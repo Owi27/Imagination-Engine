@@ -1,3 +1,4 @@
+#pragma once
 #define NOMINMAX
 
 // Simple basecode showing how to create a window and attatch a vulkansurface

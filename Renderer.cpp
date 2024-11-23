@@ -582,6 +582,61 @@ std::string Renderer::ShaderAsString(const char* shaderFilePath)
 
 Renderer::Renderer(GWindow win, GVulkanSurface vlk)
 {
+	_win = win;
+	_vlk = vlk;
+	_win.GetClientWidth(_width);
+	_win.GetClientHeight(_height);
+
+	_vlk.GetDevice((void**)&_device);
+	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
+	_vlk.GetGraphicsQueue((void**)&_graphicsQueue);
+	_vlk.GetCommandPool((void**)&_commandPool);
+
+
+	//std::vector<vec4> vertices =
+	//{
+	//	{ -1.f, 1.f, 0.f, 1.f}, {0.f, 1.f, 0.f, 1.f}, //Top Left
+	//	{  1.f, 1.f, 0.f, 1.f}, {1.f, 1.f, 0.f, 1.f}, //Top Right
+	//	{ 1.f, -1.f, 0.f, 1.f}, {1.f, 0.f, 0.f, 1.f}, //Bottom Right
+	//	{ 1.f, -1.f, 0.f, 1.f}, {1.f, 0.f, 0.f, 1.f}, //Bottom Right
+	//	{-1.f, -1.f, 0.f, 1.f}, {0.f, 0.f, 0.f, 1.f}, //Bottom left
+	//	{ -1.f, 1.f, 0.f, 1.f}, {0.f, 1.f, 0.f, 1.f} //Top Left
+	//};
+
+	//GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer.buffer, &_vertexBuffer.memory);
+	//GvkHelper::write_to_buffer(_device, _vertexBuffer.memory, vertices.data(), sizeof(vec4) * vertices.size());
+
+	//Vertex verts[] = {
+	//	{{0,   0.5f, 0,1}, {0, 1.f}},
+	//	{{0.5f, -0.5f, 0, 1}, {1.f, 0}},
+	//	{{-0.5f, -0.5f, 0, 1}, {0, 0}}
+	//};
+	//// Transfer triangle data to the vertex buffer. (staging would be prefered here)
+	//GvkHelper::create_buffer(_physicalDevice, _device, sizeof(verts),
+	//	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+	//	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer.buffer, &_vertexBuffer.memory);
+	//GvkHelper::write_to_buffer(_device, _vertexBuffer.memory, verts, sizeof(verts));
+
+	//create proxies
+	_gInput.Create(_win);
+	_gController.Create();
+
+	InitDXC();
+	LoadModel("Models/T/Test.gltf");
+	CreateUniformBuffers();
+	CreateDescriptorSets();
+	WriteDescriptorSets();
+	CreateGraphicsPipeline();
+
+	//clean up/shutdown
+	_shutdown.Create(vlk, [&]()
+		{
+			if (+_shutdown.Find(GW::GRAPHICS::GVulkanSurface::Events::RELEASE_RESOURCES, true))
+			{
+				CleanUp(); // unlike D3D we must be careful about destroy timing
+			}
+		});
+
 }
 
 Renderer::~Renderer()
