@@ -9,7 +9,7 @@ void main()
 	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		VkClearValue clrAndDepth[2];
-		clrAndDepth[0].color = { {0, 0, 0, 1} }; // start with a black screen
+		clrAndDepth[0].color = { {1, 1, 1, 1} }; // start with a white screen
 		clrAndDepth[1].depthStencil = { 1.0f, 0u };
 
 		msgs.Create([&](const GW::GEvent& e)
@@ -29,11 +29,11 @@ void main()
 
 		std::vector<const char*> deviceExtensions =
 		{
-			VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+			/*VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 			VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
 			VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
 			VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-			VK_EXT_HOST_QUERY_RESET_EXTENSION_NAME
+			VK_EXT_HOST_QUERY_RESET_EXTENSION_NAME*/
 		};
 
 		if (+vulkan.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT, sizeof(debugLayers) / sizeof(debugLayers[0]), debugLayers, 0, nullptr, deviceExtensions.size(), deviceExtensions.data(), true))

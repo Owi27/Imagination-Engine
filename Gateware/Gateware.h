@@ -74378,6 +74378,19 @@ namespace GW
 					if (m_MSAAOn)						
 						if (all_device_features.sampleRateShading)	device_features.sampleRateShading = VK_TRUE; //MSAA
 				}
+
+				/*CUSTOM*/
+				//VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeaturesKHR = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR };
+				//accelerationStructureFeaturesKHR.accelerationStructure = true;
+				//VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeaturesKHR = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR };
+				//rayTracingPipelineFeaturesKHR.rayTracingPipeline = true;
+				//rayTracingPipelineFeaturesKHR.pNext = &accelerationStructureFeaturesKHR;
+				//VkPhysicalDeviceBufferDeviceAddressFeaturesKHR bufferDeviceAddressFeaturesKHR = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR };
+				//bufferDeviceAddressFeaturesKHR.bufferDeviceAddress = true;
+				//bufferDeviceAddressFeaturesKHR.pNext = &rayTracingPipelineFeaturesKHR;
+				//VkPhysicalDeviceHostQueryResetFeatures hostQueryResetFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES };
+				//hostQueryResetFeatures.hostQueryReset = true;
+				//hostQueryResetFeatures.pNext = &bufferDeviceAddressFeaturesKHR;
 				
 				//Setup Logical device create info [*: Two different Queue Indices Check Needed]
 				VkDeviceCreateInfo create_info = {};
@@ -74388,6 +74401,7 @@ namespace GW
 
 				create_info.enabledExtensionCount = m_DeviceExtensionCount;
 				create_info.ppEnabledExtensionNames = m_DeviceExtensions;
+				//create_info.pNext = &hostQueryResetFeatures;
 
 				// add bindless support if requested
 				VkPhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures{};

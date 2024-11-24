@@ -18,13 +18,13 @@
 #include "Gateware/Gateware.h"
 #include "tinygltf/tiny_gltf.h"
 
-#include <filesystem>
-
 #include <dxcapi.h>
 #include <wrl/client.h>
 #pragma comment(lib, "dxcompiler.lib")
 
+#include <filesystem>
 #include <random>
+#include <set>
 
 using GWindow = GW::SYSTEM::GWindow;
 using GWindowStyle = GW::SYSTEM::GWindowStyle;
@@ -34,9 +34,11 @@ using GEventResponder = GW::CORE::GEventResponder;
 
 using GInput = GW::INPUT::GInput;
 using GController = GW::INPUT::GController;
-using pMat = GW::MATH::GMatrix;
+using GMatrix = GW::MATH::GMatrix;
 using mat4 = GW::MATH::GMATRIXF;
 using vec4 = GW::MATH::GVECTORF;
+using GVector2D = GW::MATH2D::GVector2D;
+using mat3 = GW::MATH2D::GMATRIX3F;
 using vec3 = GW::MATH2D::GVECTOR3F;
 using vec2 = GW::MATH2D::GVECTOR2F;
 

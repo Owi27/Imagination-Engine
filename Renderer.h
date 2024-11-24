@@ -21,9 +21,9 @@ class Renderer
 	//shader modules
 	VkShaderModule _vertexShader, _pixelShader;
 	//Buffers
-	Buffer _vertexBuffer, _geometryBuffer;
+	Buffer _vertexBuffer, _normalBuffer, _texCoordBuffer, _idxBuffer, _materialBuffer, _primInfo, _sceneDesc;
 	//Texture _textureBuffer;
-	std::vector<Texture> _textureBuffers;
+	std::vector<Texture> _textures;
 	Texture _depthTexture;
 	//std::vector<glMaterial> _materials;
 	//uniform buffer
@@ -56,11 +56,13 @@ class Renderer
 
 	//tiny
 	tinygltf::Model _model;
+	GLTFScene _gltfScene;
 
 	/* FUNCTIONS */
 	void InitDXC();
 	void CompileShaders();
 	void LoadModel(std::string filename, float scale = 1.f);
+	void CreateTextureImages(VkCommandBuffer& commandBuffer);
 	void CreateGeometryBuffer();
 	void CreateUniformBuffers();
 	void CreateDescriptorSets();

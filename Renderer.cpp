@@ -24,7 +24,7 @@ void Renderer::CompileShaders()
 	std::wstring hlsl, out;
 
 	//compute shaders
-	for (auto& shader : std::filesystem::directory_iterator("Shaders/ComputeShaders"))
+	for (auto& shader : std::filesystem::directory_iterator("Shaders/Compute"))
 	{
 		//convert shader to dxc buffer
 		shaderCode = ShaderAsString(shader.path().string().c_str());
@@ -51,7 +51,7 @@ void Renderer::CompileShaders()
 		// Check for compilation errors
 		ComPtr<IDxcBlobUtf8> errors;
 		if (SUCCEEDED(result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr)) && errors && errors->GetStringLength() > 0) {
-			std::cerr << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
+			std::cout << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
 			return;
 		}
 
@@ -67,7 +67,7 @@ void Renderer::CompileShaders()
 	}
 
 	//vertex shaders
-	for (auto& shader : std::filesystem::directory_iterator("Shaders/VertexShaders"))
+	for (auto& shader : std::filesystem::directory_iterator("Shaders/Vertex"))
 	{
 		//convert shader to dxc buffer
 		shaderCode = ShaderAsString(shader.path().string().c_str());
@@ -94,7 +94,7 @@ void Renderer::CompileShaders()
 		// Check for compilation errors
 		ComPtr<IDxcBlobUtf8> errors;
 		if (SUCCEEDED(result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr)) && errors && errors->GetStringLength() > 0) {
-			std::cerr << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
+			std::cout << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
 			return;
 		}
 
@@ -110,7 +110,7 @@ void Renderer::CompileShaders()
 	}
 
 	//pixelshaders
-	for (auto& shader : std::filesystem::directory_iterator("Shaders/PixelShaders"))
+	for (auto& shader : std::filesystem::directory_iterator("Shaders/Fragment"))
 	{
 		//convert shader to dxc buffer
 		shaderCode = ShaderAsString(shader.path().string().c_str());
@@ -137,7 +137,7 @@ void Renderer::CompileShaders()
 		// Check for compilation errors
 		ComPtr<IDxcBlobUtf8> errors;
 		if (SUCCEEDED(result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr)) && errors && errors->GetStringLength() > 0) {
-			std::cerr << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
+			std::cout << "Shader compilation errors: " << errors->GetStringPointer() << "\n";
 			return;
 		}
 
@@ -153,7 +153,7 @@ void Renderer::CompileShaders()
 	}
 
 	VkPipelineShaderStageCreateInfo pssci;
-	GvkHelper::create_shader(_device, "Shaders/SPV/PixelShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_pixelShaderModule, &pssci);
+	GvkHelper::create_shader(_device, "Shaders/SPV/FragmentShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_pixelShaderModule, &pssci);
 	GvkHelper::create_shader(_device, "Shaders/SPV/VertexShader.spv", "main", VK_SHADER_STAGE_VERTEX_BIT, &_vertexShaderModule, &pssci);
 }
 
@@ -183,16 +183,125 @@ void Renderer::LoadModel(std::string filename, float scale)
 		std::cout << "Failed to parse model\n";
 	}
 
+	_gltfScene.ImportMaterials(_model);
+	_gltfScene.ImportDrawableNodes(_model);
+
 	CreateGeometryBuffer();
+}
+
+void Renderer::CreateTextureImages(VkCommandBuffer& commandBuffer)
+{
+	VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
+
+	auto AddDefaultTexture = [this, commandBuffer, format]()
+		{
+			unsigned char white[4] = { 255, 255, 255, 255 };
+
+			Texture outTex;
+			GvkHelper::create_image(_physicalDevice, _device, { 1, 1, 1 }, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &outTex.texImage, &outTex.texBuffer.memory);
+			GvkHelper::create_image_view(_device, outTex.texImage, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &outTex.texImageView);
+			CreateSampler(&outTex);
+
+			_textures.push_back(outTex);
+		};
+
+	if (_model.images.empty())
+	{
+		AddDefaultTexture();
+		return;
+	}
+
+	_textures.reserve(_model.images.size());
+	for (size_t i = 0; i < _model.images.size(); i++)
+	{
+		Texture tex;
+		UploadTextureToGPU(&_model.images[i], &tex);
+		CreateSampler(&tex);
+		_textures.push_back(tex);
+	}
 }
 
 void Renderer::CreateGeometryBuffer()
 {
-	void* data = _model.buffers[0].data.data();
-	int size = _model.buffers[0].data.size() * sizeof(unsigned char);
+	VkCommandBuffer commandBuffer;
+	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
 
-	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_geometryBuffer.buffer, &_geometryBuffer.memory);
-	GvkHelper::write_to_buffer(_device, _geometryBuffer.memory, data, size);
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _gltfScene.positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_vertexBuffer.buffer, &_vertexBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _vertexBuffer.memory, _gltfScene.positions.data(), sizeof(vec3) * _gltfScene.positions.size());
+
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * _gltfScene.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_idxBuffer.buffer, &_idxBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _idxBuffer.memory, _gltfScene.indices.data(), sizeof(unsigned int) * _gltfScene.indices.size());
+
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _gltfScene.normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_normalBuffer.buffer, &_normalBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _normalBuffer.memory, _gltfScene.normals.data(), sizeof(vec3) * _gltfScene.normals.size());
+
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * _gltfScene.texCoords0.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_texCoordBuffer.buffer, &_texCoordBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _texCoordBuffer.memory, _gltfScene.texCoords0.data(), sizeof(vec2) * _gltfScene.texCoords0.size());
+
+	std::vector<GltfShaderMaterial> shaderMaterials;
+	for (auto& m : _gltfScene.materials)
+	{
+		GltfShaderMaterial smat;
+		smat.pbrBaseColorFactor = m.baseColorFactor;
+		smat.pbrBaseColorTexture = m.baseColorTexture;
+		smat.pbrMetallicFactor = m.metallicFactor;
+		smat.pbrRoughnessFactor = m.roughnessFactor;
+		smat.pbrMetallicRoughnessTexture = m.metallicRoughnessTexture;
+		smat.emissiveTexture = m.emissiveTexture;
+		smat.emissiveFactor = m.emissiveFactor;
+		smat.alphaMode = m.alphaMode;
+		smat.alphaCutoff = m.alphaCutoff;
+		smat.normalTexture = m.normalTexture;
+		smat.normalTextureScale = m.normalTextureScale;
+		smat.uvTransform = m.textureTransform.uvTransform;
+		smat.unlit = m.unlit.active;
+		smat.transmissionFactor = m.transmission.factor;
+		smat.transmissionTexture = m.transmission.texture;
+		smat.anisotropyTexture = m.anisotropy.texture;
+		smat.anisotropyStrength = m.anisotropy.factor;
+		smat.anisotropyRotation = m.anisotropy.factor;
+		smat.ior = m.ior.ior;
+		smat.attenuationColor = m.volume.attenuationColor;
+		smat.thicknessFactor = m.volume.thicknessFactor;
+		smat.thicknessTexture = m.volume.thicknessTexture;
+		smat.attenuationDistance = m.volume.attenuationDistance;
+		smat.clearcoatFactor = m.clearcoat.factor;
+		smat.clearcoatRoughness = m.clearcoat.roughnessFactor;
+		smat.clearcoatTexture = m.clearcoat.texture;
+		smat.clearcoatRoughnessTexture = m.clearcoat.roughnessTexture;
+		smat.sheenColorFactor = m.sheen.colorFactor;
+		smat.sheenColorTexture = m.sheen.colorTexture;
+		smat.sheenRoughnessFactor = m.sheen.roughnessFactor;
+		smat.sheenRoughnessTexture = m.sheen.roughnessTexture;
+
+		shaderMaterials.emplace_back(smat);
+	}
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(GltfShaderMaterial) * shaderMaterials.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_materialBuffer.buffer, &_materialBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _materialBuffer.memory, shaderMaterials.data(), sizeof(GltfShaderMaterial) * shaderMaterials.size());
+
+	std::vector<PrimMeshInfo> primLookup;
+	for (auto& primMesh : _gltfScene.primMeshes)
+	{
+		primLookup.push_back({ primMesh.firstIndex, primMesh.vertexOffset, primMesh.materialIndex });
+	}
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(PrimMeshInfo) * primLookup.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_primInfo.buffer, &_primInfo.memory);
+	GvkHelper::write_to_buffer(_device, _primInfo.memory, primLookup.data(), sizeof(PrimMeshInfo) * primLookup.size());
+
+
+	//SceneDescription sceneDesc;
+	//sceneDesc.vertexAddress = GetBufferDeviceAddress(_vertexBuffer.buffer);
+	//sceneDesc.idxAddress = GetBufferDeviceAddress(_idxBuffer.buffer);
+	//sceneDesc.normalAddress = GetBufferDeviceAddress(_normalBuffer.buffer);
+	//sceneDesc.uvAddress = GetBufferDeviceAddress(_texCoordBuffer.buffer);
+	//sceneDesc.materialAddress = GetBufferDeviceAddress(_materialBuffer.buffer);
+	//sceneDesc.primInfoAddress = GetBufferDeviceAddress(_primInfo.buffer);
+
+	//GvkHelper::create_buffer(_physicalDevice, _device, sizeof(SceneDescription), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT, &_sceneDesc.buffer, &_sceneDesc.memory);
+	//GvkHelper::write_to_buffer(_device, _sceneDesc.memory, &sceneDesc, sizeof(SceneDescription));
+
+	CreateTextureImages(commandBuffer);
+
+	GvkHelper::signal_command_end(_device, _graphicsQueue, _commandPool, &commandBuffer);
 }
 
 void Renderer::CreateUniformBuffers()
@@ -203,11 +312,11 @@ void Renderer::CreateUniformBuffers()
 	_uniformBuffers.resize(_frames);
 
 	//view
-	pMat::LookAtLHF(vec4{ 0.f, .125f, -1.f }, vec4{ 0, 0, 0 }, vec4{ 0, 1, 0 }, view);
+	GMatrix::LookAtLHF(vec4{ 0.f, .125f, -1.f }, vec4{ 0, 0, 0 }, vec4{ 0, 1, 0 }, view);
 
 	//proj
 	_vlk.GetAspectRatio(_aspect);
-	pMat::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 100.f, proj);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 100.f, proj);
 
 	_matrices.prevWorldViewProjection = world * view * proj;
 	_matrices.currWorldViewProjection = world * view * proj;
@@ -226,7 +335,7 @@ void Renderer::CreateDescriptorSets()
 	descriptorSetLayoutBinding.binding = 0;
 	descriptorSetLayoutBinding.descriptorCount = 1;
 	descriptorSetLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;// | VK_SHADER_STAGE_FRAGMENT_BIT;
+	descriptorSetLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	descriptorSetLayoutCreateInfo.bindingCount = 1;
@@ -592,37 +701,12 @@ Renderer::Renderer(GWindow win, GVulkanSurface vlk)
 	_vlk.GetGraphicsQueue((void**)&_graphicsQueue);
 	_vlk.GetCommandPool((void**)&_commandPool);
 
-
-	//std::vector<vec4> vertices =
-	//{
-	//	{ -1.f, 1.f, 0.f, 1.f}, {0.f, 1.f, 0.f, 1.f}, //Top Left
-	//	{  1.f, 1.f, 0.f, 1.f}, {1.f, 1.f, 0.f, 1.f}, //Top Right
-	//	{ 1.f, -1.f, 0.f, 1.f}, {1.f, 0.f, 0.f, 1.f}, //Bottom Right
-	//	{ 1.f, -1.f, 0.f, 1.f}, {1.f, 0.f, 0.f, 1.f}, //Bottom Right
-	//	{-1.f, -1.f, 0.f, 1.f}, {0.f, 0.f, 0.f, 1.f}, //Bottom left
-	//	{ -1.f, 1.f, 0.f, 1.f}, {0.f, 1.f, 0.f, 1.f} //Top Left
-	//};
-
-	//GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer.buffer, &_vertexBuffer.memory);
-	//GvkHelper::write_to_buffer(_device, _vertexBuffer.memory, vertices.data(), sizeof(vec4) * vertices.size());
-
-	//Vertex verts[] = {
-	//	{{0,   0.5f, 0,1}, {0, 1.f}},
-	//	{{0.5f, -0.5f, 0, 1}, {1.f, 0}},
-	//	{{-0.5f, -0.5f, 0, 1}, {0, 0}}
-	//};
-	//// Transfer triangle data to the vertex buffer. (staging would be prefered here)
-	//GvkHelper::create_buffer(_physicalDevice, _device, sizeof(verts),
-	//	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-	//	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer.buffer, &_vertexBuffer.memory);
-	//GvkHelper::write_to_buffer(_device, _vertexBuffer.memory, verts, sizeof(verts));
-
 	//create proxies
 	_gInput.Create(_win);
 	_gController.Create();
 
 	InitDXC();
-	LoadModel("Models/T/Test.gltf");
+	LoadModel("Models/Shapes/Shapes.gltf");
 	CreateUniformBuffers();
 	CreateDescriptorSets();
 	WriteDescriptorSets();
@@ -659,8 +743,9 @@ void Renderer::Render()
 	_win.GetClientWidth(_width);
 	_win.GetClientHeight(_height);
 
+	GMatrix::RotateYGlobalF(world, G_DEGREE_TO_RADIAN(250) * _deltaTime.count(), world);
 	_matrices.prevWorldViewProjection = _matrices.currWorldViewProjection;
-	_matrices.currWorldViewProjection = GW::MATH::GIdentityMatrixF * view * proj;
+	_matrices.currWorldViewProjection = world * view * proj;
 	_matrices.deltaTime = _deltaTime.count();
 	GvkHelper::write_to_buffer(_device, _uniformBuffers[currentBuffer].memory, &_matrices, sizeof(Matrices));
 
@@ -671,26 +756,16 @@ void Renderer::Render()
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipelineLayout, 0, 1, &_descriptorSets[currentBuffer], 0, nullptr);
+	std::vector<VkBuffer> vertexBuffers = { _vertexBuffer.buffer, _normalBuffer.buffer, _texCoordBuffer.buffer };
+	std::vector<VkDeviceSize> offsets = { 0, 0, 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, (unsigned int)vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+	vkCmdBindIndexBuffer(commandBuffer, _idxBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-	for (auto& mesh : _model.meshes)
+	for (auto& node : _gltfScene.nodes)
 	{
-		for (auto& prim : mesh.primitives)
-		{
-			const auto& posAccessor = _model.accessors[prim.attributes.find("POSITION")->second];
-			const auto& nrmAccessor = _model.accessors[prim.attributes.find("NORMAL")->second];
-			const auto& uv0Accessor = _model.accessors[prim.attributes.find("TEXCOORD_0")->second];
-			//const auto& tanAccessor = _model.accessors[prim.attributes.find("TANGENT")->second];
-			const auto& idx = _model.accessors[prim.indices];
+		auto& prim = _gltfScene.primMeshes[node.primMesh];
 
-			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &_geometryBuffer.buffer, &_model.bufferViews[posAccessor.bufferView].byteOffset + posAccessor.byteOffset);
-			vkCmdBindVertexBuffers(commandBuffer, 1, 1, &_geometryBuffer.buffer, &_model.bufferViews[nrmAccessor.bufferView].byteOffset + nrmAccessor.byteOffset);
-			vkCmdBindVertexBuffers(commandBuffer, 2, 1, &_geometryBuffer.buffer, &_model.bufferViews[uv0Accessor.bufferView].byteOffset + uv0Accessor.byteOffset);
-			//vkCmdBindVertexBuffers(commandBuffer, 3, 1, &_geometryBuffer.buffer, &_model.bufferViews[tanAccessor.bufferView].byteOffset + tanAccessor.byteOffset);
-
-			vkCmdBindIndexBuffer(commandBuffer, _geometryBuffer.buffer, _model.bufferViews[idx.bufferView].byteOffset + idx.byteOffset, VK_INDEX_TYPE_UINT16);
-
-			vkCmdDrawIndexed(commandBuffer, idx.count, 1, 0, 0, 0);
-		}
+		vkCmdDrawIndexed(commandBuffer, prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
 	}
 }
 
@@ -702,7 +777,7 @@ void Renderer::UpdateCamera()
 
 	GW::MATH::GMATRIXF cam = GW::MATH::GIdentityMatrixF;
 
-	pMat::InverseF(view, cam);
+	GMatrix::InverseF(view, cam);
 
 	float y = 0.0f;
 
@@ -710,7 +785,7 @@ void Renderer::UpdateCamera()
 	float totalZ = 0.0f;
 	float totalX = 0.0f;
 
-	const float cameraSpeed = 15.0f;
+	const float cameraSpeed = 7.5f;
 	float spaceKeyState = 0.0f;
 	float leftShiftState = 0.0f;
 	float rightTriggerState = 0.0f;
@@ -754,7 +829,7 @@ void Renderer::UpdateCamera()
 
 	if (+_gInput.GetState(G_KEY_SPACE, spaceKeyState) && spaceKeyState != 0 || +_gInput.GetState(G_KEY_LEFTSHIFT, leftShiftState) && leftShiftState != 0 || +_gController.GetState(0, G_RIGHT_TRIGGER_AXIS, rightTriggerState) && rightTriggerState != 0 || +_gController.GetState(0, G_LEFT_TRIGGER_AXIS, leftTriggerState) && leftTriggerState != 0)
 	{
-		totalY = leftShiftState - spaceKeyState + rightTriggerState - leftTriggerState;
+		totalY = spaceKeyState - leftShiftState + rightTriggerState - leftTriggerState;
 	}
 
 	cam.row4.y += totalY * cameraSpeed * _deltaTime.count();
@@ -769,22 +844,22 @@ void Renderer::UpdateCamera()
 
 	mat4 translation = GW::MATH::GIdentityMatrixF;
 	vec4 vec = { totalX * perFrameSpeed, 0, totalZ * perFrameSpeed };
-	pMat::TranslateLocalF(translation, vec, translation);
-	pMat::MultiplyMatrixF(translation, cam, cam);
+	GMatrix::TranslateLocalF(translation, vec, translation);
+	GMatrix::MultiplyMatrixF(translation, cam, cam);
 
 	float thumbSpeed = 3.14 * perFrameSpeed;
 	auto r = _gInput.GetMouseDelta(mouseDeltaX, mouseDeltaY);
 	if (G_PASS(r) && r != GW::GReturn::REDUNDANT)
 	{
 		float totalPitch = G_DEGREE_TO_RADIAN(65) * mouseDeltaY / screenHeight + rightStickYaxis * -thumbSpeed;
-		pMat::RotateXLocalF(cam, -totalPitch, cam);
+		GMatrix::RotateXLocalF(cam, totalPitch, cam);
 		float totalYaw = G_DEGREE_TO_RADIAN(65) * _aspect * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
 		mat4 yawMatrix = GW::MATH::GIdentityMatrixF;
 		vec4 camSave = cam.row4;
 		cam.row4 = { 0,0,0,1 };
-		pMat::RotateYGlobalF(cam, totalYaw, cam);
+		GMatrix::RotateYGlobalF(cam, totalYaw, cam);
 		cam.row4 = camSave;
 	}
 
-	pMat::InverseF(cam, view);
+	GMatrix::InverseF(cam, view);
 }
