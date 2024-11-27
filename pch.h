@@ -17,6 +17,7 @@
 // With what we want & what we don't defined we can include the API
 #include "Gateware/Gateware.h"
 #include "tinygltf/tiny_gltf.h"
+#include "entt/entt.hpp"
 
 #include <dxcapi.h>
 #include <wrl/client.h>
