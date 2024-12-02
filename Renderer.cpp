@@ -176,6 +176,11 @@ void VulkanRenderer::CreateUniformBuffers()
 	GvkHelper::write_to_buffer(_device, _uniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 }
 
+void VulkanRenderer::CreateDescriptorSets()
+{
+
+}
+
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 {
 	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT)) return; //return if creation didn't work

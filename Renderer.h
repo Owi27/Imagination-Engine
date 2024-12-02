@@ -28,10 +28,14 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkSampler _colorSampler;
 	Buffer _uniformBuffer;
+	VkDescriptorSet _descriptorSet;
+	VkDescriptorPool _descriptorPool;
+	VkDescriptorSetLayout _descriptorSetLayout;
 
 
 	void CreateOffscreenFrameBuffer();
 	void CreateUniformBuffers();
+	void CreateDescriptorSets();
 
 public:
 	VulkanRenderer(GWindow win);
