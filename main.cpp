@@ -1,43 +1,19 @@
+#include "pch.h"
+#include "Renderer.h"
 
-struct position {
-    float x;
-    float y;
-};
+int main()
+{
+	GWindow win;
+	Renderer* renderer;
+	entt::registry registry;
+	bool useVulkan = true;
 
-struct velocity {
-    float dx;
-    float dy;
-};
+	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERLESS))
+	{
+		renderer = useVulkan ? static_cast<Renderer*>(new VulkanRenderer(win)) : static_cast<Renderer*>(new DX12Renderer(win));
 
-void update(entt::registry& registry) {
-    auto view = registry.view<const position, velocity>();
 
-    // use a callback
-    view.each([](const auto& pos, auto& vel) { /* ... */ });
+	}
 
-    // use an extended callback
-    view.each([](const auto entity, const auto& pos, auto& vel) { /* ... */ });
-
-    // use a range-for 
-    for (auto [entity, pos, vel] : view.each()) {
-        // ...
-    }
-
-    // use forward iterators and get only the components of interest
-    for (auto entity : view) {
-        auto& vel = view.get<velocity>(entity);
-        // ...
-    }
-}
-
-int main() {
-    entt::registry registry;
-
-    for (auto i = 0u; i < 10u; ++i) {
-        const auto entity = registry.create();
-        registry.emplace<position>(entity, i * 1.f, i * 1.f);
-        if (i % 2 == 0) { registry.emplace<velocity>(entity, i * .1f, i * .1f); }
-    }
-
-    update(registry);
+	delete renderer;
 }
