@@ -1,5 +1,9 @@
 #include "pch.h"
 #include "Renderer.h"
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "tinygltf/tiny_gltf.h"
 
 Renderer::Renderer(GWindow win)
 {
@@ -170,6 +174,7 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 
 	for (size_t i = 0; i < 4; i++)
 	{
+		attachmentDescription[i].flags = 0;
 		attachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
 		attachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		attachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -204,10 +209,16 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 	depthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpassDescription;
+	subpassDescription.flags = 0;
 	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassDescription.pColorAttachments = colorAttachmentReference.data();
-	subpassDescription.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentReference.size());
+	subpassDescription.colorAttachmentCount = colorAttachmentReference.size();
 	subpassDescription.pDepthStencilAttachment = &depthAttachmentReference;
+	subpassDescription.pInputAttachments = nullptr;
+	subpassDescription.inputAttachmentCount = 0;
+	subpassDescription.pPreserveAttachments = nullptr;
+	subpassDescription.preserveAttachmentCount = 0;
+	subpassDescription.pResolveAttachments = nullptr;
 
 	// Use subpass dependencies for attachment layout transitions
 	std::array<VkSubpassDependency, 2> subpassDependencies;
@@ -230,10 +241,10 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 
 	VkRenderPassCreateInfo renderPassCreateInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
 	renderPassCreateInfo.pAttachments = attachmentDescription.data();
-	renderPassCreateInfo.attachmentCount = static_cast<uint32_t>(attachmentDescription.size());
+	renderPassCreateInfo.attachmentCount = attachmentDescription.size();
 	renderPassCreateInfo.subpassCount = 1;
 	renderPassCreateInfo.pSubpasses = &subpassDescription;
-	renderPassCreateInfo.dependencyCount = 2;
+	renderPassCreateInfo.dependencyCount = subpassDependencies.size();
 	renderPassCreateInfo.pDependencies = subpassDependencies.data();
 
 	vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_offscreenFrameBuffer.renderPass);
@@ -285,10 +296,10 @@ void VulkanRenderer::CreateUniformBuffers()
 
 void VulkanRenderer::CreateDescriptorSets()
 {
+	//offscreen
 	std::vector<VkDescriptorPoolSize> descriptorPoolSizes =
 	{
-		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
-		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3},
+		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
@@ -300,10 +311,7 @@ void VulkanRenderer::CreateDescriptorSets()
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
 	{
-		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr},
-		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
-		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
-		{3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
@@ -317,11 +325,42 @@ void VulkanRenderer::CreateDescriptorSets()
 	descriptorSetAllocateInfo.descriptorSetCount = 1;
 	descriptorSetAllocateInfo.pSetLayouts = &_descriptorSetLayout;
 
+	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_offscreenDescriptorSet);
+
+	//final
+	descriptorPoolSizes =
+	{
+		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3}
+	};
+
+	descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
+
+	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
+
+	descriptorSetLayoutBindings =
+	{
+		{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+	};
+
+	descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+	descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
+
+	vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
+
+	descriptorSetAllocateInfo.descriptorPool = _descriptorPool;
+	descriptorSetAllocateInfo.descriptorSetCount = 1;
+	descriptorSetAllocateInfo.pSetLayouts = &_descriptorSetLayout;
+
 	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_descriptorSet);
 }
 
 void VulkanRenderer::WriteDescriptorSets()
 {
+	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+
 	VkDescriptorBufferInfo descriptorBufferInfo;
 	descriptorBufferInfo.buffer = _uniformBuffer.buffer;
 	descriptorBufferInfo.offset = 0;
@@ -334,22 +373,25 @@ void VulkanRenderer::WriteDescriptorSets()
 		{_colorSampler, _offscreenFrameBuffer.albedo.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
 	};
 
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
 	writeDescriptorSet.descriptorCount = 1;
 	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	writeDescriptorSet.dstBinding = 0;
-	writeDescriptorSet.dstSet = _descriptorSet;
+	writeDescriptorSet.dstSet = _offscreenDescriptorSet;
 	writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-	writeDescriptorSets.push_back(writeDescriptorSet);
+
+	vkUpdateDescriptorSets(_device, 1, &writeDescriptorSet, 0, nullptr);
+
+	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+
+	writeDescriptorSet.dstSet = _descriptorSet;
 	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	writeDescriptorSet.dstBinding = 1;
+	writeDescriptorSet.dstBinding = 0;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[0];
 	writeDescriptorSets.push_back(writeDescriptorSet);
-	writeDescriptorSet.dstBinding = 2;
+	writeDescriptorSet.dstBinding = 1;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[1];
 	writeDescriptorSets.push_back(writeDescriptorSet);
-	writeDescriptorSet.dstBinding = 3;
+	writeDescriptorSet.dstBinding = 2;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[2];
 	writeDescriptorSets.push_back(writeDescriptorSet);
 
@@ -584,7 +626,7 @@ void VulkanRenderer::CreateCommandBuffers()
 
 		vkCmdSetViewport(_drawCommandBuffers[i], 0, 1, &viewport);
 		vkCmdSetScissor(_drawCommandBuffers[i], 0, 1, &scissor);
-		//vkCmdBindDescriptorSets(_drawCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_graphicsDescriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(_drawCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
 		vkCmdBindPipeline(_drawCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 		vkCmdDraw(_drawCommandBuffers[i], 3, 1, 0, 0);
 
@@ -636,7 +678,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdBindPipeline(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
 
-	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
 	
 	for (auto& mesh : _model.meshes)
 	{
@@ -679,19 +721,30 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 {
+#ifndef NDEBUG
+	const char* debugLayers[] =
+	{
+		"VK_LAYER_KHRONOS_validation"
+	};
+
+	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, sizeof(debugLayers) / sizeof(debugLayers[0]), debugLayers, 0, nullptr, 0, nullptr, false)) return;
+#else
 	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER)) return; //return if creation didn't work
+#endif
 
 	_vlk.GetDevice((void**)&_device);
 	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
 	_vlk.GetCommandPool((void**)&_commandPool);
 
 	CompileShaders();
+	LoadModel("Models/Test/Test.gltf");
 	CreateOffscreenFrameBuffer();
 	CreateUniformBuffers();
 	CreateDescriptorSets();
 	WriteDescriptorSets();
 	CreateGraphicsPipelines();
 	CreateCommandBuffers();
+	CreateDeferredCommandBuffers();
 }
 
 VulkanRenderer::~VulkanRenderer()

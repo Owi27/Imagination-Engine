@@ -31,7 +31,7 @@ class VulkanRenderer : public Renderer
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
 	Buffer _uniformBuffer, _geometryBuffer;
-	VkDescriptorSet _descriptorSet, _graphicsDescriptorSet;
+	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
@@ -50,7 +50,6 @@ class VulkanRenderer : public Renderer
 	//tinygltf
 	tinygltf::Model _model;
 
-
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryBuffer();
@@ -62,7 +61,6 @@ class VulkanRenderer : public Renderer
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
 	std::string ShaderAsString(const char* shaderFilePath);
-
 
 public:
 	VulkanRenderer(GWindow win);
