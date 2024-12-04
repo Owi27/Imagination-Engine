@@ -1,4 +1,14 @@
-float4 main() : SV_TARGET
+struct GBuffer
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+    float4 position : SV_Target0;
+    float4 normal : SV_Target1;
+    float4 albedo : SV_Target2;
+};
+
+//pos
+GBuffer main()
+{
+    GBuffer gBuffer;
+    //gBuffer. pos = input.pos
+    return gBuffer;
 }
