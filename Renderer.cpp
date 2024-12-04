@@ -22,37 +22,40 @@ void VulkanRenderer::CompileShaders()
 
 	// Convert shader code to a DXC blob
 	DxcBuffer sourceBuffer;
-	std::string shaderCode;
+	std::string shaderCode, full;
 	std::wstring hlsl, out;
-	
+
 	//0 - fragment, 1 - vertex, 2 - compute | dont include extension
-	std::vector<std::pair<int, std::wstring>> shaders =
+	std::vector<std::pair<int, std::string>> shaders =
 	{
-		{0, L"Shaders/FragmentShader"},
-		{0, L"Shaders/OffscreenFragmentShader"},
-		{1, L"Shaders/VertexShader"},
-		{1, L"Shaders/OffscreenVertexShader"},
+		{0, "FragmentShader"},
+		{0, "OffscreenFragmentShader"},
+		{1, "VertexShader"},
+		{1, "OffscreenVertexShader"},
 	};
 
 	for (size_t i = 0; i < shaders.size(); i++)
 	{
 		//convert shader to dxc buffer
-		shaderCode = ShaderAsString(shaders[i].second.c_str());
+		full = "Shaders/" + shaders[i].second + ".hlsl";
+		shaderCode = ShaderAsString(full.c_str());
 		sourceBuffer.Ptr = shaderCode.c_str();
 		sourceBuffer.Size = shaderCode.size();
 		sourceBuffer.Encoding = DXC_CP_ACP;
+
+		std::wstring tWstring(shaders[i].second.begin(), shaders[i].second.end());
 
 		//define arguments
 		std::vector<LPCWSTR> arguments;
 		arguments.push_back(L"-spirv");
 		arguments.push_back(L"-T");
-		shaders[i].first == 0 ? arguments.push_back(L"ps_6_6") : shaders[i].first == 1 ? arguments.push_back(L"vs_6_6") : shaders[i].first == 2 ? arguments.push_back(L"cs_6_6") : Ignore();
+		shaders[i].first == 0 ? arguments.push_back(L"ps_6_6") : shaders[i].first == 1 ? arguments.push_back(L"vs_6_6") : arguments.push_back(L"cs_6_6");
 		arguments.push_back(L"-E");
 		arguments.push_back(L"main");
-		hlsl = shaders[i].second + L".hlsl";
+		hlsl = L"Shaders/" + tWstring + L".hlsl";
 		arguments.push_back(hlsl.c_str());
 		arguments.push_back(L"-Fo");
-		out = shaders[i].second + L".spv";
+		out = tWstring + L".spv";
 		arguments.push_back(out.c_str());
 
 		ComPtr<IDxcResult> result;
@@ -70,11 +73,50 @@ void VulkanRenderer::CompileShaders()
 		if (SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr)))
 		{
 			// Write the compiled shader to file
-			std::ofstream outFile(out, std::ios::binary);
+			std::ofstream outFile(L"Shaders/SPV/" + out, std::ios::binary);
 			outFile.write(static_cast<const char*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize());
 			outFile.close();
 		}
 	}
+}
+
+void VulkanRenderer::LoadModel(std::string filename)
+{
+	tinygltf::TinyGLTF gltfLoader;
+	std::string error;
+	std::string warning;
+
+	unsigned long long pos = filename.find_last_of('/');
+	std::string path = filename.substr(0, pos);
+
+	bool fileLoaded = gltfLoader.LoadASCIIFromFile(&_model, &error, &warning, filename);
+	//bool fileLoaded = gltfLoader.LoadBinaryFromFile(&_model, &error, &warning, filename);
+
+	if (!warning.empty())
+	{
+		std::cout << "Warning: " << warning << '\n';
+	}
+
+	if (!error.empty())
+	{
+		std::cout << "Error: " << error << '\n';
+	}
+
+	if (!fileLoaded)
+	{
+		std::cout << "Failed to parse model\n";
+	}
+
+	CreateGeometryBuffer();
+}
+
+void VulkanRenderer::CreateGeometryBuffer()
+{
+	void* data = _model.buffers[0].data.data();
+	int size = _model.buffers[0].data.size() * sizeof(unsigned char);
+
+	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_geometryBuffer.buffer, &_geometryBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _geometryBuffer.memory, data, size);
 }
 
 void VulkanRenderer::CreateOffscreenFrameBuffer()
@@ -253,7 +295,7 @@ void VulkanRenderer::CreateDescriptorSets()
 	descriptorPoolCreateInfo.maxSets = 1;
 	descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
 	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
-	
+
 	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
@@ -320,7 +362,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	VkPipelineShaderStageCreateInfo pssci;
 
 	GvkHelper::create_shader(_device, "Shaders/SPV/FragmentShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_fragmentShaderModule, &pssci);
-	GvkHelper::create_shader(_device, "Shaders/SPV/VertexShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_vertexShaderModule, &pssci);
+	GvkHelper::create_shader(_device, "Shaders/SPV/VertexShader.spv", "main", VK_SHADER_STAGE_VERTEX_BIT, &_vertexShaderModule, &pssci);
 
 	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfos[2] = { {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO}, {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO} };
 	//vertex shader
@@ -368,7 +410,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
 
 	//viewport state
-	VkViewport viewport = { 0, _height, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
 	VkRect2D scissor = { {0, 0}, {_width, _height} };
 
 	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
@@ -477,6 +519,9 @@ void VulkanRenderer::CreateGraphicsPipelines()
 
 	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT; //offscreen
 
+	GvkHelper::create_shader(_device, "Shaders/SPV/OffscreenFragmentShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_offscreenFragmentShaderModule, &pssci);
+	GvkHelper::create_shader(_device, "Shaders/SPV/OffscreenVertexShader.spv", "main", VK_SHADER_STAGE_VERTEX_BIT, &_offscreenVertexShaderModule, &pssci);
+
 	//vertex shader
 	pipelineShaderStageCreateInfos[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 	pipelineShaderStageCreateInfos[0].module = _offscreenVertexShaderModule;
@@ -485,7 +530,6 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineShaderStageCreateInfos[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pipelineShaderStageCreateInfos[1].module = _offscreenFragmentShaderModule;
 	pipelineShaderStageCreateInfos[1].pName = "main";
-
 
 	//important
 	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates = { pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState };
@@ -501,8 +545,119 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &_offscreenPipeline);
 }
 
-void VulkanRenderer::Ignore()
+void VulkanRenderer::CreateCommandBuffers()
 {
+	_vlk.GetSwapchainImageCount(_swapchainImageCount);
+	_drawCommandBuffers.resize(_swapchainImageCount);
+
+	VkCommandBufferAllocateInfo commandBufferAllocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+	commandBufferAllocateInfo.commandPool = _commandPool;
+	commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	commandBufferAllocateInfo.commandBufferCount = _swapchainImageCount;
+
+	vkAllocateCommandBuffers(_device, &commandBufferAllocateInfo, _drawCommandBuffers.data());
+
+	VkClearValue clearValues[2];
+	clearValues[0].color = { { 0.2f, 0.0f, 0.0f, 0.0f } };
+	clearValues[1].depthStencil = { 1.0f, 0 };
+
+	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	renderPassBeginInfo.renderPass = _renderPass;
+	renderPassBeginInfo.renderArea.offset.x = 0;
+	renderPassBeginInfo.renderArea.offset.y = 0;
+	renderPassBeginInfo.renderArea.extent.width = _width;
+	renderPassBeginInfo.renderArea.extent.height = _height;
+	renderPassBeginInfo.clearValueCount = 2;
+	renderPassBeginInfo.pClearValues = clearValues;
+
+	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+
+	for (size_t i = 0; i < _swapchainImageCount; i++)
+	{
+		_vlk.GetSwapchainFramebuffer(i, (void**)&renderPassBeginInfo.framebuffer);
+
+		vkBeginCommandBuffer(_drawCommandBuffers[i], &commandBufferBeginInfo);
+		vkCmdBeginRenderPass(_drawCommandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+		VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+		vkCmdSetViewport(_drawCommandBuffers[i], 0, 1, &viewport);
+		vkCmdSetScissor(_drawCommandBuffers[i], 0, 1, &scissor);
+		//vkCmdBindDescriptorSets(_drawCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_graphicsDescriptorSet, 0, nullptr);
+		vkCmdBindPipeline(_drawCommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+		vkCmdDraw(_drawCommandBuffers[i], 3, 1, 0, 0);
+
+		vkCmdEndRenderPass(_drawCommandBuffers[i]);
+		vkEndCommandBuffer(_drawCommandBuffers[i]);
+	}
+}
+
+void VulkanRenderer::CreateDeferredCommandBuffers()
+{
+	if (!_offscreenCommandBuffer)
+	{
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+		commandBufferAllocateInfo.commandPool = _commandPool;
+		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		commandBufferAllocateInfo.commandBufferCount = 1;
+
+		vkAllocateCommandBuffers(_device, &commandBufferAllocateInfo, &_offscreenCommandBuffer);
+	}
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+
+	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+
+	// Clear values for all attachments written in the fragment shader
+	std::array<VkClearValue, 4> clearValues;
+	clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[3].depthStencil = { 1.0f, 0 };
+
+	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	renderPassBeginInfo.renderPass = _offscreenFrameBuffer.renderPass;
+	renderPassBeginInfo.framebuffer = _offscreenFrameBuffer.frameBuffer;
+	renderPassBeginInfo.renderArea.extent.width = _width;
+	renderPassBeginInfo.renderArea.extent.height = _height;
+	renderPassBeginInfo.clearValueCount = clearValues.size();
+	renderPassBeginInfo.pClearValues = clearValues.data();
+
+	vkBeginCommandBuffer(_offscreenCommandBuffer, &commandBufferBeginInfo);
+	vkCmdBeginRenderPass(_offscreenCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+	VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+	vkCmdSetViewport(_offscreenCommandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(_offscreenCommandBuffer, 0, 1, &scissor);
+
+	vkCmdBindPipeline(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
+
+	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+	
+	for (auto& mesh : _model.meshes)
+	{
+		for (auto& prim : mesh.primitives)
+		{
+			const auto& posAccessor = _model.accessors[prim.attributes.find("POSITION")->second];
+			const auto& nrmAccessor = _model.accessors[prim.attributes.find("NORMAL")->second];
+			const auto& uv0Accessor = _model.accessors[prim.attributes.find("TEXCOORD_0")->second];
+			const auto& idx = _model.accessors[prim.indices];
+
+			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 0, 1, &_geometryBuffer.buffer, &_model.bufferViews[posAccessor.bufferView].byteOffset + posAccessor.byteOffset);
+			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 1, 1, &_geometryBuffer.buffer, &_model.bufferViews[nrmAccessor.bufferView].byteOffset + nrmAccessor.byteOffset);
+			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 2, 1, &_geometryBuffer.buffer, &_model.bufferViews[uv0Accessor.bufferView].byteOffset + uv0Accessor.byteOffset);
+			vkCmdBindIndexBuffer(_offscreenCommandBuffer, _geometryBuffer.buffer, _model.bufferViews[idx.bufferView].byteOffset + idx.byteOffset, idx.componentType == 5121 ? VK_INDEX_TYPE_UINT8_KHR : idx.componentType == 5123 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
+
+			vkCmdDrawIndexed(_offscreenCommandBuffer, idx.count, 1, 0, 0, 0);
+		}
+	}
+
+	vkCmdEndRenderPass(_offscreenCommandBuffer);
+	vkEndCommandBuffer(_offscreenCommandBuffer);
 }
 
 std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
@@ -524,10 +679,11 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 {
-	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT)) return; //return if creation didn't work
+	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER)) return; //return if creation didn't work
 
 	_vlk.GetDevice((void**)&_device);
 	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
+	_vlk.GetCommandPool((void**)&_commandPool);
 
 	CompileShaders();
 	CreateOffscreenFrameBuffer();
@@ -535,6 +691,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	CreateDescriptorSets();
 	WriteDescriptorSets();
 	CreateGraphicsPipelines();
+	CreateCommandBuffers();
 }
 
 VulkanRenderer::~VulkanRenderer()

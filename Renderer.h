@@ -5,7 +5,7 @@ class Renderer
 {
 protected:
 	GWindow _win;
-	unsigned int _width, _height;
+	unsigned int _width, _height, _swapchainImageCount;
 	float _aspect;
 
 public:
@@ -30,27 +30,37 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _uniformBuffer;
-	VkDescriptorSet _descriptorSet;
+	Buffer _uniformBuffer, _geometryBuffer;
+	VkDescriptorSet _descriptorSet, _graphicsDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
 	VkPipeline _offscreenPipeline, _graphicsPipeline;
 	VkPipelineLayout _pipelineLayout;
+	std::vector<VkCommandBuffer> _drawCommandBuffers;
+	VkCommandBuffer _offscreenCommandBuffer;
+	VkCommandPool _commandPool;
+	VkSemaphore _offscreenSemaphore;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	//tinygltf
+	tinygltf::Model _model;
+
 
 	void CompileShaders();
+	void LoadModel(std::string filename);
+	void CreateGeometryBuffer();
 	void CreateOffscreenFrameBuffer();
 	void CreateUniformBuffers();
 	void CreateDescriptorSets();
 	void WriteDescriptorSets();
 	void CreateGraphicsPipelines();
-	void Ignore();
+	void CreateCommandBuffers();
+	void CreateDeferredCommandBuffers();
 	std::string ShaderAsString(const char* shaderFilePath);
 
 

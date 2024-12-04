@@ -73879,7 +73879,7 @@ namespace GW
 
 					//Wait for Queue to be ready
 					//if (m_PrevFrame != m_CurrentFrame)
-					vkWaitForFences(m_VkDevice, 1, &m_VkFenceRendering[m_CurrentFrame], VK_TRUE, ~(static_cast<uint64_t>(0)));
+					vkWaitForFences(m_VkDevice, 1, &m_VkFenceRendering[m_CurrentFrame], false, ~(static_cast<uint64_t>(0)));
 
 					//Get the Frame Result
 					//m_PrevFrame = m_CurrentFrame;
