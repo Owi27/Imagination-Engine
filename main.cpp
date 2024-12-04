@@ -12,7 +12,11 @@ int main()
 	{
 		renderer = useVulkan ? static_cast<Renderer*>(new VulkanRenderer(win)) : static_cast<Renderer*>(new DX12Renderer(win));
 
-
+		while (+win.ProcessWindowEvents())
+		{
+			renderer->UpdateCamera();
+			renderer->Render();
+		}
 	}
 
 	delete renderer;

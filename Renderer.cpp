@@ -10,6 +10,10 @@ Renderer::Renderer(GWindow win)
 	_win = win;
 	_win.GetClientWidth(_width);
 	_win.GetClientHeight(_height);
+	//create proxies
+	_gInput.Create(_win);
+	_gController.Create();
+
 }
 
 Renderer::~Renderer()
@@ -307,7 +311,7 @@ void VulkanRenderer::CreateDescriptorSets()
 	descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
 	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
-	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
+	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_offscreenDescriptorPool);
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
 	{
@@ -318,12 +322,12 @@ void VulkanRenderer::CreateDescriptorSets()
 	descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
 	descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
-	vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
+	vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &_offscreenDescriptorSetLayout);
 
 	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-	descriptorSetAllocateInfo.descriptorPool = _descriptorPool;
+	descriptorSetAllocateInfo.descriptorPool = _offscreenDescriptorPool;
 	descriptorSetAllocateInfo.descriptorSetCount = 1;
-	descriptorSetAllocateInfo.pSetLayouts = &_descriptorSetLayout;
+	descriptorSetAllocateInfo.pSetLayouts = &_offscreenDescriptorSetLayout;
 
 	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_offscreenDescriptorSet);
 
@@ -340,9 +344,9 @@ void VulkanRenderer::CreateDescriptorSets()
 
 	descriptorSetLayoutBindings =
 	{
-		{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
-		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
-		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
+		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
+		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
 	};
 
 	descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
@@ -528,9 +532,11 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineDynamicStateCreateInfo.pDynamicStates = dynamicState;
 
 	//descriptor pipeline layout
+
+	std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts = { _descriptorSetLayout, _offscreenDescriptorSetLayout };
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	pipelineLayoutCreateInfo.setLayoutCount = 1;
-	pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
+	pipelineLayoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
+	pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 
 	vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout);
@@ -678,7 +684,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdBindPipeline(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
 
-	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
+	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_offscreenDescriptorSet, 0, nullptr);
 	
 	for (auto& mesh : _model.meshes)
 	{
@@ -735,6 +741,8 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	_vlk.GetDevice((void**)&_device);
 	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
 	_vlk.GetCommandPool((void**)&_commandPool);
+	_vlk.GetGraphicsQueue((void**)&_queue);
+	_vlk.GetSwapchain((void**)&_swapchain);
 
 	CompileShaders();
 	LoadModel("Models/Test/Test.gltf");
@@ -745,6 +753,17 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	CreateGraphicsPipelines();
 	CreateCommandBuffers();
 	CreateDeferredCommandBuffers();
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore);
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderCompleteSemaphore);
+
+	_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
+	_submitInfo.waitSemaphoreCount = 1;
+	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
+	_submitInfo.signalSemaphoreCount = 1;
+	_submitInfo.pSignalSemaphores = &_renderCompleteSemaphore;
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -753,6 +772,139 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
+	GvkHelper::write_to_buffer(_device, _uniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
+
+	auto now = std::chrono::steady_clock::now();
+	_deltaTime = now - _lastUpdate;
+	_lastUpdate = now;
+
+	unsigned int currentBuffer;
+
+	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore, nullptr, &currentBuffer);
+
+
+	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
+	_submitInfo.pSignalSemaphores = &_offscreenSemaphore;
+	_submitInfo.commandBufferCount = 1;
+	_submitInfo.pCommandBuffers = &_offscreenCommandBuffer;
+
+	vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);
+
+	_submitInfo.pWaitSemaphores = &_offscreenSemaphore;
+	_submitInfo.pSignalSemaphores = &_renderCompleteSemaphore;
+	_submitInfo.pCommandBuffers = &_drawCommandBuffers[currentBuffer];
+
+	vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);
+
+	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = &_swapchain;
+	presentInfo.pImageIndices = &currentBuffer;
+
+	if (_renderCompleteSemaphore)
+	{
+		presentInfo.pWaitSemaphores = &_renderCompleteSemaphore;
+		presentInfo.waitSemaphoreCount = 1;
+	}
+
+	vkQueuePresentKHR(_queue, &presentInfo);
+	vkQueueWaitIdle(_queue);
+}
+
+void VulkanRenderer::UpdateCamera()
+{
+	_win.IsFocus(_isFocused);
+
+	if (!_isFocused) return;
+
+	GW::MATH::GMATRIXF cam = GW::MATH::GIdentityMatrixF;
+
+	GMatrix::InverseF(_offscreenData.view, cam);
+
+	float y = 0.0f;
+
+	float totalY = 0.0f;
+	float totalZ = 0.0f;
+	float totalX = 0.0f;
+
+	const float cameraSpeed = 7.5f;
+	float spaceKeyState = 0.0f;
+	float leftShiftState = 0.0f;
+	float rightTriggerState = 0.0f;
+	float leftTriggerState = 0.0f;
+
+	float arrowRight = 0.0f;
+	float arrowLeft = 0.0f;
+
+	float wKeyState = 0.0f;
+	float sKeyState = 0.0f;
+	float aKeyState = 0.0f;
+	float dKeyState = 0.0f;
+	float leftStickX = 0.0f;
+	float leftStickY = 0.0f;
+	unsigned int screenHeight = 0.0f;
+	_win.GetHeight(screenHeight);
+	unsigned int screenWidth = 0.0f;
+	_win.GetWidth(screenWidth);
+	float mouseDeltaX = 0.0f;
+	float mouseDeltaY = 0.0f;
+	//GW::GReturn result = ;
+	float rightStickYaxis = 0.0f;
+	_gController.GetState(0, G_RY_AXIS, rightStickYaxis);
+	float rightStickXaxis = 0.0f;
+	_gController.GetState(0, G_RX_AXIS, rightStickXaxis);
+
+	float perFrameSpeed = 0.0f;
+
+	_gInput.GetState(G_KEY_RIGHT, arrowRight);
+	_gInput.GetState(G_KEY_LEFT, arrowLeft);
+
+	if (arrowRight != 0)
+	{
+		cam.row4 = { 0.0f, 50.0f, 0.0f, 1 };
+
+	}
+	if (arrowLeft != 0)
+	{
+		cam.row4 = { 5.75f, 5.25f, -30.5f, 1 };
+	}
+
+	if (+_gInput.GetState(G_KEY_SPACE, spaceKeyState) && spaceKeyState != 0 || +_gInput.GetState(G_KEY_LEFTSHIFT, leftShiftState) && leftShiftState != 0 || +_gController.GetState(0, G_RIGHT_TRIGGER_AXIS, rightTriggerState) && rightTriggerState != 0 || +_gController.GetState(0, G_LEFT_TRIGGER_AXIS, leftTriggerState) && leftTriggerState != 0)
+	{
+		totalY = spaceKeyState - leftShiftState + rightTriggerState - leftTriggerState;
+	}
+
+	cam.row4.y += totalY * cameraSpeed * _deltaTime.count();
+
+	perFrameSpeed = cameraSpeed * _deltaTime.count();
+
+	if (+_gInput.GetState(G_KEY_W, wKeyState) && wKeyState != 0 || +_gInput.GetState(G_KEY_A, aKeyState) && aKeyState != 0 || +_gInput.GetState(G_KEY_S, sKeyState) && sKeyState != 0 || +_gInput.GetState(G_KEY_D, dKeyState) && dKeyState != 0 || +_gController.GetState(0, G_LX_AXIS, leftStickX) && leftStickX != 0 || +_gController.GetState(0, G_LY_AXIS, leftStickY) && leftStickY != 0)
+	{
+		totalZ = wKeyState - sKeyState + leftStickY;
+		totalX = dKeyState - aKeyState + leftStickX;
+	}
+
+	mat4 translation = GW::MATH::GIdentityMatrixF;
+	vec4 vec = { totalX * perFrameSpeed, 0, totalZ * perFrameSpeed };
+	GMatrix::TranslateLocalF(translation, vec, translation);
+	GMatrix::MultiplyMatrixF(translation, cam, cam);
+
+	float thumbSpeed = 3.14 * perFrameSpeed;
+	auto r = _gInput.GetMouseDelta(mouseDeltaX, mouseDeltaY);
+	if (G_PASS(r) && r != GW::GReturn::REDUNDANT)
+	{
+		float totalPitch = G_DEGREE_TO_RADIAN(65) * mouseDeltaY / screenHeight + rightStickYaxis * -thumbSpeed;
+		GMatrix::RotateXLocalF(cam, totalPitch, cam);
+		float totalYaw = G_DEGREE_TO_RADIAN(65) * _aspect * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
+		mat4 yawMatrix = GW::MATH::GIdentityMatrixF;
+		vec4 camSave = cam.row4;
+		cam.row4 = { 0,0,0,1 };
+		GMatrix::RotateYGlobalF(cam, totalYaw, cam);
+		cam.row4 = camSave;
+	}
+
+	GMatrix::InverseF(cam, _offscreenData.view);
+
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)
@@ -765,5 +917,9 @@ DX12Renderer::~DX12Renderer()
 }
 
 void DX12Renderer::Render()
+{
+}
+
+void DX12Renderer::UpdateCamera()
 {
 }

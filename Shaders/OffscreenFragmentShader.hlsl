@@ -1,14 +1,25 @@
-struct GBuffer
+struct VSOutput
 {
-    float4 position : SV_Target0;
-    float4 normal : SV_Target1;
-    float4 albedo : SV_Target2;
+    float4 pos : SV_Position;
+    float3 nrm : NORMAL0;
+    float2 uv : TEXCOORD0;
 };
 
-//pos
-GBuffer main()
+struct FSOutput
 {
-    GBuffer gBuffer;
-    //gBuffer. pos = input.pos
-    return gBuffer;
+    float4 Position : SV_TARGET0;
+    float4 Normal : SV_TARGET1;
+};
+
+cbuffer UniformBuffer : register(b0)
+{
+    matrix world, view, proj;
+};
+
+FSOutput main(VSOutput input)
+{
+    FSOutput output;
+    output.Position = input.pos;
+    output.Normal = float4(input.nrm, 1);
+    return output;
 }
