@@ -303,66 +303,43 @@ void VulkanRenderer::CreateDescriptorSets()
 	//offscreen
 	std::vector<VkDescriptorPoolSize> descriptorPoolSizes =
 	{
-		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
+		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2},
+		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 6}
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-	descriptorPoolCreateInfo.maxSets = 1;
+	descriptorPoolCreateInfo.maxSets = 2;
 	descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
 	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
-	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_offscreenDescriptorPool);
+	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
 	{
-		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr}
+		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
 	descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
 
-	vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &_offscreenDescriptorSetLayout);
-
-	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-	descriptorSetAllocateInfo.descriptorPool = _offscreenDescriptorPool;
-	descriptorSetAllocateInfo.descriptorSetCount = 1;
-	descriptorSetAllocateInfo.pSetLayouts = &_offscreenDescriptorSetLayout;
-
-	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_offscreenDescriptorSet);
-
-	//final
-	descriptorPoolSizes =
-	{
-		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3}
-	};
-
-	descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
-	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
-
-	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
-
-	descriptorSetLayoutBindings =
-	{
-		{0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
-		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
-		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, nullptr},
-	};
-
-	descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
-	descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
-
 	vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
 
+	VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 	descriptorSetAllocateInfo.descriptorPool = _descriptorPool;
 	descriptorSetAllocateInfo.descriptorSetCount = 1;
 	descriptorSetAllocateInfo.pSetLayouts = &_descriptorSetLayout;
 
+	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_offscreenDescriptorSet);
 	vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &_descriptorSet);
 }
 
 void VulkanRenderer::WriteDescriptorSets()
 {
+	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
 
 	VkDescriptorBufferInfo descriptorBufferInfo;
@@ -382,20 +359,21 @@ void VulkanRenderer::WriteDescriptorSets()
 	writeDescriptorSet.dstBinding = 0;
 	writeDescriptorSet.dstSet = _offscreenDescriptorSet;
 	writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-
-	vkUpdateDescriptorSets(_device, 1, &writeDescriptorSet, 0, nullptr);
-
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+	writeDescriptorSets.push_back(writeDescriptorSet);
 
 	writeDescriptorSet.dstSet = _descriptorSet;
 	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	writeDescriptorSet.dstBinding = 0;
+	writeDescriptorSet.dstBinding = 1;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[0];
 	writeDescriptorSets.push_back(writeDescriptorSet);
-	writeDescriptorSet.dstBinding = 1;
+
+	writeDescriptorSet.dstSet = _descriptorSet;
+	writeDescriptorSet.dstBinding = 2;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[1];
 	writeDescriptorSets.push_back(writeDescriptorSet);
-	writeDescriptorSet.dstBinding = 2;
+
+	writeDescriptorSet.dstSet = _descriptorSet;
+	writeDescriptorSet.dstBinding = 3;
 	writeDescriptorSet.pImageInfo = &descriptorImageInfos[2];
 	writeDescriptorSets.push_back(writeDescriptorSet);
 
@@ -532,11 +510,9 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineDynamicStateCreateInfo.pDynamicStates = dynamicState;
 
 	//descriptor pipeline layout
-
-	std::array<VkDescriptorSetLayout, 2> descriptorSetLayouts = { _descriptorSetLayout, _offscreenDescriptorSetLayout };
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	pipelineLayoutCreateInfo.setLayoutCount = descriptorSetLayouts.size();
-	pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.data();
+	pipelineLayoutCreateInfo.setLayoutCount = 1;
+	pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 
 	vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout);
@@ -684,7 +660,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdBindPipeline(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
 
-	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_offscreenDescriptorSet, 0, nullptr);
+	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
 	
 	for (auto& mesh : _model.meshes)
 	{

@@ -43,8 +43,8 @@ class VulkanRenderer : public Renderer
 	VkSampler _colorSampler;
 	Buffer _uniformBuffer, _geometryBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet;
-	VkDescriptorPool _offscreenDescriptorPool, _descriptorPool;
-	VkDescriptorSetLayout _offscreenDescriptorSetLayout, _descriptorSetLayout;
+	VkDescriptorPool _descriptorPool;
+	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
 	VkPipeline _offscreenPipeline, _graphicsPipeline;
 	VkPipelineLayout _pipelineLayout;
