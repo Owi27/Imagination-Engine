@@ -291,8 +291,8 @@ void VulkanRenderer::CreateUniformBuffers()
 	_vlk.GetAspectRatio(_aspect);
 
 	_offscreenData.world = GW::MATH::GIdentityMatrixF;
-	GMatrix::LookAtLHF(vec4{ 0.f, 3.f, -1.5f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
-	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 100.f, _offscreenData.proj);
+	GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
 
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_uniformBuffer.buffer, &_uniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _uniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
@@ -316,7 +316,7 @@ void VulkanRenderer::CreateDescriptorSets()
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
 	{
-		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr},
 		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
@@ -661,9 +661,10 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	vkCmdBindPipeline(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
 
 	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
-	
-	for (auto& mesh : _model.meshes)
+
+	for (auto& node : _model.nodes)
 	{
+		auto& mesh = _model.meshes[node.mesh];
 		for (auto& prim : mesh.primitives)
 		{
 			const auto& posAccessor = _model.accessors[prim.attributes.find("POSITION")->second];
@@ -682,6 +683,11 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdEndRenderPass(_offscreenCommandBuffer);
 	vkEndCommandBuffer(_offscreenCommandBuffer);
+}
+
+void VulkanRenderer::CleanUp()
+{
+
 }
 
 std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
@@ -740,6 +746,14 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
 	_submitInfo.signalSemaphoreCount = 1;
 	_submitInfo.pSignalSemaphores = &_renderCompleteSemaphore;
+
+	_shutdown.Create(_vlk, [&]()
+		{
+			if (+_shutdown.Find(GW::GRAPHICS::GVulkanSurface::Events::RELEASE_RESOURCES, true))
+			{
+				CleanUp();
+			}
+		});
 }
 
 VulkanRenderer::~VulkanRenderer()
@@ -757,7 +771,6 @@ void VulkanRenderer::Render()
 	unsigned int currentBuffer;
 
 	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore, nullptr, &currentBuffer);
-
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
 	_submitInfo.pSignalSemaphores = &_offscreenSemaphore;

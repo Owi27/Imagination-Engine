@@ -31,6 +31,7 @@ class VulkanRenderer : public Renderer
 {
 	//gateware
 	GVulkanSurface _vlk;
+	GEventReceiver _shutdown;
 
 	//structs
 	FrameBuffer _offscreenFrameBuffer;
@@ -75,6 +76,7 @@ class VulkanRenderer : public Renderer
 	void CreateGraphicsPipelines();
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
+	void CleanUp();
 	std::string ShaderAsString(const char* shaderFilePath);
 
 public:

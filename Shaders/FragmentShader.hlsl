@@ -7,6 +7,6 @@ SamplerState samplerAlbedo : register(s3);
 
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
-    float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
+    float3 fragPos = textureNormal.Sample(samplerNormal, inUV).rgb;
     return float4(fragPos, 1);
 }

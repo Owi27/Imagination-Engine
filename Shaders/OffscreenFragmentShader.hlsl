@@ -11,11 +11,6 @@ struct FSOutput
     float4 Normal : SV_TARGET1;
 };
 
-cbuffer UniformBuffer : register(b0)
-{
-    matrix world, view, proj;
-};
-
 FSOutput main(VSOutput input)
 {
     FSOutput output;
