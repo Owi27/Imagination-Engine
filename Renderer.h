@@ -36,14 +36,15 @@ class VulkanRenderer : public Renderer
 	//structs
 	FrameBuffer _offscreenFrameBuffer;
 	UniformBufferOffscreen _offscreenData;
+	UniformBufferFinal _finalData;
 
 	//vulkan
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _uniformBuffer, _geometryBuffer;
-	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet;
+	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer;
+	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
@@ -66,6 +67,8 @@ class VulkanRenderer : public Renderer
 	//tinygltf
 	tinygltf::Model _model;
 
+	mat4 matrices[3];
+
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryBuffer();
@@ -77,6 +80,8 @@ class VulkanRenderer : public Renderer
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
 	void CleanUp();
+	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
+	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);
 
 public:

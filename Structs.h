@@ -34,5 +34,11 @@ struct FrameBuffer
 
 struct UniformBufferOffscreen
 {
-	mat4 world, view, proj;
+	mat4 prev, curr;
+	float deltaTime;
+};
+
+struct UniformBufferFinal
+{
+	vec4 view;
 };

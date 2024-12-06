@@ -4,6 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
+#include "MathOverloads.h"
 
 Renderer::Renderer(GWindow win)
 {
@@ -65,6 +66,11 @@ void VulkanRenderer::CompileShaders()
 		arguments.push_back(L"-Fo");
 		out = tWstring + L".spv";
 		arguments.push_back(out.c_str());
+#ifndef NDEBUG
+		arguments.push_back(L"-Zi");
+		arguments.push_back(L"-Qembed_debug");
+#endif // NDEBUG
+
 
 		ComPtr<IDxcResult> result;
 		_compiler->Compile(&sourceBuffer, arguments.data(), arguments.size(), _includeHandler.Get(), IID_PPV_ARGS(&result));
@@ -290,12 +296,20 @@ void VulkanRenderer::CreateUniformBuffers()
 {
 	_vlk.GetAspectRatio(_aspect);
 
-	_offscreenData.world = GW::MATH::GIdentityMatrixF;
-	GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
-	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
+	matrices[0] = GW::MATH::GIdentityMatrixF;
+	GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, matrices[1]);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, matrices[2]);
 
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_uniformBuffer.buffer, &_uniformBuffer.memory);
-	GvkHelper::write_to_buffer(_device, _uniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
+	_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
+	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];
+
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_offscreenUniformBuffer.buffer, &_offscreenUniformBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
+
+	//final
+	_finalData.view = matrices[1].row4;
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_finalUniformBuffer.buffer, &_finalUniformBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 }
 
 void VulkanRenderer::CreateDescriptorSets()
@@ -316,7 +330,7 @@ void VulkanRenderer::CreateDescriptorSets()
 
 	std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
 	{
-		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr},
+		{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
@@ -339,13 +353,23 @@ void VulkanRenderer::CreateDescriptorSets()
 
 void VulkanRenderer::WriteDescriptorSets()
 {
-	std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-
+	//offscreen
 	VkDescriptorBufferInfo descriptorBufferInfo;
-	descriptorBufferInfo.buffer = _uniformBuffer.buffer;
+	descriptorBufferInfo.buffer = _offscreenUniformBuffer.buffer;
 	descriptorBufferInfo.offset = 0;
 	descriptorBufferInfo.range = sizeof(UniformBufferOffscreen);
+
+	std::vector<VkWriteDescriptorSet> offscreenWriteDescriptorSets =
+	{
+		MakeWrite(_offscreenDescriptorSet, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &descriptorBufferInfo),
+	};
+
+	vkUpdateDescriptorSets(_device, offscreenWriteDescriptorSets.size(), offscreenWriteDescriptorSets.data(), 0, nullptr);
+
+	//final
+	descriptorBufferInfo.buffer = _finalUniformBuffer.buffer;
+	descriptorBufferInfo.offset = 0;
+	descriptorBufferInfo.range = sizeof(UniformBufferFinal);
 
 	std::vector<VkDescriptorImageInfo> descriptorImageInfos =
 	{
@@ -354,30 +378,15 @@ void VulkanRenderer::WriteDescriptorSets()
 		{_colorSampler, _offscreenFrameBuffer.albedo.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
 	};
 
-	writeDescriptorSet.descriptorCount = 1;
-	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	writeDescriptorSet.dstBinding = 0;
-	writeDescriptorSet.dstSet = _offscreenDescriptorSet;
-	writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
-	writeDescriptorSets.push_back(writeDescriptorSet);
+	std::vector<VkWriteDescriptorSet> finalWriteDescriptorSets =
+	{
+		MakeWrite(_descriptorSet, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &descriptorBufferInfo),
+		MakeWrite(_descriptorSet, 1, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[0], nullptr),
+		MakeWrite(_descriptorSet, 2, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[1], nullptr),
+		MakeWrite(_descriptorSet, 3, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[2], nullptr),
+	};
 
-	writeDescriptorSet.dstSet = _descriptorSet;
-	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	writeDescriptorSet.dstBinding = 1;
-	writeDescriptorSet.pImageInfo = &descriptorImageInfos[0];
-	writeDescriptorSets.push_back(writeDescriptorSet);
-
-	writeDescriptorSet.dstSet = _descriptorSet;
-	writeDescriptorSet.dstBinding = 2;
-	writeDescriptorSet.pImageInfo = &descriptorImageInfos[1];
-	writeDescriptorSets.push_back(writeDescriptorSet);
-
-	writeDescriptorSet.dstSet = _descriptorSet;
-	writeDescriptorSet.dstBinding = 3;
-	writeDescriptorSet.pImageInfo = &descriptorImageInfos[2];
-	writeDescriptorSets.push_back(writeDescriptorSet);
-
-	vkUpdateDescriptorSets(_device, writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
+	vkUpdateDescriptorSets(_device, finalWriteDescriptorSets.size(), finalWriteDescriptorSets.data(), 0, nullptr);
 }
 
 void VulkanRenderer::CreateGraphicsPipelines()
@@ -665,6 +674,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	for (auto& node : _model.nodes)
 	{
 		auto& mesh = _model.meshes[node.mesh];
+
 		for (auto& prim : mesh.primitives)
 		{
 			const auto& posAccessor = _model.accessors[prim.attributes.find("POSITION")->second];
@@ -687,7 +697,60 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 void VulkanRenderer::CleanUp()
 {
+	vkDeviceWaitIdle(_device);
+}
 
+VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
+{
+	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+	writeDescriptorSet.descriptorCount = descriptorCount;
+	writeDescriptorSet.descriptorType = type;
+	writeDescriptorSet.dstBinding = binding;
+	writeDescriptorSet.dstSet = descriptorSet;
+	writeDescriptorSet.pBufferInfo = pBufferInfo;
+	writeDescriptorSet.pImageInfo = pImageInfo;
+	return writeDescriptorSet;
+}
+
+mat4 VulkanRenderer::GetLocalMatrix(const tinygltf::Node& node)
+{
+	//translation
+	vec4 translation = { 0, 0, 0, 0 };
+	if (node.translation.size() == 3)
+	{
+		translation = { (float)node.translation[0], (float)node.translation[1] , (float)node.translation[2] };
+	}
+
+	//rotation
+	mat4 rotation = GW::MATH::GIdentityMatrixF;
+	if (node.rotation.size() == 4)
+	{
+		GW::MATH::GQUATERNIONF quat = { (float)node.rotation[0], (float)node.rotation[1], (float)node.rotation[2], (float)node.rotation[3] };
+		GW::MATH::GMatrix::ConvertQuaternionF(quat, rotation);
+		//GQuaternion::SetByMatrixF(rotation, rotation);
+	}
+
+	//scale
+	vec4 scale = { 1, 1, 1, 1 };
+	if (node.scale.size() == 3)
+	{
+		scale = { (float)node.scale[0], (float)node.scale[1] , (float)node.scale[2] };
+	}
+
+	auto& matrix = GW::MATH::GIdentityMatrixF;
+
+	mat4 translatedMatrix;
+	mat4 scaledMatrix;
+	mat4 rotatedMatrix;
+	mat4 m;
+
+	GMatrix::TranslateLocalF(GW::MATH::GIdentityMatrixF, translation, translatedMatrix);
+	GMatrix::MultiplyMatrixF(translatedMatrix, rotation, rotatedMatrix);
+	GMatrix::ScaleLocalF(GW::MATH::GIdentityMatrixF, scale, scaledMatrix);
+	GMatrix::MultiplyMatrixF(rotatedMatrix, scaledMatrix, m);
+	//GW::MATH::GMatrix::MultiplyMatrixF(m, matrix, matrix);
+
+	return matrix;
 }
 
 std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
@@ -762,11 +825,17 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	GvkHelper::write_to_buffer(_device, _uniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
-
 	auto now = std::chrono::steady_clock::now();
 	_deltaTime = now - _lastUpdate;
 	_lastUpdate = now;
+
+	_offscreenData.prev = _offscreenData.curr;
+	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];
+	_offscreenData.deltaTime = _deltaTime.count();
+	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
+
+	_finalData.view = matrices[1].row4;
+	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 
 	unsigned int currentBuffer;
 
@@ -808,7 +877,7 @@ void VulkanRenderer::UpdateCamera()
 
 	GW::MATH::GMATRIXF cam = GW::MATH::GIdentityMatrixF;
 
-	GMatrix::InverseF(_offscreenData.view, cam);
+	GMatrix::InverseF(matrices[1], cam);
 
 	float y = 0.0f;
 
@@ -892,8 +961,7 @@ void VulkanRenderer::UpdateCamera()
 		cam.row4 = camSave;
 	}
 
-	GMatrix::InverseF(cam, _offscreenData.view);
-
+	GMatrix::InverseF(cam, matrices[1]);
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)

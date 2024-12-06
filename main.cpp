@@ -8,7 +8,7 @@ int main()
 	entt::registry registry;
 	bool useVulkan = true;
 
-	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERLESS))
+	if (+win.Create(0, 0, 800, 600, GWindowStyle::WINDOWEDBORDERED))
 	{
 		renderer = useVulkan ? static_cast<Renderer*>(new VulkanRenderer(win)) : static_cast<Renderer*>(new DX12Renderer(win));
 
