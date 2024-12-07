@@ -67,7 +67,7 @@ class VulkanRenderer : public Renderer
 	//tinygltf
 	tinygltf::Model _model;
 
-	mat4 matrices[3];
+	//mat4 matrices[3];
 
 	void CompileShaders();
 	void LoadModel(std::string filename);

@@ -12,8 +12,8 @@ cbuffer UniformBufferFinal : register(b0)
 
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
-   // float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
-    float3 fragPos = textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
+    float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
+   // float3 fragPos = textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
    // float3 V = view.xyz - fragPos;
   
     //float3 fragNrm = textureNormal.Sample(samplerNormal, inUV).rgb;

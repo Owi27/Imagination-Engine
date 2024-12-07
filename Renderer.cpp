@@ -296,18 +296,18 @@ void VulkanRenderer::CreateUniformBuffers()
 {
 	_vlk.GetAspectRatio(_aspect);
 
-	matrices[0] = GW::MATH::GIdentityMatrixF;
-	GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, matrices[1]);
-	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, matrices[2]);
+	_offscreenData.world = GW::MATH::GIdentityMatrixF;
+	GMatrix::LookAtLHF(vec4{ 0.f, 2.5, 1.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
 
-	_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
-	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];
+	/*_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
+	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];*/
 
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_offscreenUniformBuffer.buffer, &_offscreenUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	//final
-	_finalData.view = matrices[1].row4;
+	_finalData.view = _offscreenData.view.row4;
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_finalUniformBuffer.buffer, &_finalUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 }
@@ -829,12 +829,10 @@ void VulkanRenderer::Render()
 	_deltaTime = now - _lastUpdate;
 	_lastUpdate = now;
 
-	_offscreenData.prev = _offscreenData.curr;
-	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];
 	_offscreenData.deltaTime = _deltaTime.count();
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
-	_finalData.view = matrices[1].row4;
+	_finalData.view = _offscreenData.view.row4;
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 
 	unsigned int currentBuffer;
@@ -877,7 +875,7 @@ void VulkanRenderer::UpdateCamera()
 
 	GW::MATH::GMATRIXF cam = GW::MATH::GIdentityMatrixF;
 
-	GMatrix::InverseF(matrices[1], cam);
+	GMatrix::InverseF(_offscreenData.view, cam);
 
 	float y = 0.0f;
 
@@ -961,7 +959,7 @@ void VulkanRenderer::UpdateCamera()
 		cam.row4 = camSave;
 	}
 
-	GMatrix::InverseF(cam, matrices[1]);
+	GMatrix::InverseF(cam, _offscreenData.view);
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)
