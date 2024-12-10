@@ -32,6 +32,13 @@ struct FrameBuffer
 	VkRenderPass renderPass;
 };
 
+struct Light
+{
+	vec4 pos;
+	vec3 col;
+	float radius;
+};
+
 struct UniformBufferOffscreen
 {
 	mat4 world, view, proj;
@@ -40,5 +47,6 @@ struct UniformBufferOffscreen
 
 struct UniformBufferFinal
 {
+	Light lights[4];
 	vec4 view;
 };

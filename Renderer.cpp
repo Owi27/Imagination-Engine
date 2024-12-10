@@ -307,6 +307,28 @@ void VulkanRenderer::CreateUniformBuffers()
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	//final
+	std::default_random_engine gen(27);
+	std::uniform_real_distribution<float> distribution(0.f, 1.f);
+
+	//lights
+	{
+		//pos
+		_finalData.lights[0].pos = { 0, 2, 0, 1 };
+		_finalData.lights[1].pos = { 0, 3, 0, 1 };
+		_finalData.lights[2].pos = { 3, 1, 0, 1 };
+		_finalData.lights[3].pos = { -3, 1, 0, 1 };
+		//color
+		_finalData.lights[0].col = {1 , 0 , 0 };
+		_finalData.lights[1].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+		_finalData.lights[2].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+		_finalData.lights[3].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+
+		_finalData.lights[0].radius = 3.f;
+		_finalData.lights[1].radius = 7.f;
+		_finalData.lights[2].radius = 7.f;
+		_finalData.lights[3].radius = 7.f;
+	}
+
 	_finalData.view = _offscreenData.view.row4;
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_finalUniformBuffer.buffer, &_finalUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
@@ -695,9 +717,19 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	vkEndCommandBuffer(_offscreenCommandBuffer);
 }
 
+void VulkanRenderer::UpdateLights()
+{
+	_finalData.lights[0].pos.y = sin(_deltaTime.count() *360);
+	_finalData.lights[1].pos.y = sin(_deltaTime.count() *360);
+	_finalData.lights[2].pos.y = sin(_deltaTime.count() *360);
+	_finalData.lights[3].pos.y = sin(_deltaTime.count() *360);
+}
+
 void VulkanRenderer::CleanUp()
 {
 	vkDeviceWaitIdle(_device);
+
+
 }
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
@@ -833,6 +865,7 @@ void VulkanRenderer::Render()
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	_finalData.view = _offscreenData.view.row4;
+	//UpdateLights();
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 
 	unsigned int currentBuffer;
@@ -873,7 +906,7 @@ void VulkanRenderer::UpdateCamera()
 
 	if (!_isFocused) return;
 
-	GW::MATH::GMATRIXF cam = GW::MATH::GIdentityMatrixF;
+	mat4 cam = GW::MATH::GIdentityMatrixF;
 
 	GMatrix::InverseF(_offscreenData.view, cam);
 

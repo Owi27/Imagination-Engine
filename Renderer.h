@@ -79,6 +79,7 @@ class VulkanRenderer : public Renderer
 	void CreateGraphicsPipelines();
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
+	void UpdateLights();
 	void CleanUp();
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);

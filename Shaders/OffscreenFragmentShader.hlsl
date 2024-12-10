@@ -17,6 +17,6 @@ FSOutput main(VSOutput input)
     FSOutput output;
     output.Position = normalize(input.pos);
     output.Normal = float4(input.nrm, 1);
-    output.UV = float4(input.uv.x, 0, input.uv.y, 1);
+    output.UV = float4(0.7, 0.7, 0.7, 1);
     return output;
 }
