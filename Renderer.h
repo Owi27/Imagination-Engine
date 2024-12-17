@@ -17,6 +17,7 @@ protected:
 	GInput _gInput;
 	GController _gController;
 
+	//virtual void InitImGUI() = 0;
 
 public:
 	Renderer() = default;
@@ -41,6 +42,7 @@ class VulkanRenderer : public Renderer
 	//vulkan
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;
+	VkInstance _instance;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
 	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer;
@@ -81,6 +83,7 @@ class VulkanRenderer : public Renderer
 	void CreateDeferredCommandBuffers();
 	void UpdateLights();
 	void CleanUp();
+	//void InitImGUI() override;
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);

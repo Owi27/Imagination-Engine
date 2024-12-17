@@ -166,6 +166,7 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 	CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, &_offscreenFrameBuffer.position);
 	CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, &_offscreenFrameBuffer.normal);
 	CreateAttachment(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, &_offscreenFrameBuffer.albedo);
+	CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, &_offscreenFrameBuffer.velocity);
 
 	std::vector<VkFormat> formats =
 	{
@@ -180,9 +181,9 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 	GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
 	CreateAttachment(depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, &_offscreenFrameBuffer.depth);
 
-	std::array<VkAttachmentDescription, 4> attachmentDescription;
+	std::array<VkAttachmentDescription, 5> attachmentDescription;
 
-	for (size_t i = 0; i < 4; i++)
+	for (size_t i = 0; i < attachmentDescription.size(); i++)
 	{
 		attachmentDescription[i].flags = 0;
 		attachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
@@ -191,7 +192,7 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 		attachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-		if (i == 3)
+		if (i == 4)
 		{
 			attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -207,15 +208,17 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 	attachmentDescription[0].format = _offscreenFrameBuffer.position.format;
 	attachmentDescription[1].format = _offscreenFrameBuffer.normal.format;
 	attachmentDescription[2].format = _offscreenFrameBuffer.albedo.format;
-	attachmentDescription[3].format = _offscreenFrameBuffer.depth.format;
+	attachmentDescription[3].format = _offscreenFrameBuffer.velocity.format;
+	attachmentDescription[4].format = _offscreenFrameBuffer.depth.format;
 
 	std::vector<VkAttachmentReference> colorAttachmentReference;
 	colorAttachmentReference.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 	colorAttachmentReference.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 	colorAttachmentReference.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+	colorAttachmentReference.push_back({ 3, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
 	VkAttachmentReference depthAttachmentReference;
-	depthAttachmentReference.attachment = 3;
+	depthAttachmentReference.attachment = 4;
 	depthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	VkSubpassDescription subpassDescription;
@@ -259,11 +262,12 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 
 	vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_offscreenFrameBuffer.renderPass);
 
-	std::array<VkImageView, 4> imageViews;
+	std::array<VkImageView, 5> imageViews;
 	imageViews[0] = _offscreenFrameBuffer.position.texture.texImageView;
 	imageViews[1] = _offscreenFrameBuffer.normal.texture.texImageView;
 	imageViews[2] = _offscreenFrameBuffer.albedo.texture.texImageView;
-	imageViews[3] = _offscreenFrameBuffer.depth.texture.texImageView;
+	imageViews[3] = _offscreenFrameBuffer.velocity.texture.texImageView;
+	imageViews[4] = _offscreenFrameBuffer.depth.texture.texImageView;
 
 	VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	frameBufferCreateInfo.renderPass = _offscreenFrameBuffer.renderPass;
@@ -300,8 +304,8 @@ void VulkanRenderer::CreateUniformBuffers()
 	GMatrix::LookAtLHF(vec4{ 0.f, 2.5, 1.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
 	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
 
-	/*_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
-	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];*/
+	_offscreenData.prev = _offscreenData.world * _offscreenData.view * _offscreenData.proj;
+	_offscreenData.curr = _offscreenData.world * _offscreenData.view * _offscreenData.proj;
 
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_offscreenUniformBuffer.buffer, &_offscreenUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
@@ -318,7 +322,7 @@ void VulkanRenderer::CreateUniformBuffers()
 		_finalData.lights[2].pos = { 3, 1, 0, 1 };
 		_finalData.lights[3].pos = { -3, 1, 0, 1 };
 		//color
-		_finalData.lights[0].col = {1 , 0 , 0 };
+		_finalData.lights[0].col = { 1 , 0 , 0 };
 		_finalData.lights[1].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[2].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[3].col = { distribution(gen) , distribution(gen) , distribution(gen) };
@@ -340,7 +344,7 @@ void VulkanRenderer::CreateDescriptorSets()
 	std::vector<VkDescriptorPoolSize> descriptorPoolSizes =
 	{
 		{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2},
-		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 6}
+		{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 8}
 	};
 
 	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
@@ -356,6 +360,7 @@ void VulkanRenderer::CreateDescriptorSets()
 		{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 		{3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
+		{4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr},
 	};
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
@@ -398,6 +403,7 @@ void VulkanRenderer::WriteDescriptorSets()
 		{_colorSampler, _offscreenFrameBuffer.position.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
 		{_colorSampler, _offscreenFrameBuffer.normal.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
 		{_colorSampler, _offscreenFrameBuffer.albedo.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
+		{_colorSampler, _offscreenFrameBuffer.velocity.texture.texImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
 	};
 
 	std::vector<VkWriteDescriptorSet> finalWriteDescriptorSets =
@@ -406,6 +412,7 @@ void VulkanRenderer::WriteDescriptorSets()
 		MakeWrite(_descriptorSet, 1, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[0], nullptr),
 		MakeWrite(_descriptorSet, 2, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[1], nullptr),
 		MakeWrite(_descriptorSet, 3, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[2], nullptr),
+		MakeWrite(_descriptorSet, 4, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfos[3], nullptr),
 	};
 
 	vkUpdateDescriptorSets(_device, finalWriteDescriptorSets.size(), finalWriteDescriptorSets.data(), 0, nullptr);
@@ -587,7 +594,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineShaderStageCreateInfos[1].pName = "main";
 
 	//important
-	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates = { pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState };
+	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates = { pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState, pipelineColorBlendAttachmentState };
 
 	pipelineColorBlendStateCreateInfo.attachmentCount = pipelineColorBlendAttachmentStates.size();
 	pipelineColorBlendStateCreateInfo.pAttachments = pipelineColorBlendAttachmentStates.data();
@@ -666,11 +673,12 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 
 	// Clear values for all attachments written in the fragment shader
-	std::array<VkClearValue, 4> clearValues;
+	std::array<VkClearValue, 5> clearValues;
 	clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
 	clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
 	clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
-	clearValues[3].depthStencil = { 1.0f, 0 };
+	clearValues[3].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+	clearValues[4].depthStencil = { 1.0f, 0 };
 
 	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
 	renderPassBeginInfo.renderPass = _offscreenFrameBuffer.renderPass;
@@ -719,10 +727,10 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 void VulkanRenderer::UpdateLights()
 {
-	_finalData.lights[0].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[1].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[2].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[3].pos.y = sin(_deltaTime.count() *360);
+	_finalData.lights[0].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[1].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[2].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[3].pos.y = sin(_deltaTime.count() * 360);
 }
 
 void VulkanRenderer::CleanUp()
@@ -731,6 +739,68 @@ void VulkanRenderer::CleanUp()
 
 
 }
+
+//void VulkanRenderer::InitImGUI()
+//{
+//	//1: create descriptor pool for IMGUI
+//	// the size of the pool is very oversize, but it's copied from imgui demo itself.
+//	VkDescriptorPoolSize descriptorPoolSizes[] =
+//	{
+//		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+//		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+//	};
+//
+//	VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+//	descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+//	descriptorPoolCreateInfo.maxSets = 1000;
+//	descriptorPoolCreateInfo.poolSizeCount = std::size(descriptorPoolSizes);
+//	descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes;
+//
+//	VkDescriptorPool imguiPool;
+//	vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &imguiPool);
+//
+//
+//	// 2: initialize imgui library
+//	//this initializes the core structures of imgui
+//	ImGui::CreateContext();
+//
+//	//this initializes imgui for Vulkan
+//	ImGui_ImplVulkan_InitInfo init_info = {};
+//	init_info.Instance = _instance;
+//	init_info.PhysicalDevice = _physicalDevice;
+//	init_info.Device = _device;
+//	init_info.Queue = _queue;
+//	init_info.DescriptorPool = imguiPool;
+//	init_info.MinImageCount = 3;
+//	init_info.ImageCount = 3;
+//	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+//
+//	ImGui_ImplVulkan_Init(&init_info);
+//
+//	//execute a gpu command to upload imgui font textures
+//	VkCommandBuffer commandBuffer;
+//	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
+//	//ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
+//
+//	////clear font textures from cpu data
+//	//ImGui_ImplVulkan_DestroyFontUploadObjects();
+//
+//	////add the destroy the imgui created structures
+//	//_mainDeletionQueue.push_function([=]() {
+//
+//	//	vkDestroyDescriptorPool(_device, imguiPool, nullptr);
+//	//	ImGui_ImplVulkan_Shutdown();
+//	//	});
+//}
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
 {
@@ -862,6 +932,8 @@ void VulkanRenderer::Render()
 	_lastUpdate = now;
 
 	_offscreenData.deltaTime = _deltaTime.count();
+	_offscreenData.prev = _offscreenData.curr;
+	_offscreenData.curr = _offscreenData.world * _offscreenData.view * _offscreenData.proj;
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	_finalData.view = _offscreenData.view.row4;

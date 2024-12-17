@@ -28,7 +28,7 @@ struct FrameBufferTexture
 struct FrameBuffer
 {
 	VkFramebuffer frameBuffer;
-	FrameBufferTexture position, normal, albedo, depth;
+	FrameBufferTexture position, normal, albedo, velocity, depth;
 	VkRenderPass renderPass;
 };
 
@@ -43,6 +43,7 @@ struct UniformBufferOffscreen
 {
 	mat4 world, view, proj;
 	float deltaTime;
+	mat4 prev, curr;
 };
 
 struct UniformBufferFinal

@@ -4,6 +4,8 @@ Texture2D textureNormal : register(t2);
 SamplerState samplerNormal : register(s2);
 Texture2D textureAlbedo : register(t3);
 SamplerState samplerAlbedo : register(s3);
+Texture2D textureVelocity : register(t4);
+SamplerState samplerVelocity : register(s4);
 
 struct Light
 {
@@ -24,7 +26,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
     float3 normal = textureNormal.Sample(samplerNormal, inUV).rgb;
     float4 albedo = textureAlbedo.Sample(samplerAlbedo, inUV);
-  
+
     float3 fragcolor;
 
 #define lightCount 1
