@@ -41,7 +41,7 @@ struct Light
 
 struct UniformBufferOffscreen
 {
-	mat4 world, view, proj;
+	mat4 world, view, proj, inverse/*hlsl wouldnt invert*/;
 	float deltaTime;
 };
 
@@ -49,4 +49,13 @@ struct UniformBufferFinal
 {
 	Light lights[4];
 	vec4 view;
+};
+
+struct PrimData
+{
+	unsigned int firstIndex = 0;
+	unsigned int indexCount = 0;
+	unsigned int vertexOffset = 0;
+	unsigned int vertexCount = 0;
+	int materialIndex = 0;
 };

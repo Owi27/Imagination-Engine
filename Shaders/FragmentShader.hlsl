@@ -22,13 +22,17 @@ cbuffer UniformBufferFinal : register(b0)
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
     float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
-    float3 normal = textureNormal.Sample(samplerNormal, inUV).rgb;
+    float3 normal = normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
     float4 albedo = textureAlbedo.Sample(samplerAlbedo, inUV);
   
+   //return float4(fragPos, 1.0); // Visualize position
+  // return float4(normal, 1.0); // Visualize normal
+   //return float4(albedo.rgb, 1.0); // Visualize albedo
+    
     float3 fragcolor;
 
 #define lightCount 1
-#define ambient 0.0
+#define ambient 0.1
 
 	// Ambient part
     fragcolor = albedo.rgb * ambient;
@@ -37,6 +41,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     {
 		// Vector to light
         float3 L = lights[i].pos.xyz - fragPos;
+
 		// Distance from light to fragment position
         float dist = length(L);
 
@@ -44,7 +49,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         float3 V = view.xyz - fragPos;
         V = normalize(V);
 
-		//if(dist < ubo.lights[i].radius)
+		//if(dist < lights[i].radius)
 		{
 			// Light to fragment
             L = normalize(L);

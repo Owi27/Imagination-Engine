@@ -43,7 +43,7 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer;
+	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer, _vertexBuffer[4], _indexBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
@@ -58,6 +58,8 @@ class VulkanRenderer : public Renderer
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
 	VkPipelineStageFlags _submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	std::vector<unsigned int> _idxCounts;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;

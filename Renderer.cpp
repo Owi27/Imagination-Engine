@@ -126,11 +126,255 @@ void VulkanRenderer::LoadModel(std::string filename)
 
 void VulkanRenderer::CreateGeometryBuffer()
 {
-	void* data = _model.buffers[0].data.data();
-	int size = _model.buffers[0].data.size() * sizeof(unsigned char);
+	std::vector<vec3> positions;
+	std::vector<vec3> normals;
+	std::vector<vec2> texCoords;
+	std::vector<vec4> tangents;
+	std::vector<unsigned int> indices;
+	int vCount = 0, iCount = 0, firstIdx = 0, vertexOffset = 0;
 
-	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_geometryBuffer.buffer, &_geometryBuffer.memory);
-	GvkHelper::write_to_buffer(_device, _geometryBuffer.memory, data, size);
+	for (auto mesh : _model.meshes)
+	{
+		for (auto prim : mesh.primitives)
+		{
+			firstIdx = indices.size();
+			vertexOffset = positions.size();
+
+			//position
+			tinygltf::Accessor& accessor = _model.accessors[prim.attributes.find("POSITION")->second];
+			tinygltf::BufferView& bufferView = _model.bufferViews[accessor.bufferView];
+			tinygltf::Buffer& buffer = _model.buffers[bufferView.buffer];
+			vCount = accessor.count;
+			{
+				auto pos = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
+
+				if (pos)
+				{
+					for (size_t i = 0; i < accessor.count; i++)
+					{
+						positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
+					}
+				}
+			}
+
+			//normals
+			accessor = _model.accessors[prim.attributes.find("NORMAL")->second];
+			bufferView = _model.bufferViews[accessor.bufferView];
+			buffer = _model.buffers[bufferView.buffer];
+			{
+				auto nrm = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
+
+				if (nrm)
+				{
+					for (size_t i = 0; i < accessor.count; i++)
+					{
+						normals.push_back(vec3{ nrm[i * 3 + 0], nrm[i * 3 + 1], nrm[i * 3 + 2] });
+					}
+				}
+			}
+
+			//texCoord
+			accessor = _model.accessors[prim.attributes.find("TEXCOORD_0")->second];
+			bufferView = _model.bufferViews[accessor.bufferView];
+			buffer = _model.buffers[bufferView.buffer];
+			{
+				auto uv0 = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
+
+				if (uv0)
+				{
+					for (size_t i = 0; i < accessor.count; i++)
+					{
+						texCoords.push_back(vec2{ uv0[i * 2 + 0], uv0[i * 2 + 1] });
+					}
+				}
+			}
+
+			//index buffer
+			accessor = _model.accessors[prim.indices];
+			bufferView = _model.bufferViews[accessor.bufferView];
+			buffer = _model.buffers[bufferView.buffer];
+			iCount = accessor.count;
+			_idxCounts.push_back((unsigned int)iCount);
+			{
+				switch (accessor.componentType)
+				{
+				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
+				{
+					std::vector<unsigned int> uIntPrims;
+					uIntPrims.resize(accessor.count);
+					memcpy(uIntPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned int));
+					indices.insert(indices.end(), uIntPrims.begin(), uIntPrims.end());
+					break;
+				}
+				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
+				{
+					std::vector<unsigned short> uShortPrims;
+					uShortPrims.resize(accessor.count);
+					memcpy(uShortPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned short));
+					indices.insert(indices.end(), uShortPrims.begin(), uShortPrims.end());
+					break;
+				}
+				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
+				{
+					std::vector<unsigned char> uCharPrims;
+					uCharPrims.resize(accessor.count);
+					memcpy(uCharPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned char));
+					indices.insert(indices.end(), uCharPrims.begin(), uCharPrims.end());
+					break;
+				}
+				default:
+					std::cout << "Index component type " << accessor.componentType << " not supported!\n";
+					return;
+				}
+			}
+
+			//tangent
+			if (prim.attributes.contains("TANGENT"))
+			{
+				accessor = _model.accessors[prim.attributes.find("TANGENT")->second];
+				bufferView = _model.bufferViews[accessor.bufferView];
+				buffer = _model.buffers[bufferView.buffer];
+				{
+					auto tan = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
+
+					if (tan)
+					{
+						for (size_t i = 0; i < accessor.count; i++)
+						{
+							tangents.push_back(vec4{ tan[i * 4 + 0], tan[i * 4 + 1], tan[i * 4 + 2], tan[i * 4 + 3] });
+						}
+					}
+				}
+			}
+			else
+			{
+				std::vector<vec3> tangent(vCount);
+				std::vector<vec3> biTangent(vCount);
+
+				for (size_t i = 0; i < iCount; i += 3)
+				{
+					//local index
+					unsigned int i0 = indices[firstIdx + i + 0];
+					unsigned int i1 = indices[firstIdx + i + 1];
+					unsigned int i2 = indices[firstIdx + i + 2];
+					assert(i0 < vCount);
+					assert(i1 < vCount);
+					assert(i2 < vCount);
+
+					//global index
+					unsigned int gi0 = i0 + vertexOffset;
+					unsigned int gi1 = i1 + vertexOffset;
+					unsigned int gi2 = i2 + vertexOffset;
+
+					const auto& p0 = positions[gi0];
+					const auto& p1 = positions[gi1];
+					const auto& p2 = positions[gi2];
+
+					const auto& uv0 = texCoords[gi0];
+					const auto& uv1 = texCoords[gi1];
+					const auto& uv2 = texCoords[gi2];
+
+					vec3 e1, e2;
+					{
+						GVector2D::Subtract3F(p1, p0, e1);
+						GVector2D::Subtract3F(p2, p0, e2);
+					}
+
+					vec2 duvE1, duvE2;
+					{
+						GVector2D::Subtract2F(uv1, uv0, duvE1);
+						GVector2D::Subtract2F(uv2, uv0, duvE2);
+					}
+
+					float r = 1.f;
+					float a = duvE1.x * duvE2.y - duvE2.x * duvE1.y;
+
+					if (fabs(a) > 0) //catch degenerated UVs
+					{
+						r = 1.f / a;
+					}
+
+					vec3 t, b;
+					{
+						vec3 v[3];
+
+						//t
+						GVector2D::Scale3F(e1, duvE2.y, v[0]);
+						GVector2D::Scale3F(e2, duvE1.y, v[1]);
+						GVector2D::Subtract3F(v[0], v[1], v[2]);
+						GVector2D::Scale3F(v[2], r, t);
+
+						//b
+						GVector2D::Scale3F(e2, duvE1.x, v[0]);
+						GVector2D::Scale3F(e1, duvE2.x, v[1]);
+						GVector2D::Subtract3F(v[0], v[1], v[2]);
+						GVector2D::Scale3F(v[2], r, b);
+					}
+
+					GVector2D::Add3F(tangent[i0], t, tangent[i0]);
+					GVector2D::Add3F(tangent[i1], t, tangent[i1]);
+					GVector2D::Add3F(tangent[i2], t, tangent[i2]);
+
+					GVector2D::Add3F(biTangent[i0], b, biTangent[i0]);
+					GVector2D::Add3F(biTangent[i1], b, biTangent[i1]);
+					GVector2D::Add3F(biTangent[i2], b, biTangent[i2]);
+				}
+
+				for (unsigned int a = 0; a < vCount; a++)
+				{
+					const auto& t = tangent[a];
+					const auto& b = biTangent[a];
+					const auto& n = normals[vertexOffset + a];
+
+					vec3 oTangent;
+					{
+						vec3 v;
+						float d;
+						GVector2D::Dot3F(n, t, d);
+						GVector2D::Scale3F(n, d, v);
+						GVector2D::Subtract3F(t, v, v);
+						GVector2D::Normalize3F(v, oTangent);
+					}
+
+					if (oTangent.x == 0 && oTangent.y == 0 && oTangent.z == 0) //if tangent invalid
+					{
+						if (fabsf(n.x) > fabsf(n.y))
+							GVector2D::Scale3F(vec3{ n.z, 0, -n.x }, 1 / sqrtf(n.x * n.x + n.z * n.z), oTangent);
+						else
+							GVector2D::Scale3F(vec3{ 0, -n.z, n.y }, 1 / sqrtf(n.y * n.y + n.z * n.z), oTangent);
+					}
+
+					//calculate handedness
+					float handedness;
+					{
+						float f;
+						vec3 v;
+						GVector2D::Cross3F(n, t, v);
+						GVector2D::Dot3F(v, b, f);
+						handedness = f < 0.f ? 1.f : -1.f;
+					}
+
+					tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
+				}
+			}
+		}
+	}
+
+	//position
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[0].buffer, &_vertexBuffer[0].memory);
+	GvkHelper::write_to_buffer(_device, _vertexBuffer[0].memory, positions.data(), sizeof(vec3) * positions.size());
+	//normal
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[1].buffer, &_vertexBuffer[1].memory);
+	GvkHelper::write_to_buffer(_device, _vertexBuffer[1].memory, normals.data(), sizeof(vec3) * normals.size());
+	//texcoord
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[2].buffer, &_vertexBuffer[2].memory);
+	GvkHelper::write_to_buffer(_device, _vertexBuffer[2].memory, texCoords.data(), sizeof(vec2) * texCoords.size());
+	//tangent
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[3].buffer, &_vertexBuffer[3].memory);
+	GvkHelper::write_to_buffer(_device, _vertexBuffer[3].memory, tangents.data(), sizeof(vec4) * tangents.size());
+	//index
+	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_indexBuffer.buffer, &_indexBuffer.memory);
+	GvkHelper::write_to_buffer(_device, _indexBuffer.memory, indices.data(), sizeof(unsigned int) * indices.size());
 }
 
 void VulkanRenderer::CreateOffscreenFrameBuffer()
@@ -299,6 +543,7 @@ void VulkanRenderer::CreateUniformBuffers()
 	_offscreenData.world = GW::MATH::GIdentityMatrixF;
 	GMatrix::LookAtLHF(vec4{ 0.f, 2.5, 1.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
 	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
+	GMatrix::InverseF(_offscreenData.world, _offscreenData.inverse);
 
 	/*_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
 	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];*/
@@ -318,7 +563,7 @@ void VulkanRenderer::CreateUniformBuffers()
 		_finalData.lights[2].pos = { 3, 1, 0, 1 };
 		_finalData.lights[3].pos = { -3, 1, 0, 1 };
 		//color
-		_finalData.lights[0].col = {1 , 0 , 0 };
+		_finalData.lights[0].col = { 1 , 0 , 0 };
 		_finalData.lights[1].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[2].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[3].col = { distribution(gen) , distribution(gen) , distribution(gen) };
@@ -435,15 +680,16 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = false;
 
 	//vertex input state
-	VkVertexInputBindingDescription vertexInputBindingDescription[3] =
+	VkVertexInputBindingDescription vertexInputBindingDescription[4] =
 	{
 		{0, sizeof(vec3), VK_VERTEX_INPUT_RATE_VERTEX}, //pos
 		{1, sizeof(vec3), VK_VERTEX_INPUT_RATE_VERTEX}, //nrm
 		{2, sizeof(vec2), VK_VERTEX_INPUT_RATE_VERTEX}, //uv
+		{3, sizeof(vec4), VK_VERTEX_INPUT_RATE_VERTEX}, //tan
 	};
 
 	//vertex attributes
-	VkVertexInputAttributeDescription vertexInputAttributeDescription[3] =
+	VkVertexInputAttributeDescription vertexInputAttributeDescription[4] =
 	{
 		//location, binding, format, offset
 		/*for my own memory:
@@ -455,6 +701,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 		{0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0},
 		{1, 1, VK_FORMAT_R32G32B32_SFLOAT, 0},
 		{2, 2, VK_FORMAT_R32G32_SFLOAT, 0},
+		{3, 3, VK_FORMAT_R32G32B32A32_SFLOAT, 0},
 	};
 
 	//vertex input info
@@ -479,7 +726,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = false;
 	pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL; //TODO: switch render modes on key press;
 	pipelineRasterizationStateCreateInfo.lineWidth = 1.f;
-	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT; //final comp
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE; //final comp
 	pipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	pipelineRasterizationStateCreateInfo.depthClampEnable = false;
 	pipelineRasterizationStateCreateInfo.depthBiasEnable = false;
@@ -567,12 +814,12 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &_graphicsPipeline);
 
 	//offscreen
-	pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 3;
+	pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 4;
 	pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescription;
-	pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 3;
+	pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 4;
 	pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescription;
 
-	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT; //offscreen
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT; //offscreen
 
 	GvkHelper::create_shader(_device, "Shaders/SPV/OffscreenFragmentShader.spv", "main", VK_SHADER_STAGE_FRAGMENT_BIT, &_offscreenFragmentShaderModule, &pssci);
 	GvkHelper::create_shader(_device, "Shaders/SPV/OffscreenVertexShader.spv", "main", VK_SHADER_STAGE_VERTEX_BIT, &_offscreenVertexShaderModule, &pssci);
@@ -693,23 +940,24 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
 
-	for (auto& node : _model.nodes)
+	std::vector<VkBuffer> vertexBuffers =
 	{
-		auto& mesh = _model.meshes[node.mesh];
+		_vertexBuffer[0].buffer,
+		_vertexBuffer[1].buffer,
+		_vertexBuffer[2].buffer,
+		_vertexBuffer[3].buffer,
+	};
 
+	std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
+	vkCmdBindVertexBuffers(_offscreenCommandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+	vkCmdBindIndexBuffer(_offscreenCommandBuffer, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+	int i = 0;
+	for (auto& mesh : _model.meshes)
+	{
 		for (auto& prim : mesh.primitives)
 		{
-			const auto& posAccessor = _model.accessors[prim.attributes.find("POSITION")->second];
-			const auto& nrmAccessor = _model.accessors[prim.attributes.find("NORMAL")->second];
-			const auto& uv0Accessor = _model.accessors[prim.attributes.find("TEXCOORD_0")->second];
-			const auto& idx = _model.accessors[prim.indices];
-
-			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 0, 1, &_geometryBuffer.buffer, &_model.bufferViews[posAccessor.bufferView].byteOffset + posAccessor.byteOffset);
-			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 1, 1, &_geometryBuffer.buffer, &_model.bufferViews[nrmAccessor.bufferView].byteOffset + nrmAccessor.byteOffset);
-			vkCmdBindVertexBuffers(_offscreenCommandBuffer, 2, 1, &_geometryBuffer.buffer, &_model.bufferViews[uv0Accessor.bufferView].byteOffset + uv0Accessor.byteOffset);
-			vkCmdBindIndexBuffer(_offscreenCommandBuffer, _geometryBuffer.buffer, _model.bufferViews[idx.bufferView].byteOffset + idx.byteOffset, idx.componentType == 5121 ? VK_INDEX_TYPE_UINT8_KHR : idx.componentType == 5123 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
-
-			vkCmdDrawIndexed(_offscreenCommandBuffer, idx.count, 1, 0, 0, 0);
+			vkCmdDrawIndexed(_offscreenCommandBuffer, _idxCounts[i++], 1, 0, 0, 0);
 		}
 	}
 
@@ -719,10 +967,10 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 void VulkanRenderer::UpdateLights()
 {
-	_finalData.lights[0].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[1].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[2].pos.y = sin(_deltaTime.count() *360);
-	_finalData.lights[3].pos.y = sin(_deltaTime.count() *360);
+	_finalData.lights[0].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[1].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[2].pos.y = sin(_deltaTime.count() * 360);
+	_finalData.lights[3].pos.y = sin(_deltaTime.count() * 360);
 }
 
 void VulkanRenderer::CleanUp()
@@ -916,7 +1164,7 @@ void VulkanRenderer::UpdateCamera()
 	float totalZ = 0.0f;
 	float totalX = 0.0f;
 
-	const float cameraSpeed = 7.5f;
+	const float cameraSpeed = 25.f;
 	float spaceKeyState = 0.0f;
 	float leftShiftState = 0.0f;
 	float rightTriggerState = 0.0f;
