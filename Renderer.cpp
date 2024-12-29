@@ -563,12 +563,12 @@ void VulkanRenderer::CreateUniformBuffers()
 		_finalData.lights[2].pos = { 3, 1, 0, 1 };
 		_finalData.lights[3].pos = { -3, 1, 0, 1 };
 		//color
-		_finalData.lights[0].col = { 1 , 0 , 0 };
+		_finalData.lights[0].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[1].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[2].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 		_finalData.lights[3].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 
-		_finalData.lights[0].radius = 3.f;
+		_finalData.lights[0].radius = 15.f;
 		_finalData.lights[1].radius = 7.f;
 		_finalData.lights[2].radius = 7.f;
 		_finalData.lights[3].radius = 7.f;

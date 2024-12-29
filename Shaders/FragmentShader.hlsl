@@ -16,7 +16,6 @@ cbuffer UniformBufferFinal : register(b0)
 {
     Light lights[4];
     float4 view;
-    float radius;
 };
 
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
@@ -32,7 +31,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 fragcolor;
 
 #define lightCount 1
-#define ambient 0.1
+#define ambient 0
 
 	// Ambient part
     fragcolor = albedo.rgb * ambient;
