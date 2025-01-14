@@ -7,32 +7,56 @@ SamplerState samplerAlbedo : register(s3);
 
 struct Light
 {
-    float4 pos;
+    float3 pos;
     float3 col;
     float radius;
 };
 
 cbuffer UniformBufferFinal : register(b0)
 {
-    Light lights[4];
+    Light lights[10];
     float4 view;
+    matrix viewProj;
 };
 
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
-    float3 fragPos = textureposition.Sample(samplerposition, inUV).rgb;
+    float3 fragPos = normalize(textureposition.Sample(samplerposition, inUV).rgb);
     float3 normal = normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
-    float4 albedo = textureAlbedo.Sample(samplerAlbedo, inUV);
+    float3 albedo = textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
+    float specular = textureAlbedo.Sample(samplerAlbedo, inUV).a;
   
-   //return float4(fragPos, 1.0); // Visualize position
+    //return float4(normalize(fragPos), 1.0); // Visualize position
   // return float4(normal, 1.0); // Visualize normal
    //return float4(albedo.rgb, 1.0); // Visualize albedo
     
-    float3 fragcolor;
-
-#define lightCount 1
+   // return float4(lights[0].col, 1);
+#define lightCount 4
 #define ambient 0
-
+    //float3 fragcolor;
+    
+    
+    
+    float3 fragcolor = albedo * 0;
+    float3 viewDir = normalize(view.xyz - fragPos);
+    for (int i = 0; i < 10; i++)
+    {
+        //float4 lightPos = mul(viewProj, float4(lights[i].pos, 1));
+        //diffuse
+        float3 lightDir = normalize(lights[i].pos - fragPos);
+        float3 diffuse = max(dot(normal, lightDir), 0.0) * albedo * lights[i].col;
+        
+        //attenuation
+        float dist = length(lights[i].pos - fragPos);
+        float attenuation = saturate(1.0 - (dist / lights[i].radius));
+        diffuse *= attenuation;
+        
+        //accumulate the light contribution
+        fragcolor += diffuse;
+    }
+   
+  
+    return float4(fragcolor, 1);
 	// Ambient part
     fragcolor = albedo.rgb * ambient;
 
@@ -65,7 +89,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 			// Specular map values are stored in alpha of albedo mrt
             float3 R = reflect(-L, N);
             float NdotR = max(0.0, dot(R, V));
-            float3 spec = lights[i].col * albedo.a * pow(NdotR, 16.0) * atten;
+            float3 spec = lights[i].col * specular * pow(NdotR, 16.0) * atten;
 
             fragcolor += diff + spec;
         }

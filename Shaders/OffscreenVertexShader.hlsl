@@ -16,15 +16,22 @@ struct VSOutput
 
 cbuffer UniformBuffer : register(b0)
 {
-    matrix world, view, proj, inverse;
+    matrix world, view, proj;
     float deltaTime;
 };
+
+struct PCR
+{
+    matrix model;
+};
+
+[[vk::push_constant]] PCR _pcr;
    
 
-VSOutput main(VSInput input)
+VSOutput main(VSInput input, uint id : SV_InstanceID)
 {
     VSOutput output;
-    output.pos = mul(proj, mul(view, mul(world, float4(input.pos, 1))));
+    output.pos = mul(proj, mul(view, mul(mul(world, _pcr.model), float4(input.pos, 1))));
     output.uv = input.uv;
     
     //normal in world space

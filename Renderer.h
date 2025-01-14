@@ -59,7 +59,8 @@ class VulkanRenderer : public Renderer
 	VkSwapchainKHR _swapchain;
 	VkPipelineStageFlags _submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-	std::vector<unsigned int> _idxCounts;
+	std::vector<DrawInfo> _drawInfo;
+	Dimensions _dimensions;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -75,6 +76,7 @@ class VulkanRenderer : public Renderer
 	void LoadModel(std::string filename);
 	void CreateGeometryBuffer();
 	void CreateOffscreenFrameBuffer();
+	void CreateForwardRenderer();
 	void CreateUniformBuffers();
 	void CreateDescriptorSets();
 	void WriteDescriptorSets();

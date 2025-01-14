@@ -132,13 +132,16 @@ void VulkanRenderer::CreateGeometryBuffer()
 	std::vector<vec4> tangents;
 	std::vector<unsigned int> indices;
 	int vCount = 0, iCount = 0, firstIdx = 0, vertexOffset = 0;
+	DrawInfo di;
 
-	for (auto mesh : _model.meshes)
+	for (auto& node : _model.nodes)
 	{
+		auto& mesh = _model.meshes[node.mesh];
 		for (auto prim : mesh.primitives)
 		{
-			firstIdx = indices.size();
-			vertexOffset = positions.size();
+			di.firstIdx = indices.size();
+			di.vertexOffset = positions.size();
+			di.nodeWorld = GetLocalMatrix(node);
 
 			//position
 			tinygltf::Accessor& accessor = _model.accessors[prim.attributes.find("POSITION")->second];
@@ -154,6 +157,8 @@ void VulkanRenderer::CreateGeometryBuffer()
 					{
 						positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
 					}
+
+					//_offscreenData.min = { (float)accessor.minValues[0], (float)accessor.minValues[1] , (float)accessor.minValues[2] };
 				}
 			}
 
@@ -194,7 +199,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 			bufferView = _model.bufferViews[accessor.bufferView];
 			buffer = _model.buffers[bufferView.buffer];
 			iCount = accessor.count;
-			_idxCounts.push_back((unsigned int)iCount);
+			di.idxCount = (unsigned int)accessor.count;
 			{
 				switch (accessor.componentType)
 				{
@@ -248,115 +253,122 @@ void VulkanRenderer::CreateGeometryBuffer()
 			}
 			else
 			{
-				std::vector<vec3> tangent(vCount);
-				std::vector<vec3> biTangent(vCount);
-
-				for (size_t i = 0; i < iCount; i += 3)
+				if (node.name.find("Cone") != std::string::npos) tangents.push_back(vec4{ 0, 0, 0, 1 });
+				else 
 				{
-					//local index
-					unsigned int i0 = indices[firstIdx + i + 0];
-					unsigned int i1 = indices[firstIdx + i + 1];
-					unsigned int i2 = indices[firstIdx + i + 2];
-					assert(i0 < vCount);
-					assert(i1 < vCount);
-					assert(i2 < vCount);
 
-					//global index
-					unsigned int gi0 = i0 + vertexOffset;
-					unsigned int gi1 = i1 + vertexOffset;
-					unsigned int gi2 = i2 + vertexOffset;
+					std::vector<vec3> tangent(vCount);
+					std::vector<vec3> biTangent(vCount);
 
-					const auto& p0 = positions[gi0];
-					const auto& p1 = positions[gi1];
-					const auto& p2 = positions[gi2];
-
-					const auto& uv0 = texCoords[gi0];
-					const auto& uv1 = texCoords[gi1];
-					const auto& uv2 = texCoords[gi2];
-
-					vec3 e1, e2;
+					for (size_t i = 0; i < iCount; i += 3)
 					{
-						GVector2D::Subtract3F(p1, p0, e1);
-						GVector2D::Subtract3F(p2, p0, e2);
+						//local index
+						unsigned int i0 = indices[firstIdx + i + 0];
+						unsigned int i1 = indices[firstIdx + i + 1];
+						unsigned int i2 = indices[firstIdx + i + 2];
+						assert(i0 < vCount);
+						assert(i1 < vCount);
+						assert(i2 < vCount);
+
+						//global index
+						unsigned int gi0 = i0 + vertexOffset;
+						unsigned int gi1 = i1 + vertexOffset;
+						unsigned int gi2 = i2 + vertexOffset;
+
+						const auto& p0 = positions[gi0];
+						const auto& p1 = positions[gi1];
+						const auto& p2 = positions[gi2];
+
+						const auto& uv0 = texCoords[gi0];
+						const auto& uv1 = texCoords[gi1];
+						const auto& uv2 = texCoords[gi2];
+
+						vec3 e1, e2;
+						{
+							GVector2D::Subtract3F(p1, p0, e1);
+							GVector2D::Subtract3F(p2, p0, e2);
+						}
+
+						vec2 duvE1, duvE2;
+						{
+							GVector2D::Subtract2F(uv1, uv0, duvE1);
+							GVector2D::Subtract2F(uv2, uv0, duvE2);
+						}
+
+						float r = 1.f;
+						float a = duvE1.x * duvE2.y - duvE2.x * duvE1.y;
+
+						if (fabs(a) > 0) //catch degenerated UVs
+						{
+							r = 1.f / a;
+						}
+
+						vec3 t, b;
+						{
+							vec3 v[3];
+
+							//t
+							GVector2D::Scale3F(e1, duvE2.y, v[0]);
+							GVector2D::Scale3F(e2, duvE1.y, v[1]);
+							GVector2D::Subtract3F(v[0], v[1], v[2]);
+							GVector2D::Scale3F(v[2], r, t);
+
+							//b
+							GVector2D::Scale3F(e2, duvE1.x, v[0]);
+							GVector2D::Scale3F(e1, duvE2.x, v[1]);
+							GVector2D::Subtract3F(v[0], v[1], v[2]);
+							GVector2D::Scale3F(v[2], r, b);
+						}
+
+						GVector2D::Add3F(tangent[i0], t, tangent[i0]);
+						GVector2D::Add3F(tangent[i1], t, tangent[i1]);
+						GVector2D::Add3F(tangent[i2], t, tangent[i2]);
+
+						GVector2D::Add3F(biTangent[i0], b, biTangent[i0]);
+						GVector2D::Add3F(biTangent[i1], b, biTangent[i1]);
+						GVector2D::Add3F(biTangent[i2], b, biTangent[i2]);
 					}
 
-					vec2 duvE1, duvE2;
+					for (unsigned int a = 0; a < vCount; a++)
 					{
-						GVector2D::Subtract2F(uv1, uv0, duvE1);
-						GVector2D::Subtract2F(uv2, uv0, duvE2);
+						const auto& t = tangent[a];
+						const auto& b = biTangent[a];
+						const auto& n = normals[vertexOffset + a];
+
+						vec3 oTangent;
+						{
+							vec3 v;
+							float d;
+							GVector2D::Dot3F(n, t, d);
+							GVector2D::Scale3F(n, d, v);
+							GVector2D::Subtract3F(t, v, v);
+							GVector2D::Normalize3F(v, oTangent);
+						}
+
+						if (oTangent.x == 0 && oTangent.y == 0 && oTangent.z == 0) //if tangent invalid
+						{
+							if (fabsf(n.x) > fabsf(n.y))
+								GVector2D::Scale3F(vec3{ n.z, 0, -n.x }, 1 / sqrtf(n.x * n.x + n.z * n.z), oTangent);
+							else
+								GVector2D::Scale3F(vec3{ 0, -n.z, n.y }, 1 / sqrtf(n.y * n.y + n.z * n.z), oTangent);
+						}
+
+						//calculate handedness
+						float handedness;
+						{
+							float f;
+							vec3 v;
+							GVector2D::Cross3F(n, t, v);
+							GVector2D::Dot3F(v, b, f);
+							handedness = f < 0.f ? 1.f : -1.f;
+						}
+
+						tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
 					}
-
-					float r = 1.f;
-					float a = duvE1.x * duvE2.y - duvE2.x * duvE1.y;
-
-					if (fabs(a) > 0) //catch degenerated UVs
-					{
-						r = 1.f / a;
-					}
-
-					vec3 t, b;
-					{
-						vec3 v[3];
-
-						//t
-						GVector2D::Scale3F(e1, duvE2.y, v[0]);
-						GVector2D::Scale3F(e2, duvE1.y, v[1]);
-						GVector2D::Subtract3F(v[0], v[1], v[2]);
-						GVector2D::Scale3F(v[2], r, t);
-
-						//b
-						GVector2D::Scale3F(e2, duvE1.x, v[0]);
-						GVector2D::Scale3F(e1, duvE2.x, v[1]);
-						GVector2D::Subtract3F(v[0], v[1], v[2]);
-						GVector2D::Scale3F(v[2], r, b);
-					}
-
-					GVector2D::Add3F(tangent[i0], t, tangent[i0]);
-					GVector2D::Add3F(tangent[i1], t, tangent[i1]);
-					GVector2D::Add3F(tangent[i2], t, tangent[i2]);
-
-					GVector2D::Add3F(biTangent[i0], b, biTangent[i0]);
-					GVector2D::Add3F(biTangent[i1], b, biTangent[i1]);
-					GVector2D::Add3F(biTangent[i2], b, biTangent[i2]);
-				}
-
-				for (unsigned int a = 0; a < vCount; a++)
-				{
-					const auto& t = tangent[a];
-					const auto& b = biTangent[a];
-					const auto& n = normals[vertexOffset + a];
-
-					vec3 oTangent;
-					{
-						vec3 v;
-						float d;
-						GVector2D::Dot3F(n, t, d);
-						GVector2D::Scale3F(n, d, v);
-						GVector2D::Subtract3F(t, v, v);
-						GVector2D::Normalize3F(v, oTangent);
-					}
-
-					if (oTangent.x == 0 && oTangent.y == 0 && oTangent.z == 0) //if tangent invalid
-					{
-						if (fabsf(n.x) > fabsf(n.y))
-							GVector2D::Scale3F(vec3{ n.z, 0, -n.x }, 1 / sqrtf(n.x * n.x + n.z * n.z), oTangent);
-						else
-							GVector2D::Scale3F(vec3{ 0, -n.z, n.y }, 1 / sqrtf(n.y * n.y + n.z * n.z), oTangent);
-					}
-
-					//calculate handedness
-					float handedness;
-					{
-						float f;
-						vec3 v;
-						GVector2D::Cross3F(n, t, v);
-						GVector2D::Dot3F(v, b, f);
-						handedness = f < 0.f ? 1.f : -1.f;
-					}
-
-					tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
 				}
 			}
+
+			_drawInfo.push_back(di);
 		}
 	}
 
@@ -536,42 +548,35 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 	vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
 }
 
+void VulkanRenderer::CreateForwardRenderer()
+{
+}
+
 void VulkanRenderer::CreateUniformBuffers()
 {
 	_vlk.GetAspectRatio(_aspect);
 
 	_offscreenData.world = GW::MATH::GIdentityMatrixF;
-	GMatrix::LookAtLHF(vec4{ 0.f, 2.5, 1.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
+	GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
 	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
-	GMatrix::InverseF(_offscreenData.world, _offscreenData.inverse);
-
-	/*_offscreenData.prev = matrices[0] * matrices[1] * matrices[2];
-	_offscreenData.curr = matrices[0] * matrices[1] * matrices[2];*/
 
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_offscreenUniformBuffer.buffer, &_offscreenUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	//final
-	std::default_random_engine gen(27);
+	std::default_random_engine gen(777);
 	std::uniform_real_distribution<float> distribution(0.f, 1.f);
+	std::uniform_real_distribution<float> distribution2(-3.f, 3.f);
 
 	//lights
 	{
-		//pos
-		_finalData.lights[0].pos = { 0, 2, 0, 1 };
-		_finalData.lights[1].pos = { 0, 3, 0, 1 };
-		_finalData.lights[2].pos = { 3, 1, 0, 1 };
-		_finalData.lights[3].pos = { -3, 1, 0, 1 };
-		//color
-		_finalData.lights[0].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-		_finalData.lights[1].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-		_finalData.lights[2].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-		_finalData.lights[3].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 
-		_finalData.lights[0].radius = 15.f;
-		_finalData.lights[1].radius = 7.f;
-		_finalData.lights[2].radius = 7.f;
-		_finalData.lights[3].radius = 7.f;
+		for (size_t i = 0; i < 10; i++)
+		{
+			_finalData.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
+			_finalData.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+			_finalData.lights[i].radius = 5.f;
+		}
 	}
 
 	_finalData.view = _offscreenData.view.row4;
@@ -658,6 +663,13 @@ void VulkanRenderer::WriteDescriptorSets()
 
 void VulkanRenderer::CreateGraphicsPipelines()
 {
+	VkPushConstantRange pushConstantRange;
+	{
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(PCR);
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	}
+
 	_vlk.GetRenderPass((void**)&_renderPass);
 	VkPipelineShaderStageCreateInfo pssci;
 
@@ -726,7 +738,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = false;
 	pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL; //TODO: switch render modes on key press;
 	pipelineRasterizationStateCreateInfo.lineWidth = 1.f;
-	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE; //final comp
+	pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT; //final comp
 	pipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	pipelineRasterizationStateCreateInfo.depthClampEnable = false;
 	pipelineRasterizationStateCreateInfo.depthBiasEnable = false;
@@ -791,7 +803,8 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
 	pipelineLayoutCreateInfo.setLayoutCount = 1;
 	pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
-	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+	pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+	pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 
 	vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout);
 
@@ -953,11 +966,14 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	vkCmdBindIndexBuffer(_offscreenCommandBuffer, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 	int i = 0;
-	for (auto& mesh : _model.meshes)
+	for (auto& node : _model.nodes)
 	{
+		auto& mesh = _model.meshes[node.mesh];
 		for (auto& prim : mesh.primitives)
 		{
-			vkCmdDrawIndexed(_offscreenCommandBuffer, _idxCounts[i++], 1, 0, 0, 0);
+			vkCmdPushConstants(_offscreenCommandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
+			vkCmdDrawIndexed(_offscreenCommandBuffer, _drawInfo[i].idxCount, 1, _drawInfo[i].firstIdx, _drawInfo[i].vertexOffset, 0);
+			i++;
 		}
 	}
 
@@ -972,6 +988,7 @@ void VulkanRenderer::UpdateLights()
 	_finalData.lights[2].pos.y = sin(_deltaTime.count() * 360);
 	_finalData.lights[3].pos.y = sin(_deltaTime.count() * 360);
 }
+
 
 void VulkanRenderer::CleanUp()
 {
@@ -1017,18 +1034,16 @@ mat4 VulkanRenderer::GetLocalMatrix(const tinygltf::Node& node)
 		scale = { (float)node.scale[0], (float)node.scale[1] , (float)node.scale[2] };
 	}
 
-	auto& matrix = GW::MATH::GIdentityMatrixF;
+	mat4 matrix = GW::MATH::GIdentityMatrixF;
 
 	mat4 translatedMatrix;
 	mat4 scaledMatrix;
 	mat4 rotatedMatrix;
-	mat4 m;
 
 	GMatrix::TranslateLocalF(GW::MATH::GIdentityMatrixF, translation, translatedMatrix);
 	GMatrix::MultiplyMatrixF(translatedMatrix, rotation, rotatedMatrix);
 	GMatrix::ScaleLocalF(GW::MATH::GIdentityMatrixF, scale, scaledMatrix);
-	GMatrix::MultiplyMatrixF(rotatedMatrix, scaledMatrix, m);
-	//GW::MATH::GMatrix::MultiplyMatrixF(m, matrix, matrix);
+	GMatrix::MultiplyMatrixF(rotatedMatrix, scaledMatrix, matrix);
 
 	return matrix;
 }
@@ -1070,7 +1085,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	_vlk.GetSwapchain((void**)&_swapchain);
 
 	CompileShaders();
-	LoadModel("Models/Test/Test.gltf");
+	LoadModel("Models/Shapes/Shapes.gltf");
 	CreateOffscreenFrameBuffer();
 	CreateUniformBuffers();
 	CreateDescriptorSets();
@@ -1097,7 +1112,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 				CleanUp();
 			}
 		});
-}
+	}
 
 VulkanRenderer::~VulkanRenderer()
 {
@@ -1113,7 +1128,7 @@ void VulkanRenderer::Render()
 	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	_finalData.view = _offscreenData.view.row4;
-	//UpdateLights();
+	_finalData.viewProj = GW::MATH::GIdentityMatrixF * _offscreenData.view * _offscreenData.proj;
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 
 	unsigned int currentBuffer;

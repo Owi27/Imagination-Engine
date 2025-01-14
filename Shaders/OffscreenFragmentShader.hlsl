@@ -10,7 +10,7 @@ struct FSOutput
 {
     float4 Position : SV_TARGET0;
     float4 Normal : SV_TARGET1;
-    float4 UV : SV_Target2;
+    float4 UV : SV_TARGET2;
 };
 
 FSOutput main(VSOutput input)
@@ -20,9 +20,9 @@ FSOutput main(VSOutput input)
     
     float3 N = normalize(input.nrm);
     float3 T = normalize(input.tan);
-    float3 B = cross(N, T);
+    float3 B = cross(N, T); 
     float3x3 TBN = float3x3(T, B, N);
-  // Use a flat tangent-space normal (0, 0, 1)
+    // Use a flat tangent-space normal (0, 0, 1)
     float3 flatNormal = float3(0.0, 0.0, 1.0);
 
     // Transform flat tangent-space normal to world space
