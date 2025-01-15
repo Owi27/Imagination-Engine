@@ -254,7 +254,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 			else
 			{
 				if (node.name.find("Cone") != std::string::npos) tangents.push_back(vec4{ 0, 0, 0, 1 });
-				else 
+				else
 				{
 
 					std::vector<vec3> tangent(vCount);
@@ -953,7 +953,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdBindDescriptorSets(_offscreenCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
 
-	std::vector<VkBuffer> vertexBuffers =
+	std::vector<VkBuffer> vertexBufferss =
 	{
 		_vertexBuffer[0].buffer,
 		_vertexBuffer[1].buffer,
@@ -962,7 +962,7 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	};
 
 	std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
-	vkCmdBindVertexBuffers(_offscreenCommandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+	vkCmdBindVertexBuffers(_offscreenCommandBuffer, 0, vertexBufferss.size(), vertexBufferss.data(), offsets.data());
 	vkCmdBindIndexBuffer(_offscreenCommandBuffer, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
 	int i = 0;
@@ -979,6 +979,114 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 	vkCmdEndRenderPass(_offscreenCommandBuffer);
 	vkEndCommandBuffer(_offscreenCommandBuffer);
+}
+
+void VulkanRenderer::CreateFrameGraphNodes()
+{
+	FrameGraphResource vertexBuffers;
+	{
+		vertexBuffers.name = "Vertex Buffers";
+		vertexBuffers.isExternal = false;
+		vertexBuffers.buffer = new Buffer[4];
+		vertexBuffers.buffer[0] = _vertexBuffer[0];
+		vertexBuffers.buffer[1] = _vertexBuffer[1];
+		vertexBuffers.buffer[2] = _vertexBuffer[2];
+		vertexBuffers.buffer[3] = _vertexBuffer[3];
+	}
+	FrameGraph::GetInstance()->AddResource(vertexBuffers.name, vertexBuffers);
+	FrameGraphResource depthBuffer;
+	{
+		std::vector<VkFormat> formats =
+		{
+			VK_FORMAT_D32_SFLOAT_S8_UINT,
+			VK_FORMAT_D32_SFLOAT,
+			VK_FORMAT_D24_UNORM_S8_UINT,
+			VK_FORMAT_D16_UNORM_S8_UINT,
+			VK_FORMAT_D16_UNORM
+		};
+
+		depthBuffer.extent = { _width, _height };
+		depthBuffer.image = nullptr;
+		depthBuffer.imageView = nullptr;
+		depthBuffer.buffer = nullptr;
+		depthBuffer.name = "Depth Buffer";
+		depthBuffer.isExternal = false;
+
+		//set format
+		GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
+	}
+
+	FrameGraphNode offscreenPass;
+	{
+		offscreenPass.name = "Offscreen Pass";
+		offscreenPass.inputResources = {"Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set"};
+		offscreenPass.outputResources = { "Position", "Normal", "Albedo" };
+		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
+			{
+				VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+				if (!_offscreenSemaphore) vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+
+				VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+
+				// Clear values for all attachments written in the fragment shader
+				std::array<VkClearValue, 4> clearValues;
+				clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+				clearValues[1].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+				clearValues[2].color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
+				clearValues[3].depthStencil = { 1.0f, 0 };
+
+				VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+				renderPassBeginInfo.renderPass = _offscreenFrameBuffer.renderPass;
+				renderPassBeginInfo.framebuffer = _offscreenFrameBuffer.frameBuffer;
+				renderPassBeginInfo.renderArea.extent.width = _width;
+				renderPassBeginInfo.renderArea.extent.height = _height;
+				renderPassBeginInfo.clearValueCount = clearValues.size();
+				renderPassBeginInfo.pClearValues = clearValues.data();
+
+				vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+				vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+				VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+				VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+				vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+				vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _offscreenPipeline);
+
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
+
+				std::vector<VkBuffer> vertexBuffers =
+				{
+					_vertexBuffer[0].buffer,
+					_vertexBuffer[1].buffer,
+					_vertexBuffer[2].buffer,
+					_vertexBuffer[3].buffer,
+				};
+
+				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
+				vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+				vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+
+				int i = 0;
+				for (auto& node : _model.nodes)
+				{
+					auto& mesh = _model.meshes[node.mesh];
+					for (auto& prim : mesh.primitives)
+					{
+						vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
+						vkCmdDrawIndexed(commandBuffer, _drawInfo[i].idxCount, 1, _drawInfo[i].firstIdx, _drawInfo[i].vertexOffset, 0);
+						i++;
+					}
+				}
+
+				vkCmdEndRenderPass(commandBuffer);
+				vkEndCommandBuffer(commandBuffer);
+			};
+	}
+
+	FrameGraph::GetInstance()->AddResource(depthBuffer.name, depthBuffer);
+	FrameGraph::GetInstance()->AddNode(offscreenPass);
 }
 
 void VulkanRenderer::UpdateLights()
@@ -1093,6 +1201,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	CreateGraphicsPipelines();
 	CreateCommandBuffers();
 	CreateDeferredCommandBuffers();
+	CreateFrameGraphNodes();
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore);
@@ -1112,7 +1221,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 				CleanUp();
 			}
 		});
-	}
+}
 
 VulkanRenderer::~VulkanRenderer()
 {

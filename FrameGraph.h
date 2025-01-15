@@ -11,19 +11,20 @@ struct FrameGraphResource
 	std::string name;       
 	bool isExternal;        
 	VkImage image;          
-	VkImageView imageView;  
+	VkImageView imageView;
+	Buffer* buffer;
 	VkFormat format;        
 	VkExtent2D extent;      
 };
 
 class FrameGraph
 {
-	static FrameGraph* _frameGraph;
+	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
 	std::unordered_map<std::string, FrameGraphResource> _resources;
 
-	FrameGraph();
-	~FrameGraph() = default;
+	FrameGraph() {};
+	~FrameGraph() {};
 	// Deleting the copy constructor to prevent copies
 	FrameGraph(const FrameGraph& frameGraph) = delete;
 
