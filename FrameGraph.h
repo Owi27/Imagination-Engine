@@ -8,13 +8,13 @@ struct FrameGraphNode
 
 struct FrameGraphResource
 {
-	std::string name;       
-	bool isExternal;        
-	VkImage image;          
-	VkImageView imageView;
-	Buffer* buffer;
-	VkFormat format;        
-	VkExtent2D extent;      
+	std::string name = "";
+	bool isExternal = false;        
+	VkImage image = nullptr;          
+	VkImageView imageView = nullptr;
+	Buffer* buffer = nullptr;
+	VkFormat format;
+	VkExtent2D extent;
 };
 
 class FrameGraph

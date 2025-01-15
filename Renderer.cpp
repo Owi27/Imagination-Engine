@@ -993,7 +993,14 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		vertexBuffers.buffer[2] = _vertexBuffer[2];
 		vertexBuffers.buffer[3] = _vertexBuffer[3];
 	}
-	FrameGraph::GetInstance()->AddResource(vertexBuffers.name, vertexBuffers);
+
+	FrameGraphResource indexBuffer;
+	{
+		indexBuffer.buffer->buffer = _indexBuffer.buffer;
+		indexBuffer.isExternal = false;
+		indexBuffer.name = "Index Buffer";
+	}
+
 	FrameGraphResource depthBuffer;
 	{
 		std::vector<VkFormat> formats =
@@ -1085,6 +1092,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			};
 	}
 
+	FrameGraph::GetInstance()->AddResource(vertexBuffers.name, vertexBuffers);
 	FrameGraph::GetInstance()->AddResource(depthBuffer.name, depthBuffer);
 	FrameGraph::GetInstance()->AddNode(offscreenPass);
 }
