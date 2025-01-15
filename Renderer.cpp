@@ -986,7 +986,6 @@ void VulkanRenderer::CreateFrameGraphNodes()
 	FrameGraphResource vertexBuffers;
 	{
 		vertexBuffers.name = "Vertex Buffers";
-		vertexBuffers.isExternal = false;
 		vertexBuffers.buffer = new Buffer[4];
 		vertexBuffers.buffer[0] = _vertexBuffer[0];
 		vertexBuffers.buffer[1] = _vertexBuffer[1];
@@ -997,7 +996,6 @@ void VulkanRenderer::CreateFrameGraphNodes()
 	FrameGraphResource indexBuffer;
 	{
 		indexBuffer.buffer->buffer = _indexBuffer.buffer;
-		indexBuffer.isExternal = false;
 		indexBuffer.name = "Index Buffer";
 	}
 
@@ -1013,11 +1011,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		};
 
 		depthBuffer.extent = { _width, _height };
-		depthBuffer.image = nullptr;
-		depthBuffer.imageView = nullptr;
-		depthBuffer.buffer = nullptr;
 		depthBuffer.name = "Depth Buffer";
-		depthBuffer.isExternal = false;
 
 		//set format
 		GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
