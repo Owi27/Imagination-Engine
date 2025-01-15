@@ -18,6 +18,6 @@ int main()
 			renderer->Render();
 		}
 	}
-
+	
 	delete renderer;
 }

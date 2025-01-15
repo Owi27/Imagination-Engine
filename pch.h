@@ -26,6 +26,7 @@
 #include <filesystem>
 #include <random>
 #include <set>
+#include <queue>
 
 using GWindow = GW::SYSTEM::GWindow;
 using GWindowStyle = GW::SYSTEM::GWindowStyle;
@@ -46,3 +47,4 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 
 #include "Structs.h"
 #include "Components.h"
+#include "FrameGraph.h"
