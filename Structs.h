@@ -9,6 +9,7 @@ struct Buffer
 struct Image
 {
 	VkImage image;
+	VkImageView imageView;
 	VkDeviceMemory memory;
 };
 
@@ -30,6 +31,14 @@ struct FrameBuffer
 	VkFramebuffer frameBuffer;
 	FrameBufferTexture position, normal, albedo, depth;
 	VkRenderPass renderPass;
+};
+
+struct FrameBufferT
+{
+	VkRenderPass renderPass;
+	VkFramebuffer frameBuffer;
+	VkPipelineBindPoint bindPoint;
+	std::vector<VkAttachmentReference> attachmentReferences;
 };
 
 struct Light

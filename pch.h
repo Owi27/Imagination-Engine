@@ -26,7 +26,7 @@
 #include <filesystem>
 #include <random>
 #include <set>
-#include <queue>
+#include <variant>
 
 using GWindow = GW::SYSTEM::GWindow;
 using GWindowStyle = GW::SYSTEM::GWindowStyle;

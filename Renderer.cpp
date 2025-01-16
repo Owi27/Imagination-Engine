@@ -983,23 +983,25 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 
 void VulkanRenderer::CreateFrameGraphNodes()
 {
-	FrameGraphResource vertexBuffers;
+	FrameGraphBufferResource vertexBuffers;
 	{
 		vertexBuffers.name = "Vertex Buffers";
-		vertexBuffers.buffer = new Buffer[4];
-		vertexBuffers.buffer[0] = _vertexBuffer[0];
-		vertexBuffers.buffer[1] = _vertexBuffer[1];
-		vertexBuffers.buffer[2] = _vertexBuffer[2];
-		vertexBuffers.buffer[3] = _vertexBuffer[3];
+		vertexBuffers.buffers = { _vertexBuffer[0], _vertexBuffer[1],_vertexBuffer[2],_vertexBuffer[3] };
 	}
 
-	FrameGraphResource indexBuffer;
+	FrameGraphBufferResource indexBuffer;
 	{
-		indexBuffer.buffer->buffer = _indexBuffer.buffer;
+		indexBuffer.buffers = { _indexBuffer };
 		indexBuffer.name = "Index Buffer";
 	}
 
-	FrameGraphResource depthBuffer;
+	FrameGraphBufferResource offscreenDescriptorSet;
+	{
+		offscreenDescriptorSet.name = "Offscreen Descriptor Set";
+		offscreenDescriptorSet.buffers = { _offscreenUniformBuffer };
+	}
+
+	FrameGraphImageResource depthBuffer;
 	{
 		std::vector<VkFormat> formats =
 		{
@@ -1020,7 +1022,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 	FrameGraphNode offscreenPass;
 	{
 		offscreenPass.name = "Offscreen Pass";
-		offscreenPass.inputResources = {"Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set"};
+		offscreenPass.inputResources = { "Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set" };
 		offscreenPass.outputResources = { "Position", "Normal", "Albedo" };
 		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
 			{
@@ -1086,9 +1088,11 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			};
 	}
 
-	FrameGraph::GetInstance()->AddResource(vertexBuffers.name, vertexBuffers);
-	FrameGraph::GetInstance()->AddResource(depthBuffer.name, depthBuffer);
-	FrameGraph::GetInstance()->AddNode(offscreenPass);
+	_frameGraph->AddResource(vertexBuffers.name, vertexBuffers);
+	_frameGraph->AddResource(indexBuffer.name, indexBuffer);
+	_frameGraph->AddResource(offscreenDescriptorSet.name, offscreenDescriptorSet);
+	_frameGraph->AddResource(depthBuffer.name, depthBuffer);
+	_frameGraph->AddNode(offscreenPass);
 }
 
 void VulkanRenderer::UpdateLights()

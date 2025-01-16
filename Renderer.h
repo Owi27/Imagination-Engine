@@ -33,6 +33,8 @@ class VulkanRenderer : public Renderer
 	GVulkanSurface _vlk;
 	GEventReceiver _shutdown;
 
+	FrameGraph* _frameGraph = FrameGraph::GetInstance();
+
 	//structs
 	FrameBuffer _offscreenFrameBuffer;
 	UniformBufferOffscreen _offscreenData;
