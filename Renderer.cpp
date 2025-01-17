@@ -120,17 +120,10 @@ void VulkanRenderer::LoadModel(std::string filename)
 	{
 		std::cout << "Failed to parse model\n";
 	}
-
-	CreateGeometryBuffer();
 }
 
-void VulkanRenderer::CreateGeometryBuffer()
+void VulkanRenderer::CreateGeometryData()
 {
-	std::vector<vec3> positions;
-	std::vector<vec3> normals;
-	std::vector<vec2> texCoords;
-	std::vector<vec4> tangents;
-	std::vector<unsigned int> indices;
 	int vCount = 0, iCount = 0, firstIdx = 0, vertexOffset = 0;
 	DrawInfo di;
 
@@ -139,8 +132,8 @@ void VulkanRenderer::CreateGeometryBuffer()
 		auto& mesh = _model.meshes[node.mesh];
 		for (auto prim : mesh.primitives)
 		{
-			di.firstIdx = indices.size();
-			di.vertexOffset = positions.size();
+			di.firstIdx = _geometryData.indices.size();
+			di.vertexOffset = _geometryData.positions.size();
 			di.nodeWorld = GetLocalMatrix(node);
 
 			//position
@@ -155,7 +148,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
+						_geometryData.positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
 					}
 
 					//_offscreenData.min = { (float)accessor.minValues[0], (float)accessor.minValues[1] , (float)accessor.minValues[2] };
@@ -173,7 +166,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						normals.push_back(vec3{ nrm[i * 3 + 0], nrm[i * 3 + 1], nrm[i * 3 + 2] });
+						_geometryData.normals.push_back(vec3{ nrm[i * 3 + 0], nrm[i * 3 + 1], nrm[i * 3 + 2] });
 					}
 				}
 			}
@@ -189,7 +182,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						texCoords.push_back(vec2{ uv0[i * 2 + 0], uv0[i * 2 + 1] });
+						_geometryData.texCoords.push_back(vec2{ uv0[i * 2 + 0], uv0[i * 2 + 1] });
 					}
 				}
 			}
@@ -208,7 +201,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 					std::vector<unsigned int> uIntPrims;
 					uIntPrims.resize(accessor.count);
 					memcpy(uIntPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned int));
-					indices.insert(indices.end(), uIntPrims.begin(), uIntPrims.end());
+					_geometryData.indices.insert(_geometryData.indices.end(), uIntPrims.begin(), uIntPrims.end());
 					break;
 				}
 				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
@@ -216,7 +209,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 					std::vector<unsigned short> uShortPrims;
 					uShortPrims.resize(accessor.count);
 					memcpy(uShortPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned short));
-					indices.insert(indices.end(), uShortPrims.begin(), uShortPrims.end());
+					_geometryData.indices.insert(_geometryData.indices.end(), uShortPrims.begin(), uShortPrims.end());
 					break;
 				}
 				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
@@ -224,7 +217,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 					std::vector<unsigned char> uCharPrims;
 					uCharPrims.resize(accessor.count);
 					memcpy(uCharPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned char));
-					indices.insert(indices.end(), uCharPrims.begin(), uCharPrims.end());
+					_geometryData.indices.insert(_geometryData.indices.end(), uCharPrims.begin(), uCharPrims.end());
 					break;
 				}
 				default:
@@ -246,14 +239,14 @@ void VulkanRenderer::CreateGeometryBuffer()
 					{
 						for (size_t i = 0; i < accessor.count; i++)
 						{
-							tangents.push_back(vec4{ tan[i * 4 + 0], tan[i * 4 + 1], tan[i * 4 + 2], tan[i * 4 + 3] });
+							_geometryData.tangents.push_back(vec4{ tan[i * 4 + 0], tan[i * 4 + 1], tan[i * 4 + 2], tan[i * 4 + 3] });
 						}
 					}
 				}
 			}
 			else
 			{
-				if (node.name.find("Cone") != std::string::npos) tangents.push_back(vec4{ 0, 0, 0, 1 });
+				if (node.name.find("Cone") != std::string::npos) _geometryData.tangents.push_back(vec4{ 0, 0, 0, 1 });
 				else
 				{
 
@@ -263,9 +256,9 @@ void VulkanRenderer::CreateGeometryBuffer()
 					for (size_t i = 0; i < iCount; i += 3)
 					{
 						//local index
-						unsigned int i0 = indices[firstIdx + i + 0];
-						unsigned int i1 = indices[firstIdx + i + 1];
-						unsigned int i2 = indices[firstIdx + i + 2];
+						unsigned int i0 = _geometryData.indices[firstIdx + i + 0];
+						unsigned int i1 = _geometryData.indices[firstIdx + i + 1];
+						unsigned int i2 = _geometryData.indices[firstIdx + i + 2];
 						assert(i0 < vCount);
 						assert(i1 < vCount);
 						assert(i2 < vCount);
@@ -275,13 +268,13 @@ void VulkanRenderer::CreateGeometryBuffer()
 						unsigned int gi1 = i1 + vertexOffset;
 						unsigned int gi2 = i2 + vertexOffset;
 
-						const auto& p0 = positions[gi0];
-						const auto& p1 = positions[gi1];
-						const auto& p2 = positions[gi2];
+						const auto& p0 = _geometryData.positions[gi0];
+						const auto& p1 = _geometryData.positions[gi1];
+						const auto& p2 = _geometryData.positions[gi2];
 
-						const auto& uv0 = texCoords[gi0];
-						const auto& uv1 = texCoords[gi1];
-						const auto& uv2 = texCoords[gi2];
+						const auto& uv0 = _geometryData.texCoords[gi0];
+						const auto& uv1 = _geometryData.texCoords[gi1];
+						const auto& uv2 = _geometryData.texCoords[gi2];
 
 						vec3 e1, e2;
 						{
@@ -333,7 +326,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 					{
 						const auto& t = tangent[a];
 						const auto& b = biTangent[a];
-						const auto& n = normals[vertexOffset + a];
+						const auto& n = _geometryData.normals[vertexOffset + a];
 
 						vec3 oTangent;
 						{
@@ -363,7 +356,7 @@ void VulkanRenderer::CreateGeometryBuffer()
 							handedness = f < 0.f ? 1.f : -1.f;
 						}
 
-						tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
+						_geometryData.tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
 					}
 				}
 			}
@@ -371,22 +364,6 @@ void VulkanRenderer::CreateGeometryBuffer()
 			_drawInfo.push_back(di);
 		}
 	}
-
-	//position
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[0].buffer, &_vertexBuffer[0].memory);
-	GvkHelper::write_to_buffer(_device, _vertexBuffer[0].memory, positions.data(), sizeof(vec3) * positions.size());
-	//normal
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[1].buffer, &_vertexBuffer[1].memory);
-	GvkHelper::write_to_buffer(_device, _vertexBuffer[1].memory, normals.data(), sizeof(vec3) * normals.size());
-	//texcoord
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[2].buffer, &_vertexBuffer[2].memory);
-	GvkHelper::write_to_buffer(_device, _vertexBuffer[2].memory, texCoords.data(), sizeof(vec2) * texCoords.size());
-	//tangent
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_vertexBuffer[3].buffer, &_vertexBuffer[3].memory);
-	GvkHelper::write_to_buffer(_device, _vertexBuffer[3].memory, tangents.data(), sizeof(vec4) * tangents.size());
-	//index
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_indexBuffer.buffer, &_indexBuffer.memory);
-	GvkHelper::write_to_buffer(_device, _indexBuffer.memory, indices.data(), sizeof(unsigned int) * indices.size());
 }
 
 void VulkanRenderer::CreateOffscreenFrameBuffer()
@@ -554,14 +531,6 @@ void VulkanRenderer::CreateForwardRenderer()
 
 void VulkanRenderer::CreateUniformBuffers()
 {
-	_vlk.GetAspectRatio(_aspect);
-
-	_offscreenData.world = GW::MATH::GIdentityMatrixF;
-	GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, _offscreenData.view);
-	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, _offscreenData.proj);
-
-	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_offscreenUniformBuffer.buffer, &_offscreenUniformBuffer.memory);
-	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	//final
 	std::default_random_engine gen(777);
@@ -981,51 +950,89 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	vkEndCommandBuffer(_offscreenCommandBuffer);
 }
 
+void VulkanRenderer::CreateFrameGraphResources()
+{
+	//images
+	{
+		FrameGraphImageResource depthBuffer;
+		{
+			std::vector<VkFormat> formats =
+			{
+				VK_FORMAT_D32_SFLOAT_S8_UINT,
+				VK_FORMAT_D32_SFLOAT,
+				VK_FORMAT_D24_UNORM_S8_UINT,
+				VK_FORMAT_D16_UNORM_S8_UINT,
+				VK_FORMAT_D16_UNORM
+			};
+
+			depthBuffer.name = "Depth Buffer";
+			depthBuffer.extent = { _width, _height, 1 };
+			//set format
+			GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
+			GvkHelper::create_image(_physicalDevice, _device, depthBuffer.extent, 1, VK_SAMPLE_COUNT_1_BIT, depthBuffer.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depthBuffer.image.image, &depthBuffer.image.memory);
+			GvkHelper::create_image_view(_device, depthBuffer.image.image, depthBuffer.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &depthBuffer.image.imageView);
+		}
+		_frameGraph->AddResource(depthBuffer.name, &depthBuffer);
+	}
+
+	//buffers
+	{
+		FrameGraphBufferResource vertexBuffers;
+		{
+			vertexBuffers.name = "Vertex Buffers";
+			CreateGeometryData();
+			vertexBuffers.buffers.resize(4);
+			//position
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[0].buffer, &vertexBuffers.buffers[0].memory);
+			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[0].memory, _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
+			//normal
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[1].buffer, &vertexBuffers.buffers[1].memory);
+			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[1].memory, _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
+			//texcoord
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * _geometryData.texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[2].buffer, &vertexBuffers.buffers[2].memory);
+			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[2].memory, _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
+			//tangent
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * _geometryData.tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[3].buffer, &vertexBuffers.buffers[3].memory);
+			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[3].memory, _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
+
+			vertexBuffers.prepared = true;
+		}
+		_frameGraph->AddResource(vertexBuffers.name, &vertexBuffers);
+
+		FrameGraphBufferResource indexBuffer;
+		{
+			indexBuffer.name = "Index Buffer";
+			indexBuffer.buffers.resize(1);
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_indexBuffer.buffer, &_indexBuffer.memory);
+			GvkHelper::write_to_buffer(_device, _indexBuffer.memory, _geometryData.indices.data(), sizeof(unsigned int) * _geometryData.indices.size());
+
+			indexBuffer.prepared = true;
+		}
+		_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
+
+		FrameGraphBufferResource offscreenDescriptorSet;
+		{
+			offscreenDescriptorSet.name = "Offscreen Descriptor Set";
+			offscreenDescriptorSet.buffers.resize(1);
+			_vlk.GetAspectRatio(_aspect);
+			UniformBufferOffscreen data;
+
+			data.world = GW::MATH::GIdentityMatrixF;
+			GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, data.view);
+			GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
+
+			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &offscreenDescriptorSet.buffers[0].buffer, &offscreenDescriptorSet.buffers[0].memory);
+			GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &data, sizeof(UniformBufferOffscreen));
+
+
+		}
+		_frameGraph->AddResource(offscreenDescriptorSet.name, &offscreenDescriptorSet);
+
+	}
+}
+
 void VulkanRenderer::CreateFrameGraphNodes()
 {
-	FrameGraphBufferResource vertexBuffers;
-	{
-		vertexBuffers.name = "Vertex Buffers";
-		vertexBuffers.buffers = { _vertexBuffer[0], _vertexBuffer[1],_vertexBuffer[2],_vertexBuffer[3] };
-	}
-	_frameGraph->AddResource(vertexBuffers.name, &vertexBuffers);
-
-
-	FrameGraphBufferResource indexBuffer;
-	{
-		indexBuffer.name = "Index Buffer";
-		indexBuffer.buffers = { _indexBuffer };
-	}
-	_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
-
-	FrameGraphBufferResource offscreenDescriptorSet;
-	{
-		offscreenDescriptorSet.name = "Offscreen Descriptor Set";
-		offscreenDescriptorSet.buffers = { _offscreenUniformBuffer };
-	}
-	_frameGraph->AddResource(offscreenDescriptorSet.name, &offscreenDescriptorSet);
-
-
-	FrameGraphImageResource depthBuffer;
-	{
-		std::vector<VkFormat> formats =
-		{
-			VK_FORMAT_D32_SFLOAT_S8_UINT,
-			VK_FORMAT_D32_SFLOAT,
-			VK_FORMAT_D24_UNORM_S8_UINT,
-			VK_FORMAT_D16_UNORM_S8_UINT,
-			VK_FORMAT_D16_UNORM
-		};
-
-		depthBuffer.name = "Depth Buffer";
-		depthBuffer.extent = { _width, _height, 1 };
-		//set format
-		GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
-		GvkHelper::create_image(_physicalDevice, _device, depthBuffer.extent, 1, VK_SAMPLE_COUNT_1_BIT, depthBuffer.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depthBuffer.image.image, &depthBuffer.image.memory);
-		GvkHelper::create_image_view(_device, depthBuffer.image.image, depthBuffer.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &depthBuffer.image.imageView);
-	}
-	_frameGraph->AddResource(depthBuffer.name, &depthBuffer);
-
 	FrameGraphNode offscreenPass;
 	{
 		offscreenPass.name = "Offscreen Pass";
@@ -1034,31 +1041,6 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		offscreenPass.frameBuffer.setupFrameBuffer = true;
 		offscreenPass.Setup = [&]()
 			{
-				auto CreateAttachment = [this](VkFormat format, VkImageUsageFlagBits usage, FrameBufferTexture* frameBufferTexture)
-					{
-						VkImageAspectFlags aspectMask = 0;
-						VkImageLayout imageLayout;
-
-						frameBufferTexture->format = format;
-
-						if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
-						{
-							aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-							imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-						}
-
-						if (usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
-						{
-							aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-							if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-
-							imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-						}
-
-						assert(aspectMask > 0);
-
-					};
 
 				FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb;
 				{
@@ -1146,7 +1128,6 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					// Use subpass dependencies for attachment layout transitions
 					std::array<VkSubpassDependency, 2> subpassDependencies;
-
 					subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 					subpassDependencies[0].dstSubpass = 0;
 					subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -1171,51 +1152,42 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					renderPassCreateInfo.dependencyCount = subpassDependencies.size();
 					renderPassCreateInfo.pDependencies = subpassDependencies.data();
 
+					vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &offscreenPass.frameBuffer.renderPass);
 
-					std::cout << '\n';
+					std::array<VkImageView, 4> imageViews =
+					{
+						posResource->image.imageView,
+						nrmResource->image.imageView,
+						albResource->image.imageView,
+						depthResource->image.imageView
+					};
+
+					VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+					frameBufferCreateInfo.renderPass = offscreenPass.frameBuffer.renderPass;
+					frameBufferCreateInfo.pAttachments = imageViews.data();
+					frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
+					frameBufferCreateInfo.width = _width;
+					frameBufferCreateInfo.height = _height;
+					frameBufferCreateInfo.layers = 1;
+
+					vkCreateFramebuffer(_device, &frameBufferCreateInfo, nullptr, &offscreenPass.frameBuffer.frameBuffer);
+
+					//create sampler
+					VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+					samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+					samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+					samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+					samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+					samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+					samplerCreateInfo.maxAnisotropy = 1.f;
+					samplerCreateInfo.maxLod = 1.f;
+					samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+					samplerCreateInfo.minLod = 0;
+					samplerCreateInfo.mipLodBias = 0;
+					samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+					vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
 				}
-
-				
-				vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_offscreenFrameBuffer.renderPass);
-
-				std::array<VkImageView, 4> imageViews;
-				imageViews[0] = _offscreenFrameBuffer.position.texture.texImageView;
-				imageViews[1] = _offscreenFrameBuffer.normal.texture.texImageView;
-				imageViews[2] = _offscreenFrameBuffer.albedo.texture.texImageView;
-				imageViews[3] = _offscreenFrameBuffer.depth.texture.texImageView;
-
-				VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-				frameBufferCreateInfo.renderPass = _offscreenFrameBuffer.renderPass;
-				frameBufferCreateInfo.pAttachments = imageViews.data();
-				frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
-				frameBufferCreateInfo.width = _width;
-				frameBufferCreateInfo.height = _height;
-				frameBufferCreateInfo.layers = 1;
-
-				vkCreateFramebuffer(_device, &frameBufferCreateInfo, nullptr, &_offscreenFrameBuffer.frameBuffer);
-
-				//create sampler
-				VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-				samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-				samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-				samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
-				samplerCreateInfo.maxAnisotropy = 1.f;
-				samplerCreateInfo.maxLod = 1.f;
-				samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
-				samplerCreateInfo.minLod = 0;
-				samplerCreateInfo.mipLodBias = 0;
-				samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-
-				vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
-
-
-
-
-
-
-
 			};
 
 		offscreenPass.Setup();
@@ -1400,8 +1372,8 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	WriteDescriptorSets();
 	CreateGraphicsPipelines();
 	CreateCommandBuffers();
-	CreateDeferredCommandBuffers();
 	CreateFrameGraphNodes();
+	CreateDeferredCommandBuffers();
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore);

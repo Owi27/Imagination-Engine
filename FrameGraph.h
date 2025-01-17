@@ -3,6 +3,7 @@
 struct FrameGraphResource
 {
 	std::string name = "";
+	std::string parent = "";
 	//bool isExternal = false; // don't need?
 	bool prepared = false;
 
@@ -62,7 +63,6 @@ public:
 	void AddResource(const std::string& name, FrameGraphResource* resource)
 	{
 		_resources[name] = resource;
-		_resources[name]->prepared = true;
 	}
 
 	FrameGraphResource* GetResource(const std::string& name)
@@ -76,7 +76,6 @@ public:
 			// Ensure input resources are prepared here if needed
 			if (node.shouldExecute)
 			{
-				//CreateFrameBuffer(node);
 
 				node.Execute(commandBuffer);
 			}

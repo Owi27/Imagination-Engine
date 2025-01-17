@@ -42,6 +42,14 @@ struct FrameBufferT
 	std::vector<VkAttachmentReference> attachmentReferences;
 };
 
+struct GeometryData
+{
+	std::vector<vec3> positions;
+	std::vector<vec3> normals;
+	std::vector<vec2> texCoords;
+	std::vector<vec4> tangents;
+	std::vector<unsigned int> indices;
+};
 struct Light
 {
 	vec3 pos;

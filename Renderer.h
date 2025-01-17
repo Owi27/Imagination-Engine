@@ -34,6 +34,7 @@ class VulkanRenderer : public Renderer
 	GEventReceiver _shutdown;
 
 	FrameGraph* _frameGraph = FrameGraph::GetInstance();
+	GeometryData _geometryData;
 
 	//structs
 	FrameBuffer _offscreenFrameBuffer;
@@ -45,7 +46,7 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer, _vertexBuffer[4], _indexBuffer;
+	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer, _indexBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
@@ -76,7 +77,7 @@ class VulkanRenderer : public Renderer
 
 	void CompileShaders();
 	void LoadModel(std::string filename);
-	void CreateGeometryBuffer();
+	void CreateGeometryData();
 	void CreateOffscreenFrameBuffer();
 	void CreateForwardRenderer();
 	void CreateUniformBuffers();
@@ -85,9 +86,12 @@ class VulkanRenderer : public Renderer
 	void CreateGraphicsPipelines();
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
+	void CreateFrameGraphResources();
 	void CreateFrameGraphNodes();
 	void UpdateLights();
 	void CleanUp();
+	template <typename T>
+	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()) }
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);
