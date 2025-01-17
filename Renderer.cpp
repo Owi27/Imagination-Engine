@@ -977,38 +977,6 @@ void VulkanRenderer::CreateFrameGraphResources()
 
 	//buffers
 	{
-		FrameGraphBufferResource vertexBuffers;
-		{
-			vertexBuffers.name = "Vertex Buffers";
-			CreateGeometryData();
-			vertexBuffers.buffers.resize(4);
-			//position
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[0].buffer, &vertexBuffers.buffers[0].memory);
-			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[0].memory, _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
-			//normal
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[1].buffer, &vertexBuffers.buffers[1].memory);
-			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[1].memory, _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
-			//texcoord
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * _geometryData.texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[2].buffer, &vertexBuffers.buffers[2].memory);
-			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[2].memory, _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
-			//tangent
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * _geometryData.tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[3].buffer, &vertexBuffers.buffers[3].memory);
-			GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[3].memory, _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
-
-			vertexBuffers.prepared = true;
-		}
-		_frameGraph->AddResource(vertexBuffers.name, &vertexBuffers);
-
-		FrameGraphBufferResource indexBuffer;
-		{
-			indexBuffer.name = "Index Buffer";
-			indexBuffer.buffers.resize(1);
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_indexBuffer.buffer, &_indexBuffer.memory);
-			GvkHelper::write_to_buffer(_device, _indexBuffer.memory, _geometryData.indices.data(), sizeof(unsigned int) * _geometryData.indices.size());
-
-			indexBuffer.prepared = true;
-		}
-		_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
 
 		FrameGraphBufferResource offscreenDescriptorSet;
 		{
@@ -1016,15 +984,16 @@ void VulkanRenderer::CreateFrameGraphResources()
 			offscreenDescriptorSet.buffers.resize(1);
 			_vlk.GetAspectRatio(_aspect);
 			UniformBufferOffscreen data;
-
-			data.world = GW::MATH::GIdentityMatrixF;
-			GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, data.view);
-			GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
+			{
+				data.world = GW::MATH::GIdentityMatrixF;
+				GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, data.view);
+				GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
+			}
 
 			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &offscreenDescriptorSet.buffers[0].buffer, &offscreenDescriptorSet.buffers[0].memory);
-			GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &data, sizeof(UniformBufferOffscreen));
+			GvkHelper::write_to_buffer(_device, offscreenDescriptorSet.buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
 
-
+			offscreenDescriptorSet.prepared = true;
 		}
 		_frameGraph->AddResource(offscreenDescriptorSet.name, &offscreenDescriptorSet);
 
@@ -1033,6 +1002,53 @@ void VulkanRenderer::CreateFrameGraphResources()
 
 void VulkanRenderer::CreateFrameGraphNodes()
 {
+	FrameGraphNode offscreenBuffers;
+	{
+		offscreenBuffers.name = "Offscreen Buffers";
+		offscreenBuffers.outputResources = { "Vertex Buffers", "Index Buffer" };
+		offscreenBuffers.Setup = [&]()
+			{
+				FrameGraphBufferResource vertexBuffers;
+				{
+					vertexBuffers.parent = offscreenBuffers.name;
+					vertexBuffers.name = offscreenBuffers.outputResources[0];
+					CreateGeometryData();
+					vertexBuffers.buffers.resize(4);
+					//position
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[0].buffer, &vertexBuffers.buffers[0].memory);
+					GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[0].memory, _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
+					//normal
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec3) * _geometryData.normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[1].buffer, &vertexBuffers.buffers[1].memory);
+					GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[1].memory, _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
+					//texcoord
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec2) * _geometryData.texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[2].buffer, &vertexBuffers.buffers[2].memory);
+					GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[2].memory, _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
+					//tangent
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(vec4) * _geometryData.tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexBuffers.buffers[3].buffer, &vertexBuffers.buffers[3].memory);
+					GvkHelper::write_to_buffer(_device, vertexBuffers.buffers[3].memory, _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
+				}
+				_frameGraph->AddResource(vertexBuffers.name, &vertexBuffers);
+
+				FrameGraphBufferResource indexBuffer;
+				{
+					indexBuffer.parent = offscreenBuffers.name;
+					indexBuffer.name = offscreenBuffers.outputResources[1];
+					indexBuffer.buffers.resize(1);
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(unsigned int) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_indexBuffer.buffer, &_indexBuffer.memory);
+					GvkHelper::write_to_buffer(_device, _indexBuffer.memory, _geometryData.indices.data(), sizeof(unsigned int) * _geometryData.indices.size());
+				}
+				_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
+			};
+		offscreenBuffers.Execute = [&](VkCommandBuffer commandBuffer)
+			{
+				for (auto out : offscreenBuffers.outputResources)
+				{
+					_frameGraph->GetResource(out)->prepared = true;
+				}
+			};
+	}
+	_frameGraph->AddNode(offscreenBuffers);
+
 	FrameGraphNode offscreenPass;
 	{
 		offscreenPass.name = "Offscreen Pass";
@@ -1041,11 +1057,11 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		offscreenPass.frameBuffer.setupFrameBuffer = true;
 		offscreenPass.Setup = [&]()
 			{
-
 				FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb;
 				{
 					//Gbuffer Position
 					gBufferPos.name = offscreenPass.outputResources[0];
+					gBufferPos.parent = offscreenPass.name;
 					gBufferPos.extent = { _width, _height, 1 };
 					gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 					GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.memory);
@@ -1053,6 +1069,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					//Gbuffer Normal
 					gBufferNrm.name = offscreenPass.outputResources[1];
+					gBufferNrm.parent = offscreenPass.name;
 					gBufferNrm.extent = { _width, _height, 1 };
 					gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 					GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.memory);
@@ -1060,6 +1077,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					//Gbuffer Albedo
 					gBufferAlb.name = offscreenPass.outputResources[2];
+					gBufferAlb.parent = offscreenPass.name;
 					gBufferAlb.extent = { _width, _height, 1 };
 					gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
 					GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.memory);
@@ -1194,7 +1212,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
 			{
 				//assert that input resources are prepared
-				for (auto& input : offscreenPass.inputResources) assert(_frameGraph->GetResource(input)->prepared);
+				Debug::CheckInputResources(*_frameGraph, offscreenPass);
 
 				VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 				if (!_offscreenSemaphore) vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);

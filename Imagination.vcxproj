@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
+    <ClInclude Include="DEBUG.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="Gateware\Gateware.h" />
     <ClInclude Include="Material.h" />

@@ -48,3 +48,5 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 #include "Structs.h"
 #include "Components.h"
 #include "FrameGraph.h"
+
+#include "DEBUG.h"

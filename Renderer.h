@@ -38,7 +38,7 @@ class VulkanRenderer : public Renderer
 
 	//structs
 	FrameBuffer _offscreenFrameBuffer;
-	UniformBufferOffscreen _offscreenData;
+	//UniformBufferOffscreen _offscreenData;
 	UniformBufferFinal _finalData;
 
 	//vulkan
@@ -46,7 +46,7 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _offscreenUniformBuffer, _finalUniformBuffer, _geometryBuffer, _indexBuffer;
+	Buffer _finalUniformBuffer, _geometryBuffer, _indexBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
