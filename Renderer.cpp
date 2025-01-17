@@ -988,18 +988,23 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		vertexBuffers.name = "Vertex Buffers";
 		vertexBuffers.buffers = { _vertexBuffer[0], _vertexBuffer[1],_vertexBuffer[2],_vertexBuffer[3] };
 	}
+	_frameGraph->AddResource(vertexBuffers.name, &vertexBuffers);
+
 
 	FrameGraphBufferResource indexBuffer;
 	{
-		indexBuffer.buffers = { _indexBuffer };
 		indexBuffer.name = "Index Buffer";
+		indexBuffer.buffers = { _indexBuffer };
 	}
+	_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
 
 	FrameGraphBufferResource offscreenDescriptorSet;
 	{
 		offscreenDescriptorSet.name = "Offscreen Descriptor Set";
 		offscreenDescriptorSet.buffers = { _offscreenUniformBuffer };
 	}
+	_frameGraph->AddResource(offscreenDescriptorSet.name, &offscreenDescriptorSet);
+
 
 	FrameGraphImageResource depthBuffer;
 	{
@@ -1012,20 +1017,213 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			VK_FORMAT_D16_UNORM
 		};
 
-		depthBuffer.extent = { _width, _height };
 		depthBuffer.name = "Depth Buffer";
-
+		depthBuffer.extent = { _width, _height, 1 };
 		//set format
 		GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
+		GvkHelper::create_image(_physicalDevice, _device, depthBuffer.extent, 1, VK_SAMPLE_COUNT_1_BIT, depthBuffer.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depthBuffer.image.image, &depthBuffer.image.memory);
+		GvkHelper::create_image_view(_device, depthBuffer.image.image, depthBuffer.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &depthBuffer.image.imageView);
 	}
+	_frameGraph->AddResource(depthBuffer.name, &depthBuffer);
 
 	FrameGraphNode offscreenPass;
 	{
 		offscreenPass.name = "Offscreen Pass";
-		offscreenPass.inputResources = { "Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set" };
-		offscreenPass.outputResources = { "Position", "Normal", "Albedo" };
+		offscreenPass.inputResources = { "Depth Buffer", "Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set" };
+		offscreenPass.outputResources = { "GBuffer: Position", "GBuffer: Normal", "GBuffer: Albedo" };
+		offscreenPass.frameBuffer.setupFrameBuffer = true;
+		offscreenPass.Setup = [&]()
+			{
+				auto CreateAttachment = [this](VkFormat format, VkImageUsageFlagBits usage, FrameBufferTexture* frameBufferTexture)
+					{
+						VkImageAspectFlags aspectMask = 0;
+						VkImageLayout imageLayout;
+
+						frameBufferTexture->format = format;
+
+						if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+						{
+							aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+							imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						}
+
+						if (usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+						{
+							aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+							if (format >= VK_FORMAT_D16_UNORM_S8_UINT) aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+
+							imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						}
+
+						assert(aspectMask > 0);
+
+					};
+
+				FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb;
+				{
+					//Gbuffer Position
+					gBufferPos.name = offscreenPass.outputResources[0];
+					gBufferPos.extent = { _width, _height, 1 };
+					gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+					GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.memory);
+					GvkHelper::create_image_view(_device, gBufferPos.image.image, gBufferPos.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferPos.image.imageView);
+
+					//Gbuffer Normal
+					gBufferNrm.name = offscreenPass.outputResources[1];
+					gBufferNrm.extent = { _width, _height, 1 };
+					gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+					GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.memory);
+					GvkHelper::create_image_view(_device, gBufferNrm.image.image, gBufferNrm.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferNrm.image.imageView);
+
+					//Gbuffer Albedo
+					gBufferAlb.name = offscreenPass.outputResources[2];
+					gBufferAlb.extent = { _width, _height, 1 };
+					gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
+					GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.memory);
+					GvkHelper::create_image_view(_device, gBufferAlb.image.image, gBufferAlb.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferAlb.image.imageView);
+
+					_frameGraph->AddResource(gBufferPos.name, &gBufferPos);
+					_frameGraph->AddResource(gBufferNrm.name, &gBufferNrm);
+					_frameGraph->AddResource(gBufferAlb.name, &gBufferAlb);
+
+					//FrameGraphImageResource* depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
+
+					std::array<VkAttachmentDescription, 4> attachmentDescription;
+
+					for (size_t i = 0; i < 4; i++)
+					{
+						attachmentDescription[i].flags = 0;
+						attachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
+						attachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+						attachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+						attachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+						attachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+						if (i == 3)
+						{
+							attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+							attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						}
+						else
+						{
+							attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+							attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						}
+					}
+
+					FrameGraphImageResource* posResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[0])),
+						*nrmResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[1])), 
+						*albResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[3])), 
+						*depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
+
+					//formats
+					attachmentDescription[0].format = posResource->format;
+					attachmentDescription[1].format = nrmResource->format;
+					attachmentDescription[2].format = albResource->format;
+					attachmentDescription[3].format = depthResource->format;
+
+					std::vector<VkAttachmentReference> colorAttachmentReference;
+					colorAttachmentReference.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+					colorAttachmentReference.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+					colorAttachmentReference.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+
+					VkAttachmentReference depthAttachmentReference;
+					depthAttachmentReference.attachment = 3;
+					depthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+					VkSubpassDescription subpassDescription;
+					subpassDescription.flags = 0;
+					subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+					subpassDescription.pColorAttachments = colorAttachmentReference.data();
+					subpassDescription.colorAttachmentCount = colorAttachmentReference.size();
+					subpassDescription.pDepthStencilAttachment = &depthAttachmentReference;
+					subpassDescription.pInputAttachments = nullptr;
+					subpassDescription.inputAttachmentCount = 0;
+					subpassDescription.pPreserveAttachments = nullptr;
+					subpassDescription.preserveAttachmentCount = 0;
+					subpassDescription.pResolveAttachments = nullptr;
+
+					// Use subpass dependencies for attachment layout transitions
+					std::array<VkSubpassDependency, 2> subpassDependencies;
+
+					subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+					subpassDependencies[0].dstSubpass = 0;
+					subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+					subpassDependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					subpassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+					subpassDependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+					subpassDependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+					subpassDependencies[1].srcSubpass = 0;
+					subpassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+					subpassDependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					subpassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+					subpassDependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+					subpassDependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+					subpassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+					VkRenderPassCreateInfo renderPassCreateInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+					renderPassCreateInfo.pAttachments = attachmentDescription.data();
+					renderPassCreateInfo.attachmentCount = attachmentDescription.size();
+					renderPassCreateInfo.subpassCount = 1;
+					renderPassCreateInfo.pSubpasses = &subpassDescription;
+					renderPassCreateInfo.dependencyCount = subpassDependencies.size();
+					renderPassCreateInfo.pDependencies = subpassDependencies.data();
+
+
+					std::cout << '\n';
+				}
+
+				
+				vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_offscreenFrameBuffer.renderPass);
+
+				std::array<VkImageView, 4> imageViews;
+				imageViews[0] = _offscreenFrameBuffer.position.texture.texImageView;
+				imageViews[1] = _offscreenFrameBuffer.normal.texture.texImageView;
+				imageViews[2] = _offscreenFrameBuffer.albedo.texture.texImageView;
+				imageViews[3] = _offscreenFrameBuffer.depth.texture.texImageView;
+
+				VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+				frameBufferCreateInfo.renderPass = _offscreenFrameBuffer.renderPass;
+				frameBufferCreateInfo.pAttachments = imageViews.data();
+				frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
+				frameBufferCreateInfo.width = _width;
+				frameBufferCreateInfo.height = _height;
+				frameBufferCreateInfo.layers = 1;
+
+				vkCreateFramebuffer(_device, &frameBufferCreateInfo, nullptr, &_offscreenFrameBuffer.frameBuffer);
+
+				//create sampler
+				VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+				samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+				samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+				samplerCreateInfo.maxAnisotropy = 1.f;
+				samplerCreateInfo.maxLod = 1.f;
+				samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+				samplerCreateInfo.minLod = 0;
+				samplerCreateInfo.mipLodBias = 0;
+				samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+				vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
+
+
+
+
+
+
+
+			};
+
+		offscreenPass.Setup();
 		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
 			{
+				//assert that input resources are prepared
+				for (auto& input : offscreenPass.inputResources) assert(_frameGraph->GetResource(input)->prepared);
+
 				VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 				if (!_offscreenSemaphore) vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
 
@@ -1088,10 +1286,6 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			};
 	}
 
-	_frameGraph->AddResource(vertexBuffers.name, vertexBuffers);
-	_frameGraph->AddResource(indexBuffer.name, indexBuffer);
-	_frameGraph->AddResource(offscreenDescriptorSet.name, offscreenDescriptorSet);
-	_frameGraph->AddResource(depthBuffer.name, depthBuffer);
 	_frameGraph->AddNode(offscreenPass);
 }
 

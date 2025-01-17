@@ -35,6 +35,7 @@ struct FrameBuffer
 
 struct FrameBufferT
 {
+	bool setupFrameBuffer = false;
 	VkRenderPass renderPass;
 	VkFramebuffer frameBuffer;
 	VkPipelineBindPoint bindPoint;
