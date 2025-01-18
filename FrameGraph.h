@@ -19,6 +19,7 @@ struct FrameGraphImageResource : FrameGraphResource
 
 struct FrameGraphBufferResource : FrameGraphResource
 {
+	std::vector<void*> data;
 	std::vector<Buffer> buffers;
 };
 
@@ -26,6 +27,7 @@ struct FrameGraphNode
 {
 	std::string name; //node name
 	bool shouldExecute = false;
+	bool isSetupComplete = false;
 	FrameBufferT frameBuffer;
 	std::vector<std::string> inputResources;
 	std::vector<std::string> outputResources;
@@ -35,16 +37,12 @@ struct FrameGraphNode
 
 class FrameGraph
 {
-	VkDevice _device;
-	VkPhysicalDevice _physicalDevice;
 	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
 	std::unordered_map<std::string, FrameGraphResource*> _resources;
 
 	FrameGraph() {};
 	~FrameGraph() {};
-	// Deleting the copy constructor to prevent copies
-	FrameGraph(const FrameGraph& frameGraph) = delete;
 
 public:
 
@@ -76,12 +74,10 @@ public:
 			// Ensure input resources are prepared here if needed
 			if (node.shouldExecute)
 			{
+				if (!node.isSetupComplete) node.Setup();
 
 				node.Execute(commandBuffer);
 			}
 		}
 	}
-
-	void SetDevice(VkDevice& device) { _device = device; }
-	void SetPhysicalDevice(VkPhysicalDevice physicalDevice) { _physicalDevice = physicalDevice; }
 };

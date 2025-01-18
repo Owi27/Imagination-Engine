@@ -86,10 +86,10 @@ class VulkanRenderer : public Renderer
 	void CreateGraphicsPipelines();
 	void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
-	void CreateFrameGraphResources();
 	void CreateFrameGraphNodes();
 	void UpdateLights();
 	void CleanUp();
+	void Prepare(FrameGraphNode node);
 	template <typename T>
 	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()) }
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);

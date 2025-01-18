@@ -35,10 +35,14 @@ struct FrameBuffer
 
 struct FrameBufferT
 {
-	bool setupFrameBuffer = false;
 	VkRenderPass renderPass;
 	VkFramebuffer frameBuffer;
 	VkPipelineBindPoint bindPoint;
+	VkPipeline pipeline;
+	VkPipelineLayout pipelineLayout;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSetLayout descriptorSetLayout;
+	std::vector<VkDescriptorSet> descriptorSets;
 	std::vector<VkAttachmentReference> attachmentReferences;
 };
 

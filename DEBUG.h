@@ -16,7 +16,7 @@ namespace Debug
 				}
 				else
 				{
-					cout << r->name << " was not prepared. Please execute " << r->parent << " first";
+					cout << r->name << " was not prepared. Please execute " << r->parent << " first\n";
 				}
 			}
 		}

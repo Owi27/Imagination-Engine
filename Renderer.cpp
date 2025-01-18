@@ -950,56 +950,6 @@ void VulkanRenderer::CreateDeferredCommandBuffers()
 	vkEndCommandBuffer(_offscreenCommandBuffer);
 }
 
-void VulkanRenderer::CreateFrameGraphResources()
-{
-	//images
-	{
-		FrameGraphImageResource depthBuffer;
-		{
-			std::vector<VkFormat> formats =
-			{
-				VK_FORMAT_D32_SFLOAT_S8_UINT,
-				VK_FORMAT_D32_SFLOAT,
-				VK_FORMAT_D24_UNORM_S8_UINT,
-				VK_FORMAT_D16_UNORM_S8_UINT,
-				VK_FORMAT_D16_UNORM
-			};
-
-			depthBuffer.name = "Depth Buffer";
-			depthBuffer.extent = { _width, _height, 1 };
-			//set format
-			GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthBuffer.format);
-			GvkHelper::create_image(_physicalDevice, _device, depthBuffer.extent, 1, VK_SAMPLE_COUNT_1_BIT, depthBuffer.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depthBuffer.image.image, &depthBuffer.image.memory);
-			GvkHelper::create_image_view(_device, depthBuffer.image.image, depthBuffer.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &depthBuffer.image.imageView);
-		}
-		_frameGraph->AddResource(depthBuffer.name, &depthBuffer);
-	}
-
-	//buffers
-	{
-
-		FrameGraphBufferResource offscreenDescriptorSet;
-		{
-			offscreenDescriptorSet.name = "Offscreen Descriptor Set";
-			offscreenDescriptorSet.buffers.resize(1);
-			_vlk.GetAspectRatio(_aspect);
-			UniformBufferOffscreen data;
-			{
-				data.world = GW::MATH::GIdentityMatrixF;
-				GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, data.view);
-				GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
-			}
-
-			GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &offscreenDescriptorSet.buffers[0].buffer, &offscreenDescriptorSet.buffers[0].memory);
-			GvkHelper::write_to_buffer(_device, offscreenDescriptorSet.buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
-
-			offscreenDescriptorSet.prepared = true;
-		}
-		_frameGraph->AddResource(offscreenDescriptorSet.name, &offscreenDescriptorSet);
-
-	}
-}
-
 void VulkanRenderer::CreateFrameGraphNodes()
 {
 	FrameGraphNode offscreenBuffers;
@@ -1038,54 +988,97 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					GvkHelper::write_to_buffer(_device, _indexBuffer.memory, _geometryData.indices.data(), sizeof(unsigned int) * _geometryData.indices.size());
 				}
 				_frameGraph->AddResource(indexBuffer.name, &indexBuffer);
+
+				FrameGraphBufferResource offscreenUniformBuffer;
+				{
+					offscreenUniformBuffer.parent = offscreenBuffers.name;
+					offscreenUniformBuffer.name = "Offscreen UB";
+					offscreenUniformBuffer.buffers.resize(1);
+					_vlk.GetAspectRatio(_aspect);
+					UniformBufferOffscreen data;
+					{
+						data.world = GW::MATH::GIdentityMatrixF;
+						GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, data.view);
+						GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
+					}
+
+					offscreenUniformBuffer.data.push_back(static_cast<void*>(&data));
+
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &offscreenUniformBuffer.buffers[0].buffer, &offscreenUniformBuffer.buffers[0].memory);
+					GvkHelper::write_to_buffer(_device, offscreenUniformBuffer.buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
+				}
+				_frameGraph->AddResource(offscreenUniformBuffer.name, &offscreenUniformBuffer);
+
+				offscreenBuffers.isSetupComplete = true;
 			};
 		offscreenBuffers.Execute = [&](VkCommandBuffer commandBuffer)
 			{
-				for (auto out : offscreenBuffers.outputResources)
-				{
-					_frameGraph->GetResource(out)->prepared = true;
-				}
+				Prepare(offscreenBuffers);
 			};
+		offscreenBuffers.shouldExecute = true;
 	}
 	_frameGraph->AddNode(offscreenBuffers);
 
 	FrameGraphNode offscreenPass;
 	{
 		offscreenPass.name = "Offscreen Pass";
-		offscreenPass.inputResources = { "Depth Buffer", "Vertex Buffers", "Index Buffer", "Offscreen Descriptor Set" };
-		offscreenPass.outputResources = { "GBuffer: Position", "GBuffer: Normal", "GBuffer: Albedo" };
-		offscreenPass.frameBuffer.setupFrameBuffer = true;
+		offscreenPass.inputResources = { "Vertex Buffers", "Index Buffer", "Offscreen UB" };
+		offscreenPass.outputResources = { "GBuffer: Position", "GBuffer: Normal", "GBuffer: Albedo", "Depth Buffer" };
 		offscreenPass.Setup = [&]()
 			{
-				FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb;
+				//assert that input resources are prepared
+				Debug::CheckInputResources(*_frameGraph, offscreenPass);
+
+				//FRAMEBUFFER
 				{
-					//Gbuffer Position
-					gBufferPos.name = offscreenPass.outputResources[0];
-					gBufferPos.parent = offscreenPass.name;
-					gBufferPos.extent = { _width, _height, 1 };
-					gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-					GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.memory);
-					GvkHelper::create_image_view(_device, gBufferPos.image.image, gBufferPos.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferPos.image.imageView);
+					FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb, depth;
+					{
+						//Gbuffer Position
+						gBufferPos.name = offscreenPass.outputResources[0];
+						gBufferPos.parent = offscreenPass.name;
+						gBufferPos.extent = { _width, _height, 1 };
+						gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+						GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.memory);
+						GvkHelper::create_image_view(_device, gBufferPos.image.image, gBufferPos.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferPos.image.imageView);
 
-					//Gbuffer Normal
-					gBufferNrm.name = offscreenPass.outputResources[1];
-					gBufferNrm.parent = offscreenPass.name;
-					gBufferNrm.extent = { _width, _height, 1 };
-					gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-					GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.memory);
-					GvkHelper::create_image_view(_device, gBufferNrm.image.image, gBufferNrm.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferNrm.image.imageView);
+						//Gbuffer Normal
+						gBufferNrm.name = offscreenPass.outputResources[1];
+						gBufferNrm.parent = offscreenPass.name;
+						gBufferNrm.extent = { _width, _height, 1 };
+						gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+						GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.memory);
+						GvkHelper::create_image_view(_device, gBufferNrm.image.image, gBufferNrm.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferNrm.image.imageView);
 
-					//Gbuffer Albedo
-					gBufferAlb.name = offscreenPass.outputResources[2];
-					gBufferAlb.parent = offscreenPass.name;
-					gBufferAlb.extent = { _width, _height, 1 };
-					gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
-					GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.memory);
-					GvkHelper::create_image_view(_device, gBufferAlb.image.image, gBufferAlb.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferAlb.image.imageView);
+						//Gbuffer Albedo
+						gBufferAlb.name = offscreenPass.outputResources[2];
+						gBufferAlb.parent = offscreenPass.name;
+						gBufferAlb.extent = { _width, _height, 1 };
+						gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
+						GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.memory);
+						GvkHelper::create_image_view(_device, gBufferAlb.image.image, gBufferAlb.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferAlb.image.imageView);
+
+						std::vector<VkFormat> formats =
+						{
+							VK_FORMAT_D32_SFLOAT_S8_UINT,
+							VK_FORMAT_D32_SFLOAT,
+							VK_FORMAT_D24_UNORM_S8_UINT,
+							VK_FORMAT_D16_UNORM_S8_UINT,
+							VK_FORMAT_D16_UNORM
+						};
+
+						depth.name = offscreenPass.outputResources[3];
+						depth.parent = offscreenPass.name;
+						depth.extent = { _width, _height, 1 };
+						//set format
+						GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depth.format);
+						GvkHelper::create_image(_physicalDevice, _device, depth.extent, 1, VK_SAMPLE_COUNT_1_BIT, depth.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depth.image.image, &depth.image.memory);
+						GvkHelper::create_image_view(_device, depth.image.image, depth.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &depth.image.imageView);
+					}
 
 					_frameGraph->AddResource(gBufferPos.name, &gBufferPos);
 					_frameGraph->AddResource(gBufferNrm.name, &gBufferNrm);
 					_frameGraph->AddResource(gBufferAlb.name, &gBufferAlb);
+					_frameGraph->AddResource(depth.name, &depth);
 
 					//FrameGraphImageResource* depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
 
@@ -1113,9 +1106,9 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					}
 
 					FrameGraphImageResource* posResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[0])),
-						*nrmResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[1])), 
-						*albResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[3])), 
-						*depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
+						* nrmResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[1])),
+						* albResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[2])),
+						* depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.outputResources[3]));
 
 					//formats
 					attachmentDescription[0].format = posResource->format;
@@ -1206,13 +1199,22 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
 				}
-			};
 
-		offscreenPass.Setup();
+				offscreenPass.isSetupComplete = true;
+			};
 		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
 			{
-				//assert that input resources are prepared
-				Debug::CheckInputResources(*_frameGraph, offscreenPass);
+				FrameGraphBufferResource* vBuffer = dynamic_cast<FrameGraphBufferResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
+				FrameGraphBufferResource* iBuffer = dynamic_cast<FrameGraphBufferResource*>(_frameGraph->GetResource(offscreenPass.inputResources[1]));
+				FrameGraphBufferResource* offscreenUB = dynamic_cast<FrameGraphBufferResource*>(_frameGraph->GetResource(offscreenPass.inputResources[2]));
+				auto* data = static_cast<UniformBufferOffscreen*>(offscreenUB->data[0]);
+				auto now = std::chrono::steady_clock::now();
+				_deltaTime = now - _lastUpdate;
+				_lastUpdate = now;
+
+				data->deltaTime = _deltaTime.count();
+				GvkHelper::write_to_buffer(_device, offscreenUB->buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
+
 
 				VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 				if (!_offscreenSemaphore) vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
@@ -1227,8 +1229,8 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				clearValues[3].depthStencil = { 1.0f, 0 };
 
 				VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-				renderPassBeginInfo.renderPass = _offscreenFrameBuffer.renderPass;
-				renderPassBeginInfo.framebuffer = _offscreenFrameBuffer.frameBuffer;
+				renderPassBeginInfo.renderPass = offscreenPass.frameBuffer.renderPass;
+				renderPassBeginInfo.framebuffer = offscreenPass.frameBuffer.frameBuffer;
 				renderPassBeginInfo.renderArea.extent.width = _width;
 				renderPassBeginInfo.renderArea.extent.height = _height;
 				renderPassBeginInfo.clearValueCount = clearValues.size();
@@ -1247,17 +1249,17 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_offscreenDescriptorSet, 0, nullptr);
 
-				std::vector<VkBuffer> vertexBuffers =
+				std::array<VkBuffer, 4> vertexBuffers =
 				{
-					_vertexBuffer[0].buffer,
-					_vertexBuffer[1].buffer,
-					_vertexBuffer[2].buffer,
-					_vertexBuffer[3].buffer,
+					vBuffer->buffers[0].buffer,
+					vBuffer->buffers[1].buffer,
+					vBuffer->buffers[2].buffer,
+					vBuffer->buffers[3].buffer,
 				};
 
 				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
 				vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-				vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+				vkCmdBindIndexBuffer(commandBuffer, iBuffer->buffers[0].buffer, 0, VK_INDEX_TYPE_UINT32);
 
 				int i = 0;
 				for (auto& node : _model.nodes)
@@ -1265,7 +1267,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					auto& mesh = _model.meshes[node.mesh];
 					for (auto& prim : mesh.primitives)
 					{
-						vkCmdPushConstants(commandBuffer, _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
+						vkCmdPushConstants(commandBuffer, offscreenPass.frameBuffer.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
 						vkCmdDrawIndexed(commandBuffer, _drawInfo[i].idxCount, 1, _drawInfo[i].firstIdx, _drawInfo[i].vertexOffset, 0);
 						i++;
 					}
@@ -1273,9 +1275,11 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 				vkCmdEndRenderPass(commandBuffer);
 				vkEndCommandBuffer(commandBuffer);
-			};
-	}
 
+				Prepare(offscreenPass);
+			};
+		offscreenPass.shouldExecute = false;
+	};
 	_frameGraph->AddNode(offscreenPass);
 }
 
@@ -1293,6 +1297,14 @@ void VulkanRenderer::CleanUp()
 	vkDeviceWaitIdle(_device);
 
 
+}
+
+void VulkanRenderer::Prepare(FrameGraphNode node)
+{
+	for (auto out : node.outputResources)
+	{
+		_frameGraph->GetResource(out)->prepared = true;
+	}
 }
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
@@ -1384,7 +1396,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 
 	CompileShaders();
 	LoadModel("Models/Shapes/Shapes.gltf");
-	CreateOffscreenFrameBuffer();
+	//CreateOffscreenFrameBuffer();
 	CreateUniformBuffers();
 	CreateDescriptorSets();
 	WriteDescriptorSets();
@@ -1419,12 +1431,7 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	auto now = std::chrono::steady_clock::now();
-	_deltaTime = now - _lastUpdate;
-	_lastUpdate = now;
 
-	_offscreenData.deltaTime = _deltaTime.count();
-	GvkHelper::write_to_buffer(_device, _offscreenUniformBuffer.memory, &_offscreenData, sizeof(UniformBufferOffscreen));
 
 	_finalData.view = _offscreenData.view.row4;
 	_finalData.viewProj = GW::MATH::GIdentityMatrixF * _offscreenData.view * _offscreenData.proj;
