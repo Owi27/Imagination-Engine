@@ -42,7 +42,8 @@ struct FrameBufferT
 	VkPipelineLayout pipelineLayout;
 	VkDescriptorPool descriptorPool;
 	VkDescriptorSetLayout descriptorSetLayout;
-	std::vector<VkDescriptorSet> descriptorSets;
+	VkDescriptorSet descriptorSet;
+	//std::vector<VkDescriptorSet> descriptorSets;
 	std::vector<VkAttachmentReference> attachmentReferences;
 };
 

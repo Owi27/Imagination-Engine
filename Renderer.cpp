@@ -366,7 +366,7 @@ void VulkanRenderer::CreateGeometryData()
 	}
 }
 
-void VulkanRenderer::CreateOffscreenFrameBuffer()
+/*void VulkanRenderer::CreateOffscreenFrameBuffer()
 {
 	auto CreateAttachment = [this](VkFormat format, VkImageUsageFlagBits usage, FrameBufferTexture* frameBufferTexture)
 		{
@@ -524,12 +524,13 @@ void VulkanRenderer::CreateOffscreenFrameBuffer()
 
 	vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
 }
+*/
 
 void VulkanRenderer::CreateForwardRenderer()
 {
 }
 
-void VulkanRenderer::CreateUniformBuffers()
+/*void VulkanRenderer::CreateUniformBuffers()
 {
 
 	//final
@@ -552,6 +553,7 @@ void VulkanRenderer::CreateUniformBuffers()
 	GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &_finalUniformBuffer.buffer, &_finalUniformBuffer.memory);
 	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 }
+*/
 
 void VulkanRenderer::CreateDescriptorSets()
 {
@@ -829,7 +831,7 @@ void VulkanRenderer::CreateGraphicsPipelines()
 	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &_offscreenPipeline);
 }
 
-void VulkanRenderer::CreateCommandBuffers()
+/*void VulkanRenderer::CreateCommandBuffers()
 {
 	_vlk.GetSwapchainImageCount(_swapchainImageCount);
 	_drawCommandBuffers.resize(_swapchainImageCount);
@@ -876,6 +878,7 @@ void VulkanRenderer::CreateCommandBuffers()
 		vkEndCommandBuffer(_drawCommandBuffers[i]);
 	}
 }
+*/
 
 void VulkanRenderer::CreateDeferredCommandBuffers()
 {
@@ -1028,6 +1031,8 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			{
 				//assert that input resources are prepared
 				Debug::CheckInputResources(*_frameGraph, offscreenPass);
+
+				FrameGraphBufferResource* offscreenUB = dynamic_cast<FrameGraphBufferResource*>(_frameGraph->GetResource(offscreenPass.inputResources[2]));
 
 				//FRAMEBUFFER
 				{
@@ -1200,6 +1205,56 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
 				}
 
+				//DESCRIPTOR SET
+				{
+					std::vector<VkDescriptorPoolSize> descriptorPoolSizes =
+					{
+						{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1}
+					};
+
+					VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+					descriptorPoolCreateInfo.maxSets = 1;
+					descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizes.size();
+					descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
+
+					vkCreateDescriptorPool(_device, &descriptorPoolCreateInfo, nullptr, &offscreenPass.frameBuffer.descriptorPool);
+
+					std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings =
+					{
+						{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr}
+					};
+
+					VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+					descriptorSetLayoutCreateInfo.bindingCount = descriptorSetLayoutBindings.size();
+					descriptorSetLayoutCreateInfo.pBindings = descriptorSetLayoutBindings.data();
+
+					vkCreateDescriptorSetLayout(_device, &descriptorSetLayoutCreateInfo, nullptr, &offscreenPass.frameBuffer.descriptorSetLayout);
+
+					VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+					descriptorSetAllocateInfo.descriptorPool = offscreenPass.frameBuffer.descriptorPool;
+					descriptorSetAllocateInfo.descriptorSetCount = 1;
+					descriptorSetAllocateInfo.pSetLayouts = &offscreenPass.frameBuffer.descriptorSetLayout;
+
+					vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &offscreenPass.frameBuffer.descriptorSet);
+
+					VkDescriptorBufferInfo descriptorBufferInfo;
+					descriptorBufferInfo.buffer = offscreenUB->buffers[0].buffer;
+					descriptorBufferInfo.offset = 0;
+					descriptorBufferInfo.range = sizeof(UniformBufferOffscreen);
+
+					std::vector<VkWriteDescriptorSet> offscreenWriteDescriptorSets =
+					{
+						MakeWrite(_offscreenDescriptorSet, 0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &descriptorBufferInfo)
+					};
+
+					vkUpdateDescriptorSets(_device, offscreenWriteDescriptorSets.size(), offscreenWriteDescriptorSets.data(), 0, nullptr);
+				}
+
+				//GRAPHICS PIPELINE
+				{
+
+				}
+
 				offscreenPass.isSetupComplete = true;
 			};
 		offscreenPass.Execute = [&](VkCommandBuffer commandBuffer)
@@ -1258,7 +1313,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				};
 
 				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
-				vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+				vkCmdBindVertexBuffers(commandBuffer, 0, vBuffer->buffers.size(), vBuffer->buffers.data(), offsets.data());
 				vkCmdBindIndexBuffer(commandBuffer, iBuffer->buffers[0].buffer, 0, VK_INDEX_TYPE_UINT32);
 
 				int i = 0;
@@ -1281,15 +1336,129 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		offscreenPass.shouldExecute = false;
 	};
 	_frameGraph->AddNode(offscreenPass);
+
+	FrameGraphNode compositionBuffers;
+	{
+		compositionBuffers.name = "Composition Buffers";
+		compositionBuffers.inputResources = { "Offscreen UB" };
+		compositionBuffers.outputResources = { "Composition UB" };
+		compositionBuffers.Setup = [&]()
+			{
+				//assert that input resources are prepared
+				Debug::CheckInputResources(*_frameGraph, compositionBuffers);
+
+				FrameGraphBufferResource compositionUB;
+				{
+					compositionUB.parent = compositionBuffers.name;
+					compositionUB.name = compositionBuffers.outputResources[0];
+					compositionUB.buffers.resize(1);
+
+					UniformBufferFinal data;
+					{
+						FrameGraphBufferResource* offscreenUB = dynamic_cast<FrameGraphBufferResource*>(_frameGraph->GetResource(offscreenPass.inputResources[2]));
+						auto* offscreenData = static_cast<UniformBufferOffscreen*>(offscreenUB->data[0]);
+
+						data.view = offscreenData->view.row4;
+
+						std::default_random_engine gen(777);
+						std::uniform_real_distribution<float> distribution(0.f, 1.f);
+						std::uniform_real_distribution<float> distribution2(-3.f, 3.f);
+
+						for (size_t i = 0; i < 10; i++)
+						{
+							data.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
+							data.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+							data.lights[i].radius = 5.f;
+						}
+					}
+					compositionUB.data.push_back(static_cast<void*>(&data));
+
+					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &compositionUB.buffers[0].buffer, &compositionUB.buffers[0].memory);
+					GvkHelper::write_to_buffer(_device, compositionUB.buffers[0].memory, &data, sizeof(UniformBufferFinal));
+				}
+				_frameGraph->AddResource(compositionUB.name, &compositionUB);
+
+				compositionBuffers.isSetupComplete = true;
+			};
+		compositionBuffers.Execute = [&](VkCommandBuffer commandBuffer)
+			{
+				Prepare(compositionBuffers);
+			};
+		compositionBuffers.shouldExecute = false;
+	}
+	_frameGraph->AddNode(compositionBuffers);
+
+	FrameGraphNode compositionPass; //todo
+	{
+		compositionPass.name = "Composition Pass";
+		compositionPass.inputResources = { "Composition UB" };
+		compositionPass.outputResources = { "Composition Image" };
+		compositionPass.Setup = [&]()
+			{
+				//assert that input resources are prepared
+				Debug::CheckInputResources(*_frameGraph, compositionPass);
+
+				_vlk.GetRenderPass((void**)&compositionPass.frameBuffer.renderPass);
+
+				//DESCRIPTOR SET
+
+
+
+				compositionPass.isSetupComplete = true;
+			};
+		compositionPass.Execute = [&](VkCommandBuffer commandBuffer)
+			{
+				VkClearValue clearValues[2];
+				clearValues[0].color = { { 0.2f, 0.0f, 0.0f, 0.0f } };
+				clearValues[1].depthStencil = { 1.0f, 0 };
+
+				VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+				renderPassBeginInfo.renderPass = compositionPass.frameBuffer.renderPass;
+				renderPassBeginInfo.renderArea.offset.x = 0;
+				renderPassBeginInfo.renderArea.offset.y = 0;
+				renderPassBeginInfo.renderArea.extent.width = _width;
+				renderPassBeginInfo.renderArea.extent.height = _height;
+				renderPassBeginInfo.clearValueCount = 2;
+				renderPassBeginInfo.pClearValues = clearValues;
+
+				VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+
+				//for (size_t i = 0; i < _swapchainImageCount; i++)
+				//{
+					//_vlk.GetSwapchainFramebuffer(i, (void**)&renderPassBeginInfo.framebuffer);
+
+					vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+					vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+					VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+					VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+					vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+					vkCmdBindDescriptorSets(commandBuffer, compositionPass.frameBuffer.bindPoint, compositionPass.frameBuffer.pipelineLayout, 0, 1, &compositionPass.frameBuffer.descriptorSet, 0, nullptr);
+					vkCmdBindPipeline(commandBuffer, compositionPass.frameBuffer.bindPoint, compositionPass.frameBuffer.pipeline);
+					vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+					vkCmdEndRenderPass(commandBuffer);
+					vkEndCommandBuffer(commandBuffer);
+				//}
+
+
+				Prepare(compositionPass);
+			};
+		compositionPass.shouldExecute = false;
+	};
+	_frameGraph->AddNode(compositionPass);
+
 }
 
-void VulkanRenderer::UpdateLights()
-{
-	_finalData.lights[0].pos.y = sin(_deltaTime.count() * 360);
-	_finalData.lights[1].pos.y = sin(_deltaTime.count() * 360);
-	_finalData.lights[2].pos.y = sin(_deltaTime.count() * 360);
-	_finalData.lights[3].pos.y = sin(_deltaTime.count() * 360);
-}
+//void VulkanRenderer::UpdateLights()
+//{
+//	_finalData.lights[0].pos.y = sin(_deltaTime.count() * 360);
+//	_finalData.lights[1].pos.y = sin(_deltaTime.count() * 360);
+//	_finalData.lights[2].pos.y = sin(_deltaTime.count() * 360);
+//	_finalData.lights[3].pos.y = sin(_deltaTime.count() * 360);
+//}
 
 
 void VulkanRenderer::CleanUp()
@@ -1397,11 +1566,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	CompileShaders();
 	LoadModel("Models/Shapes/Shapes.gltf");
 	//CreateOffscreenFrameBuffer();
-	CreateUniformBuffers();
+	//CreateUniformBuffers();
 	CreateDescriptorSets();
 	WriteDescriptorSets();
 	CreateGraphicsPipelines();
-	CreateCommandBuffers();
+	//CreateCommandBuffers();
 	CreateFrameGraphNodes();
 	CreateDeferredCommandBuffers();
 
@@ -1432,10 +1601,13 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Render()
 {
 
+	VkCommandBuffer commandBuffer;
 
-	_finalData.view = _offscreenData.view.row4;
-	_finalData.viewProj = GW::MATH::GIdentityMatrixF * _offscreenData.view * _offscreenData.proj;
-	GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
+	_frameGraph->Execute(commandBuffer);
+
+	//_finalData.view = _offscreenData.view.row4;
+	//_finalData.viewProj = GW::MATH::GIdentityMatrixF * _offscreenData.view * _offscreenData.proj;
+	//GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
 
 	unsigned int currentBuffer;
 

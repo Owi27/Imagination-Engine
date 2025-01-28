@@ -37,16 +37,17 @@ class VulkanRenderer : public Renderer
 	GeometryData _geometryData;
 
 	//structs
-	FrameBuffer _offscreenFrameBuffer;
+	//FrameBuffer _offscreenFrameBuffer;
 	//UniformBufferOffscreen _offscreenData;
-	UniformBufferFinal _finalData;
+	//UniformBufferFinal _finalData;
+
 
 	//vulkan
 	VkDevice _device;
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-	Buffer _finalUniformBuffer, _geometryBuffer, _indexBuffer;
+//	Buffer _finalUniformBuffer, _geometryBuffer, _indexBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
@@ -78,16 +79,16 @@ class VulkanRenderer : public Renderer
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryData();
-	void CreateOffscreenFrameBuffer();
+	//void CreateOffscreenFrameBuffer();
 	void CreateForwardRenderer();
-	void CreateUniformBuffers();
+	//void CreateUniformBuffers();
 	void CreateDescriptorSets();
 	void WriteDescriptorSets();
 	void CreateGraphicsPipelines();
-	void CreateCommandBuffers();
+	//void CreateCommandBuffers();
 	void CreateDeferredCommandBuffers();
 	void CreateFrameGraphNodes();
-	void UpdateLights();
+	//void UpdateLights();
 	void CleanUp();
 	void Prepare(FrameGraphNode node);
 	template <typename T>
