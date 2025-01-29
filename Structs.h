@@ -43,6 +43,7 @@ struct FrameBufferT
 	VkDescriptorPool descriptorPool;
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorSet descriptorSet;
+	std::vector<VkShaderModule> shaderModules;
 	//std::vector<VkDescriptorSet> descriptorSets;
 	std::vector<VkAttachmentReference> attachmentReferences;
 };

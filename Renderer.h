@@ -52,8 +52,8 @@ class VulkanRenderer : public Renderer
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
-	VkPipeline _offscreenPipeline, _graphicsPipeline;
-	VkPipelineLayout _pipelineLayout;
+	//VkPipeline _offscreenPipeline, _graphicsPipeline;
+	//VkPipelineLayout _pipelineLayout;
 	std::vector<VkCommandBuffer> _drawCommandBuffers;
 	VkCommandBuffer _offscreenCommandBuffer;
 	VkCommandPool _commandPool;
@@ -62,6 +62,7 @@ class VulkanRenderer : public Renderer
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
 	VkPipelineStageFlags _submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	//VkPipelineCache _pipelineCache;
 
 	std::vector<DrawInfo> _drawInfo;
 	Dimensions _dimensions;
