@@ -39,7 +39,7 @@ class FrameGraph
 {
 	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
-	std::unordered_map<std::string, FrameGraphResource*> _resources;
+	std::unordered_map<std::string, FrameGraphResource*> _resources; //split
 
 	FrameGraph() {};
 	~FrameGraph() {};
