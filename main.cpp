@@ -14,8 +14,8 @@ int main()
 
 		while (+win.ProcessWindowEvents())
 		{
-			renderer->UpdateCamera();
 			renderer->Render();
+			renderer->UpdateCamera();
 		}
 	}
 	

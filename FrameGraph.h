@@ -31,8 +31,8 @@ struct FrameGraphNode
 	FrameBufferT frameBuffer;
 	std::vector<std::string> inputResources;
 	std::vector<std::string> outputResources;
-	std::function<void()> Setup;
-	std::function<void(VkCommandBuffer)> Execute;
+	std::function<void(FrameGraphNode&)> Setup;
+	std::function<void(VkCommandBuffer, FrameGraphNode&)> Execute;
 };
 
 class FrameGraph
@@ -74,9 +74,9 @@ public:
 			// Ensure input resources are prepared here if needed
 			if (node.shouldExecute)
 			{
-				if (!node.isSetupComplete) node.Setup();
+				if (!node.isSetupComplete) node.Setup(node);
 
-				node.Execute(commandBuffer);
+				node.Execute(commandBuffer, node);
 			}
 		}
 	}

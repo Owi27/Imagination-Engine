@@ -83,17 +83,17 @@ class VulkanRenderer : public Renderer
 	//void CreateOffscreenFrameBuffer();
 	void CreateForwardRenderer();
 	//void CreateUniformBuffers();
-	void CreateDescriptorSets();
-	void WriteDescriptorSets();
-	void CreateGraphicsPipelines();
+	//void CreateDescriptorSets();
+	//void WriteDescriptorSets();
+	//void CreateGraphicsPipelines();
 	//void CreateCommandBuffers();
-	void CreateDeferredCommandBuffers();
+	//void CreateDeferredCommandBuffers();
 	void CreateFrameGraphNodes();
 	//void UpdateLights();
 	void CleanUp();
 	void Prepare(FrameGraphNode node);
 	template <typename T>
-	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()) }
+	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()); }
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);
