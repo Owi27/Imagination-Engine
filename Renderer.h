@@ -68,6 +68,9 @@ class VulkanRenderer : public Renderer
 	std::vector<DrawInfo> _drawInfo;
 	Dimensions _dimensions;
 
+	unsigned int _currentFrame;
+
+
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
 	ComPtr<IDxcUtils> _utils;

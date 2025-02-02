@@ -32,13 +32,14 @@ struct FrameGraphNode
 	std::vector<std::string> inputResources;
 	std::vector<std::string> outputResources;
 	std::function<void(FrameGraphNode&)> Setup;
-	std::function<void(VkCommandBuffer, FrameGraphNode&)> Execute;
+	std::function<void(VkCommandBuffer&, FrameGraphNode&)> Execute;
 };
 
 class FrameGraph
 {
 	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
+	std::vector<VkSemaphore> _semaphores;
 	std::unordered_map<std::string, FrameGraphBufferResource> _bufferResources;
 	std::unordered_map<std::string, FrameGraphImageResource> _imageResources;
 
@@ -84,7 +85,7 @@ public:
 		return _imageResources.at(name);
 	}
 
-	void Execute(VkCommandBuffer commandBuffer)
+	void Execute(VkCommandBuffer& commandBuffer)
 	{
 		for (auto& node : _nodes) {
 			// Ensure input resources are prepared here if needed
