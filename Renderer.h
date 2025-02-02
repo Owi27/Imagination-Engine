@@ -58,6 +58,7 @@ class VulkanRenderer : public Renderer
 	VkCommandBuffer _offscreenCommandBuffer;
 	VkCommandPool _commandPool;
 	VkSemaphore _offscreenSemaphore, _presentCompleteSemaphore, _renderCompleteSemaphore;
+	VkFence _fence;
 	VkSubmitInfo _submitInfo;
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
@@ -81,7 +82,6 @@ class VulkanRenderer : public Renderer
 	void LoadModel(std::string filename);
 	void CreateGeometryData();
 	//void CreateOffscreenFrameBuffer();
-	void CreateForwardRenderer();
 	//void CreateUniformBuffers();
 	//void CreateDescriptorSets();
 	//void WriteDescriptorSets();

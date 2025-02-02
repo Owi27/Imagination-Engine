@@ -6,9 +6,9 @@ namespace Debug
 
 	void CheckInputResources(FrameGraph& fg, FrameGraphNode node)
 	{
-		for (auto i : node.inputResources)
+		/*for (auto i : node.inputResources)
 		{
-			if (auto r = fg.GetResource(i))
+			if (auto r = fg.GetBufferResource(i))
 			{
 				if (r->prepared)
 				{
@@ -19,6 +19,6 @@ namespace Debug
 					cout << r->name << " was not prepared. Please execute " << r->parent << " first\n";
 				}
 			}
-		}
+		}*/
 	}
 }

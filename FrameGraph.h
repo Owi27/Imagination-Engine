@@ -39,7 +39,8 @@ class FrameGraph
 {
 	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
-	std::unordered_map<std::string, FrameGraphResource*> _resources; //split
+	std::unordered_map<std::string, FrameGraphBufferResource> _bufferResources;
+	std::unordered_map<std::string, FrameGraphImageResource> _imageResources;
 
 	FrameGraph() {};
 	~FrameGraph() {};
@@ -53,19 +54,34 @@ public:
 		return _frameGraph;
 	}
 
+	int GetNodeCount() const
+	{
+		return _nodes.size();
+	}
+
 	void AddNode(const FrameGraphNode& frameGraphNode)
 	{
 		_nodes.push_back(frameGraphNode);
 	}
 
-	void AddResource(const std::string& name, FrameGraphResource* resource)
+	void AddBufferResource(const std::string& name, FrameGraphBufferResource& resource)
 	{
-		_resources[name] = resource;
+		_bufferResources[name] = resource;
 	}
 
-	FrameGraphResource* GetResource(const std::string& name)
+	void AddImageResource(const std::string& name, FrameGraphImageResource& resource)
 	{
-		return _resources.at(name);
+		_imageResources[name] = resource;
+	}
+
+	FrameGraphBufferResource& GetBufferResource(const std::string& name)
+	{
+		return _bufferResources.at(name);
+	}
+
+	FrameGraphImageResource& GetImageResource(const std::string& name)
+	{
+		return _imageResources.at(name);
 	}
 
 	void Execute(VkCommandBuffer commandBuffer)
