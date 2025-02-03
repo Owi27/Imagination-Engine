@@ -59,7 +59,7 @@ class VulkanRenderer : public Renderer
 	std::vector<VkCommandBuffer> _drawCommandBuffers;
 	VkCommandBuffer _offscreenCommandBuffer;
 	VkCommandPool _commandPool;
-	VkSemaphore _offscreenSemaphore, _compositionSemaphore, _postProcessSemaphore, _presentCompleteSemaphore;// , _renderCompleteSemaphore;
+	VkSemaphore _offscreenSemaphore, _compositionSemaphore, _postProcessSemaphore, _presentCompleteSemaphore[3];// , _renderCompleteSemaphore;
 	VkSubmitInfo _submitInfo;
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
