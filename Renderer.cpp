@@ -2025,11 +2025,10 @@ void VulkanRenderer::Render()
 	vkResetFences(_device, 1, &_fences[_currentFrame]);
 
 	VkCommandBuffer commandBuffer;
-
 	_frameGraph->Execute(commandBuffer);
 
-	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &_currentFrame);
-
+	unsigned int frameIdx;
+	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
 	_submitInfo.pSignalSemaphores = &_offscreenSemaphore;
@@ -2054,7 +2053,7 @@ void VulkanRenderer::Render()
 	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &_swapchain;
-	presentInfo.pImageIndices = &_currentFrame;
+	presentInfo.pImageIndices = &frameIdx;
 	presentInfo.pWaitSemaphores = &_compositionSemaphore;
 	presentInfo.waitSemaphoreCount = 1;
 
