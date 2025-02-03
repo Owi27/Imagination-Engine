@@ -1,5 +1,6 @@
 
 
+
 struct FrameGraphResource
 {
 	std::string name = "";
@@ -17,11 +18,19 @@ struct FrameGraphImageResource : FrameGraphResource
 	VkExtent3D extent;
 };
 
+template <typename T>
 struct FrameGraphBufferResource : FrameGraphResource
 {
-	std::vector<void*> data;
+	std::vector<T> data;
 	std::vector<Buffer> buffers;
 };
+
+using BufferDataVariants = std::variant<
+	FrameGraphBufferResource<UniformBufferOffscreen>,
+	FrameGraphBufferResource<UniformBufferFinal>,
+	FrameGraphBufferResource<Vertex>,
+	FrameGraphBufferResource<unsigned int>
+>;
 
 struct FrameGraphNode
 {
@@ -40,7 +49,7 @@ class FrameGraph
 	static inline FrameGraph* _frameGraph = nullptr;
 	std::vector<FrameGraphNode> _nodes;
 	std::vector<VkSemaphore> _semaphores;
-	std::unordered_map<std::string, FrameGraphBufferResource> _bufferResources;
+	std::unordered_map<std::string, BufferDataVariants> _bufferResources;
 	std::unordered_map<std::string, FrameGraphImageResource> _imageResources;
 
 	FrameGraph() {};
@@ -65,7 +74,8 @@ public:
 		_nodes.push_back(frameGraphNode);
 	}
 
-	void AddBufferResource(const std::string& name, FrameGraphBufferResource& resource)
+	template <typename T>
+	void AddBufferResource(const std::string& name, FrameGraphBufferResource<T>& resource)
 	{
 		_bufferResources[name] = resource;
 	}
@@ -75,9 +85,10 @@ public:
 		_imageResources[name] = resource;
 	}
 
-	FrameGraphBufferResource& GetBufferResource(const std::string& name)
+	template <typename T>
+	FrameGraphBufferResource<T>& GetBufferResource(const std::string& name)
 	{
-		return _bufferResources.at(name);
+		return std::get<FrameGraphBufferResource<T>>(_bufferResources.at(name));
 	}
 
 	FrameGraphImageResource& GetImageResource(const std::string& name)

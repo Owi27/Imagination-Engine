@@ -41,6 +41,8 @@ class VulkanRenderer : public Renderer
 	//UniformBufferOffscreen _offscreenData;
 	//UniformBufferFinal _finalData;
 
+	VkSemaphore _offscreenSe, _renderComplete;
+	VkQueue _present;
 
 	//vulkan
 	VkDevice _device;
@@ -57,20 +59,22 @@ class VulkanRenderer : public Renderer
 	std::vector<VkCommandBuffer> _drawCommandBuffers;
 	VkCommandBuffer _offscreenCommandBuffer;
 	VkCommandPool _commandPool;
-	VkSemaphore _offscreenSemaphore, _presentCompleteSemaphore, _renderCompleteSemaphore;
-	VkFence _fence;
+	VkSemaphore _offscreenSemaphore, _compositionSemaphore, _postProcessSemaphore, _presentCompleteSemaphore;// , _renderCompleteSemaphore;
 	VkSubmitInfo _submitInfo;
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
 	VkPipelineStageFlags _submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	//VkPipelineCache _pipelineCache;
 
+	std::vector<VkFence> _fences;
+	const int MAX_FRAMES = 3;
+
 	std::vector<DrawInfo> _drawInfo;
 	Dimensions _dimensions;
 
-	unsigned int _currentFrame;
+	unsigned int _currentFrame = 0;
 
-
+	std::vector<VkCommandBuffer> _commandBuffers[3];
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
 	ComPtr<IDxcUtils> _utils;

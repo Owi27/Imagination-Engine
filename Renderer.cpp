@@ -961,7 +961,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 		offscreenBuffers.outputResources = { "Vertex Buffers", "Index Buffer", "Offscreen UB" };
 		offscreenBuffers.Setup = [&](FrameGraphNode& node)
 			{
-				FrameGraphBufferResource vertexBuffers;
+				FrameGraphBufferResource<Vertex> vertexBuffers;
 				{
 					vertexBuffers.parent = node.name;
 					vertexBuffers.name = node.outputResources[0];
@@ -983,7 +983,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				vertexBuffers.prepared = true;
 				_frameGraph->AddBufferResource(vertexBuffers.name, vertexBuffers);
 
-				FrameGraphBufferResource indexBuffer;
+				FrameGraphBufferResource<unsigned int> indexBuffer;
 				{
 					indexBuffer.parent = node.name;
 					indexBuffer.name = node.outputResources[1];
@@ -994,7 +994,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				indexBuffer.prepared = true;
 				_frameGraph->AddBufferResource(indexBuffer.name, indexBuffer);
 
-				FrameGraphBufferResource offscreenUniformBuffer;
+				FrameGraphBufferResource<UniformBufferOffscreen> offscreenUniformBuffer;
 				{
 					offscreenUniformBuffer.parent = node.name;
 					offscreenUniformBuffer.name = "Offscreen UB";
@@ -1007,7 +1007,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 						GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, data.proj);
 					}
 
-					offscreenUniformBuffer.data.push_back(static_cast<void*>(&data));
+					offscreenUniformBuffer.data.push_back(data);
 
 					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferOffscreen), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &offscreenUniformBuffer.buffers[0].buffer, &offscreenUniformBuffer.buffers[0].memory);
 					GvkHelper::write_to_buffer(_device, offscreenUniformBuffer.buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
@@ -1035,7 +1035,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				//assert that input resources are prepared
 				//Debug::CheckInputResources(*_frameGraph, offscreenPass);
 
-				FrameGraphBufferResource* offscreenUB = &_frameGraph->GetBufferResource(node.inputResources[2]);
+				FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>(node.inputResources[2]);
 
 				//FRAMEBUFFER
 				{
@@ -1245,7 +1245,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					vkAllocateDescriptorSets(_device, &descriptorSetAllocateInfo, &node.frameBuffer.descriptorSet);
 
 					VkDescriptorBufferInfo descriptorBufferInfo;
-					descriptorBufferInfo.buffer = offscreenUB->buffers[0].buffer;
+					descriptorBufferInfo.buffer = offscreenUB.buffers[0].buffer;
 					descriptorBufferInfo.offset = 0;
 					descriptorBufferInfo.range = sizeof(UniformBufferOffscreen);
 
@@ -1432,19 +1432,16 @@ void VulkanRenderer::CreateFrameGraphNodes()
 			};
 		offscreenPass.Execute = [&](VkCommandBuffer& commandBuffer, FrameGraphNode& fgNode)
 			{
-				FrameGraphBufferResource* vBuffer = &_frameGraph->GetBufferResource(fgNode.inputResources[0]);
-				FrameGraphBufferResource* iBuffer = &_frameGraph->GetBufferResource(fgNode.inputResources[1]);
-				FrameGraphBufferResource* offscreenUB = &_frameGraph->GetBufferResource(fgNode.inputResources[2]);
-				auto* data = static_cast<UniformBufferOffscreen*>(offscreenUB->data[0]);
+				FrameGraphBufferResource<Vertex>& vBuffer = _frameGraph->GetBufferResource<Vertex>(fgNode.inputResources[0]);
+				FrameGraphBufferResource<unsigned int>& iBuffer = _frameGraph->GetBufferResource<unsigned int>(fgNode.inputResources[1]);
+				FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>(fgNode.inputResources[2]);
+				auto& data = offscreenUB.data[0];
 				auto now = std::chrono::steady_clock::now();
 				_deltaTime = now - _lastUpdate;
 				_lastUpdate = now;
 
-				data->deltaTime = _deltaTime.count();
-				GvkHelper::write_to_buffer(_device, offscreenUB->buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
-
-				//VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-				//if (!_offscreenSemaphore) vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+				data.deltaTime = _deltaTime.count();
+				GvkHelper::write_to_buffer(_device, offscreenUB.buffers[0].memory, &data, sizeof(UniformBufferOffscreen));
 
 				VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 
@@ -1463,8 +1460,8 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				renderPassBeginInfo.clearValueCount = clearValues.size();
 				renderPassBeginInfo.pClearValues = clearValues.data();
 
-				//GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
-				vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+				GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
+				//vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 				vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 				VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
@@ -1479,15 +1476,15 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 				std::array<VkBuffer, 4> vertexBuffers =
 				{
-					vBuffer->buffers[0].buffer,
-					vBuffer->buffers[1].buffer,
-					vBuffer->buffers[2].buffer,
-					vBuffer->buffers[3].buffer,
+					vBuffer.buffers[0].buffer,
+					vBuffer.buffers[1].buffer,
+					vBuffer.buffers[2].buffer,
+					vBuffer.buffers[3].buffer,
 				};
 
 				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
-				vkCmdBindVertexBuffers(commandBuffer, 0, vBuffer->buffers.size(), vertexBuffers.data(), offsets.data());
-				vkCmdBindIndexBuffer(commandBuffer, iBuffer->buffers[0].buffer, 0, VK_INDEX_TYPE_UINT32);
+				vkCmdBindVertexBuffers(commandBuffer, 0, vBuffer.buffers.size(), vertexBuffers.data(), offsets.data());
+				vkCmdBindIndexBuffer(commandBuffer, iBuffer.buffers[0].buffer, 0, VK_INDEX_TYPE_UINT32);
 
 				int i = 0;
 				for (auto& node : _model.nodes)
@@ -1503,8 +1500,10 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 				vkCmdEndRenderPass(commandBuffer);
 				vkEndCommandBuffer(commandBuffer);
+				_commandBuffers[0].clear();
+				_commandBuffers[0].push_back(commandBuffer);
 
-				Prepare(fgNode);
+				//Prepare(fgNode);
 			};
 		offscreenPass.shouldExecute = true;
 	};
@@ -1520,7 +1519,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				//assert that input resources are prepared
 				//Debug::CheckInputResources(*_frameGraph, compositionBuffers);
 
-				FrameGraphBufferResource compositionUB;
+				FrameGraphBufferResource<UniformBufferFinal> compositionUB;
 				{
 					compositionUB.parent = node.name;
 					compositionUB.name = node.outputResources[0];
@@ -1528,10 +1527,10 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					UniformBufferFinal data;
 					{
-						FrameGraphBufferResource& offscreenUB = _frameGraph->GetBufferResource(node.inputResources[0]);
-						auto* offscreenData = static_cast<UniformBufferOffscreen*>(offscreenUB.data[0]);
+						FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>(node.inputResources[0]);
+						auto& offscreenData = offscreenUB.data[0];
 
-						data.view = offscreenData->view.row4;
+						data.view = offscreenData.view.row4;
 
 						std::default_random_engine gen(777);
 						std::uniform_real_distribution<float> distribution(0.f, 1.f);
@@ -1544,7 +1543,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 							data.lights[i].radius = 5.f;
 						}
 					}
-					compositionUB.data.push_back(static_cast<void*>(&data));
+					compositionUB.data.push_back(data);
 
 					GvkHelper::create_buffer(_physicalDevice, _device, sizeof(UniformBufferFinal), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &compositionUB.buffers[0].buffer, &compositionUB.buffers[0].memory);
 					GvkHelper::write_to_buffer(_device, compositionUB.buffers[0].memory, &data, sizeof(UniformBufferFinal));
@@ -1575,7 +1574,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				_vlk.GetSwapchainFramebuffer(_currentFrame, (void**)&node.frameBuffer.frameBuffer);
 				_vlk.GetSwapchainImageCount(_swapchainImageCount);
 
-				FrameGraphBufferResource& compositionUB = _frameGraph->GetBufferResource(node.inputResources[0]);
+				FrameGraphBufferResource<UniformBufferFinal>& compositionUB = _frameGraph->GetBufferResource<UniformBufferFinal>(node.inputResources[0]);
 				FrameGraphImageResource& posResource = _frameGraph->GetImageResource(node.inputResources[1]),
 					& nrmResource = _frameGraph->GetImageResource(node.inputResources[2]),
 					& albResource = _frameGraph->GetImageResource(node.inputResources[3]);
@@ -1795,14 +1794,14 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				renderPassBeginInfo.pClearValues = clearValues;
 
 				VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-
+				_commandBuffers[1].clear();
 				for (size_t i = 0; i < _swapchainImageCount; i++)
 				{
 					//_vlk.GetSwapchainFramebuffer(i, (void**)&renderPassBeginInfo.framebuffer);
 
-					_vlk.GetCommandBuffer(i, (void**)&commandBuffer);
-					vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
-					//GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
+					//_vlk.GetCommandBuffer(i, (void**)&commandBuffer);
+					//vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+					GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
 					vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 					VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
@@ -1816,6 +1815,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 					vkCmdEndRenderPass(commandBuffer);
 					vkEndCommandBuffer(commandBuffer);
+					_commandBuffers[1].push_back(commandBuffer);
 					//GvkHelper::signal_command_end(_device, _queue, _commandPool, &commandBuffer);
 				}
 
@@ -1950,18 +1950,61 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore);
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderCompleteSemaphore);
-
-	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-	vkCreateFence(_device, &fenceInfo, nullptr, &_fence);
-
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
+	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
 
 	_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
 	_submitInfo.waitSemaphoreCount = 1;
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
 	_submitInfo.signalSemaphoreCount = 1;
-	_submitInfo.pSignalSemaphores = &_renderCompleteSemaphore;
+	_submitInfo.pSignalSemaphores = &_compositionSemaphore;
+
+	_fences.resize(MAX_FRAMES);
+	VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Optional: Start in signaled state
+	for (size_t i = 0; i < MAX_FRAMES; i++)
+		vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
+
+	//VkCommandBuffer commandBuffer;
+	//GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
+	//{
+	//	for (size_t i = 0; i < 1; i++)
+	//	{
+	//		VkImage scImage;
+	//		_vlk.GetSwapchainImage(i, (void**)&scImage);
+
+	//		VkImageMemoryBarrier barrier = {};
+	//		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	//		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Current layout
+	//		barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Target layout
+	//		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	//		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	//		barrier.image = scImage;
+	//		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	//		barrier.subresourceRange.baseMipLevel = 0;
+	//		barrier.subresourceRange.levelCount = 1;
+	//		barrier.subresourceRange.baseArrayLayer = 0;
+	//		barrier.subresourceRange.layerCount = 1;
+
+	//		barrier.srcAccessMask = 0; // No source access mask
+	//		barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT; // Destination access mask
+
+	//		vkCmdPipelineBarrier(
+	//			commandBuffer,
+	//			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, // Source stage
+	//			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, // Destination stage
+	//			0,
+	//			0, nullptr,
+	//			0, nullptr,
+	//			1, &barrier
+	//		);
+
+	//	}
+	//}
+	//////GvkHelper::transition_image_layout(_device, _commandPool, _queue, 1, scImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	//GvkHelper::signal_command_end(_device, _queue, _commandPool, &commandBuffer);
 
 	_shutdown.Create(_vlk, [&]()
 		{
@@ -1978,124 +2021,45 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	// 1. Get current frame resources from Gateware
+	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
+	vkResetFences(_device, 1, &_fences[_currentFrame]);
+
 	VkCommandBuffer commandBuffer;
-	_vlk.GetSwapchainCurrentImage(_currentFrame);
-	_vlk.GetCommandBuffer(_currentFrame, (void**)&commandBuffer);
-
-	std::vector<VkSemaphore> semaphores;
-
-	// 2. Begin frame synchronization
-	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore, nullptr, &_currentFrame);
-
-	vkResetCommandBuffer(commandBuffer, 0);
-
-	// 5. Begin command buffer
-	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-	VkSemaphore fgSemaphore;
-	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &fgSemaphore);
-	VkImage scImage;
-	_vlk.GetSwapchainImage(_currentFrame, (void**)&scImage);
-
-	//vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-	// 6. Execute frame graph nodes with proper synchronization
-	//{
-	//	VkImageMemoryBarrier barrier = {};
-	//	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	//	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Current layout
-	//	barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Target layout
-	//	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	//	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	//	barrier.image = scImage;
-	//	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	//	barrier.subresourceRange.baseMipLevel = 0;
-	//	barrier.subresourceRange.levelCount = 1;
-	//	barrier.subresourceRange.baseArrayLayer = 0;
-	//	barrier.subresourceRange.layerCount = 1;
-
-	//	barrier.srcAccessMask = 0; // No source access mask
-	//	barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT; // Destination access mask
-
-	//	vkCmdPipelineBarrier(
-	//		commandBuffer,
-	//		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, // Source stage
-	//		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, // Destination stage
-	//		0,
-	//		0, nullptr,
-	//		0, nullptr,
-	//		1, &barrier
-	//	);
-	//}
 
 	_frameGraph->Execute(commandBuffer);
 
-	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
-	{
-		VkImageMemoryBarrier barrier = {};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Current layout
-		barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Target layout
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = scImage;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-
-		barrier.srcAccessMask = 0; // No source access mask
-		barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT; // Destination access mask
-
-		vkCmdPipelineBarrier(
-			commandBuffer,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, // Source stage
-			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, // Destination stage
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-	}
-	//GvkHelper::transition_image_layout(_device, _commandPool, _queue, 1, scImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	//GvkHelper::signal_command_end(_device, _queue, _commandPool, &commandBuffer);
-	// 7. End command buffer
-	vkEndCommandBuffer(commandBuffer);
-
-	//_finalData.view = _offscreenData.view.row4;
-	//_finalData.viewProj = GW::MATH::GIdentityMatrixF * _offscreenData.view * _offscreenData.proj;
-	//GvkHelper::write_to_buffer(_device, _finalUniformBuffer.memory, &_finalData, sizeof(UniformBufferFinal));
-
-	//unsigned int currentBuffer;
-
-	//vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore, nullptr, &currentBuffer);
+	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore, nullptr, &_currentFrame);
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore;
-	_submitInfo.pSignalSemaphores = &fgSemaphore;
+	_submitInfo.pSignalSemaphores = &_offscreenSemaphore;
+	_submitInfo.commandBufferCount = _commandBuffers[0].size();
+	_submitInfo.pCommandBuffers = _commandBuffers[0].data();
+
+	vkQueueSubmit(_queue, 1, &_submitInfo, nullptr);
+
+	_submitInfo.pWaitSemaphores = &_offscreenSemaphore;
+	_submitInfo.pSignalSemaphores = &_compositionSemaphore;
 	_submitInfo.commandBufferCount = 1;
-	_submitInfo.pCommandBuffers = &commandBuffer;
+	_submitInfo.pCommandBuffers = &_commandBuffers[1][_currentFrame];
 
-	vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);
+	vkQueueSubmit(_queue, 1, &_submitInfo, _fences[_currentFrame]);
 
-	/*_submitInfo.pWaitSemaphores = &fgSemaphore;
-	_submitInfo.pSignalSemaphores = &_renderCompleteSemaphore;
-	_submitInfo.pCommandBuffers = &_drawCommandBuffers[currentBuffer];
-
-	vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);*/
+	//_submitInfo.pWaitSemaphores = &_compositionSemaphore;
+	//_submitInfo.pSignalSemaphores = &_postProcessSemaphore;
+	//_submitInfo.pCommandBuffers = &_commandBuffers[2].data();
+	//
+	//vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);
 
 	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &_swapchain;
 	presentInfo.pImageIndices = &_currentFrame;
-	presentInfo.pWaitSemaphores = &fgSemaphore;
+	presentInfo.pWaitSemaphores = &_compositionSemaphore;
 	presentInfo.waitSemaphoreCount = 1;
 
 	vkQueuePresentKHR(_queue, &presentInfo);
-	vkQueueWaitIdle(_queue);
+	_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
+	//vkQueueWaitIdle(_queue);
 }
 
 void VulkanRenderer::UpdateCamera()
@@ -2106,10 +2070,10 @@ void VulkanRenderer::UpdateCamera()
 
 	mat4 cam = GW::MATH::GIdentityMatrixF;
 
-	FrameGraphBufferResource& offscreenUB = _frameGraph->GetBufferResource("Offscreen UB");
-	auto* offscreenData = static_cast<UniformBufferOffscreen*>(offscreenUB.data[0]);
+	FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>("Offscreen UB");
+	auto& offscreenData = offscreenUB.data[0];
 
-	GMatrix::InverseF(offscreenData->view, cam);
+	GMatrix::InverseF(offscreenData.view, cam);
 
 	float y = 0.0f;
 
@@ -2193,7 +2157,7 @@ void VulkanRenderer::UpdateCamera()
 		cam.row4 = camSave;
 	}
 
-	GMatrix::InverseF(cam, offscreenData->view);
+	GMatrix::InverseF(cam, offscreenData.view);
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)

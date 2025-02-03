@@ -78,6 +78,13 @@ struct UniformBufferFinal
 	mat4 viewProj;
 };
 
+struct Vertex
+{
+	vec3* pos, nrm;
+	vec2* texCoord;
+	vec4* tangent;
+};
+
 struct PCR
 {
 	mat4 model;
