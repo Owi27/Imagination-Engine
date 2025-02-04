@@ -1797,7 +1797,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 				_commandBuffers[1].clear();
 				for (size_t i = 0; i < _swapchainImageCount; i++)
 				{
-					//_vlk.GetSwapchainFramebuffer(i, (void**)&renderPassBeginInfo.framebuffer);
+					_vlk.GetSwapchainFramebuffer(i, (void**)&renderPassBeginInfo.framebuffer);
 
 					//_vlk.GetCommandBuffer(i, (void**)&commandBuffer);
 					//vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
@@ -1968,43 +1968,6 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	for (size_t i = 0; i < MAX_FRAMES; i++)
 		vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
 
-	VkCommandBuffer commandBuffer;
-	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
-	{
-		for (size_t i = 0; i < 3; i++)
-		{
-			VkImage scImage;
-			_vlk.GetSwapchainImage(i, (void**)&scImage);
-
-			VkImageMemoryBarrier barrier = {};
-			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Current layout
-			barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Target layout
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.image = scImage;
-			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			barrier.subresourceRange.baseMipLevel = 0;
-			barrier.subresourceRange.levelCount = 1;
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount = 1;
-
-			barrier.srcAccessMask = 0; // No source access mask
-			barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT; // Destination access mask
-
-			vkCmdPipelineBarrier(
-				commandBuffer,
-				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, // Source stage
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, // Destination stage
-				0,
-				0, nullptr,
-				0, nullptr,
-				1, &barrier
-			);
-
-		}
-	}
-	GvkHelper::signal_command_end(_device, _queue, _commandPool, &commandBuffer);
 
 	_shutdown.Create(_vlk, [&]()
 		{
