@@ -36,12 +36,6 @@ class VulkanRenderer : public Renderer
 	FrameGraph* _frameGraph = FrameGraph::GetInstance();
 	GeometryData _geometryData;
 
-	//structs
-	//FrameBuffer _offscreenFrameBuffer;
-	//UniformBufferOffscreen _offscreenData;
-	//UniformBufferFinal _finalData;
-
-	VkSemaphore _offscreenSe, _renderComplete;
 	VkQueue _present;
 
 	//vulkan
@@ -49,13 +43,10 @@ class VulkanRenderer : public Renderer
 	VkPhysicalDevice _physicalDevice;
 	VkRenderPass _renderPass;
 	VkSampler _colorSampler;
-//	Buffer _finalUniformBuffer, _geometryBuffer, _indexBuffer;
 	VkDescriptorSet _offscreenDescriptorSet, _descriptorSet, _finalDescriptorSet;
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkShaderModule _vertexShaderModule, _fragmentShaderModule, _offscreenVertexShaderModule, _offscreenFragmentShaderModule;
-	//VkPipeline _offscreenPipeline, _graphicsPipeline;
-	//VkPipelineLayout _pipelineLayout;
 	std::vector<VkCommandBuffer> _drawCommandBuffers;
 	VkCommandBuffer _offscreenCommandBuffer;
 	VkCommandPool _commandPool;
@@ -64,7 +55,6 @@ class VulkanRenderer : public Renderer
 	VkQueue _queue;
 	VkSwapchainKHR _swapchain;
 	VkPipelineStageFlags _submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	//VkPipelineCache _pipelineCache;
 
 	std::vector<VkFence> _fences;
 	const int MAX_FRAMES = 3;
@@ -88,15 +78,7 @@ class VulkanRenderer : public Renderer
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryData();
-	//void CreateOffscreenFrameBuffer();
-	//void CreateUniformBuffers();
-	//void CreateDescriptorSets();
-	//void WriteDescriptorSets();
-	//void CreateGraphicsPipelines();
-	//void CreateCommandBuffers();
-	//void CreateDeferredCommandBuffers();
 	void CreateFrameGraphNodes();
-	//void UpdateLights();
 	void CleanUp();
 	void Prepare(FrameGraphNode node);
 	template <typename T>
