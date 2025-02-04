@@ -15,7 +15,6 @@ Renderer::Renderer(GWindow win)
 	//create proxies
 	_gInput.Create(_win);
 	_gController.Create();
-
 }
 
 Renderer::~Renderer()
@@ -247,10 +246,9 @@ void VulkanRenderer::CreateGeometryData()
 			}
 			else
 			{
-				if (node.name.find("Cone") != std::string::npos) _geometryData.tangents.push_back(vec4{ 0, 0, 0, 1 });
+				if (node.name.find("Cone") != std::string::npos) _geometryData.tangents.push_back(vec4{ 0, 0, 0, 0 });
 				else
 				{
-
 					std::vector<vec3> tangent(vCount);
 					std::vector<vec3> biTangent(vCount);
 
