@@ -360,14 +360,7 @@ void VulkanRenderer::CreateGeometryData()
 				}
 			}
 
-		}
-			
-		_drawInfo.push_back(di);
-
-		for (auto& childIdx : node.children)
-		{
-			auto& child = _model.nodes[node.children[childIdx]];
-			GetLocalMatrix(child);
+			_drawInfo.push_back(di);
 		}
 	}
 }
@@ -1348,7 +1341,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	_vlk.GetSwapchain((void**)&_swapchain);
 
 	CompileShaders();
-	LoadModel("Models/Shapes/Shapes.gltf");
+	LoadModel("Models/Sponza/glTF/Sponza.gltf");
 	CreateFrameGraphNodes();
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
@@ -1393,7 +1386,7 @@ void VulkanRenderer::Render()
 	VkCommandBuffer commandBuffer;
 	_frameGraph->Execute(commandBuffer);
 
-	unsigned int frameIdx;
+	unsigned int frameIdx = 0;
 	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
