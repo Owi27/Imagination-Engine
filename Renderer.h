@@ -59,6 +59,8 @@ class VulkanRenderer : public Renderer
 	std::vector<VkFence> _fences;
 	const int MAX_FRAMES = 3;
 
+	std::vector<Texture> _textures;
+
 	std::vector<DrawInfo> _drawInfo;
 	Dimensions _dimensions;
 
@@ -81,6 +83,7 @@ class VulkanRenderer : public Renderer
 	void CreateFrameGraphNodes();
 	void CleanUp();
 	void Prepare(FrameGraphNode node);
+	void UploadTextureToGPU(tinygltf::Image& image, Texture* texture);
 	template <typename T>
 	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()); }
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);

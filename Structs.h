@@ -9,6 +9,7 @@ struct Buffer
 struct Image
 {
 	VkImage image;
+	VkBuffer buffer;
 	VkImageView imageView;
 	VkDeviceMemory memory;
 };
