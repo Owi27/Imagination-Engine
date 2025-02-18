@@ -141,6 +141,8 @@
       </PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
@@ -152,7 +154,9 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="Structs.h" />
+    <ClInclude Include="VulkanContext.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\FragmentShader.hlsl">
