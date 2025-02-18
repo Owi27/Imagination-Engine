@@ -1378,12 +1378,17 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 {
 #ifndef NDEBUG
-	const char* debugLayers[] =
+	std::vector<const char*> debugLayers =
 	{
 		"VK_LAYER_KHRONOS_validation"
 	};
 
-	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, sizeof(debugLayers) / sizeof(debugLayers[0]), debugLayers, 0, nullptr, 0, nullptr, false)) return;
+	std::vector<const char*> deviceExt =
+	{
+		"VK_KHR_dynamic_rendering"
+	};
+
+	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false)) return;
 #else
 	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER)) return; //return if creation didn't work
 #endif
