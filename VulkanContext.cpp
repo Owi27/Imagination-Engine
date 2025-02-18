@@ -4,12 +4,17 @@
 VulkanContext::VulkanContext(GWindow win)
 {
 #ifndef NDEBUG
-	const char* debugLayers[] =
+	std::vector<const char*> debugLayers =
 	{
 		"VK_LAYER_KHRONOS_validation"
 	};
 
-	if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, sizeof(debugLayers) / sizeof(debugLayers[0]), debugLayers, 0, nullptr, 0, nullptr, false))
+	std::vector<const char*> deviceExt =
+	{
+		"VK_KHR_dynamic_rendering"
+	};
+
+	if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false))
 #else
 	if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER))
 #endif

@@ -74391,6 +74391,11 @@ namespace GW
 				//VkPhysicalDeviceHostQueryResetFeatures hostQueryResetFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES };
 				//hostQueryResetFeatures.hostQueryReset = true;
 				//hostQueryResetFeatures.pNext = &bufferDeviceAddressFeaturesKHR;
+				VkPhysicalDeviceDynamicRenderingFeaturesKHR physicalDeviceDynamicRenderingFeaturesKHR
+				{
+					.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+					.dynamicRendering = true
+				};
 				
 				//Setup Logical device create info [*: Two different Queue Indices Check Needed]
 				VkDeviceCreateInfo create_info = {};
@@ -74401,7 +74406,7 @@ namespace GW
 
 				create_info.enabledExtensionCount = m_DeviceExtensionCount;
 				create_info.ppEnabledExtensionNames = m_DeviceExtensions;
-				//create_info.pNext = &hostQueryResetFeatures;
+				create_info.pNext = &physicalDeviceDynamicRenderingFeaturesKHR;
 
 				// add bindless support if requested
 				VkPhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures{};

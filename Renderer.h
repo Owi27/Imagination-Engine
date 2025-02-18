@@ -75,6 +75,8 @@ class VulkanRenderer : public Renderer
 
 	//mat4 matrices[3];
 
+	//VulkanContext* _vk = VulkanContext::GetInst(_win);
+
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryData();
