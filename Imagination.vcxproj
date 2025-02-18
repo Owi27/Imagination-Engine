@@ -133,26 +133,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CompositionRenderPass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="OffscreenRenderPass.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
+    <ClInclude Include="CompositionRenderPass.h" />
     <ClInclude Include="DEBUG.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="Gateware\Gateware.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathOverloads.h" />
+    <ClInclude Include="OffscreenRenderPass.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderPass.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Structs.h" />
