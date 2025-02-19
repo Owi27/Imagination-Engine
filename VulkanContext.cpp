@@ -21,6 +21,8 @@ VulkanContext::VulkanContext(GWindow win)
 	{
 		_vulkanSurface.GetDevice((void**)&_device);
 		_vulkanSurface.GetPhysicalDevice((void**)&_physicalDevice);
+		_vulkanSurface.GetInstance((void**)&_instance);
+		_vulkanSurface.GetGraphicsQueue((void**)&_graphicsQueue);
 		_vulkanSurface.GetCommandPool((void**)&_commandPool);
 		_vulkanSurface.GetGraphicsQueue((void**)&_graphicsQueue);
 		_vulkanSurface.GetSwapchain((void**)&_swapchain);
@@ -30,9 +32,6 @@ VulkanContext::VulkanContext(GWindow win)
 		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
 		_utils->CreateDefaultIncludeHandler(&_includeHandler);
 		std::filesystem::create_directories("Shaders/SPV");
-
-
-
 	}
 }
 
