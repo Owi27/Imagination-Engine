@@ -47,5 +47,7 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 
 #include "Structs.h"
 #include "Components.h"
+#include "RenderPass.h"
 #include "FrameGraph.h"
 #include "VulkanContext.h"
+#include "Shader.h"

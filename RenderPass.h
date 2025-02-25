@@ -3,10 +3,17 @@ class RenderPass
 {
 
 public:
-	RenderPass() = default;
-	~RenderPass() = default;
+	RenderPass()
+	{
 
-	virtual void Setup() = 0;
-	virtual void Execute() = 0;
+	}
+
+	~RenderPass()
+	{
+
+	}
+
+	virtual void Setup();
+	virtual void Execute();
 };
 

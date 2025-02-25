@@ -1,4 +1,8 @@
-
+enum FrameGraphQueueBit
+{
+	FRAMEGRAPH_GRAPHICS_BIT = 1 << 0,
+	FRAMEGRAPH_COMPUTE_BIT = 1 << 1
+};
 
 
 struct FrameGraphResource
@@ -47,6 +51,13 @@ struct FrameGraphNode
 class FrameGraph
 {
 	static inline FrameGraph* _frameGraph = nullptr;
+	std::vector<std::unique_ptr<RenderPass>> _passes;
+
+	std::map<std::string, std::unique_ptr<RenderPass>> _test;
+	std::vector<std::string> _passStack;
+
+	std::vector<std::unique_ptr<FrameGraphResource>> _resources;
+	std::unordered_map<std::string, unsigned int> _passToIndex;
 	std::vector<FrameGraphNode> _nodes;
 	std::vector<VkSemaphore> _semaphores;
 	std::unordered_map<std::string, BufferDataVariants> _bufferResources;
@@ -107,5 +118,44 @@ public:
 				node.Execute(commandBuffer, node);
 			}
 		}
+	}
+
+	RenderPass& AddPass(const std::string& name, FrameGraphQueueBit framegraphQueueBit)
+	{
+		for (auto& p : _test)
+		{
+			auto& pp = *p.second;
+
+		}
+
+		auto itr = _passToIndex.find(name);
+		if (itr != _passToIndex.end())
+		{
+			return *_passes[itr->second];
+		}
+		else
+		{
+			unsigned index = _passes.size();
+			_passes.emplace_back(new RenderPass());
+			//set pass name
+			_passToIndex[name] = index;
+			return *_passes.back();
+		}
+
+		if (_test.find(name) != _test.end())
+		{
+			return *_test[name];
+		}
+		else
+		{
+			_test.emplace(name, new RenderPass);
+			return *_test[name];
+		}
+	}
+
+	void Reset()
+	{
+		_passes.clear();
+		_resources.clear();
 	}
 };
