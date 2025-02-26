@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "VulkanContext.h"
-using namespace VkContext;
 
 VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 {
@@ -8,7 +7,7 @@ VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 	return _frameBuffer;
 }
 
-VkPipeline VkContext::VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription)
+VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
 {
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
 	{
@@ -16,7 +15,7 @@ VkPipeline VkContext::VulkanContext::CreateGraphicsPipeline(PipelineDescription 
 		return nullptr;
 	}
 
-	//VkPipeline
+	VkPipeline outPipeline;
 
 	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfos[2] =
 	{
@@ -124,6 +123,31 @@ VkPipeline VkContext::VulkanContext::CreateGraphicsPipeline(PipelineDescription 
 		pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
 	}
 
+	VkViewport viewport
+	{
+		.x = 0,
+		.y = 0,
+		.width = _width,
+		.height = _height,
+		.minDepth = 0,
+		.maxDepth = 1
+	};
+
+	VkRect2D scissor
+	{
+		.offset = {0, 0},
+		.extent = {_width, _height}
+	};
+		
+	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+		.viewportCount = 1,
+		.pViewports = &viewport,
+		.scissorCount = 1,
+		.pScissors = &scissor
+	};
+
 	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
@@ -180,5 +204,82 @@ VkPipeline VkContext::VulkanContext::CreateGraphicsPipeline(PipelineDescription 
 		.alphaToOneEnable = false,
 	};
 
+	VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+		.depthTestEnable = true,
+		.depthWriteEnable = true,
+		.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
+		.depthBoundsTestEnable = false,
+		.stencilTestEnable = false,
+		.minDepthBounds = 0.0f,
+		.maxDepthBounds = 1.0f,
+	};
 
+	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState = {};
+	pipelineColorBlendAttachmentState.colorWriteMask = 0xF;
+	pipelineColorBlendAttachmentState.blendEnable = false;
+	pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
+	pipelineColorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_DST_COLOR;
+	pipelineColorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+	pipelineColorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	pipelineColorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+	pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates;
+	if (colorAttachmentCount > 1)
+	{
+		pipelineColorBlendAttachmentStates.resize(colorAttachmentCount, pipelineColorBlendAttachmentState);
+	}
+	else
+	{
+		pipelineColorBlendAttachmentStates.push_back(std::move(pipelineColorBlendAttachmentState));
+	}
+
+	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+		.logicOpEnable = false,
+		.logicOp = VK_LOGIC_OP_COPY,
+		.attachmentCount = pipelineColorBlendAttachmentStates.size(),
+		.pAttachments = pipelineColorBlendAttachmentStates.data(),
+		.blendConstants = { {0.f}, {0.f},{0.f},{0.f}}
+	};
+
+	VkDynamicState dynamicState[2] =
+	{
+		// By setting these we do not need to re-create the pipeline on Resize
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+		.dynamicStateCount = 2,
+		.pDynamicStates = dynamicState
+	};
+
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.stageCount = 2,
+		.pStages = pipelineShaderStageCreateInfos,
+		.pVertexInputState = &pipelineVertexInputStateCreateInfo,
+		.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo,
+		.pViewportState = &pipelineViewportStateCreateInfo,
+		.pRasterizationState = &pipelineRasterizationStateCreateInfo,
+		.pMultisampleState = &pipelineMultisampleStateCreateInfo,
+		.pDepthStencilState = &pipelineDepthStencilStateCreateInfo,
+		.pColorBlendState = &pipelineColorBlendStateCreateInfo,
+		.pDynamicState = &pipelineDynamicStateCreateInfo,
+		.layout = pipelineLayout,
+		//.renderPass = node.frameBuffer.renderPass;
+		.subpass = 0,
+		.basePipelineHandle = nullptr
+	};
+		
+	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);
+
+	return outPipeline;
 }

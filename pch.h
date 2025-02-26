@@ -27,6 +27,7 @@
 #include <random>
 #include <set>
 #include <variant>
+#include <memory>
 
 using GWindow = GW::SYSTEM::GWindow;
 using GWindowStyle = GW::SYSTEM::GWindowStyle;
@@ -49,5 +50,6 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 #include "Components.h"
 #include "RenderPass.h"
 #include "FrameGraph.h"
+#include "VulkanDescriptions.h"
 #include "VulkanContext.h"
-#include "Shader.h"
+

@@ -500,6 +500,7 @@ void VulkanRenderer::CreateFrameGraphNodes()
 						depth.name = node.outputResources[3];
 						depth.parent = node.name;
 						depth.extent = { _width, _height, 1 };
+
 						//set format
 						GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depth.format);
 						GvkHelper::create_image(_physicalDevice, _device, depth.extent, 1, VK_SAMPLE_COUNT_1_BIT, depth.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depth.image.image, &depth.image.memory);
@@ -748,11 +749,14 @@ void VulkanRenderer::CreateFrameGraphNodes()
 					VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
 					VkRect2D scissor = { {0, 0}, {_width, _height} };
 
-					VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
-					pipelineViewportStateCreateInfo.viewportCount = 1;
-					pipelineViewportStateCreateInfo.pViewports = &viewport;
-					pipelineViewportStateCreateInfo.scissorCount = 1;
-					pipelineViewportStateCreateInfo.pScissors = &scissor;
+					VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo
+					{
+						.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+						.viewportCount = 1,
+						.pViewports = &viewport,
+						.scissorCount = 1,
+						.pScissors = &scissor
+					};
 
 					//rasterizer state
 					VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
@@ -1375,8 +1379,30 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 	return output;
 }
 
+void VulkanRenderer::Playground()
+{
+
+	VkPipelineLayout pipelineLayout;
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+	pipelineLayoutCreateInfo.setLayoutCount = 0;
+	pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+	//pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+
+	vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+
+
+	VkPipeline test = _vkContext.get()->CreateGraphicsPipeline(
+		{
+			.vertexShader = std::make_shared<Shader>("VertexShader", VERTEX_SHADER),
+			.fragmentShader = std::make_shared<Shader>("FragmentShader", PIXEL_SHADER),
+		}, pipelineLayout);
+}
+
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 {
+	Playground();
+
 #ifndef NDEBUG
 	std::vector<const char*> debugLayers =
 	{

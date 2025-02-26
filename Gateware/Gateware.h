@@ -74272,7 +74272,7 @@ namespace GW
 				//Application Information (Will come back to this for Gateware Version. Maybe used for RenderDoc)
 				VkApplicationInfo app_info = {};
 				app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-				app_info.apiVersion = VK_API_VERSION_1_1;
+				app_info.apiVersion = VK_API_VERSION_1_3;
 				app_info.pApplicationName = m_WindowName;
 				app_info.applicationVersion = 1;
 				app_info.pEngineName = "Gateware";

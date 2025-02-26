@@ -163,6 +163,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="VulkanContext.h" />
+    <ClInclude Include="VulkanDescriptions.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\FragmentShader.hlsl">

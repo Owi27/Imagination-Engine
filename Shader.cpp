@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Shader.h"
 using namespace Microsoft::WRL;
-using namespace VkContext;
 
 std::string Shader::ShaderAsString(const char* shaderFilePath)
 {

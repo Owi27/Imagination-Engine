@@ -77,6 +77,7 @@ class VulkanRenderer : public Renderer
 
 	//mat4 matrices[3];
 
+	std::unique_ptr<VulkanContext> _vkContext = std::make_unique<VulkanContext>(_win);
 	//VulkanContext* _vk = VulkanContext::GetInst(_win);
 
 	void CompileShaders();
@@ -91,6 +92,7 @@ class VulkanRenderer : public Renderer
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);
+	void Playground();
 
 public:
 	VulkanRenderer(GWindow win);

@@ -95,6 +95,9 @@
     <ClInclude Include="CompositionRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanDescriptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\FragmentShader.hlsl">
