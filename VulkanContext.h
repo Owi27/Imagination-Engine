@@ -33,7 +33,7 @@ public:
 
 	}
 
-	VulkanContext(GWindow win)
+	VulkanContext(GWindow& win)
 	{
 #ifndef NDEBUG
 		std::vector<const char*> debugLayers =
@@ -46,7 +46,7 @@ public:
 			"VK_KHR_dynamic_rendering"
 		};
 
-		if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_STENCIL_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false))
+		if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false))
 #else
 		if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER))
 #endif

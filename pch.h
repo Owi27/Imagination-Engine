@@ -52,4 +52,3 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 #include "FrameGraph.h"
 #include "VulkanDescriptions.h"
 #include "VulkanContext.h"
-

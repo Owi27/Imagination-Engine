@@ -14,7 +14,7 @@ class Shader
 	VkShaderStageFlagBits _shaderStageFlagBits;
 	VkPipelineShaderStageCreateInfo _pssci;
 	std::shared_ptr<VulkanContext> _vk;
-	const char* _entryPointName = "main";
+	std::string _entryPointName = "main";
 
 	std::string ShaderAsString(const char* shaderFilePath);
 
@@ -110,13 +110,12 @@ public:
 
 	~Shader()
 	{
-		delete[] _entryPointName;
 		vkDestroyShaderModule(_vk.get()->GetDevice(), _shaderModule, nullptr);
 	}
 
 	VkShaderModule GetVkShaderModule() const { return _shaderModule; }
 	VkShaderStageFlagBits GetVkShaderStageFlagBits() const { return _shaderStageFlagBits; }
-	const char* GetEntryPointName() const { return _entryPointName; }
+	std::string GetEntryPointName() const { return _entryPointName; }
 	
-	void SetEntryPointName(const char* entryPointName) { _entryPointName = entryPointName; }
+	void SetEntryPointName(std::string entryPointName) { _entryPointName = entryPointName; }
 };

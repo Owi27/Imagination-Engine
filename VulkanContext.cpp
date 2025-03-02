@@ -24,14 +24,14 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			.stage = pipelineDescription.fragmentShader.get()->GetVkShaderStageFlagBits(),
 			.module = pipelineDescription.fragmentShader.get()->GetVkShaderModule(),
-			.pName = pipelineDescription.fragmentShader.get()->GetEntryPointName()
+			.pName = pipelineDescription.fragmentShader.get()->GetEntryPointName().c_str()
 		},
 		//vertex
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			.stage = pipelineDescription.vertexShader.get()->GetVkShaderStageFlagBits(),
 			.module = pipelineDescription.vertexShader.get()->GetVkShaderModule(),
-			.pName = pipelineDescription.vertexShader.get()->GetEntryPointName()
+			.pName = pipelineDescription.vertexShader.get()->GetEntryPointName().c_str()
 		}
 	};
 
@@ -127,8 +127,8 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	{
 		.x = 0,
 		.y = 0,
-		.width = _width,
-		.height = _height,
+		.width = static_cast<float>(_width),
+		.height = static_cast<float>(_height),
 		.minDepth = 0,
 		.maxDepth = 1
 	};
@@ -241,7 +241,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
 		.logicOpEnable = false,
 		.logicOp = VK_LOGIC_OP_COPY,
-		.attachmentCount = pipelineColorBlendAttachmentStates.size(),
+		.attachmentCount = (unsigned)pipelineColorBlendAttachmentStates.size(),
 		.pAttachments = pipelineColorBlendAttachmentStates.data(),
 		.blendConstants = { {0.f}, {0.f},{0.f},{0.f}}
 	};

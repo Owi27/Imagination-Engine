@@ -1381,7 +1381,6 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 
 void VulkanRenderer::Playground()
 {
-
 	VkPipelineLayout pipelineLayout;
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
 	pipelineLayoutCreateInfo.setLayoutCount = 0;
@@ -1389,13 +1388,13 @@ void VulkanRenderer::Playground()
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	//pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 
-	vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+	vkCreatePipelineLayout(_vkContext.get()->GetDevice(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
 
 
 	VkPipeline test = _vkContext.get()->CreateGraphicsPipeline(
 		{
-			.vertexShader = std::make_shared<Shader>("VertexShader", VERTEX_SHADER),
-			.fragmentShader = std::make_shared<Shader>("FragmentShader", PIXEL_SHADER),
+			.vertexShader = std::make_shared<Shader>(*_vkContext, "VertexShader", VERTEX_SHADER),
+			.fragmentShader = std::make_shared<Shader>(*_vkContext, "FragmentShader", PIXEL_SHADER),
 		}, pipelineLayout);
 }
 
@@ -1418,7 +1417,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 #else
 	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER)) return; //return if creation didn't work
 #endif
-
+	
 	_vlk.GetDevice((void**)&_device);
 	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
 	_vlk.GetCommandPool((void**)&_commandPool);
