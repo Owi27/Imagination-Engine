@@ -48,7 +48,8 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 
 #include "Structs.h"
 #include "Components.h"
+#include "VulkanDescriptions.h"
+#include "VulkanResources.h"
+#include "VulkanContext.h"
 #include "RenderPass.h"
 #include "FrameGraph.h"
-#include "VulkanDescriptions.h"
-#include "VulkanContext.h"

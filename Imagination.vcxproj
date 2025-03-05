@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CompositionRenderPass.cpp" />
+    <ClCompile Include="FrameGraph.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="OffscreenRenderPass.cpp" />
@@ -146,11 +147,13 @@
     <ClCompile Include="RenderPass.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="VulkanContext.cpp" />
+    <ClCompile Include="VulkanResources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components.h" />
     <ClInclude Include="CompositionRenderPass.h" />
     <ClInclude Include="DEBUG.h" />
+    <ClInclude Include="dFrameGraph.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="Gateware\Gateware.h" />
     <ClInclude Include="Material.h" />
@@ -164,6 +167,7 @@
     <ClInclude Include="Structs.h" />
     <ClInclude Include="VulkanContext.h" />
     <ClInclude Include="VulkanDescriptions.h" />
+    <ClInclude Include="VulkanResources.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\FragmentShader.hlsl">

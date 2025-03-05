@@ -260,9 +260,20 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.pDynamicStates = dynamicState
 	};
 
+	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+		.colorAttachmentCount = colorAttachmentCount,
+		.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
+		.depthAttachmentFormat = pipelineDescription.depthFormat,
+		.stencilAttachmentFormat = pipelineDescription.depthFormat
+	};
+	
+	
 	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.pNext = &pipelineRenderingCreateInfo,
 		.stageCount = 2,
 		.pStages = pipelineShaderStageCreateInfos,
 		.pVertexInputState = &pipelineVertexInputStateCreateInfo,
@@ -273,10 +284,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.pDepthStencilState = &pipelineDepthStencilStateCreateInfo,
 		.pColorBlendState = &pipelineColorBlendStateCreateInfo,
 		.pDynamicState = &pipelineDynamicStateCreateInfo,
-		.layout = pipelineLayout,
-		//.renderPass = node.frameBuffer.renderPass;
-		.subpass = 0,
-		.basePipelineHandle = nullptr
+		.layout = pipelineLayout
 	};
 		
 	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);

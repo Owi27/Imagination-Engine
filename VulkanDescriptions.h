@@ -38,8 +38,6 @@ enum FrontFace : unsigned char
 	COUNTER_CLOCKWISE
 };
 
-
-
 struct PipelineDescription
 {
 	Topology topology = TRIANGLE_TOPOLOGY;
@@ -49,10 +47,11 @@ struct PipelineDescription
 	std::shared_ptr<Shader> fragmentShader;
 	//... rest of shader types
 
-
+	std::vector<VkFormat> colorAttachmentFormats;
 	VkFormat depthFormat;
 
 	PolygonMode polygonMode = FILL;
 	CullMode cullMode = NONE;
 	FrontFace frontFace = COUNTER_CLOCKWISE;
 };
+

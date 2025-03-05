@@ -1,38 +1,38 @@
 #pragma once
 
-struct Buffer
-{
-	VkBuffer buffer;
-	VkDeviceMemory memory;
-};
+//struct Buffer
+//{
+//	VkBuffer buffer;
+//	VkDeviceMemory memory;
+//};
+//
+//struct Image
+//{
+//	VkImage image;
+//	VkBuffer buffer;
+//	VkImageView imageView;
+//	VkDeviceMemory memory;
+//};
 
-struct Image
-{
-	VkImage image;
-	VkBuffer buffer;
-	VkImageView imageView;
-	VkDeviceMemory memory;
-};
+//struct Texture
+//{
+//	Image texImage;
+//	VkImageView texImageView;
+//	VkSampler texSampler;
+//};
 
-struct Texture
-{
-	Image texImage;
-	VkImageView texImageView;
-	VkSampler texSampler;
-};
-
-struct FrameBufferTexture
-{
-	Texture texture;
-	VkFormat format;
-};
-
-struct FrameBuffer
-{
-	VkFramebuffer frameBuffer;
-	FrameBufferTexture position, normal, albedo, depth;
-	VkRenderPass renderPass;
-};
+//struct FrameBufferTexture
+//{
+//	Texture texture;
+//	VkFormat format;
+//};
+//
+//struct FrameBuffer
+//{
+//	VkFramebuffer frameBuffer;
+//	FrameBufferTexture position, normal, albedo, depth;
+//	VkRenderPass renderPass;
+//};
 
 struct FrameBufferT
 {
