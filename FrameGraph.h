@@ -21,6 +21,9 @@ public:
 
 	}
 
+	void Bake();
+
 	RenderPass& AddPass(const std::string& name, FrameGraphQueueBit queue);
+
 };
 

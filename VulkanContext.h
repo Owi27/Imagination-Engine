@@ -101,4 +101,6 @@ public:
 	ComPtr<IDxcIncludeHandler> GetIncludeHandler() const { return _includeHandler; }
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
+
+	void StartRendering(unsigned currentBuffer);
 };

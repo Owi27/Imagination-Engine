@@ -80,12 +80,14 @@ class VulkanRenderer : public Renderer
 	std::unique_ptr<VulkanContext> _vkContext = std::make_unique<VulkanContext>(_win);
 	//VulkanContext* _vk = VulkanContext::GetInst(_win);
 
+
+	void OffscreenTest();
 	void CompileShaders();
 	void LoadModel(std::string filename);
 	void CreateGeometryData();
 	void CreateFrameGraphNodes();
 	void CleanUp();
-	void Prepare(FrameGraphNode node);
+	void Prepare();
 	void UploadTextureToGPU(tinygltf::Image& image, Texture* texture);
 	template <typename T>
 	bool DoesVectorContain(std::vector<T> v, T value) { return (std::find(v.begin(), v.end(), value) != v.end()); }

@@ -21,6 +21,12 @@ Renderer::~Renderer()
 {
 }
 
+void VulkanRenderer::OffscreenTest()
+{
+	RenderPass offscreen;
+	
+}
+
 void VulkanRenderer::CompileShaders()
 {
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
@@ -460,181 +466,181 @@ void VulkanRenderer::CreateFrameGraphNodes()
 
 	//			FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>(node.inputResources[2]);
 
-	//			//FRAMEBUFFER
-	//			{
-	//				FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb, depth;
-	//				{
-	//					//Gbuffer Position
-	//					gBufferPos.name = node.outputResources[0];
-	//					gBufferPos.parent = node.name;
-	//					gBufferPos.extent = { _width, _height, 1 };
-	//					gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	//					GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.GetVkMemory());
-	//					GvkHelper::create_image_view(_device, gBufferPos.image.image, gBufferPos.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferPos.image.imageView);
+				//FRAMEBUFFER
+				//{
+				//	FrameGraphImageResource gBufferPos, gBufferNrm, gBufferAlb, depth;
+				//	{
+				//		//Gbuffer Position
+				//		gBufferPos.name = node.outputResources[0];
+				//		gBufferPos.parent = node.name;
+				//		gBufferPos.extent = { _width, _height, 1 };
+				//		gBufferPos.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+				//		GvkHelper::create_image(_physicalDevice, _device, gBufferPos.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferPos.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferPos.image.image, &gBufferPos.image.GetVkMemory());
+				//		GvkHelper::create_image_view(_device, gBufferPos.image.image, gBufferPos.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferPos.image.imageView);
 
-	//					//Gbuffer Normal
-	//					gBufferNrm.name = node.outputResources[1];
-	//					gBufferNrm.parent = node.name;
-	//					gBufferNrm.extent = { _width, _height, 1 };
-	//					gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	//					GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.GetVkMemory());
-	//					GvkHelper::create_image_view(_device, gBufferNrm.image.image, gBufferNrm.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferNrm.image.imageView);
+				//		//Gbuffer Normal
+				//		gBufferNrm.name = node.outputResources[1];
+				//		gBufferNrm.parent = node.name;
+				//		gBufferNrm.extent = { _width, _height, 1 };
+				//		gBufferNrm.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+				//		GvkHelper::create_image(_physicalDevice, _device, gBufferNrm.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferNrm.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferNrm.image.image, &gBufferNrm.image.GetVkMemory());
+				//		GvkHelper::create_image_view(_device, gBufferNrm.image.image, gBufferNrm.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferNrm.image.imageView);
 
-	//					//Gbuffer Albedo
-	//					gBufferAlb.name = node.outputResources[2];
-	//					gBufferAlb.parent = node.name;
-	//					gBufferAlb.extent = { _width, _height, 1 };
-	//					gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
-	//					GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.GetVkMemory());
-	//					GvkHelper::create_image_view(_device, gBufferAlb.image.image, gBufferAlb.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferAlb.image.imageView);
+				//		//Gbuffer Albedo
+				//		gBufferAlb.name = node.outputResources[2];
+				//		gBufferAlb.parent = node.name;
+				//		gBufferAlb.extent = { _width, _height, 1 };
+				//		gBufferAlb.format = VK_FORMAT_R8G8B8A8_UNORM;
+				//		GvkHelper::create_image(_physicalDevice, _device, gBufferAlb.extent, 1, VK_SAMPLE_COUNT_1_BIT, gBufferAlb.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &gBufferAlb.image.image, &gBufferAlb.image.GetVkMemory());
+				//		GvkHelper::create_image_view(_device, gBufferAlb.image.image, gBufferAlb.format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &gBufferAlb.image.imageView);
 
-	//					std::vector<VkFormat> formats =
-	//					{
-	//						VK_FORMAT_D32_SFLOAT_S8_UINT,
-	//						VK_FORMAT_D32_SFLOAT,
-	//						VK_FORMAT_D24_UNORM_S8_UINT,
-	//						VK_FORMAT_D16_UNORM_S8_UINT,
-	//						VK_FORMAT_D16_UNORM
-	//					};
+				//		std::vector<VkFormat> formats =
+				//		{
+				//			VK_FORMAT_D32_SFLOAT_S8_UINT,
+				//			VK_FORMAT_D32_SFLOAT,
+				//			VK_FORMAT_D24_UNORM_S8_UINT,
+				//			VK_FORMAT_D16_UNORM_S8_UINT,
+				//			VK_FORMAT_D16_UNORM
+				//		};
 
-	//					depth.name = node.outputResources[3];
-	//					depth.parent = node.name;
-	//					depth.extent = { _width, _height, 1 };
+				//		depth.name = node.outputResources[3];
+				//		depth.parent = node.name;
+				//		depth.extent = { _width, _height, 1 };
 
-	//					//set format
-	//					GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depth.format);
-	//					GvkHelper::create_image(_physicalDevice, _device, depth.extent, 1, VK_SAMPLE_COUNT_1_BIT, depth.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depth.image.image, &depth.image.GetVkMemory());
-	//					GvkHelper::create_image_view(_device, depth.image.image, depth.format, VK_IMAGE_ASPECT_DEPTH_BIT, 1, nullptr, &depth.image.imageView);
-	//				}
+				//		//set format
+				//		GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depth.format);
+				//		GvkHelper::create_image(_physicalDevice, _device, depth.extent, 1, VK_SAMPLE_COUNT_1_BIT, depth.format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &depth.image.image, &depth.image.GetVkMemory());
+				//		GvkHelper::create_image_view(_device, depth.image.image, depth.format, VK_IMAGE_ASPECT_DEPTH_BIT, 1, nullptr, &depth.image.imageView);
+				//	}
 
-	//				gBufferPos.prepared = true;
-	//				gBufferNrm.prepared = true;
-	//				gBufferAlb.prepared = true;
-	//				depth.prepared = true;
-	//				_frameGraph->AddImageResource(gBufferPos.name, gBufferPos);
-	//				_frameGraph->AddImageResource(gBufferNrm.name, gBufferNrm);
-	//				_frameGraph->AddImageResource(gBufferAlb.name, gBufferAlb);
-	//				_frameGraph->AddImageResource(depth.name, depth);
+				//	gBufferPos.prepared = true;
+				//	gBufferNrm.prepared = true;
+				//	gBufferAlb.prepared = true;
+				//	depth.prepared = true;
+				//	_frameGraph->AddImageResource(gBufferPos.name, gBufferPos);
+				//	_frameGraph->AddImageResource(gBufferNrm.name, gBufferNrm);
+				//	_frameGraph->AddImageResource(gBufferAlb.name, gBufferAlb);
+				//	_frameGraph->AddImageResource(depth.name, depth);
 
-	//				//FrameGraphImageResource* depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
+				//	//FrameGraphImageResource* depthResource = dynamic_cast<FrameGraphImageResource*>(_frameGraph->GetResource(offscreenPass.inputResources[0]));
 
-	//				std::array<VkAttachmentDescription, 4> attachmentDescription;
+				//	std::array<VkAttachmentDescription, 4> attachmentDescription;
 
-	//				for (size_t i = 0; i < 4; i++)
-	//				{
-	//					attachmentDescription[i].flags = 0;
-	//					attachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
-	//					attachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	//					attachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	//					attachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	//					attachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				//	for (size_t i = 0; i < 4; i++)
+				//	{
+				//		attachmentDescription[i].flags = 0;
+				//		attachmentDescription[i].samples = VK_SAMPLE_COUNT_1_BIT;
+				//		attachmentDescription[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				//		attachmentDescription[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+				//		attachmentDescription[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				//		attachmentDescription[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-	//					if (i == 3)
-	//					{
-	//						attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	//						attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	//					}
-	//					else
-	//					{
-	//						attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	//						attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	//					}
-	//				}
+				//		if (i == 3)
+				//		{
+				//			attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				//			attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				//		}
+				//		else
+				//		{
+				//			attachmentDescription[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				//			attachmentDescription[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				//		}
+				//	}
 
-	//				FrameGraphImageResource* posResource = &_frameGraph->GetImageResource(node.outputResources[0]),
-	//					* nrmResource = &_frameGraph->GetImageResource(node.outputResources[1]),
-	//					* albResource = &_frameGraph->GetImageResource(node.outputResources[2]),
-	//					* depthResource = &_frameGraph->GetImageResource(node.outputResources[3]);
+				//	FrameGraphImageResource* posResource = &_frameGraph->GetImageResource(node.outputResources[0]),
+				//		* nrmResource = &_frameGraph->GetImageResource(node.outputResources[1]),
+				//		* albResource = &_frameGraph->GetImageResource(node.outputResources[2]),
+				//		* depthResource = &_frameGraph->GetImageResource(node.outputResources[3]);
 
-	//				//formats
-	//				attachmentDescription[0].format = posResource->format;
-	//				attachmentDescription[1].format = nrmResource->format;
-	//				attachmentDescription[2].format = albResource->format;
-	//				attachmentDescription[3].format = depthResource->format;
+				//	//formats
+				//	attachmentDescription[0].format = posResource->format;
+				//	attachmentDescription[1].format = nrmResource->format;
+				//	attachmentDescription[2].format = albResource->format;
+				//	attachmentDescription[3].format = depthResource->format;
 
-	//				std::vector<VkAttachmentReference> colorAttachmentReference;
-	//				colorAttachmentReference.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-	//				colorAttachmentReference.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
-	//				colorAttachmentReference.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+				//	std::vector<VkAttachmentReference> colorAttachmentReference;
+				//	colorAttachmentReference.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+				//	colorAttachmentReference.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+				//	colorAttachmentReference.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
-	//				VkAttachmentReference depthAttachmentReference;
-	//				depthAttachmentReference.attachment = 3;
-	//				depthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				//	VkAttachmentReference depthAttachmentReference;
+				//	depthAttachmentReference.attachment = 3;
+				//	depthAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	//				VkSubpassDescription subpassDescription;
-	//				subpassDescription.flags = 0;
-	//				subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	//				subpassDescription.pColorAttachments = colorAttachmentReference.data();
-	//				subpassDescription.colorAttachmentCount = colorAttachmentReference.size();
-	//				subpassDescription.pDepthStencilAttachment = &depthAttachmentReference;
-	//				subpassDescription.pInputAttachments = nullptr;
-	//				subpassDescription.inputAttachmentCount = 0;
-	//				subpassDescription.pPreserveAttachments = nullptr;
-	//				subpassDescription.preserveAttachmentCount = 0;
-	//				subpassDescription.pResolveAttachments = nullptr;
+				//	VkSubpassDescription subpassDescription;
+				//	subpassDescription.flags = 0;
+				//	subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+				//	subpassDescription.pColorAttachments = colorAttachmentReference.data();
+				//	subpassDescription.colorAttachmentCount = colorAttachmentReference.size();
+				//	subpassDescription.pDepthStencilAttachment = &depthAttachmentReference;
+				//	subpassDescription.pInputAttachments = nullptr;
+				//	subpassDescription.inputAttachmentCount = 0;
+				//	subpassDescription.pPreserveAttachments = nullptr;
+				//	subpassDescription.preserveAttachmentCount = 0;
+				//	subpassDescription.pResolveAttachments = nullptr;
 
-	//				// Use subpass dependencies for attachment layout transitions
-	//				std::array<VkSubpassDependency, 2> subpassDependencies;
-	//				subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-	//				subpassDependencies[0].dstSubpass = 0;
-	//				subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	//				subpassDependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	//				subpassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	//				subpassDependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	//				subpassDependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+				//	// Use subpass dependencies for attachment layout transitions
+				//	std::array<VkSubpassDependency, 2> subpassDependencies;
+				//	subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+				//	subpassDependencies[0].dstSubpass = 0;
+				//	subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+				//	subpassDependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				//	subpassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+				//	subpassDependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				//	subpassDependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-	//				subpassDependencies[1].srcSubpass = 0;
-	//				subpassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	//				subpassDependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	//				subpassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	//				subpassDependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	//				subpassDependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	//				subpassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+				//	subpassDependencies[1].srcSubpass = 0;
+				//	subpassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+				//	subpassDependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				//	subpassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+				//	subpassDependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				//	subpassDependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+				//	subpassDependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-	//				VkRenderPassCreateInfo renderPassCreateInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	//				renderPassCreateInfo.pAttachments = attachmentDescription.data();
-	//				renderPassCreateInfo.attachmentCount = attachmentDescription.size();
-	//				renderPassCreateInfo.subpassCount = 1;
-	//				renderPassCreateInfo.pSubpasses = &subpassDescription;
-	//				renderPassCreateInfo.dependencyCount = subpassDependencies.size();
-	//				renderPassCreateInfo.pDependencies = subpassDependencies.data();
+				//	VkRenderPassCreateInfo renderPassCreateInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+				//	renderPassCreateInfo.pAttachments = attachmentDescription.data();
+				//	renderPassCreateInfo.attachmentCount = attachmentDescription.size();
+				//	renderPassCreateInfo.subpassCount = 1;
+				//	renderPassCreateInfo.pSubpasses = &subpassDescription;
+				//	renderPassCreateInfo.dependencyCount = subpassDependencies.size();
+				//	renderPassCreateInfo.pDependencies = subpassDependencies.data();
 
-	//				vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &node.frameBuffer.renderPass);
+				//	vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &node.frameBuffer.renderPass);
 
-	//				std::array<VkImageView, 4> imageViews =
-	//				{
-	//					posResource->image.imageView,
-	//					nrmResource->image.imageView,
-	//					albResource->image.imageView,
-	//					depthResource->image.imageView
-	//				};
+				//	std::array<VkImageView, 4> imageViews =
+				//	{
+				//		posResource->image.imageView,
+				//		nrmResource->image.imageView,
+				//		albResource->image.imageView,
+				//		depthResource->image.imageView
+				//	};
 
-	//				VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-	//				frameBufferCreateInfo.renderPass = node.frameBuffer.renderPass;
-	//				frameBufferCreateInfo.pAttachments = imageViews.data();
-	//				frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
-	//				frameBufferCreateInfo.width = _width;
-	//				frameBufferCreateInfo.height = _height;
-	//				frameBufferCreateInfo.layers = 1;
+				//	VkFramebufferCreateInfo frameBufferCreateInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+				//	frameBufferCreateInfo.renderPass = node.frameBuffer.renderPass;
+				//	frameBufferCreateInfo.pAttachments = imageViews.data();
+				//	frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
+				//	frameBufferCreateInfo.width = _width;
+				//	frameBufferCreateInfo.height = _height;
+				//	frameBufferCreateInfo.layers = 1;
 
-	//				vkCreateFramebuffer(_device, &frameBufferCreateInfo, nullptr, &node.frameBuffer.frameBuffer);
+				//	vkCreateFramebuffer(_device, &frameBufferCreateInfo, nullptr, &node.frameBuffer.frameBuffer);
 
-	//				//create sampler
-	//				VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-	//				samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	//				samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	//				samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	//				samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
-	//				samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
-	//				samplerCreateInfo.maxAnisotropy = 1.f;
-	//				samplerCreateInfo.maxLod = 1.f;
-	//				samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
-	//				samplerCreateInfo.minLod = 0;
-	//				samplerCreateInfo.mipLodBias = 0;
-	//				samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+				//	//create sampler
+				//	VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+				//	samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				//	samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				//	samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				//	samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+				//	samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+				//	samplerCreateInfo.maxAnisotropy = 1.f;
+				//	samplerCreateInfo.maxLod = 1.f;
+				//	samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+				//	samplerCreateInfo.minLod = 0;
+				//	samplerCreateInfo.mipLodBias = 0;
+				//	samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-	//				vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
-	//			}
+				//	vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
+				//}
 
 	//			//DESCRIPTOR SET
 	//			{
@@ -1260,12 +1266,9 @@ void VulkanRenderer::CleanUp()
 
 }
 
-void VulkanRenderer::Prepare(FrameGraphNode node)
+void VulkanRenderer::Prepare()
 {
-	for (auto out : node.outputResources)
-	{
-		//_frameGraph->GetResource(out)->prepared = true;
-	}
+	
 }
 
 void VulkanRenderer::UploadTextureToGPU(tinygltf::Image& image, Texture* texture)

@@ -12,6 +12,12 @@ class RenderPass
 	std::shared_ptr<Texture> _depthStencilOutput = nullptr;
 
 public:
+
+	RenderPass()
+	{
+
+	}
+
 	RenderPass(FrameGraph& graph, FrameGraphQueueBit queue)
 	{
 		_graph = graph;

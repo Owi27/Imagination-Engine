@@ -291,3 +291,35 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 
 	return outPipeline;
 }
+
+void VulkanContext::StartRendering(unsigned currentBuffer)
+{
+	VkCommandBuffer commandBuffer;
+
+	VkImageView swapchainImageView;
+
+	_vulkanSurface.GetSwapchainView(currentBuffer, (void**)&swapchainImageView);
+
+	VkRenderingAttachmentInfoKHR renderingAttachmentInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+		.imageView = swapchainImageView,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+	};
+
+	VkRenderingInfo renderingInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.renderArea
+		{
+			.offset = {0, 0},
+			.extent = {_width, _height}
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &renderingAttachmentInfo
+	};
+
+	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+}
