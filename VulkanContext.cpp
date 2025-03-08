@@ -7,12 +7,12 @@ VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 	return _frameBuffer;
 }
 
-VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
+VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
 {
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
 	{
 		std::cout << "Missing a fragment or vertex shader\n";
-		return nullptr;
+		return;
 	}
 
 	VkPipeline outPipeline;
@@ -22,15 +22,15 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		//fragment
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			.stage = pipelineDescription.fragmentShader.get()->GetVkShaderStageFlagBits(),
-			.module = pipelineDescription.fragmentShader.get()->GetVkShaderModule(),
+			.stage = pipelineDescription.fragmentShader.get()->GetShaderStageFlagBits(),
+			.module = pipelineDescription.fragmentShader.get()->GetShaderModule(),
 			.pName = pipelineDescription.fragmentShader.get()->GetEntryPointName().c_str()
 		},
 		//vertex
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			.stage = pipelineDescription.vertexShader.get()->GetVkShaderStageFlagBits(),
-			.module = pipelineDescription.vertexShader.get()->GetVkShaderModule(),
+			.stage = pipelineDescription.vertexShader.get()->GetShaderStageFlagBits(),
+			.module = pipelineDescription.vertexShader.get()->GetShaderModule(),
 			.pName = pipelineDescription.vertexShader.get()->GetEntryPointName().c_str()
 		}
 	};
@@ -292,7 +292,39 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
-void VulkanContext::StartRendering(unsigned currentBuffer)
+VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, std::function<void()> drawCalls)
+{
+	VkCommandBuffer commandBuffer;
+
+	VkRenderingAttachmentInfoKHR renderingAttachmentInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+		.imageView = swapchainImageView,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+	};
+
+	VkRenderingInfo renderingInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.renderArea
+		{
+			.offset = {0, 0},
+			.extent = {_width, _height}
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &renderingAttachmentInfo
+	};
+
+	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+	drawCalls();
+	vkCmdEndRenderingKHR(commandBuffer);
+
+	return commandBuffer;
+}
+
+VkCommandBuffer& VulkanContext::Render(unsigned currentBuffer)
 {
 	VkCommandBuffer commandBuffer;
 

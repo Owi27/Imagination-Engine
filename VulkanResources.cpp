@@ -1,12 +1,38 @@
 #include "pch.h"
 #include "VulkanResources.h"
 
-void Texture::MakeMipLevels()
+void Texture::CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator)
 {
-	GvkHelper::create_mipmaps(_vk.get()->GetDevice(), _vk.get()->GetCommandPool(), _vk.get()->GetGraphicsQueue(), _image, _extent.width, _extent.height, _mipLevels);
+	_extent = extent;
+	_sampleCountFlagBits = msaaBit;
+	_format = format;
+	_imageTiling = tiling;
+	_imageUsageFlags = usageFlags;
+	_imageMemoryPropertyFlags = memoryPropertyFlags;
+
+	GvkHelper::create_image(_vk->GetPhysicalDevice(), _vk->GetDevice(), _extent, _mipLevels, _sampleCountFlagBits, _format, _imageTiling, _imageUsageFlags, _imageMemoryPropertyFlags, allocator, &_image, &_imageMemory);
 }
 
-void Texture::CreateTexture()
+void Texture::CreateImageView(const VkImageAspectFlags& imageAspectFlags, VkAllocationCallbacks* allocator)
 {
-	GvkHelper::create_image(_vk.get()->GetPhysicalDevice(), _vk.get()->GetDevice(), _extent, _mipLevels, VK_SAMPLE_COUNT_4_BIT, _format, VK_IMAGE_TILING_OPTIMAL, _imageUsageFlags, _imageMemoryPropertyFlags, nullptr, &_image, &_imageMemory);
+	_imageAspectFlags = imageAspectFlags;
+	
+	GvkHelper::create_image_view(_vk->GetDevice(), _image, _format, _imageAspectFlags, _mipLevels, allocator, &_imageView);
+}
+
+void Buffer::CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bufferUsageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags)
+{
+	_size = size;
+	_bufferUsageFlags = bufferUsageFlags;
+	_bufferMemoryPropertyFlags = memoryPropertyFlags;
+	
+	GvkHelper::create_buffer(_vk->GetPhysicalDevice(), _vk->GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
+}
+
+void Buffer::WriteToBuffer(const void* dataToWrite)
+{
+	void* data;
+	vkMapMemory(_vk->GetDevice(), _bufferMemory, 0, _size, 0, &data);
+	memcpy(data, dataToWrite, _size);
+	vkUnmapMemory(_vk->GetDevice(), _bufferMemory);
 }

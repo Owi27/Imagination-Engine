@@ -33,7 +33,7 @@ class VulkanRenderer : public Renderer
 	GVulkanSurface _vlk;
 	GEventReceiver _shutdown;
 
-	FrameGraph* _frameGraph = FrameGraph::GetInstance();
+	//FrameGraph* _frameGraph = FrameGraph::GetInstance();
 	GeometryData _geometryData;
 
 	VkQueue _present;

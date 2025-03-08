@@ -8,3 +8,9 @@ void FrameGraph::Bake()
 		pass.get()->Setup();
 	}
 }
+
+RenderPass& FrameGraph::AddPass(const std::string& name, FrameGraphQueueBit queue)
+{
+	RenderPass p;
+	return p;
+}

@@ -25,41 +25,51 @@ public:
 
 class Buffer : public VulkanResource
 {
+	std::shared_ptr<VulkanContext> _vk;
+
 	VkBuffer _buffer;
 	VkDeviceMemory _bufferMemory;
+	VkDeviceSize _size;
+	VkBufferUsageFlags _bufferUsageFlags;
+	VkMemoryPropertyFlags _bufferMemoryPropertyFlags;
 
 public:
-	Buffer()
+	Buffer(VulkanContext& vkContext)
 	{
-
+		_vk = std::make_shared<VulkanContext>(vkContext);
 	}
 
 	~Buffer()
 	{
-
+		vkDestroyBuffer(_vk->GetDevice(), _buffer, nullptr);
+		vkFreeMemory(_vk->GetDevice(), _bufferMemory, nullptr);
 	}
 
-	VkBuffer& GetVkBuffer() { return _buffer; }
-	VkDeviceMemory& GetVkMemory() { return _bufferMemory; }
+	VkBuffer& GetBuffer() { return _buffer; }
+	VkDeviceMemory& GetMemory() { return _bufferMemory; }
+
+	void CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bufferUsageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags);
+	void WriteToBuffer(const void* data);
 };
 
 class Texture : public VulkanResource
 {
+	std::shared_ptr<VulkanContext> _vk;
+
 	VkImage _image;
 	VkImageView _imageView;
 	VkSampler _sampler;
 	VkDeviceMemory _imageMemory;
-
-	std::shared_ptr<VulkanContext> _vk;
-
+	VkImageTiling _imageTiling;
+	VkSampleCountFlagBits _sampleCountFlagBits;
+	VkImageAspectFlags _imageAspectFlags;
 	VkExtent3D _extent;
 	VkFormat _format;
 	unsigned _mipLevels = 0;
 	VkImageUsageFlags _imageUsageFlags;
 	VkMemoryPropertyFlags _imageMemoryPropertyFlags;
-	VkAttachmentDescription _attachmentDescription;
 
-	void MakeMipLevels();
+	VkAttachmentDescription _attachmentDescription;
 
 public:
 	Texture(VulkanContext& vkContext)
@@ -69,16 +79,15 @@ public:
 
 	~Texture()
 	{
-
+		vkDestroyImage(_vk->GetDevice(), _image, nullptr);
+		vkDestroyImageView(_vk->GetDevice(), _imageView, nullptr);
+		vkFreeMemory(_vk->GetDevice(), _imageMemory, nullptr);
 	}
 
-	VkImage& GetVkImage() { return _image; }
+	VkImage& GetImage() { return _image; }
+	VkImageView& GetImageView() { return _imageView; }
 	VkExtent3D& GetExtent() { return _extent; }
 
-	void AddUsageFlags(VkImageUsageFlags& usageFlags) { _imageUsageFlags |= usageFlags; }
-	void AddMemoryFlags(VkMemoryPropertyFlags& memoryPropertyFlags) { _imageMemoryPropertyFlags |= memoryPropertyFlags; }
-	void SetFormat(VkFormat& format) { _format = format; }
-	void SetExtent(unsigned width, unsigned height, unsigned depth = 1) { _extent = { width, height, depth }; }
-
-	void CreateTexture();
+	void CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator = nullptr);
+	void CreateImageView(const VkImageAspectFlags& imageAspectFlags, VkAllocationCallbacks* allocator = nullptr);
 };

@@ -5,7 +5,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
 #include "MathOverloads.h"
-#include "DEBUG.h"
 
 Renderer::Renderer(GWindow win)
 {
@@ -23,7 +22,31 @@ Renderer::~Renderer()
 
 void VulkanRenderer::OffscreenTest()
 {
-	RenderPass offscreen;
+	std::unique_ptr<Texture>
+		pos = std::make_unique<Texture>(_vkContext),
+		nrm = std::make_unique<Texture>(_vkContext),
+		alb = std::make_unique<Texture>(_vkContext),
+		depth = std::make_unique<Texture>(_vkContext);
+
+	std::unique_ptr<Buffer>
+		pBuffer = std::make_unique<Buffer>(_vkContext),
+		nBuffer = std::make_unique<Buffer>(_vkContext),
+		uBuffer = std::make_unique<Buffer>(_vkContext),
+		tBuffer = std::make_unique<Buffer>(_vkContext),
+		iBuffer = std::make_unique<Buffer>(_vkContext);
+
+	pBuffer->CreateBuffer(sizeof(vec3) * _geometryData.positions.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	pBuffer->WriteToBuffer(_geometryData.positions.data());
+	nBuffer->CreateBuffer(sizeof(vec3) * _geometryData.normals.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	nBuffer->WriteToBuffer(_geometryData.normals.data());
+	uBuffer->CreateBuffer(sizeof(vec2) * _geometryData.texCoords.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	uBuffer->WriteToBuffer(_geometryData.texCoords.data());
+	tBuffer->CreateBuffer(sizeof(vec4) * _geometryData.tangents.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	tBuffer->WriteToBuffer(_geometryData.tangents.data());
+	iBuffer->CreateBuffer(sizeof(unsigned) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	iBuffer->WriteToBuffer(_geometryData.indices.data());
+
+
 	
 }
 

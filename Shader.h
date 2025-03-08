@@ -113,8 +113,8 @@ public:
 		vkDestroyShaderModule(_vk.get()->GetDevice(), _shaderModule, nullptr);
 	}
 
-	VkShaderModule GetVkShaderModule() const { return _shaderModule; }
-	VkShaderStageFlagBits GetVkShaderStageFlagBits() const { return _shaderStageFlagBits; }
+	VkShaderModule GetShaderModule() const { return _shaderModule; }
+	VkShaderStageFlagBits GetShaderStageFlagBits() const { return _shaderStageFlagBits; }
 	std::string GetEntryPointName() const { return _entryPointName; }
 	
 	void SetEntryPointName(std::string entryPointName) { _entryPointName = entryPointName; }

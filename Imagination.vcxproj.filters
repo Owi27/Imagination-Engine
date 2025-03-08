@@ -83,9 +83,6 @@
     <ClInclude Include="dFrameGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DEBUG.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>

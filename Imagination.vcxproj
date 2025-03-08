@@ -152,7 +152,6 @@
   <ItemGroup>
     <ClInclude Include="Components.h" />
     <ClInclude Include="CompositionRenderPass.h" />
-    <ClInclude Include="DEBUG.h" />
     <ClInclude Include="dFrameGraph.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="Gateware\Gateware.h" />
