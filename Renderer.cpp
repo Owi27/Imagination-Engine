@@ -27,6 +27,30 @@ void VulkanRenderer::OffscreenTest()
 		nrm = std::make_unique<Texture>(_vkContext),
 		alb = std::make_unique<Texture>(_vkContext),
 		depth = std::make_unique<Texture>(_vkContext);
+ 
+	pos->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	pos->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+	nrm->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	nrm->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+	alb->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	alb->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+
+	VkFormat depthFormat;
+
+	std::vector<VkFormat> formats =
+	{
+		VK_FORMAT_D32_SFLOAT_S8_UINT,
+		VK_FORMAT_D32_SFLOAT,
+		VK_FORMAT_D24_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM
+	};
+
+	GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
+	depth->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	depth->CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
+
+
 
 	std::unique_ptr<Buffer>
 		pBuffer = std::make_unique<Buffer>(_vkContext),
@@ -46,7 +70,7 @@ void VulkanRenderer::OffscreenTest()
 	iBuffer->CreateBuffer(sizeof(unsigned) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	iBuffer->WriteToBuffer(_geometryData.indices.data());
 
-
+	
 	
 }
 

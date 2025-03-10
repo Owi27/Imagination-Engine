@@ -102,5 +102,5 @@ public:
 
 	VkPipeline& CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
 
-	VkCommandBuffer& Render(std::vector<Texture>& textures, std::function<void()> drawCalls);
+	VkCommandBuffer& Render(std::vector<Texture>& textures, Texture& depth, std::function<void()> drawCalls);
 };

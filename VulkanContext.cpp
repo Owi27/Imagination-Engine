@@ -292,14 +292,28 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, std::function<void()> drawCalls)
+VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, Texture& depth, std::function<void()> drawCalls)
 {
 	VkCommandBuffer commandBuffer;
+	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 
-	VkRenderingAttachmentInfoKHR renderingAttachmentInfo
+	for (auto& texture : textures)
+	{
+		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+			.imageView = texture.GetImageView(),
+			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+			.storeOp = VK_ATTACHMENT_STORE_OP_STORE
+		};
+
+		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
+	}
+
+	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = swapchainImageView,
+		.imageView = depth.GetImageView(),
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
 	};
@@ -313,8 +327,9 @@ VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, std::func
 			.extent = {_width, _height}
 		},
 		.layerCount = 1,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &renderingAttachmentInfo
+		.colorAttachmentCount = colorRenderingAttachmentInfos.size(),
+		.pColorAttachments = colorRenderingAttachmentInfos.data(),
+		.pDepthAttachment = &depthRenderingAttachmentInfo
 	};
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
@@ -322,36 +337,4 @@ VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, std::func
 	vkCmdEndRenderingKHR(commandBuffer);
 
 	return commandBuffer;
-}
-
-VkCommandBuffer& VulkanContext::Render(unsigned currentBuffer)
-{
-	VkCommandBuffer commandBuffer;
-
-	VkImageView swapchainImageView;
-
-	_vulkanSurface.GetSwapchainView(currentBuffer, (void**)&swapchainImageView);
-
-	VkRenderingAttachmentInfoKHR renderingAttachmentInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = swapchainImageView,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-	};
-
-	VkRenderingInfo renderingInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.renderArea
-		{
-			.offset = {0, 0},
-			.extent = {_width, _height}
-		},
-		.layerCount = 1,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &renderingAttachmentInfo
-	};
-
-	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
 }
