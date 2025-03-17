@@ -7,7 +7,7 @@ VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 	return _frameBuffer;
 }
 
-VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
+VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
 {
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
 	{
@@ -138,7 +138,7 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 		.offset = {0, 0},
 		.extent = {_width, _height}
 	};
-		
+
 	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -169,6 +169,7 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 		pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_LINE;
 		break;
 	}
+
 	switch (pipelineDescription.cullMode)
 	{
 	case FRONT:
@@ -183,6 +184,7 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 	default:
 		break;
 	}
+
 	switch (pipelineDescription.frontFace)
 	{
 	case CLOCKWISE:
@@ -227,14 +229,8 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 	pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 
 	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates;
-	if (colorAttachmentCount > 1)
-	{
-		pipelineColorBlendAttachmentStates.resize(colorAttachmentCount, pipelineColorBlendAttachmentState);
-	}
-	else
-	{
-		pipelineColorBlendAttachmentStates.push_back(std::move(pipelineColorBlendAttachmentState));
-	}
+	if (colorAttachmentCount > 1) pipelineColorBlendAttachmentStates.resize(colorAttachmentCount, pipelineColorBlendAttachmentState);
+	else pipelineColorBlendAttachmentStates.push_back(std::move(pipelineColorBlendAttachmentState));
 
 	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo
 	{
@@ -268,8 +264,9 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 		.depthAttachmentFormat = pipelineDescription.depthFormat,
 		.stencilAttachmentFormat = pipelineDescription.depthFormat
 	};
-	
-	
+
+	vkCreatePipelineLayout(_device, &pipelineDescription.pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+
 	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -286,13 +283,13 @@ VkPipeline& VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDe
 		.pDynamicState = &pipelineDynamicStateCreateInfo,
 		.layout = pipelineLayout
 	};
-		
+
 	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);
 
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, Texture& depth, std::function<void()> drawCalls)
+VkCommandBuffer& VulkanContext::Render(std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
 	VkCommandBuffer commandBuffer;
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
@@ -302,9 +299,10 @@ VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, Texture& 
 		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-			.imageView = texture.GetImageView(),
+			.imageView = texture->GetImageView(),
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-			.storeOp = VK_ATTACHMENT_STORE_OP_STORE
+			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue = texture->GetClearColorValue()
 		};
 
 		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
@@ -333,7 +331,14 @@ VkCommandBuffer& VulkanContext::Render(std::vector<Texture>& textures, Texture& 
 	};
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
-	drawCalls();
+
+	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+	VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
 	return commandBuffer;

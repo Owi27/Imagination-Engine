@@ -72,6 +72,8 @@ class VulkanRenderer : public Renderer
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	FrameGraph _graph;
+
 	//tinygltf
 	tinygltf::Model _model;
 

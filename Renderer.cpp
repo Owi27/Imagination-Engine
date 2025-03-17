@@ -22,33 +22,105 @@ Renderer::~Renderer()
 
 void VulkanRenderer::OffscreenTest()
 {
-	std::unique_ptr<Texture>
+	RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
+	offscreen.CreatePipeline(
+		{
+			.vertexInput = POSITION | NORMAL | TEXCOORD | TANGENT,
+			.vertexShader = std::make_shared<Shader>(_vkContext, "OffscreenVertexShader", ShaderType::VERTEX_SHADER),
+			.fragmentShader = std::make_shared<Shader>(_vkContext, "OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
+			.cullMode = FRONT,
+			.pipelineLayoutCreateInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+				.setLayoutCount = 0,
+				.pSetLayouts = nullptr,
+				.pushConstantRangeCount = 0
+			}
+		});
+	offscreen.AddTextureOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+	offscreen.AddTextureOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+	offscreen.AddTextureOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+	offscreen.AddDepthOutput("depth");
+
+	UniformBufferOffscreen oub
+	{
+		.world = GW::MATH::GIdentityMatrixF,
+		.deltaTime = 0.f
+	};
+	GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, oub.proj);
+
+	offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	offscreen.AddBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+	offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipeline());
+
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipelineLayout(), 0, 1, &offscreen.GetDescriptorSet(), 0, nullptr);
+
+			std::array<VkBuffer, 4> vertexBuffers =
+			{
+				offscreen.GetBufferOutputs()[0]->GetBuffer(),
+				offscreen.GetBufferOutputs()[1]->GetBuffer(),
+				offscreen.GetBufferOutputs()[2]->GetBuffer(),
+				offscreen.GetBufferOutputs()[3]->GetBuffer(),
+			};
+
+			std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
+			vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+			vkCmdBindIndexBuffer(commandBuffer, iBuffer.buffers[0].GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+			int i = 0;
+			for (auto& node : _model.nodes)
+			{
+				auto& mesh = _model.meshes[node.mesh];
+				for (auto& prim : mesh.primitives)
+				{
+					vkCmdPushConstants(commandBuffer, fgNode.frameBuffer.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
+					vkCmdDrawIndexed(commandBuffer, _drawInfo[i].idxCount, 1, _drawInfo[i].firstIdx, _drawInfo[i].vertexOffset, 0);
+					i++;
+				}
+			}
+
+
+		});
+
+
+	//VkPipelineLayout pipelineLayout;
+	//offscreen.SetPipeline(_vkContext->CreateGraphicsPipeline(offscreen., pipelineLayout));
+
+	/*std::unique_ptr<Texture>
 		pos = std::make_unique<Texture>(_vkContext),
 		nrm = std::make_unique<Texture>(_vkContext),
 		alb = std::make_unique<Texture>(_vkContext),
-		depth = std::make_unique<Texture>(_vkContext);
- 
-	pos->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	pos->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-	nrm->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	nrm->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-	alb->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	alb->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+		depth = std::make_unique<Texture>(_vkContext);*/
 
-	VkFormat depthFormat;
+	//pos->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//pos->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+	//nrm->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//nrm->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+	//alb->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//alb->CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
 
-	std::vector<VkFormat> formats =
-	{
-		VK_FORMAT_D32_SFLOAT_S8_UINT,
-		VK_FORMAT_D32_SFLOAT,
-		VK_FORMAT_D24_UNORM_S8_UINT,
-		VK_FORMAT_D16_UNORM_S8_UINT,
-		VK_FORMAT_D16_UNORM
-	};
+	//VkFormat depthFormat;
 
-	GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
-	depth->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	depth->CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
+	//std::vector<VkFormat> formats =
+	//{
+	//	VK_FORMAT_D32_SFLOAT_S8_UINT,
+	//	VK_FORMAT_D32_SFLOAT,
+	//	VK_FORMAT_D24_UNORM_S8_UINT,
+	//	VK_FORMAT_D16_UNORM_S8_UINT,
+	//	VK_FORMAT_D16_UNORM
+	//};
+
+	//GvkHelper::find_depth_format(_physicalDevice, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
+	//depth->CreateImage({ _width, _height, 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	//depth->CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
 
 
 
@@ -70,8 +142,68 @@ void VulkanRenderer::OffscreenTest()
 	iBuffer->CreateBuffer(sizeof(unsigned) * _geometryData.indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	iBuffer->WriteToBuffer(_geometryData.indices.data());
 
-	
-	
+	PipelineDescription pipelineDescription
+	{
+		.vertexInput = POSITION | NORMAL | TEXCOORD | TANGENT,
+		.vertexShader = std::make_shared<Shader>(_vkContext, "OffscreenVertexShader", ShaderType::VERTEX_SHADER),
+		.fragmentShader = std::make_shared<Shader>(_vkContext, "OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
+		.cullMode = FRONT,
+		.pipelineLayoutCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+			.setLayoutCount = 0,
+			.pSetLayouts = nullptr,
+			.pushConstantRangeCount = 0
+		}
+	};
+
+	VkPipelineLayout pipelineLayout;
+
+	VkCommandBuffer cb;
+
+	_vkContext->CreateGraphicsPipeline(pipelineDescription, pipelineLayout);
+
+	std::vector<Texture> renderTex = { *pos, *nrm, *alb };
+
+	_vkContext->Render(renderTex, *depth, [&](VkCommandBuffer& commandBuffer)
+		{
+			VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+			VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+			vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+			vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, );
+
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, fgNode.frameBuffer.pipelineLayout, 0, 1, &fgNode.frameBuffer.descriptorSet, 0, nullptr);
+
+			std::array<VkBuffer, 4> vertexBuffers =
+			{
+				vBuffer.buffers[0].GetVkBuffer(),
+				vBuffer.buffers[1].GetVkBuffer(),
+				vBuffer.buffers[2].GetVkBuffer(),
+				vBuffer.buffers[3].GetVkBuffer(),
+			};
+
+			std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
+			vkCmdBindVertexBuffers(commandBuffer, 0, vBuffer.buffers.size(), vertexBuffers.data(), offsets.data());
+			vkCmdBindIndexBuffer(commandBuffer, iBuffer.buffers[0].GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+			int i = 0;
+			for (auto& node : _model.nodes)
+			{
+				auto& mesh = _model.meshes[node.mesh];
+				for (auto& prim : mesh.primitives)
+				{
+					vkCmdPushConstants(commandBuffer, fgNode.frameBuffer.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &_drawInfo[i].nodeWorld);
+					vkCmdDrawIndexed(commandBuffer, _drawInfo[i].idxCount, 1, _drawInfo[i].firstIdx, _drawInfo[i].vertexOffset, 0);
+					i++;
+				}
+			}
+
+
+		})
+
 }
 
 void VulkanRenderer::CompileShaders()
@@ -1315,7 +1447,7 @@ void VulkanRenderer::CleanUp()
 
 void VulkanRenderer::Prepare()
 {
-	
+
 }
 
 void VulkanRenderer::UploadTextureToGPU(tinygltf::Image& image, Texture* texture)
@@ -1438,9 +1570,6 @@ void VulkanRenderer::Playground()
 	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 	//pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 
-	vkCreatePipelineLayout(_vkContext.get()->GetDevice(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
-
-
 	VkPipeline test = _vkContext.get()->CreateGraphicsPipeline(
 		{
 			.vertexShader = std::make_shared<Shader>(*_vkContext, "VertexShader", VERTEX_SHADER),
@@ -1467,7 +1596,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 #else
 	if (-_vlk.Create(_win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER)) return; //return if creation didn't work
 #endif
-	
+
 	_vlk.GetDevice((void**)&_device);
 	_vlk.GetPhysicalDevice((void**)&_physicalDevice);
 	_vlk.GetCommandPool((void**)&_commandPool);

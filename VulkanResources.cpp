@@ -31,8 +31,5 @@ void Buffer::CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bu
 
 void Buffer::WriteToBuffer(const void* dataToWrite)
 {
-	void* data;
-	vkMapMemory(_vk->GetDevice(), _bufferMemory, 0, _size, 0, &data);
-	memcpy(data, dataToWrite, _size);
-	vkUnmapMemory(_vk->GetDevice(), _bufferMemory);
+	GvkHelper::write_to_buffer(_vk->GetDevice(), _bufferMemory, dataToWrite, _size);
 }

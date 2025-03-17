@@ -100,7 +100,10 @@ public:
 	ComPtr<IDxcUtils> GetUtils() const { return _utils; }
 	ComPtr<IDxcIncludeHandler> GetIncludeHandler() const { return _includeHandler; }
 
-	VkPipeline& CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
+	unsigned GetWidth() const { return _width; }
+	unsigned GetHeight() const { return _height; }
 
-	VkCommandBuffer& Render(std::vector<Texture>& textures, Texture& depth, std::function<void()> drawCalls);
+	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
+
+	VkCommandBuffer& Render(std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

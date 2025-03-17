@@ -17,9 +17,9 @@ public:
 
 	}
 
-	void SetName(std::string& name) { _name = name; }
-	void WrittenInPass(std::string& pass) { _writtenInPasses.insert(pass); }
-	void ReadInPass(std::string& pass) { _readInPasses.insert(pass); }
+	void SetName(const std::string& name) { _name = name; }
+	void WrittenInPass(const std::string& pass) { _writtenInPasses.insert(pass); }
+	void ReadInPass(const std::string& pass) { _readInPasses.insert(pass); }
 
 };
 
@@ -34,6 +34,11 @@ class Buffer : public VulkanResource
 	VkMemoryPropertyFlags _bufferMemoryPropertyFlags;
 
 public:
+	Buffer()
+	{
+
+	}
+
 	Buffer(VulkanContext& vkContext)
 	{
 		_vk = std::make_shared<VulkanContext>(vkContext);
@@ -71,7 +76,14 @@ class Texture : public VulkanResource
 
 	VkAttachmentDescription _attachmentDescription;
 
+	VkClearColorValue _clearColorValue;
+
 public:
+	Texture()
+	{
+
+	}
+
 	Texture(VulkanContext& vkContext)
 	{
 		_vk = std::make_shared<VulkanContext>(vkContext);
@@ -87,6 +99,9 @@ public:
 	VkImage& GetImage() { return _image; }
 	VkImageView& GetImageView() { return _imageView; }
 	VkExtent3D& GetExtent() { return _extent; }
+	VkClearColorValue& GetClearColorValue() { return _clearColorValue; }
+
+	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 
 	void CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator = nullptr);
 	void CreateImageView(const VkImageAspectFlags& imageAspectFlags, VkAllocationCallbacks* allocator = nullptr);

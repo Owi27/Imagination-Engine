@@ -4,10 +4,10 @@
 
 enum VertexInput
 {
-	POSITION = 1 << 0,
-	NORMAL = 1 << 1,
-	TEXCOORD = 1 << 2,
-	TANGENT = 1 << 3
+	POSITION = (1 << 0),
+	NORMAL = (1 << 1),
+	TEXCOORD = (1 << 2),
+	TANGENT = (1 << 3)
 };
 
 enum Topology : unsigned char
@@ -41,7 +41,7 @@ enum FrontFace : unsigned char
 struct PipelineDescription
 {
 	Topology topology = TRIANGLE_TOPOLOGY;
-	VertexInput vertexInput;
+	unsigned vertexInput;
 
 	std::shared_ptr<Shader> vertexShader;
 	std::shared_ptr<Shader> fragmentShader;
@@ -53,5 +53,7 @@ struct PipelineDescription
 	PolygonMode polygonMode = FILL;
 	CullMode cullMode = NONE;
 	FrontFace frontFace = COUNTER_CLOCKWISE;
+
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
 };
 
