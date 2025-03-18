@@ -7,7 +7,7 @@ class Texture;
 
 class VulkanContext
 {
-	static inline VulkanContext* _vulkanContext = nullptr;
+	static inline std::unique_ptr<VulkanContext> _vulkanContext = nullptr;
 	GVulkanSurface _vulkanSurface;
 
 	//vulkan
@@ -28,6 +28,8 @@ class VulkanContext
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR;
+	PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR;
 
 public:
 	VulkanContext()
@@ -69,7 +71,13 @@ public:
 			_utils->CreateDefaultIncludeHandler(&_includeHandler);
 			std::filesystem::create_directories("Shaders/SPV");
 		}
+
+		vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdBeginRenderingKHR");
+		vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdEndRenderingKHR");
 	}
+
+	VulkanContext(const VulkanContext&) = delete;
+	VulkanContext& operator=(const VulkanContext&) = delete;
 
 	~VulkanContext()
 	{
@@ -77,16 +85,16 @@ public:
 
 	static VulkanContext* GetInst()
 	{
-		if (!_vulkanContext) _vulkanContext = new VulkanContext();
+		if (!_vulkanContext) return nullptr;
 
-		return _vulkanContext;
+		return _vulkanContext.get();
 	}
 
 	static VulkanContext* GetInst(GWindow win)
 	{
-		if (!_vulkanContext) _vulkanContext = new VulkanContext(win);
+		if (!_vulkanContext) _vulkanContext = std::make_unique<VulkanContext>(win);
 
-		return _vulkanContext;
+		return _vulkanContext.get();
 	}
 
 	VkDevice GetDevice() const { return _device; }
@@ -107,5 +115,5 @@ public:
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
 
-	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

@@ -72,6 +72,7 @@ class VulkanRenderer : public Renderer
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	VulkanContext& _vk;
 	FrameGraph _graph;
 
 	//tinygltf
@@ -80,7 +81,6 @@ class VulkanRenderer : public Renderer
 	std::vector<Renderable> _renderables;
 	//mat4 matrices[3];
 
-	std::unique_ptr<VulkanContext> _vkContext = std::make_unique<VulkanContext>(_win);
 	//VulkanContext* _vk = VulkanContext::GetInst(_win);
 
 

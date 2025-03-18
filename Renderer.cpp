@@ -22,10 +22,10 @@ Renderer::~Renderer()
 
 void VulkanRenderer::OffscreenTest()
 {
-	auto& model = _model;
+	//auto& model = _model;
 
 	//VkPipelineLayout pipelineLayout;
-	//offscreen.SetPipeline(_vkContext->CreateGraphicsPipeline(offscreen., pipelineLayout));
+	//offscreen.SetPipeline(_vk.CreateGraphicsPipeline(offscreen., pipelineLayout));
 
 	/*std::unique_ptr<Texture>
 		pos = std::make_unique<Texture>(_vkContext),
@@ -94,11 +94,11 @@ void VulkanRenderer::OffscreenTest()
 
 		//VkCommandBuffer cb;
 
-		//_vkContext->CreateGraphicsPipeline(pipelineDescription, pipelineLayout);
+		//_vk.CreateGraphicsPipeline(pipelineDescription, pipelineLayout);
 
 		//std::vector<Texture> renderTex = { *pos, *nrm, *alb };
 
-		//_vkContext->Render(renderTex, *depth, [&](VkCommandBuffer& commandBuffer)
+		//_vk.Render(renderTex, *depth, [&](VkCommandBuffer& commandBuffer)
 		//	{
 		//		VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
 		//		VkRect2D scissor = { {0, 0}, {_width, _height} };
@@ -1498,21 +1498,21 @@ std::string VulkanRenderer::ShaderAsString(const char* shaderFilePath)
 
 void VulkanRenderer::Playground()
 {
-	VkPipelineLayout pipelineLayout;
-	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	pipelineLayoutCreateInfo.setLayoutCount = 0;
-	pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-	pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-	//pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+	//VkPipelineLayout pipelineLayout;
+	//VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+	//pipelineLayoutCreateInfo.setLayoutCount = 0;
+	//pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+	//pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+	////pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 
-	VkPipeline test = _vkContext.get()->CreateGraphicsPipeline(
-		{
-			.vertexShader = std::make_shared<Shader>(*_vkContext, "VertexShader", VERTEX_SHADER),
-			.fragmentShader = std::make_shared<Shader>(*_vkContext, "FragmentShader", PIXEL_SHADER),
-		}, pipelineLayout);
+	//VkPipeline test = _vkContext.get()->CreateGraphicsPipeline(
+	//	{
+	//		.vertexShader = std::make_shared<Shader>("VertexShader", VERTEX_SHADER),
+	//		.fragmentShader = std::make_shared<Shader>("FragmentShader", PIXEL_SHADER),
+	//	}, pipelineLayout);
 }
 
-VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
+VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext::GetInst(_win))
 {
 	//Playground();
 /*
@@ -1545,10 +1545,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	for (size_t i = 0; i < MAX_FRAMES; i++)
-		vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore[i]);
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
-	vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
+		vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore[i]);
+	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
+	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
 
 	_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
@@ -1561,7 +1561,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win)
 	VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
 	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Optional: Start in signaled state
 	for (size_t i = 0; i < MAX_FRAMES; i++)
-		vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
+		vkCreateFence(_vk.GetDevice(), &fenceCreateInfo, nullptr, &_fences[i]);
 
 
 	_shutdown.Create(_vlk, [&]()
@@ -1579,16 +1579,16 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
-	vkResetFences(_device, 1, &_fences[_currentFrame]);
+	vkWaitForFences(_vk.GetDevice(), 1, &_fences[_currentFrame], true, UINT64_MAX);
+	vkResetFences(_vk.GetDevice(), 1, &_fences[_currentFrame]);
 
 	RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
 	offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
 	offscreen.SetPipelineInfo(
 		{
 			.vertexInput = POSITION | NORMAL | TEXCOORD | TANGENT,
-			.vertexShader = std::make_shared<Shader>(_vkContext, "OffscreenVertexShader", ShaderType::VERTEX_SHADER),
-			.fragmentShader = std::make_shared<Shader>(_vkContext, "OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
+			.vertexShader = std::make_shared<Shader>("OffscreenVertexShader", ShaderType::VERTEX_SHADER),
+			.fragmentShader = std::make_shared<Shader>("OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
 			.cullMode = FRONT,
 			.pipelineLayoutCreateInfo
 			{
@@ -1643,11 +1643,11 @@ void VulkanRenderer::Render()
 		});
 
 
-	VkCommandBuffer commandBuffer;
+	//VkCommandBuffer commandBuffer;
 	//_frameGraph->Execute(commandBuffer);
 
 	unsigned int frameIdx = 0;
-	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
+	vkAcquireNextImageKHR(_vk.GetDevice(), _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
 	_submitInfo.pSignalSemaphores = &offscreen.GetSemaphore();

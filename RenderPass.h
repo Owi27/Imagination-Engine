@@ -1,16 +1,19 @@
 #pragma once
+class Buffer;
 class Texture;
+class FrameGraph;
+enum FrameGraphQueueBit;
 
 class RenderPass
 {
-	std::shared_ptr<VulkanContext> _vk;
+	VulkanContext& _vk;
 	FrameGraph& _graph;
 	std::string _name;
 	FrameGraphQueueBit _queue;
-	std::vector<std::shared_ptr<Texture>> _colorInputs;
-	std::vector<std::shared_ptr<Texture>> _colorOutputs;
-	std::vector<std::shared_ptr<Buffer>> _bufferInputs;
-	std::vector<std::shared_ptr<Buffer>> _bufferOutputs;
+	std::vector<Texture*> _colorInputs;
+	std::vector<Texture*> _colorOutputs;
+	std::vector<Buffer*> _bufferInputs;
+	std::vector<Buffer*> _bufferOutputs;
 	std::shared_ptr<Texture> _depthStencilInput = nullptr;
 	std::shared_ptr<Texture> _depthStencilOutput = nullptr;
 
@@ -34,13 +37,10 @@ class RenderPass
 	bool _usingPushConstant = false;
 
 public:
-	RenderPass(VulkanContext& vk, FrameGraph& graph, FrameGraphQueueBit queue) : _graph(graph)
+	RenderPass(FrameGraph& graph, FrameGraphQueueBit queue) : _vk(*VulkanContext::GetInst()), _graph(graph), _queue(queue)
 	{
-		_vk = std::make_shared<VulkanContext>(vk);
-		_queue = queue;
-
 		VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-		vkCreateSemaphore(_vk->GetDevice(), &semaphoreCreateInfo, nullptr, &_semaphore);
+		vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_semaphore);
 	}
 
 	~RenderPass()
@@ -56,9 +56,7 @@ public:
 	void AddDescriptorPoolSize(VkDescriptorPoolSize descriptorPoolSize) { _descriptorPoolSizes.push_back(std::move(descriptorPoolSize)); }
 	void AddDescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding descriptorSetLayoutBinding) { _descriptorSetLayoutBindings.push_back(std::move(descriptorSetLayoutBinding)); }
 
-
-
-	Buffer& GetBuffer(const std::string& name) { return _graph.GetBufferResource(name); }
+	Buffer& GetBuffer(const std::string& name);
 
 	// should have color attachments
 	void Setup();
@@ -70,10 +68,11 @@ public:
 	VkDescriptorSet& GetDescriptorSet() { return _descriptorSet; }
 	VkSemaphore& GetSemaphore() { return _semaphore; }
 
-	std::vector<std::shared_ptr<Buffer>>& GetBufferOutputs() { return _bufferOutputs; }
+	std::vector<Buffer*>& GetBufferOutputs() { return _bufferOutputs; }
 
 	std::vector<Renderable>& GetRenderables() { return _renderables; }
 
+	void SetName(const std::string& name) { _name = name; }
 	void SetPipelineInfo(PipelineDescription pipelineDescription) { _pipelineDescription = std::move(pipelineDescription); }
 	void SetDrawCalls(std::function<void(VkCommandBuffer&)> drawCalls) { _drawCalls = std::move(drawCalls); }
 	void SetRenderables(std::vector<Renderable>& renderables) { _renderables = std::move(renderables); }

@@ -10,19 +10,17 @@ enum ShaderType : unsigned char
 
 class Shader
 {
+	VulkanContext& _vk;
 	VkShaderModule _shaderModule;
 	VkShaderStageFlagBits _shaderStageFlagBits;
 	VkPipelineShaderStageCreateInfo _pssci;
-	std::shared_ptr<VulkanContext> _vk;
 	std::string _entryPointName = "main";
 
 	std::string ShaderAsString(const char* shaderFilePath);
 
 public:
-	Shader(VulkanContext& vkContext, std::string filename, ShaderType shaderType)
+	Shader(std::string filename, ShaderType shaderType) : _vk(*VulkanContext::GetInst())
 	{
-		_vk = std::make_shared<VulkanContext>(vkContext);
-
 		switch (shaderType)
 		{
 		case PIXEL_SHADER:
@@ -85,7 +83,7 @@ public:
 #endif // NDEBUG
 
 		ComPtr<IDxcResult> result;
-		_vk.get()->GetCompiler()->Compile(&sourceBuffer, arguments.data(), arguments.size(), _vk.get()->GetIncludeHandler().Get(), IID_PPV_ARGS(&result));
+		_vk.GetCompiler()->Compile(&sourceBuffer, arguments.data(), arguments.size(), _vk.GetIncludeHandler().Get(), IID_PPV_ARGS(&result));
 
 		// Check for compilation errors
 		ComPtr<IDxcBlobUtf8> errors;
@@ -105,12 +103,12 @@ public:
 		}
 
 		std::string spvPath = "Shaders/SPV/" + filename + ".spv";
-		GvkHelper::create_shader(_vk.get()->GetDevice(), spvPath.c_str(), "main", _shaderStageFlagBits, &_shaderModule, &_pssci);
+		GvkHelper::create_shader(_vk.GetDevice(), spvPath.c_str(), "main", _shaderStageFlagBits, &_shaderModule, &_pssci);
 	}
 
 	~Shader()
 	{
-		vkDestroyShaderModule(_vk.get()->GetDevice(), _shaderModule, nullptr);
+		vkDestroyShaderModule(_vk.GetDevice(), _shaderModule, nullptr);
 	}
 
 	VkShaderModule GetShaderModule() const { return _shaderModule; }

@@ -289,7 +289,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
+VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 

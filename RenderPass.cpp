@@ -12,11 +12,23 @@ Texture& RenderPass::AddTextureInput(std::string name)
 	auto& tex = _graph.GetTextureResource(name);
 	tex.ReadInPass(_name);
 
-	if (std::find(_colorInputs.begin(), _colorInputs.end(), tex) != _colorInputs.end())
-	{
-		return tex;
-	}
-	else _colorInputs.push_back(std::make_shared<Texture>(&tex));
+	//auto itr = find_if(_colorInputs.begin(), _colorInputs.end(), [&](const std::shared_ptr<Texture>& texx)
+	//	{
+	//		return texx->GetImage() == tex.GetImage();
+	//	});
+
+	//if (itr != _colorInputs.end())
+	//{
+	//	return *itr;
+	//}
+
+	auto itr = std::find_if(_colorInputs.begin(), _colorInputs.end(),
+		[&tex](const Texture* other) {
+			return *other == tex; // Use the overloaded == operator
+		});
+
+	if (itr != _colorInputs.end()) return tex;
+	else _colorInputs.push_back(&tex);
 
 	return tex;
 }
@@ -25,16 +37,16 @@ Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat fo
 {
 	auto& tex = _graph.GetTextureResource(name);
 	tex.WrittenInPass(_name);
-	tex.CreateImage({ _vk->GetWidth(), _vk->GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	tex.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
 
-	_colorOutputs.push_back(std::make_shared<Texture>(&tex));
+	_colorOutputs.push_back(&tex);
 
 	if (!input.empty())
 	{
 		auto& inputTex = _graph.GetTextureResource(input);
 		inputTex.ReadInPass(_name);
-		_colorInputs.push_back(std::make_shared<Texture>(&inputTex));
+		_colorInputs.push_back(&inputTex);
 	}
 	else _colorInputs.push_back(nullptr);
 
@@ -57,8 +69,8 @@ Texture& RenderPass::AddDepthOutput(const std::string& name)
 		VK_FORMAT_D16_UNORM
 	};
 
-	GvkHelper::find_depth_format(_vk->GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
-	tex.CreateImage({ _vk->GetWidth(), _vk->GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
+	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	tex.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
 
 	return tex;
@@ -69,11 +81,12 @@ Buffer& RenderPass::AddBufferInput(std::string name)
 	auto& buffer = _graph.GetBufferResource(name);
 	buffer.ReadInPass(_name);
 
-	if (std::find(_bufferInputs.begin(), _bufferInputs.end(), buffer) != _bufferInputs.end())
-	{
-		return buffer;
-	}
-	else _bufferInputs.push_back(std::make_shared<Buffer>(&buffer));
+	auto itr = std::find_if(_bufferInputs.begin(), _bufferInputs.end(),
+		[&buffer](const Buffer* other) {
+			return *other == buffer; // Use the overloaded == operator
+		});
+	if (itr != _bufferInputs.end()) return buffer;
+	else _bufferInputs.push_back(&buffer);
 
 	return buffer;
 }
@@ -85,17 +98,22 @@ Buffer& RenderPass::AddBufferOutput(const std::string& name, unsigned size, void
 	buffer.CreateBuffer(size, usageFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	buffer.WriteToBuffer(data);
 
-	_bufferOutputs.push_back(std::make_shared<Buffer>(&buffer));
+	_bufferOutputs.push_back(&buffer);
 
 	if (!input.empty())
 	{
 		auto& inputBuffer = _graph.GetBufferResource(input);
 		inputBuffer.ReadInPass(_name);
-		_bufferInputs.push_back(std::make_shared<Buffer>(&inputBuffer));
+		_bufferInputs.push_back(&inputBuffer);
 	}
 	else _bufferInputs.push_back(nullptr);
 
 	return buffer;
+}
+
+Buffer& RenderPass::GetBuffer(const std::string& name)
+{
+	return _graph.GetBufferResource(name);
 }
 
 void RenderPass::Setup()
@@ -116,7 +134,7 @@ void RenderPass::Setup()
 			.pPoolSizes = _descriptorPoolSizes.data(),
 		};
 
-		vkCreateDescriptorPool(_vk->GetDevice(), &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
+		vkCreateDescriptorPool(_vk.GetDevice(), &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo
 		{
@@ -125,7 +143,7 @@ void RenderPass::Setup()
 			.pBindings = _descriptorSetLayoutBindings.data()
 		};
 
-		vkCreateDescriptorSetLayout(_vk->GetDevice(), &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
+		vkCreateDescriptorSetLayout(_vk.GetDevice(), &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo
 		{
@@ -135,13 +153,13 @@ void RenderPass::Setup()
 			.pSetLayouts = &_descriptorSetLayout
 		};
 
-		vkAllocateDescriptorSets(_vk->GetDevice(), &descriptorSetAllocateInfo, &_descriptorSet);
+		vkAllocateDescriptorSets(_vk.GetDevice(), &descriptorSetAllocateInfo, &_descriptorSet);
 
 		_pipelineDescription.pipelineLayoutCreateInfo.setLayoutCount = 1;
 		_pipelineDescription.pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
 	}
 
-	_vk->CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
+	_vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
 }
 
 void RenderPass::Execute()
@@ -168,7 +186,7 @@ void RenderPass::Execute()
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);*/
 
-	_vk->Render(_commandBuffer, _colorOutputs, *_depthStencilOutput, _drawCalls);
+	_vk.Render(_commandBuffer, _colorOutputs, *_depthStencilOutput, _drawCalls);
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)
