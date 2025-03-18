@@ -5,6 +5,8 @@ enum FrameGraphQueueBit
 	FRAMEGRAPH_COMPUTE_BIT = 1 << 1
 };
 
+class RenderPass;
+
 class FrameGraph
 {
 

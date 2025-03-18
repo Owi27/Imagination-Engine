@@ -77,6 +77,7 @@ class VulkanRenderer : public Renderer
 	//tinygltf
 	tinygltf::Model _model;
 
+	std::vector<Renderable> _renderables;
 	//mat4 matrices[3];
 
 	std::unique_ptr<VulkanContext> _vkContext = std::make_unique<VulkanContext>(_win);

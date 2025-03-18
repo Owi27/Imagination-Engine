@@ -17,7 +17,7 @@ Texture& RenderPass::AddTextureInput(std::string name)
 		return tex;
 	}
 	else _colorInputs.push_back(std::make_shared<Texture>(&tex));
-	
+
 	return tex;
 }
 
@@ -58,7 +58,7 @@ Texture& RenderPass::AddDepthOutput(const std::string& name)
 	};
 
 	GvkHelper::find_depth_format(_vk->GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
-	tex.CreateImage({ _vk->GetWidth(), _vk->GetHeight(), 1}, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	tex.CreateImage({ _vk->GetWidth(), _vk->GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	tex.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
 
 	return tex;
@@ -100,6 +100,48 @@ Buffer& RenderPass::AddBufferOutput(const std::string& name, unsigned size, void
 
 void RenderPass::Setup()
 {
+	if (_usingPushConstant)
+	{
+		_pipelineDescription.pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		_pipelineDescription.pipelineLayoutCreateInfo.pPushConstantRanges = &_pushConstantRange;
+	}
+
+	if (_descriptorPoolSizes.size() && _descriptorSetLayoutBindings.size())
+	{
+		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+			.maxSets = 1,
+			.poolSizeCount = (unsigned)_descriptorPoolSizes.size(),
+			.pPoolSizes = _descriptorPoolSizes.data(),
+		};
+
+		vkCreateDescriptorPool(_vk->GetDevice(), &descriptorPoolCreateInfo, nullptr, &_descriptorPool);
+
+		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+			.bindingCount = (unsigned)_descriptorSetLayoutBindings.size(),
+			.pBindings = _descriptorSetLayoutBindings.data()
+		};
+
+		vkCreateDescriptorSetLayout(_vk->GetDevice(), &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
+
+		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+			.descriptorPool = _descriptorPool,
+			.descriptorSetCount = 1,
+			.pSetLayouts = &_descriptorSetLayout
+		};
+
+		vkAllocateDescriptorSets(_vk->GetDevice(), &descriptorSetAllocateInfo, &_descriptorSet);
+
+		_pipelineDescription.pipelineLayoutCreateInfo.setLayoutCount = 1;
+		_pipelineDescription.pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
+	}
+
+	_vk->CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
 }
 
 void RenderPass::Execute()
@@ -126,12 +168,11 @@ void RenderPass::Execute()
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);*/
 
-	_vk->Render(_colorOutputs, *_depthStencilOutput, _drawCalls);
+	_vk->Render(_commandBuffer, _colorOutputs, *_depthStencilOutput, _drawCalls);
 }
 
-void RenderPass::CreatePipeline(const PipelineDescription pipelineDescription)
+void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)
 {
-	_pipelineDescription = std::move(pipelineDescription);
-
-	_vk->CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout);
+	_usingPushConstant = true;
+	_pushConstantRange = std::move(pushConstantRange);
 }

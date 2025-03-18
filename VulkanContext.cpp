@@ -12,7 +12,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
 	{
 		std::cout << "Missing a fragment or vertex shader\n";
-		return;
+		return nullptr;
 	}
 
 	VkPipeline outPipeline;
@@ -289,9 +289,8 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
+VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
-	VkCommandBuffer commandBuffer;
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 
 	for (auto& texture : textures)
@@ -325,7 +324,7 @@ VkCommandBuffer& VulkanContext::Render(std::vector<std::shared_ptr<Texture>>& te
 			.extent = {_width, _height}
 		},
 		.layerCount = 1,
-		.colorAttachmentCount = colorRenderingAttachmentInfos.size(),
+		.colorAttachmentCount = (unsigned)colorRenderingAttachmentInfos.size(),
 		.pColorAttachments = colorRenderingAttachmentInfos.data(),
 		.pDepthAttachment = &depthRenderingAttachmentInfo
 	};

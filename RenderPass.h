@@ -22,13 +22,25 @@ class RenderPass
 
 	std::function<void(VkCommandBuffer&)> _drawCalls;
 
+	VkDescriptorPool _descriptorPool;
+	VkDescriptorSetLayout _descriptorSetLayout;
 	VkDescriptorSet _descriptorSet;
+
+	std::vector<VkDescriptorPoolSize> _descriptorPoolSizes;
+	std::vector<VkDescriptorSetLayoutBinding> _descriptorSetLayoutBindings;
+
+	std::vector<Renderable> _renderables;
+	VkPushConstantRange _pushConstantRange;
+	bool _usingPushConstant = false;
 
 public:
 	RenderPass(VulkanContext& vk, FrameGraph& graph, FrameGraphQueueBit queue) : _graph(graph)
 	{
 		_vk = std::make_shared<VulkanContext>(vk);
 		_queue = queue;
+
+		VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+		vkCreateSemaphore(_vk->GetDevice(), &semaphoreCreateInfo, nullptr, &_semaphore);
 	}
 
 	~RenderPass()
@@ -41,6 +53,12 @@ public:
 	Texture& AddDepthOutput(const std::string& name);
 	Buffer& AddBufferInput(std::string name);
 	Buffer& AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
+	void AddDescriptorPoolSize(VkDescriptorPoolSize descriptorPoolSize) { _descriptorPoolSizes.push_back(std::move(descriptorPoolSize)); }
+	void AddDescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding descriptorSetLayoutBinding) { _descriptorSetLayoutBindings.push_back(std::move(descriptorSetLayoutBinding)); }
+
+
+
+	Buffer& GetBuffer(const std::string& name) { return _graph.GetBufferResource(name); }
 
 	// should have color attachments
 	void Setup();
@@ -54,8 +72,11 @@ public:
 
 	std::vector<std::shared_ptr<Buffer>>& GetBufferOutputs() { return _bufferOutputs; }
 
-	void CreatePipeline(const PipelineDescription pipelineDescription);
-	void SetPipeline(VkPipeline& pipeline) { _pipeline = pipeline; }
+	std::vector<Renderable>& GetRenderables() { return _renderables; }
+
+	void SetPipelineInfo(PipelineDescription pipelineDescription) { _pipelineDescription = std::move(pipelineDescription); }
 	void SetDrawCalls(std::function<void(VkCommandBuffer&)> drawCalls) { _drawCalls = std::move(drawCalls); }
+	void SetRenderables(std::vector<Renderable>& renderables) { _renderables = std::move(renderables); }
+	void SetPushConstantRange(VkPushConstantRange pushConstantRange);
 };
 

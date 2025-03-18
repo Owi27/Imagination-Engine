@@ -2,6 +2,8 @@
 using namespace Microsoft::WRL;
 
 struct PipelineDescription;
+class Buffer;
+class Texture;
 
 class VulkanContext
 {
@@ -105,5 +107,5 @@ public:
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
 
-	VkCommandBuffer& Render(std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<std::shared_ptr<Texture>>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

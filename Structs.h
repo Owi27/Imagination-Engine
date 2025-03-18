@@ -229,3 +229,9 @@ struct DrawInfo
 	unsigned int idxCount, firstIdx, vertexOffset;
 	mat4 nodeWorld;
 };
+
+struct Renderable
+{
+	mat4 world;
+	unsigned idxCount, firstIdx, vertexOffset;
+};
