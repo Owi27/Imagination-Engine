@@ -47,7 +47,8 @@ public:
 
 		std::vector<const char*> deviceExt =
 		{
-			"VK_KHR_dynamic_rendering"
+			"VK_KHR_dynamic_rendering",
+			VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
 		};
 
 		if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false))
@@ -64,12 +65,26 @@ public:
 			_vulkanSurface.GetCommandPool((void**)&_commandPool);
 			_vulkanSurface.GetGraphicsQueue((void**)&_graphicsQueue);
 			_vulkanSurface.GetSwapchain((void**)&_swapchain);
+			_vulkanSurface.GetSwapchainImageCount(_maxFramesInFlight);
+			_vulkanSurface.GetAspectRatio(_aspectRatio);
 
 			//dxc
 			DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
 			DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
 			_utils->CreateDefaultIncludeHandler(&_includeHandler);
 			std::filesystem::create_directories("Shaders/SPV");
+
+			for (size_t i = 0; i < _maxFramesInFlight; i++)
+			{
+				VkImage swapchainImage;
+				VkImageView swapchainImageView;
+				VkFormat swapchainFormat;
+
+				_vulkanSurface.GetSwapchainImage(i, (void**)&swapchainImage);
+				_vulkanSurface.GetSwapchainView(i, (void**)&swapchainImageView);
+
+				GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, swapchainImage, VK_FORMAT_UNDEFINED, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			}
 		}
 
 		vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdBeginRenderingKHR");
@@ -97,14 +112,18 @@ public:
 		return _vulkanContext.get();
 	}
 
+	void StartFrame();
+	void EndFrame();
+
 	VkDevice GetDevice() const { return _device; }
 	VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
 	VkInstance GetInstance() const { return _instance; }
 	VkCommandPool GetCommandPool() const { return _commandPool; }
 	VkQueue GetGraphicsQueue() const { return _graphicsQueue; }
-	VkSwapchainKHR GetSwapchain() const { return _swapchain; }
+	VkSwapchainKHR& GetSwapchain() { return _swapchain; }
 	VkRenderPass GetRenderPass() const { return _renderPass; }
 	VkFramebuffer GetFrameBuffer(int idx);
+
 
 	ComPtr<IDxcCompiler3> GetCompiler() const { return _compiler; }
 	ComPtr<IDxcUtils> GetUtils() const { return _utils; }
@@ -112,8 +131,12 @@ public:
 
 	unsigned GetWidth() const { return _width; }
 	unsigned GetHeight() const { return _height; }
+	unsigned GetAspectRatio() const { return _aspectRatio; }
 
-	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount = 1);
+	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, unsigned int arrayElement = 0) const;
+	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorBufferInfo* descriptorBufferInfo, unsigned int arrayElement = 0);
+
+	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
 	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

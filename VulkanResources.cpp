@@ -10,14 +10,14 @@ void Texture::CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits&
 	_imageUsageFlags = usageFlags;
 	_imageMemoryPropertyFlags = memoryPropertyFlags;
 
-	GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, _mipLevels, _sampleCountFlagBits, _format, _imageTiling, _imageUsageFlags, _imageMemoryPropertyFlags, allocator, &_image, &_imageMemory);
+	GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, 1, _sampleCountFlagBits, _format, _imageTiling, _imageUsageFlags, _imageMemoryPropertyFlags, allocator, &_image, &_imageMemory);
 }
 
 void Texture::CreateImageView(const VkImageAspectFlags& imageAspectFlags, VkAllocationCallbacks* allocator)
 {
 	_imageAspectFlags = imageAspectFlags;
 	
-	GvkHelper::create_image_view(_vk.GetDevice(), _image, _format, _imageAspectFlags, _mipLevels, allocator, &_imageView);
+	GvkHelper::create_image_view(_vk.GetDevice(), _image, _format, _imageAspectFlags, 1, allocator, &_imageView);
 }
 
 void Buffer::CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bufferUsageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags)

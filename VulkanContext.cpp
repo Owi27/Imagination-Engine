@@ -1,13 +1,50 @@
 #include "pch.h"
 #include "VulkanContext.h"
 
+void VulkanContext::StartFrame()
+{
+
+}
+
+void VulkanContext::EndFrame()
+{
+}
+
 VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 {
 	_vulkanSurface.GetSwapchainFramebuffer(idx, (void**)&_frameBuffer);
 	return _frameBuffer;
 }
 
-VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout pipelineLayout, unsigned colorAttachmentCount)
+VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, unsigned int arrayElement) const
+{
+	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+	writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
+
+	for (size_t i = 0; i < layoutBindings.size(); i++)
+	{
+		if (layoutBindings[i].binding == destinationBinding)
+		{
+			writeDescriptorSet.descriptorCount = 1;
+			writeDescriptorSet.descriptorType = layoutBindings[i].descriptorType;
+			writeDescriptorSet.dstBinding = destinationBinding;
+			writeDescriptorSet.dstSet = destinationSet;
+			writeDescriptorSet.dstArrayElement = arrayElement;
+			return writeDescriptorSet;
+		}
+	}
+
+	return writeDescriptorSet;
+}
+
+VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorBufferInfo* descriptorBufferInfo, unsigned int arrayElement)
+{
+	VkWriteDescriptorSet writeDescriptorSet = WriteDescriptorSet(destinationSet, layoutBindings, destinationBinding, arrayElement);
+	writeDescriptorSet.pBufferInfo = descriptorBufferInfo;
+	return writeDescriptorSet;
+}
+
+VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount)
 {
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
 	{
@@ -22,16 +59,16 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		//fragment
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			.stage = pipelineDescription.fragmentShader.get()->GetShaderStageFlagBits(),
-			.module = pipelineDescription.fragmentShader.get()->GetShaderModule(),
-			.pName = pipelineDescription.fragmentShader.get()->GetEntryPointName().c_str()
+			.stage = pipelineDescription.fragmentShader->GetShaderStageFlagBits(),
+			.module = pipelineDescription.fragmentShader->GetShaderModule(),
+			.pName = "main"
 		},
 		//vertex
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			.stage = pipelineDescription.vertexShader.get()->GetShaderStageFlagBits(),
-			.module = pipelineDescription.vertexShader.get()->GetShaderModule(),
-			.pName = pipelineDescription.vertexShader.get()->GetEntryPointName().c_str()
+			.stage = pipelineDescription.vertexShader->GetShaderStageFlagBits(),
+			.module = pipelineDescription.vertexShader->GetShaderModule(),
+			.pName = "main"
 		}
 	};
 
@@ -67,51 +104,66 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 
 	if (pipelineDescription.vertexInput & POSITION)
 	{
-		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions(4);
-		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions(4);
+		std::array<VkVertexInputBindingDescription, 4> vertexInputBindingDescriptions;
+		std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescriptions;
+		VkVertexInputBindingDescription vertexInputBindingDescription;
+		VkVertexInputAttributeDescription vertexInputAttributeDescription;
+		
+		vertexInputBindingDescription.binding = 0;
+		vertexInputBindingDescription.stride = sizeof(vec3);
+		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		vertexInputAttributeDescription.binding = 0;
+		vertexInputAttributeDescription.location = 0;
+		vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
+		vertexInputAttributeDescription.offset = 0;
 
-		vertexInputBindingDescriptions[0].binding = 0;
-		vertexInputBindingDescriptions[0].stride = sizeof(vec3);
-		vertexInputBindingDescriptions[0].stride = sizeof(VK_VERTEX_INPUT_RATE_VERTEX);
-		vertexInputAttributeDescriptions[0].binding = 0;
-		vertexInputAttributeDescriptions[0].location = 0;
-		vertexInputAttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		vertexInputAttributeDescriptions[0].offset = 0;
+		vertexInputBindingDescriptions[0] = std::move(vertexInputBindingDescription);
+		vertexInputAttributeDescriptions[0] = std::move(vertexInputAttributeDescription);
+
 		if (pipelineDescription.vertexInput & NORMAL)
 		{
-			vertexInputBindingDescriptions[1].binding = 1;
-			vertexInputBindingDescriptions[1].stride = sizeof(vec3);
-			vertexInputBindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescriptions[1].binding = 1;
-			vertexInputAttributeDescriptions[1].location = 1;
-			vertexInputAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			vertexInputAttributeDescriptions[1].offset = 0;
+			vertexInputBindingDescription.binding = 1;
+			vertexInputBindingDescription.stride = sizeof(vec3);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = 1;
+			vertexInputAttributeDescription.location = 1;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
+			vertexInputAttributeDescription.offset = 0;
+
+			vertexInputBindingDescriptions[1] = std::move(vertexInputBindingDescription);
+			vertexInputAttributeDescriptions[1] = std::move(vertexInputAttributeDescription);
+
 		}
 		if (pipelineDescription.vertexInput & TEXCOORD)
 		{
-			vertexInputBindingDescriptions[2].binding = 2;
-			vertexInputBindingDescriptions[2].stride = sizeof(vec2);
-			vertexInputBindingDescriptions[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescriptions[2].binding = 2;
-			vertexInputAttributeDescriptions[2].location = 2;
-			vertexInputAttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-			vertexInputAttributeDescriptions[2].offset = 0;
+			vertexInputBindingDescription.binding = 2;
+			vertexInputBindingDescription.stride = sizeof(vec2);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = 2;
+			vertexInputAttributeDescription.location = 2;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32_SFLOAT;
+			vertexInputAttributeDescription.offset = 0;
+
+			vertexInputBindingDescriptions[2] = std::move(vertexInputBindingDescription);
+			vertexInputAttributeDescriptions[2] = std::move(vertexInputAttributeDescription);
 		}
 		if (pipelineDescription.vertexInput & TANGENT)
 		{
-			vertexInputBindingDescriptions[3].binding = 3;
-			vertexInputBindingDescriptions[3].stride = sizeof(vec4);
-			vertexInputBindingDescriptions[3].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescriptions[3].binding = 3;
-			vertexInputAttributeDescriptions[3].location = 3;
-			vertexInputAttributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			vertexInputAttributeDescriptions[3].offset = 0;
+			vertexInputBindingDescription.binding = 3;
+			vertexInputBindingDescription.stride = sizeof(vec4);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = 3;
+			vertexInputAttributeDescription.location = 3;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			vertexInputAttributeDescription.offset = 0;
 
+			vertexInputBindingDescriptions[3] = std::move(vertexInputBindingDescription);
+			vertexInputAttributeDescriptions[3] = std::move(vertexInputAttributeDescription);
 		}
 
-		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 4;
+		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = vertexInputBindingDescriptions.size();
 		pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
-		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 4;
+		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexInputAttributeDescriptions.size();
 		pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
 	}
@@ -256,6 +308,8 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.pDynamicStates = dynamicState
 	};
 
+	vkCreatePipelineLayout(_device, &pipelineDescription.pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+
 	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
@@ -264,8 +318,6 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.depthAttachmentFormat = pipelineDescription.depthFormat,
 		.stencilAttachmentFormat = pipelineDescription.depthFormat
 	};
-
-	vkCreatePipelineLayout(_device, &pipelineDescription.pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
 
 	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
@@ -291,28 +343,39 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 
 VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
+	VkCommandBufferBeginInfo commandBufferBeginInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
+	};
+
+	vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 
 	for (auto& texture : textures)
 	{
+		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
 			.imageView = texture->GetImageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-			.clearValue = texture->GetClearColorValue()
+			.clearValue = texture->GetClearColorValue(),
 		};
 
 		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
 	}
 
+	GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth.GetImage(), depth.GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
 		.imageView = depth.GetImageView(),
+		.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+		.clearValue = {.depthStencil = {1.f, 0}}
 	};
 
 	VkRenderingInfo renderingInfo
@@ -340,5 +403,11 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
+	for (auto& texture : textures)
+	{
+		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	}
+
+	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;
 }

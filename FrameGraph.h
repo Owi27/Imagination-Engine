@@ -29,6 +29,11 @@ public:
 
 	RenderPass& AddPass(const std::string& name, FrameGraphQueueBit queue);
 
+	VkSemaphore& GetSemaphore() { return _passes["offscreen"]->GetSemaphore(); }
+	VkCommandBuffer& GetCB() { return _passes["offscreen"]->GetCommandBuffer(); }
+
+	void Execute();
+
 	Texture& GetTextureResource(const std::string& name);
 	Buffer& GetBufferResource(const std::string& name);
 };

@@ -49,6 +49,7 @@ public:
 
 	VkBuffer& GetBuffer() { return _buffer; }
 	VkDeviceMemory& GetMemory() { return _bufferMemory; }
+	VkDeviceSize& GetSize() { return _size; }
 
 	void CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bufferUsageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags);
 	void WriteToBuffer(const void* data);
@@ -100,6 +101,7 @@ public:
 	VkImageView& GetImageView() { return _imageView; }
 	VkExtent3D& GetExtent() { return _extent; }
 	VkClearColorValue& GetClearColorValue() { return _clearColorValue; }
+	VkFormat GetFormat() const { return _format; }
 
 	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 

@@ -12,6 +12,14 @@ RenderPass& FrameGraph::AddPass(const std::string& name, FrameGraphQueueBit queu
 	}
 }
 
+void FrameGraph::Execute()
+{
+	for (auto& pass : _passes)
+	{
+		pass.second->Execute();
+	}
+}
+
 Texture& FrameGraph::GetTextureResource(const std::string& name)
 {
 	if (_textureResources.find(name) != _textureResources.end()) return *_textureResources[name];

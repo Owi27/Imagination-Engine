@@ -14,8 +14,10 @@ class RenderPass
 	std::vector<Texture*> _colorOutputs;
 	std::vector<Buffer*> _bufferInputs;
 	std::vector<Buffer*> _bufferOutputs;
-	std::shared_ptr<Texture> _depthStencilInput = nullptr;
-	std::shared_ptr<Texture> _depthStencilOutput = nullptr;
+	Texture* _depthStencilInput = nullptr;
+	Texture* _depthStencilOutput = nullptr;
+
+	Buffer* _uniformBufferOutput;
 
 	VkCommandBuffer _commandBuffer;
 	VkPipelineLayout _pipelineLayout;
@@ -41,6 +43,18 @@ public:
 	{
 		VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 		vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_semaphore);
+
+		VkCommandBufferAllocateInfo commandBufferAllocateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+			.commandPool = _vk.GetCommandPool(),
+			.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+			.commandBufferCount = 1
+		};
+
+		vkAllocateCommandBuffers(_vk.GetDevice(), &commandBufferAllocateInfo, &_commandBuffer);
+
+
 	}
 
 	~RenderPass()
@@ -53,6 +67,7 @@ public:
 	Texture& AddDepthOutput(const std::string& name);
 	Buffer& AddBufferInput(std::string name);
 	Buffer& AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
+	Buffer& AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
 	void AddDescriptorPoolSize(VkDescriptorPoolSize descriptorPoolSize) { _descriptorPoolSizes.push_back(std::move(descriptorPoolSize)); }
 	void AddDescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding descriptorSetLayoutBinding) { _descriptorSetLayoutBindings.push_back(std::move(descriptorSetLayoutBinding)); }
 

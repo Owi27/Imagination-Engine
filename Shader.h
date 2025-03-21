@@ -115,5 +115,5 @@ public:
 	VkShaderStageFlagBits GetShaderStageFlagBits() const { return _shaderStageFlagBits; }
 	std::string GetEntryPointName() const { return _entryPointName; }
 	
-	void SetEntryPointName(std::string entryPointName) { _entryPointName = entryPointName; }
+	void SetEntryPointName(const std::string& entryPointName) { _entryPointName = entryPointName; }
 };

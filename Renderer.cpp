@@ -239,6 +239,8 @@ void VulkanRenderer::LoadModel(std::string filename)
 		std::cout << "Failed to parse model\n";
 	}
 
+	CreateGeometryData();
+
 	//load textures
 	if (_model.images.size() > 0)
 	{
@@ -1564,6 +1566,77 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		vkCreateFence(_vk.GetDevice(), &fenceCreateInfo, nullptr, &_fences[i]);
 
 
+	{
+		RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
+		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
+		offscreen.SetPipelineInfo(
+			{
+				.vertexInput = POSITION | NORMAL | TEXCOORD | TANGENT,
+				.vertexShader = std::make_shared<Shader>("OffscreenVertexShader", ShaderType::VERTEX_SHADER),
+				.fragmentShader = std::make_shared<Shader>("OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
+				.cullMode = FRONT,
+				.pipelineLayoutCreateInfo
+				{
+					.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+					.setLayoutCount = 0,
+					.pSetLayouts = nullptr,
+					.pushConstantRangeCount = 0
+				}
+			});
+		offscreen.AddTextureOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+		offscreen.AddTextureOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+		offscreen.AddTextureOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+		offscreen.AddDepthOutput("depth");
+
+		UniformBufferOffscreen oub
+		{
+			.world = GW::MATH::GIdentityMatrixF,
+			.deltaTime = 0.f
+		};
+		GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
+		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
+
+		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
+		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
+
+		offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+		offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+
+		offscreen.SetRenderables(_renderables);
+
+		offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
+			{
+				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipeline());
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipelineLayout(), 0, 1, &offscreen.GetDescriptorSet(), 0, nullptr);
+
+				std::array<VkBuffer, 4> vertexBuffers =
+				{
+					offscreen.GetBuffer("position buffer").GetBuffer(),
+					offscreen.GetBuffer("normal buffer").GetBuffer(),
+					offscreen.GetBuffer("texcoord buffer").GetBuffer(),
+					offscreen.GetBuffer("tangent buffer").GetBuffer(),
+				};
+
+				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
+				vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+				vkCmdBindIndexBuffer(commandBuffer, offscreen.GetBuffer("index buffer").GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+				for (auto& renderable : offscreen.GetRenderables())
+				{
+					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
+					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
+				}
+			});
+
+		offscreen.Setup();
+
+	}
+
+
 	_shutdown.Create(_vlk, [&]()
 		{
 			if (+_shutdown.Find(GW::GRAPHICS::GVulkanSurface::Events::RELEASE_RESOURCES, true))
@@ -1582,88 +1655,31 @@ void VulkanRenderer::Render()
 	vkWaitForFences(_vk.GetDevice(), 1, &_fences[_currentFrame], true, UINT64_MAX);
 	vkResetFences(_vk.GetDevice(), 1, &_fences[_currentFrame]);
 
-	RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
-	offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
-	offscreen.SetPipelineInfo(
-		{
-			.vertexInput = POSITION | NORMAL | TEXCOORD | TANGENT,
-			.vertexShader = std::make_shared<Shader>("OffscreenVertexShader", ShaderType::VERTEX_SHADER),
-			.fragmentShader = std::make_shared<Shader>("OffscreenFragmentShader", ShaderType::PIXEL_SHADER),
-			.cullMode = FRONT,
-			.pipelineLayoutCreateInfo
-			{
-				.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-				.setLayoutCount = 0,
-				.pSetLayouts = nullptr,
-				.pushConstantRangeCount = 0
-			}
-		});
-	offscreen.AddTextureOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
-	offscreen.AddTextureOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
-	offscreen.AddTextureOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
-	offscreen.AddDepthOutput("depth");
 
-	UniformBufferOffscreen oub
-	{
-		.world = GW::MATH::GIdentityMatrixF,
-		.deltaTime = 0.f
-	};
-	GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
-	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _aspect, .1f, 256.f, oub.proj);
-
-	offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-	offscreen.AddBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-
-	offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
-		{
-			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipeline());
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipelineLayout(), 0, 1, &offscreen.GetDescriptorSet(), 0, nullptr);
-
-			std::array<VkBuffer, 4> vertexBuffers =
-			{
-				offscreen.GetBuffer("position buffer").GetBuffer(),
-				offscreen.GetBuffer("normal buffer").GetBuffer(),
-				offscreen.GetBuffer("texcoord buffer").GetBuffer(),
-				offscreen.GetBuffer("tangent buffer").GetBuffer(),
-			};
-
-			std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
-			vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-			vkCmdBindIndexBuffer(commandBuffer, offscreen.GetBuffer("index buffer").GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-			for (auto& renderable : offscreen.GetRenderables())
-			{
-				vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
-				vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
-			}
-		});
+	_graph.Execute();
 
 
 	//VkCommandBuffer commandBuffer;
 	//_frameGraph->Execute(commandBuffer);
 
 	unsigned int frameIdx = 0;
-	vkAcquireNextImageKHR(_vk.GetDevice(), _swapchain, 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
+	vkAcquireNextImageKHR(_vk.GetDevice(), _vk.GetSwapchain(), 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
 
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
-	_submitInfo.pSignalSemaphores = &offscreen.GetSemaphore();
+	_submitInfo.pSignalSemaphores = &_graph.GetSemaphore();
 	_submitInfo.commandBufferCount = 1;
-	_submitInfo.pCommandBuffers = &offscreen.GetCommandBuffer();
+	_submitInfo.pCommandBuffers = &_graph.GetCB();
 
-	vkQueueSubmit(_queue, 1, &_submitInfo, nullptr);
+	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, nullptr);
 
 	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = &_swapchain;
+	presentInfo.pSwapchains = &_vk.GetSwapchain();
 	presentInfo.pImageIndices = &frameIdx;
-	presentInfo.pWaitSemaphores = &offscreen.GetSemaphore();
+	presentInfo.pWaitSemaphores = &_graph.GetSemaphore();
 	presentInfo.waitSemaphoreCount = 1;
 
-	vkQueuePresentKHR(_queue, &presentInfo);
+	vkQueuePresentKHR(_vk.GetGraphicsQueue(), &presentInfo);
 	_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
 
 	//_submitInfo.pWaitSemaphores = &_offscreenSemaphore;
