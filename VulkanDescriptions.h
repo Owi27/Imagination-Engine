@@ -43,15 +43,15 @@ struct PipelineDescription
 	Topology topology = TRIANGLE_TOPOLOGY;
 	unsigned vertexInput;
 
-	std::shared_ptr<Shader> vertexShader;
-	std::shared_ptr<Shader> fragmentShader;
+	Shader* vertexShader;
+	Shader* fragmentShader;
 	//... rest of shader types
 
 	std::vector<VkFormat> colorAttachmentFormats;
 	VkFormat depthFormat;
 
 	PolygonMode polygonMode = FILL;
-	CullMode cullMode = NONE;
+	VkCullModeFlags cullMode = VK_CULL_MODE_NONE;
 	FrontFace frontFace = COUNTER_CLOCKWISE;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;

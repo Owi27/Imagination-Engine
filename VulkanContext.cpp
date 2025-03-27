@@ -44,6 +44,13 @@ VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinat
 	return writeDescriptorSet;
 }
 
+VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorImageInfo* descriptorImageInfo, unsigned int arrayElement)
+{
+	VkWriteDescriptorSet writeDescriptorSet = WriteDescriptorSet(destinationSet, layoutBindings, destinationBinding, arrayElement);
+	writeDescriptorSet.pImageInfo = descriptorImageInfo;
+	return writeDescriptorSet;
+}
+
 VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount)
 {
 	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
@@ -108,7 +115,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescriptions;
 		VkVertexInputBindingDescription vertexInputBindingDescription;
 		VkVertexInputAttributeDescription vertexInputAttributeDescription;
-		
+
 		vertexInputBindingDescription.binding = 0;
 		vertexInputBindingDescription.stride = sizeof(vec3);
 		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -205,6 +212,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
 		.depthClampEnable = false,
 		.rasterizerDiscardEnable = false,
+		.cullMode = pipelineDescription.cullMode,
 		.depthBiasEnable = false,
 		.depthBiasConstantFactor = 0.0f,
 		.depthBiasClamp = 0.0f,
@@ -219,21 +227,6 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		break;
 	case LINE:
 		pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_LINE;
-		break;
-	}
-
-	switch (pipelineDescription.cullMode)
-	{
-	case FRONT:
-		pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
-		break;
-	case BACK:
-		pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-		break;
-	case NONE:
-		pipelineRasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE;
-		break;
-	default:
 		break;
 	}
 

@@ -12,6 +12,7 @@ class RenderPass;
 
 class FrameGraph
 {
+
 	std::unordered_map<std::string, std::unique_ptr<RenderPass>> _passes;
 	std::unordered_map<std::string, std::unique_ptr<Texture>> _textureResources;
 	std::unordered_map<std::string, std::unique_ptr<Buffer>> _bufferResources;
@@ -26,6 +27,8 @@ public:
 	{
 
 	}
+
+	FrameGraphBlackboard _blackboard;
 
 	RenderPass& AddPass(const std::string& name, FrameGraphQueueBit queue);
 

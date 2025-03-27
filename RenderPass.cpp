@@ -33,25 +33,19 @@ Texture& RenderPass::AddTextureInput(std::string name)
 	return tex;
 }
 
+void RenderPass::AddTInput(const std::string& name)
+{
+	//_colorOutputs.push_back(&_graph._blackboard.Get<Texture>(name));
+}
+
+void RenderPass::AddTOutput(const std::string& name)
+{
+	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
+}
+
 Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
 {
-	auto& tex = _graph.GetTextureResource(name);
-	tex.WrittenInPass(_name);
-	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	tex.CreateImageView(VK_IMAGE_ASPECT_COLOR_BIT);
-
-	_colorOutputs.push_back(&tex);
-	_pipelineDescription.colorAttachmentFormats.push_back(format);
-
-	if (!input.empty())
-	{
-		auto& inputTex = _graph.GetTextureResource(input);
-		inputTex.ReadInPass(_name);
-		_colorInputs.push_back(&inputTex);
-	}
-	else _colorInputs.push_back(nullptr);
-
-	return tex;
+	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
 }
 
 Texture& RenderPass::AddDepthOutput(const std::string& name)
@@ -137,6 +131,7 @@ void RenderPass::Setup()
 		_pipelineDescription.pipelineLayoutCreateInfo.pPushConstantRanges = &_pushConstantRange;
 	}
 
+	int i = 0;
 	if (_descriptorPoolSizes.size() && _descriptorSetLayoutBindings.size())
 	{
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo
@@ -185,6 +180,18 @@ void RenderPass::Setup()
 
 				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &descriptorBufferInfo));
 			}
+
+			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				VkDescriptorImageInfo descriptorImageInfo
+				{
+					.sampler = _vk.GetSampler(),
+					.imageView = _colorInputs[i++]->GetImageView(),
+					.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				};
+
+				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &descriptorImageInfo));
+			}
 		}
 
 		vkUpdateDescriptorSets(_vk.GetDevice(), writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
@@ -195,36 +202,26 @@ void RenderPass::Setup()
 
 void RenderPass::Execute()
 {
-	/*VkCommandBuffer commandBuffer;
-
-	VkRenderingAttachmentInfoKHR renderingAttachmentInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR
-	};
-
-	VkRenderingInfo renderingInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.renderArea
-		{
-			.offset = {0, 0},
-			.extent = {_colorInputs[0].get()->GetExtent().width, _colorInputs[0].get()->GetExtent().height}
-		},
-		.layerCount = 1,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &renderingAttachmentInfo
-	};
-
-	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);*/
-
-	//GvkHelper::signal_command_start(_vk.GetDevice(), _vk.GetCommandPool(), &_commandBuffer);
 	_vk.Render(_commandBuffer, _colorOutputs, *_depthStencilOutput, _drawCalls);
-	//vkEndCommandBuffer(_commandBuffer);
-	//GvkHelper::signal_command_end(_vk.GetDevice(), _vk.GetGraphicsQueue(), _vk.GetCommandPool(), &_commandBuffer);
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)
 {
 	_usingPushConstant = true;
 	_pushConstantRange = std::move(pushConstantRange);
+}
+
+void RenderPass::SetShaders(const std::string& shaderName)
+{
+	//pixel
+	_shaders.push_back(std::make_shared<Shader>(shaderName + "FragmentShader", FRAGMENT_SHADER));
+	_pipelineDescription.fragmentShader = _shaders.back().get();
+	//vertex
+	_shaders.push_back(std::make_shared<Shader>(shaderName + "VertexShader", VERTEX_SHADER));
+	_pipelineDescription.vertexShader = _shaders.back().get();
+}
+
+void RenderPass::SetComputeShader(const std::string& shaderName)
+{
+	_shaders.push_back(std::make_shared<Shader>(shaderName + "ComputeShader", COMPUTE_SHADER));
 }

@@ -19,6 +19,7 @@ class VulkanContext
 	VkSwapchainKHR _swapchain;
 	VkRenderPass _renderPass;
 	VkFramebuffer _frameBuffer;
+	VkSampler _colorSampler;
 
 	unsigned int _maxFramesInFlight = 0, _width, _height;
 	float _aspectRatio;
@@ -87,6 +88,21 @@ public:
 			}
 		}
 
+		//create sampler
+		VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerCreateInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+		samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+		samplerCreateInfo.maxAnisotropy = 1.f;
+		samplerCreateInfo.maxLod = 1.f;
+		samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+		samplerCreateInfo.minLod = 0;
+		samplerCreateInfo.mipLodBias = 0;
+		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		vkCreateSampler(_device, &samplerCreateInfo, nullptr, &_colorSampler);
+
 		vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdBeginRenderingKHR");
 		vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdEndRenderingKHR");
 	}
@@ -121,6 +137,7 @@ public:
 	VkCommandPool GetCommandPool() const { return _commandPool; }
 	VkQueue GetGraphicsQueue() const { return _graphicsQueue; }
 	VkSwapchainKHR& GetSwapchain() { return _swapchain; }
+	VkSampler GetSampler() const { return _colorSampler; }
 	VkRenderPass GetRenderPass() const { return _renderPass; }
 	VkFramebuffer GetFrameBuffer(int idx);
 
@@ -135,6 +152,7 @@ public:
 
 	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, unsigned int arrayElement = 0) const;
 	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorBufferInfo* descriptorBufferInfo, unsigned int arrayElement = 0);
+	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorImageInfo* descriptorImageInfo, unsigned int arrayElement = 0);
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 

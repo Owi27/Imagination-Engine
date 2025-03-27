@@ -95,6 +95,9 @@
     <ClInclude Include="FrameGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FrameGraphBlackboard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\FragmentShader.hlsl">

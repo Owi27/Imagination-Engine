@@ -38,6 +38,8 @@ class RenderPass
 	VkPushConstantRange _pushConstantRange;
 	bool _usingPushConstant = false;
 
+	std::vector<std::shared_ptr<Shader>> _shaders;
+
 public:
 	RenderPass(FrameGraph& graph, FrameGraphQueueBit queue) : _vk(*VulkanContext::GetInst()), _graph(graph), _queue(queue)
 	{
@@ -53,8 +55,6 @@ public:
 		};
 
 		vkAllocateCommandBuffers(_vk.GetDevice(), &commandBufferAllocateInfo, &_commandBuffer);
-
-
 	}
 
 	~RenderPass()
@@ -63,6 +63,7 @@ public:
 	}
 
 	Texture& AddTextureInput(std::string name);
+	void AddTOutput(const std::string& name);
 	Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
 	Texture& AddDepthOutput(const std::string& name);
 	Buffer& AddBufferInput(std::string name);
@@ -88,9 +89,13 @@ public:
 	std::vector<Renderable>& GetRenderables() { return _renderables; }
 
 	void SetName(const std::string& name) { _name = name; }
-	void SetPipelineInfo(PipelineDescription pipelineDescription) { _pipelineDescription = std::move(pipelineDescription); }
+	//void SetPipelineInfo(PipelineDescription pipelineDescription) { _pipelineDescription = std::move(pipelineDescription); }
 	void SetDrawCalls(std::function<void(VkCommandBuffer&)> drawCalls) { _drawCalls = std::move(drawCalls); }
 	void SetRenderables(std::vector<Renderable>& renderables) { _renderables = std::move(renderables); }
 	void SetPushConstantRange(VkPushConstantRange pushConstantRange);
+	void SetShaders(const std::string& shaderName = "");
+	void SetComputeShader(const std::string& shaderName);
+	void SetVertexInput(unsigned vertexInputs) { _pipelineDescription.vertexInput = vertexInputs; }
+	void SetCullMode(VkCullModeFlags cullMode) { _pipelineDescription.cullMode = cullMode; }
 };
 

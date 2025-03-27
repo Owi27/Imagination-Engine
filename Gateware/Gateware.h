@@ -72792,7 +72792,7 @@ VkResult signal_command_end(const VkDevice& _device, const VkQueue& _graphicsQue
 //Images Creation
 VkResult create_image(const VkPhysicalDevice& _physicalDevice, const VkDevice& _device, const VkExtent3D& _extent, const uint32_t& _mipLevels, const VkSampleCountFlagBits& _msaaBit,
 	const VkFormat& _format, const VkImageTiling& _tiling, const VkImageUsageFlags& _usageFlags, const VkMemoryPropertyFlags& _memoryPropertyFlags, VkAllocationCallbacks* _allocator,
-	VkImage *_outImage, VkDeviceMemory *_outImageMemory)
+	VkImage* _outImage, VkDeviceMemory* _outImageMemory)
 {
 	//Create image info
 	VkImageCreateInfo create_info = {};
@@ -72808,6 +72808,7 @@ VkResult create_image(const VkPhysicalDevice& _physicalDevice, const VkDevice& _
 	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	create_info.samples = _msaaBit;
 	create_info.flags = 0;
+
 
 	//Create the image
 	VkResult r = vkCreateImage(_device, &create_info, _allocator, _outImage);

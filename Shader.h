@@ -3,7 +3,7 @@
 
 enum ShaderType : unsigned char
 {
-	PIXEL_SHADER,
+	FRAGMENT_SHADER,
 	VERTEX_SHADER,
 	COMPUTE_SHADER
 };
@@ -23,7 +23,7 @@ public:
 	{
 		switch (shaderType)
 		{
-		case PIXEL_SHADER:
+		case FRAGMENT_SHADER:
 			_shaderStageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT;
 			break;
 		case VERTEX_SHADER:
@@ -57,7 +57,7 @@ public:
 
 		switch (shaderType)
 		{
-		case PIXEL_SHADER:
+		case FRAGMENT_SHADER:
 			arguments.push_back(L"ps_6_6");
 			break;
 		case VERTEX_SHADER:
@@ -100,10 +100,10 @@ public:
 			std::ofstream outFile(L"Shaders/SPV/" + out, std::ios::binary);
 			outFile.write(static_cast<const char*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize());
 			outFile.close();
-		}
 
-		std::string spvPath = "Shaders/SPV/" + filename + ".spv";
-		GvkHelper::create_shader(_vk.GetDevice(), spvPath.c_str(), "main", _shaderStageFlagBits, &_shaderModule, &_pssci);
+			std::string spvPath = "Shaders/SPV/" + filename + ".spv";
+			GvkHelper::create_shader(_vk.GetDevice(), spvPath.c_str(), "main", _shaderStageFlagBits, &_shaderModule, &_pssci);
+		}
 	}
 
 	~Shader()
@@ -114,6 +114,6 @@ public:
 	VkShaderModule GetShaderModule() const { return _shaderModule; }
 	VkShaderStageFlagBits GetShaderStageFlagBits() const { return _shaderStageFlagBits; }
 	std::string GetEntryPointName() const { return _entryPointName; }
-	
+
 	void SetEntryPointName(const std::string& entryPointName) { _entryPointName = entryPointName; }
 };

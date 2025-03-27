@@ -90,6 +90,22 @@ public:
 
 	}
 
+	Texture(VkImageAspectFlags imageAspectFlags, VkFormat format)
+	{
+		_extent = { _vk.GetWidth(), _vk.GetHeight(), 1 };
+		_sampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT;
+		_format = format;
+		_imageTiling = VK_IMAGE_TILING_OPTIMAL;
+		_imageAspectFlags = imageAspectFlags;
+		//_imageUsageFlags = (_imageAspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+		//_imageMemoryPropertyFlags = VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		_imageUsageFlags = (_imageAspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		_imageMemoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+		GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, 1, _sampleCountFlagBits, _format, _imageTiling, _imageUsageFlags, _imageMemoryPropertyFlags, nullptr, &_image, &_imageMemory);
+		GvkHelper::create_image_view(_vk.GetDevice(), _image, _format, _imageAspectFlags, 1, nullptr, &_imageView);
+	}
+
 	~Texture()
 	{
 		vkDestroyImage(_vk.GetDevice(), _image, nullptr);

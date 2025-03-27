@@ -50,6 +50,7 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 #include "Components.h"
 #include "VulkanDescriptions.h"
 #include "VulkanResources.h"
+#include "FrameGraphBlackboard.hpp"
 #include "VulkanContext.h"
 #include "RenderPass.h"
 #include "FrameGraph.h"
