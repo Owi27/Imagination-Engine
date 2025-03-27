@@ -1558,11 +1558,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
 		offscreen.SetCullMode(VK_CULL_MODE_FRONT_BIT);
 		offscreen.SetShaders("Offscreen");
-		offscreen.AddTextureOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
+		offscreen.AddTOutput("gbuffer position");
 		offscreen.AddTOutput("gbuffer normal");
-		offscreen.AddTextureOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
-		offscreen.AddTextureOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM).SetClearColorValue({ .float32 = {0.f, 0.f, 0.f, 0.f} });
-		offscreen.AddDepthOutput("depth");
+		offscreen.AddTOutput("gbuffer albedo");
+		offscreen.AddDOutput("depth");
 
 		UniformBufferOffscreen oub
 		{
@@ -1616,10 +1615,9 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		RenderPass& lighting = _graph.AddPass("lighting", FRAMEGRAPH_GRAPHICS_BIT);
 		lighting.SetCullMode(VK_CULL_MODE_FRONT_BIT);
 		lighting.SetShaders();
-		lighting.AddTextureInput("gbuffer position");
-		//final.AddTextureInput("gbuffer normal");
-		lighting.AddTextureInput("gbuffer normal");
-		lighting.AddTextureOutput("gbuffer albedo");
+		lighting.AddTInput("gbuffer position");
+		lighting.AddTInput("gbuffer normal");
+		lighting.AddTInput("gbuffer albedo");
 		//final.AddDepthOutput("depth");
 
 			//				UniformBufferFinal data;
@@ -1655,6 +1653,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 			oub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 			oub.lights[i].radius = 5.f;
 		}
+		lighting.AddUniformBufferOutput("lighting uniform buffer", sizeof(UniformBufferFinal), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 3 });
@@ -1665,23 +1664,9 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTOutput("lighting out");
 		lighting.SetDrawCalls([&lighting](VkCommandBuffer& commandBuffer)
 			{
-				//GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
-				//vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-				//VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
-				//VkRect2D scissor = { {0, 0}, {_width, _height} };
-
-				//vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-				//vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipelineLayout(), 0, 1, &lighting.GetDescriptorSet(), 0, nullptr);
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipeline());
 				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-				//vkCmdEndRenderPass(commandBuffer);
-			//	vkEndCommandBuffer(commandBuffer);
-				//_commandBuffers[1].push_back(commandBuffer);
-				//GvkHelper::signal_command_end(_device, _queue, _commandPool, &commandBuffer);
-
 			});
 
 		lighting.Setup();
@@ -1720,20 +1705,20 @@ void VulkanRenderer::Render()
 	_submitInfo.commandBufferCount = 1;
 	_submitInfo.pCommandBuffers = &_graph.GetCB();
 
-	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, _fences[_currentFrame]);
+	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, nullptr);
 
-	_submitInfo.pWaitSemaphores = &_offscreenSemaphore;
-	_submitInfo.pSignalSemaphores = &_compositionSemaphore;
+	_submitInfo.pWaitSemaphores = &_graph.GetSemaphore();
+	_submitInfo.pSignalSemaphores = &_graph.GetSemaphore2();
 	_submitInfo.commandBufferCount = 1;
-	_submitInfo.pCommandBuffers = &_commandBuffers[1][_currentFrame];
+	_submitInfo.pCommandBuffers = &_graph.GetCB2();
 
-	vkQueueSubmit(_queue, 1, &_submitInfo, _fences[_currentFrame]);
+	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, _fences[_currentFrame]);
 
 	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &_vk.GetSwapchain();
 	presentInfo.pImageIndices = &frameIdx;
-	presentInfo.pWaitSemaphores = &_graph.GetSemaphore();
+	presentInfo.pWaitSemaphores = &_graph.GetSemaphore2();
 	presentInfo.waitSemaphoreCount = 1;
 
 	vkQueuePresentKHR(_vk.GetGraphicsQueue(), &presentInfo);

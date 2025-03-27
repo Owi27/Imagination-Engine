@@ -334,7 +334,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture& depth, std::function<void(VkCommandBuffer&)> drawCalls)
+VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
 	VkCommandBufferBeginInfo commandBufferBeginInfo
 	{
@@ -360,16 +360,17 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
 	}
 
-	GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth.GetImage(), depth.GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo
+	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
+	if (depth)
 	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = depth.GetImageView(),
-		.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.clearValue = {.depthStencil = {1.f, 0}}
-	};
+		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
+		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthRenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depthRenderingAttachmentInfo.clearValue = { .depthStencil = {1.f, 0} };
+		depthRenderingAttachmentInfo.resolveMode = VK_RESOLVE_MODE_NONE;
+	}
 
 	VkRenderingInfo renderingInfo
 	{
@@ -382,7 +383,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 		.layerCount = 1,
 		.colorAttachmentCount = (unsigned)colorRenderingAttachmentInfos.size(),
 		.pColorAttachments = colorRenderingAttachmentInfos.data(),
-		.pDepthAttachment = &depthRenderingAttachmentInfo
+		.pDepthAttachment = depth ? &depthRenderingAttachmentInfo : nullptr
 	};
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);

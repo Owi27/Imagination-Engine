@@ -64,6 +64,8 @@ public:
 
 	Texture& AddTextureInput(std::string name);
 	void AddTOutput(const std::string& name);
+	void AddDOutput(const std::string& name);
+	void AddTInput(const std::string& name);
 	Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
 	Texture& AddDepthOutput(const std::string& name);
 	Buffer& AddBufferInput(std::string name);

@@ -35,17 +35,38 @@ Texture& RenderPass::AddTextureInput(std::string name)
 
 void RenderPass::AddTInput(const std::string& name)
 {
-	//_colorOutputs.push_back(&_graph._blackboard.Get<Texture>(name));
+	auto& t = _graph._blackboard.Get<Texture*>(name);
+	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, t->GetImage(), t->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	_colorInputs.push_back(t);
 }
 
 void RenderPass::AddTOutput(const std::string& name)
 {
-	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
+	_pipelineDescription.colorAttachmentFormats.push_back(VK_FORMAT_R16G16B16A16_UNORM);
+	_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM)));
+}
+
+void RenderPass::AddDOutput(const std::string& name)
+{
+	VkFormat depthFormat;
+	std::vector<VkFormat> formats =
+	{
+		VK_FORMAT_D32_SFLOAT_S8_UINT,
+		VK_FORMAT_D32_SFLOAT,
+		VK_FORMAT_D24_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM
+	};
+
+	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
+	_pipelineDescription.depthFormat = depthFormat;
+	_depthStencilOutput = _graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat));
 }
 
 Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
 {
 	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
+	return _graph._blackboard.Get<Texture>(name);
 }
 
 Texture& RenderPass::AddDepthOutput(const std::string& name)
@@ -197,12 +218,13 @@ void RenderPass::Setup()
 		vkUpdateDescriptorSets(_vk.GetDevice(), writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
 	}
 
+	_pipelineDescription.pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	_pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
 }
 
 void RenderPass::Execute()
 {
-	_vk.Render(_commandBuffer, _colorOutputs, *_depthStencilOutput, _drawCalls);
+	_vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)

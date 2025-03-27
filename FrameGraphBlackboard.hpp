@@ -13,9 +13,10 @@ public:
 	FrameGraphBlackboard& operator=(FrameGraphBlackboard&&) noexcept = default;
 
 	template<typename T>
-	void Set(const std::string& name, const T& value)
+	T& Set(const std::string& name, const T& value)
 	{
 		_storage[name] = value;
+		return std::any_cast<T&>(_storage[name]);
 	}
 
 	template<typename T>

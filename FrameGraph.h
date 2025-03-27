@@ -34,6 +34,8 @@ public:
 
 	VkSemaphore& GetSemaphore() { return _passes["offscreen"]->GetSemaphore(); }
 	VkCommandBuffer& GetCB() { return _passes["offscreen"]->GetCommandBuffer(); }
+	VkSemaphore& GetSemaphore2() { return _passes["lighting"]->GetSemaphore(); }
+	VkCommandBuffer& GetCB2() { return _passes["lighting"]->GetCommandBuffer(); }
 
 	void Execute();
 
