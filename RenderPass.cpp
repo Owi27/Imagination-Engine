@@ -35,9 +35,7 @@ Texture& RenderPass::AddTextureInput(std::string name)
 
 void RenderPass::AddTInput(const std::string& name)
 {
-	auto& t = _graph._blackboard.Get<Texture*>(name);
-	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, t->GetImage(), t->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	_colorInputs.push_back(t);
+	_colorInputs.push_back(_graph._blackboard.Get<Texture*>(name));
 }
 
 void RenderPass::AddTOutput(const std::string& name)
@@ -224,6 +222,14 @@ void RenderPass::Setup()
 
 void RenderPass::Execute()
 {
+	for (auto& input : _colorInputs)
+	{
+		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, input->GetImage(), input->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
+	for (auto& output: _colorOutputs)
+	{
+		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _colorOutputs.back()->GetImage(), _colorOutputs.back()->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	}
 	_vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
 }
 

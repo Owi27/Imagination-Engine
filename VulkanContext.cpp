@@ -3,7 +3,9 @@
 
 void VulkanContext::StartFrame()
 {
-
+	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
+	vkResetFences(_device, 1, &_fences[_currentFrame]);
+	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphores[_currentFrame], nullptr, &_currentFrame);
 }
 
 void VulkanContext::EndFrame()

@@ -1545,7 +1545,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 			.world = GW::MATH::GIdentityMatrixF,
 			.deltaTime = 0.f
 		};
-		GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, ubo.view);
+		GMatrix::LookAtLHF(vec4{ 0.f, 10.f, -5.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, ubo.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, ubo.proj);
 
 		_graph._blackboard.Set("ubo", ubo);
@@ -1618,26 +1618,6 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTInput("gbuffer position");
 		lighting.AddTInput("gbuffer normal");
 		lighting.AddTInput("gbuffer albedo");
-		//final.AddDepthOutput("depth");
-
-			//				UniformBufferFinal data;
-	//				{
-	//					FrameGraphBufferResource<UniformBufferOffscreen>& offscreenUB = _frameGraph->GetBufferResource<UniformBufferOffscreen>(node.inputResources[0]);
-	//					auto& offscreenData = offscreenUB.data[0];
-
-	//					data.view = offscreenData.view.row4;
-
-	//					std::default_random_engine gen(777);
-	//					std::uniform_real_distribution<float> distribution(0.f, 1.f);
-	//					std::uniform_real_distribution<float> distribution2(-3.f, 3.f);
-
-	//					for (size_t i = 0; i < 10; i++)
-	//					{
-	//						data.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
-	//						data.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-	//						data.lights[i].radius = 5.f;
-	//					}
-	//				}
 
 		UniformBufferFinal oub
 		{
@@ -1688,18 +1668,15 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::Render()
 {
-	vkWaitForFences(_vk.GetDevice(), 1, &_fences[_currentFrame], true, UINT64_MAX);
-	vkResetFences(_vk.GetDevice(), 1, &_fences[_currentFrame]);
-
-	unsigned int frameIdx = 0;
-	vkAcquireNextImageKHR(_vk.GetDevice(), _vk.GetSwapchain(), 0, _presentCompleteSemaphore[_currentFrame], nullptr, &frameIdx);
-
+	_vk.StartFrame();
 	vkResetCommandBuffer(_graph.GetCB(), 0);
 
 	_graph.Execute();
 
 	//todo: abstraction layer
 	//split between graph and vk
+
+	//todo write queue submit logic for each frame
 	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
 	_submitInfo.pSignalSemaphores = &_graph.GetSemaphore();
 	_submitInfo.commandBufferCount = 1;
@@ -1717,7 +1694,7 @@ void VulkanRenderer::Render()
 	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &_vk.GetSwapchain();
-	presentInfo.pImageIndices = &frameIdx;
+	presentInfo.pImageIndices = &frameIdx; //change to current frame
 	presentInfo.pWaitSemaphores = &_graph.GetSemaphore2();
 	presentInfo.waitSemaphoreCount = 1;
 

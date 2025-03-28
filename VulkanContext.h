@@ -21,8 +21,13 @@ class VulkanContext
 	VkFramebuffer _frameBuffer;
 	VkSampler _colorSampler;
 
-	unsigned int _maxFramesInFlight = 0, _width, _height;
+	VkSemaphore _presentComplete;
+
+	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0;
 	float _aspectRatio;
+
+	std::vector<VkFence> _fences;
+	std::vector<VkSemaphore> _presentCompleteSemaphores;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -68,6 +73,18 @@ public:
 			_vulkanSurface.GetSwapchain((void**)&_swapchain);
 			_vulkanSurface.GetSwapchainImageCount(_maxFramesInFlight);
 			_vulkanSurface.GetAspectRatio(_aspectRatio);
+
+			_fences.resize(_maxFramesInFlight);
+			_presentCompleteSemaphores.resize(_maxFramesInFlight);
+
+			VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+			VkFenceCreateInfo fenceCreateInfo = { .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, .flags = VK_FENCE_CREATE_SIGNALED_BIT };
+
+			for (size_t i = 0; i < _maxFramesInFlight; i++)
+			{
+				vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
+				vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphores[i]);
+			}
 
 			//dxc
 			DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
