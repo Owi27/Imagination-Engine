@@ -66,6 +66,16 @@ public:
 	void AddTOutput(const std::string& name);
 	void AddDOutput(const std::string& name);
 	void AddTInput(const std::string& name);
+
+	//template<typename T>
+	void AddUB(const std::string& name, void* data, unsigned size);
+	//template<typename T>
+	void AddVBOutput(const std::string& name, void* data, unsigned size);
+	//template<typename T>
+	void AddIBOutput(const std::string& name, void* data, unsigned size);
+	//template<typename T>
+	void UpdateUB(const std::string& name);
+
 	Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
 	Texture& AddDepthOutput(const std::string& name);
 	Buffer& AddBufferInput(std::string name);
@@ -100,4 +110,3 @@ public:
 	void SetVertexInput(unsigned vertexInputs) { _pipelineDescription.vertexInput = vertexInputs; }
 	void SetCullMode(VkCullModeFlags cullMode) { _pipelineDescription.cullMode = cullMode; }
 };
-

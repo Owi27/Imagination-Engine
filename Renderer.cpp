@@ -1516,6 +1516,13 @@ void VulkanRenderer::Playground()
 
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext::GetInst(_win))
 {
+
+		
+	mat4 t = GW::MATH::GIdentityMatrixF;
+	_graph._blackboard.Set<void*>("t", &t);
+	auto& rr =_graph._blackboard.Get<void*>("t");
+    mat4 newt = *static_cast<mat4*>(rr);
+
 	LoadModel("Models/Sponza/glTF/Sponza.gltf");
 	CreateFrameGraphNodes();
 
@@ -1562,7 +1569,6 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddTOutput("gbuffer normal");
 		offscreen.AddTOutput("gbuffer albedo");
 		offscreen.AddDOutput("depth");
-
 		UniformBufferOffscreen oub
 		{
 			.world = GW::MATH::GIdentityMatrixF,
@@ -1575,6 +1581,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
 
 		offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		offscreen.AddVBOutput("position data", _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
 		offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
@@ -1585,9 +1592,6 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 
 		offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
 			{
-				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipeline());
-				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, offscreen.GetPipelineLayout(), 0, 1, &offscreen.GetDescriptorSet(), 0, nullptr);
-
 				std::array<VkBuffer, 4> vertexBuffers =
 				{
 					offscreen.GetBuffer("position buffer").GetBuffer(),
@@ -1644,8 +1648,8 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTOutput("lighting out");
 		lighting.SetDrawCalls([&lighting](VkCommandBuffer& commandBuffer)
 			{
-				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipelineLayout(), 0, 1, &lighting.GetDescriptorSet(), 0, nullptr);
-				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipeline());
+				//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipelineLayout(), 0, 1, &lighting.GetDescriptorSet(), 0, nullptr);
+				//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipeline());
 				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 			});
 
@@ -1669,37 +1673,38 @@ VulkanRenderer::~VulkanRenderer()
 void VulkanRenderer::Render()
 {
 	_vk.StartFrame();
-	vkResetCommandBuffer(_graph.GetCB(), 0);
 
 	_graph.Execute();
+
+	_vk.EndFrame();
 
 	//todo: abstraction layer
 	//split between graph and vk
 
 	//todo write queue submit logic for each frame
-	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
-	_submitInfo.pSignalSemaphores = &_graph.GetSemaphore();
-	_submitInfo.commandBufferCount = 1;
-	_submitInfo.pCommandBuffers = &_graph.GetCB();
+	//_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
+	//_submitInfo.pSignalSemaphores = &_graph.GetSemaphore();
+	//_submitInfo.commandBufferCount = 1;
+	//_submitInfo.pCommandBuffers = &_graph.GetCB();
 
-	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, nullptr);
+	//vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, nullptr);
 
-	_submitInfo.pWaitSemaphores = &_graph.GetSemaphore();
-	_submitInfo.pSignalSemaphores = &_graph.GetSemaphore2();
-	_submitInfo.commandBufferCount = 1;
-	_submitInfo.pCommandBuffers = &_graph.GetCB2();
+	//_submitInfo.pWaitSemaphores = &_graph.GetSemaphore();
+	//_submitInfo.pSignalSemaphores = &_graph.GetSemaphore2();
+	//_submitInfo.commandBufferCount = 1;
+	//_submitInfo.pCommandBuffers = &_graph.GetCB2();
 
-	vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, _fences[_currentFrame]);
+	//vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, _fences[_currentFrame]);
 
-	VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = &_vk.GetSwapchain();
-	presentInfo.pImageIndices = &frameIdx; //change to current frame
-	presentInfo.pWaitSemaphores = &_graph.GetSemaphore2();
-	presentInfo.waitSemaphoreCount = 1;
+	//VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+	//presentInfo.swapchainCount = 1;
+	//presentInfo.pSwapchains = &_vk.GetSwapchain();
+	//presentInfo.pImageIndices = &frameIdx; //change to current frame
+	//presentInfo.pWaitSemaphores = &_graph.GetSemaphore2();
+	//presentInfo.waitSemaphoreCount = 1;
 
-	vkQueuePresentKHR(_vk.GetGraphicsQueue(), &presentInfo);
-	_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
+	//vkQueuePresentKHR(_vk.GetGraphicsQueue(), &presentInfo);
+	//_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
 
 
 	////_submitInfo.pWaitSemaphores = &_compositionSemaphore;

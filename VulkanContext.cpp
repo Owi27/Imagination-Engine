@@ -10,6 +10,27 @@ void VulkanContext::StartFrame()
 
 void VulkanContext::EndFrame()
 {
+	vkQueuePresentKHR(_graphicsQueue, &_presentInfo);
+	_currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
+}
+
+void VulkanContext::SubmitQueue(VkSemaphore& prevSemaphore, VkSemaphore& currSemaphore, VkCommandBuffer& commandBuffers, VkFence fence)
+{
+	_submitInfo.pWaitSemaphores = &prevSemaphore;
+	_submitInfo.pSignalSemaphores = &currSemaphore;
+	_submitInfo.commandBufferCount = 1;
+	_submitInfo.pCommandBuffers = &commandBuffers;
+
+	vkQueueSubmit(_graphicsQueue, 1, &_submitInfo, fence);
+}
+
+void VulkanContext::PresentInfo(VkSemaphore& semaphore)
+{
+	_presentInfo.swapchainCount = 1;
+	_presentInfo.pSwapchains = &_swapchain;
+	_presentInfo.pImageIndices = &_currentFrame; //change to current frame
+	_presentInfo.pWaitSemaphores = &semaphore;
+	_presentInfo.waitSemaphoreCount = 1;
 }
 
 VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
@@ -338,12 +359,6 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 
 VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
-	VkCommandBufferBeginInfo commandBufferBeginInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
-	};
-
-	vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 
 	for (auto& texture : textures)

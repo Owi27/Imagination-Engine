@@ -12,15 +12,17 @@ class RenderPass;
 
 class FrameGraph
 {
-
+	VulkanContext& _vk = *VulkanContext::GetInst();
 	std::unordered_map<std::string, std::unique_ptr<RenderPass>> _passes;
 	std::unordered_map<std::string, std::unique_ptr<Texture>> _textureResources;
 	std::unordered_map<std::string, std::unique_ptr<Buffer>> _bufferResources;
 
+	std::vector<std::string> _passOrder = { "offscreen", "lighting" };
 
 public:
 	FrameGraph()
 	{
+
 	}
 
 	~FrameGraph()

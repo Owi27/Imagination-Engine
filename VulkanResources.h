@@ -41,6 +41,26 @@ public:
 
 	}
 
+	Buffer(VkDeviceSize size, void* data, VkBufferUsageFlags usage)
+	{
+		_size = size;
+		_bufferUsageFlags = usage;
+		_bufferMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+		GvkHelper::create_buffer(_vk.GetPhysicalDevice(), _vk.GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
+		GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
+	}
+
+	Buffer(void* data, VkBufferUsageFlags usage)
+	{
+		_size = sizeof(data);
+		_bufferUsageFlags = usage;
+		_bufferMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+		GvkHelper::create_buffer(_vk.GetPhysicalDevice(), _vk.GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
+		GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
+	}
+
 	~Buffer()
 	{
 		vkDestroyBuffer(_vk.GetDevice(), _buffer, nullptr);

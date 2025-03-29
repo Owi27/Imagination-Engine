@@ -38,6 +38,62 @@ void RenderPass::AddTInput(const std::string& name)
 	_colorInputs.push_back(_graph._blackboard.Get<Texture*>(name));
 }
 
+void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
+{
+	_graph._blackboard.Set<void*>(name, data);
+	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+}
+
+void RenderPass::AddVBOutput(const std::string& name, void* data, unsigned size)
+{
+	_graph._blackboard.Set<void*>(name, data);
+	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
+}
+
+void RenderPass::AddIBOutput(const std::string& name, void* data, unsigned size)
+{
+	_graph._blackboard.Set<void*>(name, data);
+	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
+}
+
+void RenderPass::UpdateUB(const std::string& name)
+{
+	auto& data = _graph._blackboard.Get<void*>(name);
+	auto& buffer = _graph._blackboard.Get<Buffer*>(name + " buffer");
+
+	buffer->WriteToBuffer(data);
+}
+
+//template<typename T>
+//void RenderPass::AddUB(const std::string& name, T data)
+//{
+//	_graph._blackboard.Set<void*>(name, &data);
+//	_graph._blackboard.Set(name + " buffer", new Buffer(&data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+//}
+//
+//template<typename T>
+//void RenderPass::AddVBOutput(const std::string& name, T data)
+//{
+//	_graph._blackboard.Set<void*>(name, &data);
+//	_graph._blackboard.Set(name + " buffer", new Buffer(data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
+//}
+//
+//template<typename T>
+//void RenderPass::AddIBOutput(const std::string& name, T data)
+//{
+//	_graph._blackboard.Set<void*>(name, &data);
+//	_graph._blackboard.Set(name + " buffer", new Buffer(data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
+//}
+//
+//template<typename T>
+//void RenderPass::UpdateUB(const std::string& name)
+//{
+//	auto& data = _graph._blackboard.Get<void*>(name);
+//	auto& buffer = _graph._blackboard.Get<Buffer*>(name + " buffer");
+//
+//	buffer->WriteToBuffer(data);
+//}
+
 void RenderPass::AddTOutput(const std::string& name)
 {
 	_pipelineDescription.colorAttachmentFormats.push_back(VK_FORMAT_R16G16B16A16_UNORM);
@@ -230,6 +286,18 @@ void RenderPass::Execute()
 	{
 		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _colorOutputs.back()->GetImage(), _colorOutputs.back()->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
+
+	vkResetCommandBuffer(_commandBuffer, 0);
+
+	VkCommandBufferBeginInfo commandBufferBeginInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
+	};
+
+	vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
+
+	vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+	if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
 	_vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
 }
 

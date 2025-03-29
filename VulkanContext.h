@@ -22,12 +22,15 @@ class VulkanContext
 	VkSampler _colorSampler;
 
 	VkSemaphore _presentComplete;
+	VkPresentInfoKHR _presentInfo;
 
 	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0;
 	float _aspectRatio;
 
 	std::vector<VkFence> _fences;
 	std::vector<VkSemaphore> _presentCompleteSemaphores;
+	VkSubmitInfo _submitInfo;
+	VkPipelineStageFlags _submitStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -77,7 +80,7 @@ public:
 			_fences.resize(_maxFramesInFlight);
 			_presentCompleteSemaphores.resize(_maxFramesInFlight);
 
-			VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+			VkSemaphoreCreateInfo semaphoreCreateInfo = { .sType =VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
 			VkFenceCreateInfo fenceCreateInfo = { .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, .flags = VK_FENCE_CREATE_SIGNALED_BIT };
 
 			for (size_t i = 0; i < _maxFramesInFlight; i++)
@@ -85,6 +88,15 @@ public:
 				vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
 				vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphores[i]);
 			}
+
+
+			//submit info
+			_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+			_submitInfo.pWaitDstStageMask = &_submitStageFlags;
+			_submitInfo.waitSemaphoreCount = 1;
+			_submitInfo.signalSemaphoreCount = 1;
+
+			_presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 
 			//dxc
 			DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
@@ -147,6 +159,8 @@ public:
 
 	void StartFrame();
 	void EndFrame();
+	void SubmitQueue(VkSemaphore& prevSemaphore, VkSemaphore& currSemaphore, VkCommandBuffer& commandBuffers, VkFence fence = nullptr);
+	void PresentInfo(VkSemaphore& semaphore);
 
 	VkDevice GetDevice() const { return _device; }
 	VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
@@ -157,6 +171,8 @@ public:
 	VkSampler GetSampler() const { return _colorSampler; }
 	VkRenderPass GetRenderPass() const { return _renderPass; }
 	VkFramebuffer GetFrameBuffer(int idx);
+
+	VkSemaphore& GetSemaphore() { return _presentCompleteSemaphores[_currentFrame]; }
 
 
 	ComPtr<IDxcCompiler3> GetCompiler() const { return _compiler; }
