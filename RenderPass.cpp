@@ -40,20 +40,24 @@ void RenderPass::AddTInput(const std::string& name)
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
 {
+	_ubDataName = name;
 	_graph._blackboard.Set<void*>(name, data);
-	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+	_uniformBufferOutput = _graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
+	_uniformBufferOutput->SetName(name + " buffer");
 }
 
 void RenderPass::AddVBOutput(const std::string& name, void* data, unsigned size)
 {
 	_graph._blackboard.Set<void*>(name, data);
-	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
+	_bufferOutputs.push_back(_graph._blackboard.Set(name + " vertex buffer", new Buffer(size, data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)));
+	_bufferOutputs.back()->SetName(name + " vertex buffer");
 }
 
 void RenderPass::AddIBOutput(const std::string& name, void* data, unsigned size)
 {
 	_graph._blackboard.Set<void*>(name, data);
-	_graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
+	_bufferOutputs.push_back(_graph._blackboard.Set(name + " index buffer", new Buffer(size, data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT)));
+	_bufferOutputs.back()->SetName(name + " index buffer");
 }
 
 void RenderPass::UpdateUB(const std::string& name)
@@ -64,40 +68,17 @@ void RenderPass::UpdateUB(const std::string& name)
 	buffer->WriteToBuffer(data);
 }
 
-//template<typename T>
-//void RenderPass::AddUB(const std::string& name, T data)
-//{
-//	_graph._blackboard.Set<void*>(name, &data);
-//	_graph._blackboard.Set(name + " buffer", new Buffer(&data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
-//}
-//
-//template<typename T>
-//void RenderPass::AddVBOutput(const std::string& name, T data)
-//{
-//	_graph._blackboard.Set<void*>(name, &data);
-//	_graph._blackboard.Set(name + " buffer", new Buffer(data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT));
-//}
-//
-//template<typename T>
-//void RenderPass::AddIBOutput(const std::string& name, T data)
-//{
-//	_graph._blackboard.Set<void*>(name, &data);
-//	_graph._blackboard.Set(name + " buffer", new Buffer(data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT));
-//}
-//
-//template<typename T>
-//void RenderPass::UpdateUB(const std::string& name)
-//{
-//	auto& data = _graph._blackboard.Get<void*>(name);
-//	auto& buffer = _graph._blackboard.Get<Buffer*>(name + " buffer");
-//
-//	buffer->WriteToBuffer(data);
-//}
-
 void RenderPass::AddTOutput(const std::string& name)
 {
-	_pipelineDescription.colorAttachmentFormats.push_back(VK_FORMAT_R16G16B16A16_UNORM);
-	_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM)));
+	if (name.find("swapchain") != std::string::npos)
+	{
+		_renderToSwapchain = true;
+	}
+	else
+	{
+		_pipelineDescription.colorAttachmentFormats.push_back(VK_FORMAT_R16G16B16A16_UNORM);
+		_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM)));
+	}
 }
 
 void RenderPass::AddDOutput(const std::string& name)
@@ -278,11 +259,13 @@ void RenderPass::Setup()
 
 void RenderPass::Execute()
 {
+	if (_uniformBufferOutput) UpdateUB(_ubDataName);
+
 	for (auto& input : _colorInputs)
 	{
 		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, input->GetImage(), input->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
-	for (auto& output: _colorOutputs)
+	for (auto& output : _colorOutputs)
 	{
 		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _colorOutputs.back()->GetImage(), _colorOutputs.back()->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
@@ -298,7 +281,31 @@ void RenderPass::Execute()
 
 	vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 	if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
-	_vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
+
+	if (_bufferOutputs.size() > 0)
+	{
+		std::vector<VkDeviceSize> offsets;
+		std::vector<VkBuffer> vertexBuffers;
+		VkBuffer indexBuffer;
+
+		for (auto& output : _bufferOutputs)
+		{
+			if (output->GetName().find("vertex buffer") != std::string::npos)
+			{
+				vertexBuffers.push_back(output->GetBuffer());
+				offsets.push_back(0);
+			}
+			else if (output->GetName().find("index buffer") != std::string::npos)
+			{
+				indexBuffer = output->GetBuffer();
+			}
+		}
+
+		vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+	}
+	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
+	else  _vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)

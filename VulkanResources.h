@@ -138,6 +138,7 @@ public:
 	VkExtent3D& GetExtent() { return _extent; }
 	VkClearColorValue& GetClearColorValue() { return _clearColorValue; }
 	VkFormat GetFormat() const { return _format; }
+	void SetFormat(VkFormat format) { _format = format; }
 
 	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 

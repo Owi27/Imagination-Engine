@@ -39,6 +39,13 @@ VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 	return _frameBuffer;
 }
 
+void VulkanContext::GetSwapchainImage(Texture* tex, unsigned idx)
+{
+	_vulkanSurface.GetSwapchainImage(idx, (void**)&tex->GetImage());
+	_vulkanSurface.GetSwapchainView(idx, (void**)&tex->GetImageView());
+	tex->SetFormat(_swapchainFormat.format);
+}
+
 VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, unsigned int arrayElement) const
 {
 	VkWriteDescriptorSet writeDescriptorSet = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
@@ -418,6 +425,67 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	{
 		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
+
+	vkEndCommandBuffer(commandBuffer);
+	return commandBuffer;
+}
+
+VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
+{
+	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
+
+	for (auto& texture : textures)
+	{
+		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+			.imageView = texture->GetImageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+			.clearValue = texture->GetClearColorValue(),
+		};
+
+		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
+	}
+
+	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
+	if (depth)
+	{
+		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
+		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthRenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depthRenderingAttachmentInfo.clearValue = { .depthStencil = {1.f, 0} };
+		depthRenderingAttachmentInfo.resolveMode = VK_RESOLVE_MODE_NONE;
+	}
+
+	VkRenderingInfo renderingInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.renderArea
+		{
+			.offset = {0, 0},
+			.extent = {_width, _height}
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = (unsigned)colorRenderingAttachmentInfos.size(),
+		.pColorAttachments = colorRenderingAttachmentInfos.data(),
+		.pDepthAttachment = depth ? &depthRenderingAttachmentInfo : nullptr
+	};
+
+	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+
+	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+	VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+	drawCalls(commandBuffer);
+	vkCmdEndRenderingKHR(commandBuffer);
 
 	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;

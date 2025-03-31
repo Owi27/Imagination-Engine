@@ -24,6 +24,8 @@ class VulkanContext
 	VkSemaphore _presentComplete;
 	VkPresentInfoKHR _presentInfo;
 
+	VkSurfaceFormatKHR _swapchainFormat = { .format = VK_FORMAT_B8G8R8A8_UNORM, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+
 	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0;
 	float _aspectRatio;
 
@@ -182,6 +184,9 @@ public:
 	unsigned GetWidth() const { return _width; }
 	unsigned GetHeight() const { return _height; }
 	unsigned GetAspectRatio() const { return _aspectRatio; }
+	unsigned GetMaxFrames() const { return _maxFramesInFlight; }
+
+	void GetSwapchainImage(Texture* tex, unsigned idx);
 
 	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, unsigned int arrayElement = 0) const;
 	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorBufferInfo* descriptorBufferInfo, unsigned int arrayElement = 0);
@@ -190,4 +195,6 @@ public:
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
 	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	VkCommandBuffer& RenderToSwapchain(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	//VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

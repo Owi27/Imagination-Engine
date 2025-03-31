@@ -1518,12 +1518,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 {
 
 		
-	mat4 t = GW::MATH::GIdentityMatrixF;
-	_graph._blackboard.Set<void*>("t", &t);
-	auto& rr =_graph._blackboard.Get<void*>("t");
-    mat4 newt = *static_cast<mat4*>(rr);
 
 	LoadModel("Models/Sponza/glTF/Sponza.gltf");
+
+
+
 	CreateFrameGraphNodes();
 
 	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
@@ -1580,30 +1579,23 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
 
-		offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		//offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		offscreen.AddVBOutput("position data", _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
-		offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-		offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		offscreen.AddVBOutput("normal data", _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
+		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
+		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
+		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
+		offscreen.AddUB("offscreen uniform", &oub, sizeof(UniformBufferOffscreen));
+		//offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		//offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		//offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+		//offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+		//offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 		offscreen.SetRenderables(_renderables);
 
 		offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
 			{
-				std::array<VkBuffer, 4> vertexBuffers =
-				{
-					offscreen.GetBuffer("position buffer").GetBuffer(),
-					offscreen.GetBuffer("normal buffer").GetBuffer(),
-					offscreen.GetBuffer("texcoord buffer").GetBuffer(),
-					offscreen.GetBuffer("tangent buffer").GetBuffer(),
-				};
-
-				std::vector<VkDeviceSize> offsets = { 0, 0, 0, 0 };
-				vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-				vkCmdBindIndexBuffer(commandBuffer, offscreen.GetBuffer("index buffer").GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
 				for (auto& renderable : offscreen.GetRenderables())
 				{
 					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
@@ -1623,9 +1615,9 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTInput("gbuffer normal");
 		lighting.AddTInput("gbuffer albedo");
 
-		UniformBufferFinal oub
+		UniformBufferFinal lub
 		{
-			.view = _graph._blackboard.Get<UniformBufferOffscreen>("ubo").view.row4,
+			.view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view.row4,
 		};
 		std::default_random_engine gen(777);
 		std::uniform_real_distribution<float> distribution(0.f, 1.f);
@@ -1633,11 +1625,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 
 		for (size_t i = 0; i < 10; i++)
 		{
-			oub.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
-			oub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-			oub.lights[i].radius = 5.f;
+			lub.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
+			lub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+			lub.lights[i].radius = 5.f;
 		}
-		lighting.AddUniformBufferOutput("lighting uniform buffer", sizeof(UniformBufferFinal), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+		lighting.AddUB("lighting uniform", &lub, sizeof(UniformBufferFinal));
 
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 3 });
@@ -1645,11 +1637,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddTOutput("lighting out");
+		//lighting.AddTOutput("lighting out");
+		lighting.AddTOutput("swapchain");
 		lighting.SetDrawCalls([&lighting](VkCommandBuffer& commandBuffer)
 			{
-				//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipelineLayout(), 0, 1, &lighting.GetDescriptorSet(), 0, nullptr);
-				//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lighting.GetPipeline());
 				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 			});
 
@@ -1732,7 +1723,7 @@ void VulkanRenderer::UpdateCamera()
 
 	mat4 cam = GW::MATH::GIdentityMatrixF;
 
-	auto& view = _graph._blackboard.Get<UniformBufferOffscreen>("ubo").view;
+	auto& view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view;
 	GMatrix::InverseF(view, cam);
 
 	float y = 0.0f;

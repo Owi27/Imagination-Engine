@@ -40,6 +40,10 @@ class RenderPass
 
 	std::vector<std::shared_ptr<Shader>> _shaders;
 
+	std::string _ubDataName;
+
+	bool _renderToSwapchain = false;
+
 public:
 	RenderPass(FrameGraph& graph, FrameGraphQueueBit queue) : _vk(*VulkanContext::GetInst()), _graph(graph), _queue(queue)
 	{
