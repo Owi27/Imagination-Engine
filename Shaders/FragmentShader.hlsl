@@ -26,6 +26,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 albedo = textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
     float specular = textureAlbedo.Sample(samplerAlbedo, inUV).a;
   
+   // return float4(inUV, 1, 1);
     //return float4(normalize(fragPos), 1.0); // Visualize position
   // return float4(normal, 1.0); // Visualize normal
    //return float4(albedo.rgb, 1.0); // Visualize albedo

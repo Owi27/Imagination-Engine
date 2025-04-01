@@ -1523,27 +1523,27 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 
 
 
-	CreateFrameGraphNodes();
+	//CreateFrameGraphNodes();
 
-	VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-	for (size_t i = 0; i < MAX_FRAMES; i++)
-		vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore[i]);
-	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
-	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
-	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
+	//VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+	//for (size_t i = 0; i < MAX_FRAMES; i++)
+	//	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore[i]);
+	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
+	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
+	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
 
-	_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
-	_submitInfo.waitSemaphoreCount = 1;
-	_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[0];
-	_submitInfo.signalSemaphoreCount = 1;
-	_submitInfo.pSignalSemaphores = &_compositionSemaphore;
+	//_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	//_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
+	//_submitInfo.waitSemaphoreCount = 1;
+	//_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[0];
+	//_submitInfo.signalSemaphoreCount = 1;
+	//_submitInfo.pSignalSemaphores = &_compositionSemaphore;
 
-	_fences.resize(MAX_FRAMES);
-	VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Optional: Start in signaled state
-	for (size_t i = 0; i < MAX_FRAMES; i++)
-		vkCreateFence(_vk.GetDevice(), &fenceCreateInfo, nullptr, &_fences[i]);
+	//_fences.resize(MAX_FRAMES);
+	//VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+	//fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Optional: Start in signaled state
+	//for (size_t i = 0; i < MAX_FRAMES; i++)
+	//	vkCreateFence(_vk.GetDevice(), &fenceCreateInfo, nullptr, &_fences[i]);
 
 	{
 		UniformBufferOffscreen ubo
@@ -1564,9 +1564,9 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
 		offscreen.SetCullMode(VK_CULL_MODE_FRONT_BIT);
 		offscreen.SetShaders("Offscreen");
-		offscreen.AddTOutput("gbuffer position");
-		offscreen.AddTOutput("gbuffer normal");
-		offscreen.AddTOutput("gbuffer albedo");
+		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
+		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
+		offscreen.AddTOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM);
 		offscreen.AddDOutput("depth");
 		UniformBufferOffscreen oub
 		{

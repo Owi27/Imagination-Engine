@@ -72956,6 +72956,14 @@ VkResult transition_image_layout(const VkDevice& _device, const VkCommandPool& _
 		source_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		destrination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+	{
+		image_memory_barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
 
 	vkCmdPipelineBarrier(command_buffer, source_stage, destrination_stage, 0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
 

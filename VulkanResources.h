@@ -104,6 +104,8 @@ class Texture : public VulkanResource
 
 	VkClearColorValue _clearColorValue;
 
+	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
 public:
 	Texture()
 	{
@@ -139,6 +141,8 @@ public:
 	VkClearColorValue& GetClearColorValue() { return _clearColorValue; }
 	VkFormat GetFormat() const { return _format; }
 	void SetFormat(VkFormat format) { _format = format; }
+
+	void SetImageLayout(VkImageLayout newLayout);
 
 	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 

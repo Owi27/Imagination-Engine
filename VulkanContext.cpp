@@ -5,7 +5,9 @@ void VulkanContext::StartFrame()
 {
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
 	vkResetFences(_device, 1, &_fences[_currentFrame]);
-	vkAcquireNextImageKHR(_device, _swapchain, 0, _presentCompleteSemaphores[_currentFrame], nullptr, &_currentFrame);
+	vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _presentCompleteSemaphores[_currentFrame], nullptr, &_currentImage);
+	_vulkanSurface.GetSwapchainImage(_currentFrame, (void**)&_currentSwapchainTexture->GetImage());
+	_vulkanSurface.GetSwapchainView(_currentFrame, (void**)&_currentSwapchainTexture->GetImageView());
 }
 
 void VulkanContext::EndFrame()
@@ -28,7 +30,7 @@ void VulkanContext::PresentInfo(VkSemaphore& semaphore)
 {
 	_presentInfo.swapchainCount = 1;
 	_presentInfo.pSwapchains = &_swapchain;
-	_presentInfo.pImageIndices = &_currentFrame; //change to current frame
+	_presentInfo.pImageIndices = &_currentImage; //change to current frame
 	_presentInfo.pWaitSemaphores = &semaphore;
 	_presentInfo.waitSemaphoreCount = 1;
 }
@@ -370,7 +372,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 
 	for (auto& texture : textures)
 	{
-		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
@@ -387,7 +389,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
 	if (depth)
 	{
-		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
 		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -421,39 +423,33 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
-	for (auto& texture : textures)
-	{
-		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	}
+	//for (auto& tex : textures)
+	//{
+	//	GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, tex->GetImage(), tex->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//}
 
 	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;
 }
 
-VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
+VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
-	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
-
-	for (auto& texture : textures)
+	_currentSwapchainTexture->SetImageLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
 	{
-		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
-		{
-			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-			.imageView = texture->GetImageView(),
-			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-			.clearValue = texture->GetClearColorValue(),
-		};
-
-		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
-	}
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+		.imageView = _currentSwapchainTexture->GetImageView(),
+		.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		.clearValue = _currentSwapchainTexture->GetClearColorValue(),
+	};
 
 	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
 	if (depth)
 	{
-		GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
 		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -471,8 +467,8 @@ VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer
 			.extent = {_width, _height}
 		},
 		.layerCount = 1,
-		.colorAttachmentCount = (unsigned)colorRenderingAttachmentInfos.size(),
-		.pColorAttachments = colorRenderingAttachmentInfos.data(),
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &swapchainRenderingAttachmentInfo,
 		.pDepthAttachment = depth ? &depthRenderingAttachmentInfo : nullptr
 	};
 

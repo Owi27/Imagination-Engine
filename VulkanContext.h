@@ -26,13 +26,15 @@ class VulkanContext
 
 	VkSurfaceFormatKHR _swapchainFormat = { .format = VK_FORMAT_B8G8R8A8_UNORM, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 
-	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0;
+	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0, _currentImage = 0;;
 	float _aspectRatio;
 
 	std::vector<VkFence> _fences;
 	std::vector<VkSemaphore> _presentCompleteSemaphores;
 	VkSubmitInfo _submitInfo;
 	VkPipelineStageFlags _submitStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+	std::unique_ptr<Texture> _currentSwapchainTexture = std::make_unique<Texture>();
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -90,7 +92,6 @@ public:
 				vkCreateFence(_device, &fenceCreateInfo, nullptr, &_fences[i]);
 				vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphores[i]);
 			}
-
 
 			//submit info
 			_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
@@ -174,7 +175,11 @@ public:
 	VkRenderPass GetRenderPass() const { return _renderPass; }
 	VkFramebuffer GetFrameBuffer(int idx);
 
+	VkFence& GetCurrentFence() { return _fences[_currentFrame]; }
+
 	VkSemaphore& GetSemaphore() { return _presentCompleteSemaphores[_currentFrame]; }
+
+	VkFormat GetSwapchainFormat() const { return _swapchainFormat.format; }
 
 
 	ComPtr<IDxcCompiler3> GetCompiler() const { return _compiler; }
@@ -195,6 +200,6 @@ public:
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
 	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
-	VkCommandBuffer& RenderToSwapchain(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	VkCommandBuffer& RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 	//VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

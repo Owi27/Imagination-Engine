@@ -1,6 +1,14 @@
 #include "pch.h"
 #include "VulkanResources.h"
 
+void Texture::SetImageLayout(VkImageLayout newLayout)
+{
+	if (_imageLayout = newLayout) return;
+
+	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _image, _format, _imageLayout, newLayout);
+	_imageLayout = newLayout;
+}
+
 void Texture::CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator)
 {
 	_extent = extent;

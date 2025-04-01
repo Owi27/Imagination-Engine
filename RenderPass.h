@@ -44,6 +44,8 @@ class RenderPass
 
 	bool _renderToSwapchain = false;
 
+	bool _firstRun = true;
+
 public:
 	RenderPass(FrameGraph& graph, FrameGraphQueueBit queue) : _vk(*VulkanContext::GetInst()), _graph(graph), _queue(queue)
 	{
@@ -67,7 +69,7 @@ public:
 	}
 
 	Texture& AddTextureInput(std::string name);
-	void AddTOutput(const std::string& name);
+	void AddTOutput(const std::string& name, VkFormat format = VK_FORMAT_UNDEFINED);
 	void AddDOutput(const std::string& name);
 	void AddTInput(const std::string& name);
 

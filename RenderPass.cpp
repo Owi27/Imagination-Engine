@@ -36,6 +36,7 @@ Texture& RenderPass::AddTextureInput(std::string name)
 void RenderPass::AddTInput(const std::string& name)
 {
 	_colorInputs.push_back(_graph._blackboard.Get<Texture*>(name));
+	_colorInputs.back()->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
@@ -68,16 +69,24 @@ void RenderPass::UpdateUB(const std::string& name)
 	buffer->WriteToBuffer(data);
 }
 
-void RenderPass::AddTOutput(const std::string& name)
+void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 {
 	if (name.find("swapchain") != std::string::npos)
 	{
+		//for (size_t i = 0; i < _vk.GetMaxFrames(); i++)
+		//{
+		//	Texture* t = new Texture(); // Allocate on the heap
+		//	_vk.GetSwapchainImage(t, i);
+		_pipelineDescription.colorAttachmentFormats.push_back(_vk.GetSwapchainFormat());
+		//	_colorOutputs.push_back(t); // Store the pointer
+		//}
 		_renderToSwapchain = true;
 	}
 	else
 	{
-		_pipelineDescription.colorAttachmentFormats.push_back(VK_FORMAT_R16G16B16A16_UNORM);
-		_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM)));
+		_pipelineDescription.colorAttachmentFormats.push_back(format);
+		_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, format)));
+		_colorOutputs.back()->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 
@@ -96,6 +105,8 @@ void RenderPass::AddDOutput(const std::string& name)
 	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
 	_pipelineDescription.depthFormat = depthFormat;
 	_depthStencilOutput = _graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat));
+	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _depthStencilOutput->GetImage(), _depthStencilOutput->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
 }
 
 Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
@@ -254,7 +265,9 @@ void RenderPass::Setup()
 	}
 
 	_pipelineDescription.pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	_pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
+
+	if (_colorOutputs.size() > 0) _pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
+	else _pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout);
 }
 
 void RenderPass::Execute()
@@ -263,14 +276,8 @@ void RenderPass::Execute()
 
 	for (auto& input : _colorInputs)
 	{
-		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, input->GetImage(), input->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		input->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
-	for (auto& output : _colorOutputs)
-	{
-		GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _colorOutputs.back()->GetImage(), _colorOutputs.back()->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
-
-	vkResetCommandBuffer(_commandBuffer, 0);
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo
 	{
@@ -304,8 +311,18 @@ void RenderPass::Execute()
 		vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 	}
-	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
+	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depthStencilOutput, _drawCalls);
 	else  _vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
+
+	for (auto& input : _colorInputs)
+	{
+		input->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	}
+
+	for (auto& output : _colorOutputs)
+	{
+		output->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	}
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)
