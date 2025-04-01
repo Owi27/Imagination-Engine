@@ -74496,7 +74496,7 @@ namespace GW
 				GATEWARE_VK_FAIL(CreateVkSwapchainKHR(), GReturn::FAILURE);
 
 				//Create the RenderPass
-				GATEWARE_VK_FAIL(CreateVkRenderPass(), GReturn::FAILURE);
+				//GATEWARE_VK_FAIL(CreateVkRenderPass(), GReturn::FAILURE);
 
 				//Create the MSAA Buffer (If Needed)
 				if (m_MSAAOn) GATEWARE_VK_FAIL(CreateMSAABuffer(), GReturn::FAILURE);
@@ -74505,7 +74505,7 @@ namespace GW
 				if (m_InitMask & GRAPHICS::DEPTH_BUFFER_SUPPORT) GATEWARE_VK_FAIL(CreateDepthBuffer(), GReturn::FAILURE);
 
 				//Create the Framebuffer
-				GATEWARE_VK_FAIL(CreateVkFramebuffer(), GReturn::FAILURE);
+				//GATEWARE_VK_FAIL(CreateVkFramebuffer(), GReturn::FAILURE);
 
 				//Create the Command Buffer
 				GATEWARE_VK_FAIL(CreateVkCommandBuffer(), GReturn::FAILURE);

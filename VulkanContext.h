@@ -34,6 +34,8 @@ class VulkanContext
 	VkSubmitInfo _submitInfo;
 	VkPipelineStageFlags _submitStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
+	std::vector<VkCommandBuffer> _swapchainCommandBuffers;
+
 	std::unique_ptr<Texture> _currentSwapchainTexture = std::make_unique<Texture>();
 
 	//dxc
@@ -80,6 +82,13 @@ public:
 			_vulkanSurface.GetSwapchain((void**)&_swapchain);
 			_vulkanSurface.GetSwapchainImageCount(_maxFramesInFlight);
 			_vulkanSurface.GetAspectRatio(_aspectRatio);
+
+			for (size_t i = 0; i < _maxFramesInFlight; i++)
+			{
+				VkCommandBuffer commandBuffer;
+				_vulkanSurface.GetCommandBuffer(i, (void**)&commandBuffer);
+				_swapchainCommandBuffers.push_back(commandBuffer);
+			}
 
 			_fences.resize(_maxFramesInFlight);
 			_presentCompleteSemaphores.resize(_maxFramesInFlight);

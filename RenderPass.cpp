@@ -275,26 +275,14 @@ void RenderPass::Execute()
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
 
 	for (auto& input : _colorInputs)
-	{
-		input->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	{		input->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
-	VkCommandBufferBeginInfo commandBufferBeginInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
-	};
-
-	vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
-
-	vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-	if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
-
+	std::vector<VkDeviceSize> offsets;
+	std::vector<VkBuffer> vertexBuffers;
+	VkBuffer indexBuffer = nullptr;
 	if (_bufferOutputs.size() > 0)
 	{
-		std::vector<VkDeviceSize> offsets;
-		std::vector<VkBuffer> vertexBuffers;
-		VkBuffer indexBuffer;
-
 		for (auto& output : _bufferOutputs)
 		{
 			if (output->GetName().find("vertex buffer") != std::string::npos)
@@ -307,21 +295,28 @@ void RenderPass::Execute()
 				indexBuffer = output->GetBuffer();
 			}
 		}
-
-		vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-		vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 	}
+
+	VkCommandBufferBeginInfo commandBufferBeginInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
+	};
+
+	vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
+
+	vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+	if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+
+
+	if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+	if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
 	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depthStencilOutput, _drawCalls);
 	else  _vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
 
 	for (auto& input : _colorInputs)
 	{
 		input->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
-
-	for (auto& output : _colorOutputs)
-	{
-		output->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 
