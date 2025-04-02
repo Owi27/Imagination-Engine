@@ -71973,6 +71973,7 @@ namespace GvkHelper {
 		VkImage* _outImage, VkDeviceMemory* _outImageMemory);
 	inline VkResult create_image_view(const VkDevice& _device, const VkImage& _image, const VkFormat& _format, const VkImageAspectFlags& _imageAspectFlags, const uint32_t& _mipLevels, VkAllocationCallbacks* _allocator, VkImageView* _outImageView);
 	inline VkResult transition_image_layout(const VkDevice& _device, const VkCommandPool& _commandPool, const VkQueue& _graphicsQueue, const uint32_t& _mipLevel, const VkImage& _image, const VkFormat& _format, const VkImageLayout& _previousLayout, const VkImageLayout& _currentLayout);
+	inline void transition_image_layout(VkCommandBuffer& _commandbuffer, const VkDevice& _device, const VkCommandPool& _commandPool, const VkQueue& _graphicsQueue, const uint32_t& _mipLevel, const VkImage& _image, const VkFormat& _format, const VkImageLayout& _previousLayout, const VkImageLayout& _currentLayout);
 	inline VkResult create_image_set(const VkPhysicalDevice& _physicalDevice, const VkDevice& _device, const VkCommandPool& _commandPool, const VkExtent3D& _extent, const VkQueue& _graphicsQueue, const uint32_t& _mipLevels, const VkSampleCountFlagBits& _msaaSample, const VkFormat& _format,
 		const VkImageTiling& _tiling, const VkImageUsageFlags& _usageFlags, const VkImageAspectFlags& _aspectFlags, const VkMemoryPropertyFlags& _memoryPropertyFlags, const VkImageLayout& _previousLayout, const VkImageLayout& _currentLayout, VkAllocationCallbacks* _allocator,
 		VkImage* _outImage, VkImageView* _outImageView, VkDeviceMemory* _outDeviceMemory);
@@ -72969,6 +72970,103 @@ VkResult transition_image_layout(const VkDevice& _device, const VkCommandPool& _
 
 	r = signal_command_end(_device, _graphicsQueue, _commandPool, &command_buffer);
 	return r;
+}
+//custom
+void transition_image_layout(VkCommandBuffer& _commandBuffer, const VkDevice& _device, const VkCommandPool& _commandPool, const VkQueue& _graphicsQueue, const uint32_t& _mipLevel, const VkImage& _image, const VkFormat& _format, const VkImageLayout& _previousLayout, const VkImageLayout& _currentLayout)
+{
+	//Start the command buffer
+	//VkCommandBuffer command_buffer = VK_NULL_HANDLE;
+	//VkResult r = signal_command_start(_device, _commandPool, &command_buffer);
+
+	//Create the image memory barrier
+	VkImageMemoryBarrier image_memory_barrier = {};
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	image_memory_barrier.image = _image;
+	image_memory_barrier.oldLayout = _previousLayout;
+	image_memory_barrier.newLayout = _currentLayout;
+	image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	image_memory_barrier.subresourceRange.baseMipLevel = 0;
+	image_memory_barrier.subresourceRange.levelCount = _mipLevel;
+	image_memory_barrier.subresourceRange.layerCount = 1;
+	image_memory_barrier.subresourceRange.baseArrayLayer = 0;
+
+	//Setup the source and destination stage flags. Will be set based on the Old and New Layout set from outside
+	VkPipelineStageFlags source_stage = 0;
+	VkPipelineStageFlags destrination_stage = 0;
+
+	if (_currentLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+	{
+		image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		if (_format == VK_FORMAT_D24_UNORM_S8_UINT || _format == VK_FORMAT_D32_SFLOAT_S8_UINT)
+			image_memory_barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+
+	if (_previousLayout == VK_IMAGE_LAYOUT_UNDEFINED)
+	{
+		if (_currentLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+		{
+			image_memory_barrier.srcAccessMask = 0;
+			image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destrination_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		}
+		else if (_currentLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		{
+			image_memory_barrier.srcAccessMask = 0;
+			image_memory_barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destrination_stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		}
+		else if (_currentLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+		{
+			image_memory_barrier.srcAccessMask = 0;
+			image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+		else if (_currentLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+		{
+			image_memory_barrier.srcAccessMask = 0;
+			image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			source_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	{
+		image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	{
+		image_memory_barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+	{
+		image_memory_barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+
+	vkCmdPipelineBarrier(_commandBuffer, source_stage, destrination_stage, 0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
+
+	//r = signal_command_end(_device, _graphicsQueue, _commandPool, &_commandBuffer);
+	//return r;
 }
 VkResult copy_buffer_to_image(const VkDevice& device, const VkCommandPool& command_pool, const VkQueue& graphics_queue, const VkBuffer& buffer, const VkImage& image, const VkExtent3D& extent)
 {

@@ -10,12 +10,12 @@ class RenderPass
 	FrameGraph& _graph;
 	std::string _name;
 	FrameGraphQueueBit _queue;
-	std::vector<Texture*> _colorInputs;
-	std::vector<Texture*> _colorOutputs;
-	std::vector<Buffer*> _bufferInputs;
-	std::vector<Buffer*> _bufferOutputs;
-	Texture* _depthStencilInput = nullptr;
-	Texture* _depthStencilOutput = nullptr;
+	std::vector<std::reference_wrapper<Texture>> _colorInputs;
+	std::vector<std::reference_wrapper<Texture>> _colorOutputs;
+	std::vector<std::reference_wrapper<Buffer>> _bufferInputs;
+	std::vector<std::reference_wrapper<Buffer>> _bufferOutputs;
+	Texture* _depth = nullptr;
+	//Texture* _depthStencilOutput = nullptr;
 
 	Buffer* _uniformBufferOutput;
 
@@ -68,7 +68,7 @@ public:
 
 	}
 
-	Texture& AddTextureInput(std::string name);
+	//Texture& AddTextureInput(std::string name);
 	void AddTOutput(const std::string& name, VkFormat format = VK_FORMAT_UNDEFINED);
 	void AddDOutput(const std::string& name);
 	void AddTInput(const std::string& name);
@@ -82,15 +82,15 @@ public:
 	//template<typename T>
 	void UpdateUB(const std::string& name);
 
-	Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
-	Texture& AddDepthOutput(const std::string& name);
-	Buffer& AddBufferInput(std::string name);
-	Buffer& AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
-	Buffer& AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
+	//Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
+	//Texture& AddDepthOutput(const std::string& name);
+	//Buffer& AddBufferInput(std::string name);
+	//Buffer& AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
+	//Buffer& AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input = "");
 	void AddDescriptorPoolSize(VkDescriptorPoolSize descriptorPoolSize) { _descriptorPoolSizes.push_back(std::move(descriptorPoolSize)); }
 	void AddDescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding descriptorSetLayoutBinding) { _descriptorSetLayoutBindings.push_back(std::move(descriptorSetLayoutBinding)); }
 
-	Buffer& GetBuffer(const std::string& name);
+	//Buffer& GetBuffer(const std::string& name);
 
 	// should have color attachments
 	void Setup();
@@ -102,7 +102,7 @@ public:
 	VkDescriptorSet& GetDescriptorSet() { return _descriptorSet; }
 	VkSemaphore& GetSemaphore() { return _semaphore; }
 
-	std::vector<Buffer*>& GetBufferOutputs() { return _bufferOutputs; }
+	std::vector<std::reference_wrapper<Buffer>>& GetBufferOutputs() { return _bufferOutputs; }
 
 	std::vector<Renderable>& GetRenderables() { return _renderables; }
 

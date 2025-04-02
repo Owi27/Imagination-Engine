@@ -103,6 +103,7 @@ class Texture : public VulkanResource
 	VkAttachmentDescription _attachmentDescription;
 
 	VkClearColorValue _clearColorValue;
+	VkClearValue _clearValue = { .color {0, 0, 0, 0} };
 
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
@@ -138,11 +139,12 @@ public:
 	VkImage& GetImage() { return _image; }
 	VkImageView& GetImageView() { return _imageView; }
 	VkExtent3D& GetExtent() { return _extent; }
-	VkClearColorValue& GetClearColorValue() { return _clearColorValue; }
+	VkClearValue& GetClearValue() { return _clearValue; }
 	VkFormat GetFormat() const { return _format; }
 	void SetFormat(VkFormat format) { _format = format; }
 
 	void SetImageLayout(VkImageLayout newLayout);
+	void SetImageLayout(VkCommandBuffer& commandBuffer, VkImageLayout newLayout);
 
 	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 

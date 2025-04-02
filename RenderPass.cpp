@@ -1,42 +1,42 @@
 #include "pch.h"
 #include "RenderPass.h"
 
-Texture& RenderPass::AddTextureInput(std::string name)
-{
-	//Texture& gottenTex;
-	//graph.get texture
-	//add to graphics queue through texture
-	//read in passes from renderresource (this pass name)
-	//gottenTex.ReadInPass(_name); 
-
-	auto& tex = _graph.GetTextureResource(name);
-	tex.ReadInPass(_name);
-
-	//auto itr = find_if(_colorInputs.begin(), _colorInputs.end(), [&](const std::shared_ptr<Texture>& texx)
-	//	{
-	//		return texx->GetImage() == tex.GetImage();
-	//	});
-
-	//if (itr != _colorInputs.end())
-	//{
-	//	return *itr;
-	//}
-
-	auto itr = std::find_if(_colorInputs.begin(), _colorInputs.end(),
-		[&tex](const Texture* other) {
-			return *other == tex; // Use the overloaded == operator
-		});
-
-	if (itr != _colorInputs.end()) return tex;
-	else _colorInputs.push_back(&tex);
-
-	return tex;
-}
+//Texture& RenderPass::AddTextureInput(std::string name)
+//{
+//	//Texture& gottenTex;
+//	//graph.get texture
+//	//add to graphics queue through texture
+//	//read in passes from renderresource (this pass name)
+//	//gottenTex.ReadInPass(_name); 
+//
+//	auto& tex = _graph.GetTextureResource(name);
+//	tex.ReadInPass(_name);
+//
+//	//auto itr = find_if(_colorInputs.begin(), _colorInputs.end(), [&](const std::shared_ptr<Texture>& texx)
+//	//	{
+//	//		return texx->GetImage() == tex.GetImage();
+//	//	});
+//
+//	//if (itr != _colorInputs.end())
+//	//{
+//	//	return *itr;
+//	//}
+//
+//	auto itr = std::find_if(_colorInputs.begin(), _colorInputs.end(),
+//		[&tex](const Texture* other) {
+//			return *other == tex; // Use the overloaded == operator
+//		});
+//
+//	if (itr != _colorInputs.end()) return tex;
+//	else _colorInputs.push_back(tex);
+//
+//	return tex;
+//}
 
 void RenderPass::AddTInput(const std::string& name)
 {
-	_colorInputs.push_back(_graph._blackboard.Get<Texture*>(name));
-	_colorInputs.back()->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	_colorInputs.push_back(*_graph._blackboard.Get<Texture*>(name));
+	_colorInputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
@@ -50,15 +50,15 @@ void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
 void RenderPass::AddVBOutput(const std::string& name, void* data, unsigned size)
 {
 	_graph._blackboard.Set<void*>(name, data);
-	_bufferOutputs.push_back(_graph._blackboard.Set(name + " vertex buffer", new Buffer(size, data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)));
-	_bufferOutputs.back()->SetName(name + " vertex buffer");
+	_bufferOutputs.push_back(*_graph._blackboard.Set(name + " vertex buffer", new Buffer(size, data, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)));
+	_bufferOutputs.back().get().SetName(name + " vertex buffer");
 }
 
 void RenderPass::AddIBOutput(const std::string& name, void* data, unsigned size)
 {
 	_graph._blackboard.Set<void*>(name, data);
-	_bufferOutputs.push_back(_graph._blackboard.Set(name + " index buffer", new Buffer(size, data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT)));
-	_bufferOutputs.back()->SetName(name + " index buffer");
+	_bufferOutputs.push_back(*_graph._blackboard.Set(name + " index buffer", new Buffer(size, data, VK_BUFFER_USAGE_INDEX_BUFFER_BIT)));
+	_bufferOutputs.back().get().SetName(name + " index buffer");
 }
 
 void RenderPass::UpdateUB(const std::string& name)
@@ -85,8 +85,9 @@ void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 	else
 	{
 		_pipelineDescription.colorAttachmentFormats.push_back(format);
-		_colorOutputs.push_back(_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, format)));
-		_colorOutputs.back()->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		_colorOutputs.push_back(*_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, format)));
+		_colorOutputs.back().get().SetName(name);
+		_colorOutputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 
@@ -104,91 +105,91 @@ void RenderPass::AddDOutput(const std::string& name)
 
 	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
 	_pipelineDescription.depthFormat = depthFormat;
-	_depthStencilOutput = _graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat));
-	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _depthStencilOutput->GetImage(), _depthStencilOutput->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	_depth = _graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat));
+	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _depth->GetImage(), _depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 }
 
-Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
-{
-	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
-	return _graph._blackboard.Get<Texture>(name);
-}
-
-Texture& RenderPass::AddDepthOutput(const std::string& name)
-{
-	auto& tex = _graph.GetTextureResource("depth");
-	tex.WrittenInPass(_name);
-
-	VkFormat depthFormat;
-
-	std::vector<VkFormat> formats =
-	{
-		VK_FORMAT_D32_SFLOAT_S8_UINT,
-		VK_FORMAT_D32_SFLOAT,
-		VK_FORMAT_D24_UNORM_S8_UINT,
-		VK_FORMAT_D16_UNORM_S8_UINT,
-		VK_FORMAT_D16_UNORM
-	};
-
-	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
-	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	tex.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
-
-	_pipelineDescription.depthFormat = depthFormat;
-
-	_depthStencilOutput = std::move(&tex);
-	return *_depthStencilOutput;
-}
-
-Buffer& RenderPass::AddBufferInput(std::string name)
-{
-	auto& buffer = _graph.GetBufferResource(name);
-	buffer.ReadInPass(_name);
-
-	auto itr = std::find_if(_bufferInputs.begin(), _bufferInputs.end(),
-		[&buffer](const Buffer* other) {
-			return *other == buffer; // Use the overloaded == operator
-		});
-	if (itr != _bufferInputs.end()) return buffer;
-	else _bufferInputs.push_back(&buffer);
-
-	return buffer;
-}
-
-Buffer& RenderPass::AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
-{
-	auto& buffer = _graph.GetBufferResource(name);
-	buffer.WrittenInPass(_name);
-	buffer.CreateBuffer(size, usageFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	buffer.WriteToBuffer(data);
-
-	_bufferOutputs.push_back(&buffer);
-
-	if (!input.empty())
-	{
-		auto& inputBuffer = _graph.GetBufferResource(input);
-		inputBuffer.ReadInPass(_name);
-		_bufferInputs.push_back(&inputBuffer);
-	}
-	else _bufferInputs.push_back(nullptr);
-
-	return buffer;
-}
-
-Buffer& RenderPass::AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
-{
-	AddBufferOutput(name, size, data, usageFlags, input);
-	_uniformBufferOutput = std::move(_bufferOutputs.back());
-	_bufferOutputs.pop_back();
-
-	return *_uniformBufferOutput;
-}
-
-Buffer& RenderPass::GetBuffer(const std::string& name)
-{
-	return _graph.GetBufferResource(name);
-}
+//Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
+//{
+//	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
+//	return _graph._blackboard.Get<Texture>(name);
+//}
+//
+//Texture& RenderPass::AddDepthOutput(const std::string& name)
+//{
+//	auto& tex = _graph.GetTextureResource("depth");
+//	tex.WrittenInPass(_name);
+//
+//	VkFormat depthFormat;
+//
+//	std::vector<VkFormat> formats =
+//	{
+//		VK_FORMAT_D32_SFLOAT_S8_UINT,
+//		VK_FORMAT_D32_SFLOAT,
+//		VK_FORMAT_D24_UNORM_S8_UINT,
+//		VK_FORMAT_D16_UNORM_S8_UINT,
+//		VK_FORMAT_D16_UNORM
+//	};
+//
+//	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
+//	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+//	tex.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
+//
+//	_pipelineDescription.depthFormat = depthFormat;
+//
+//	_depth = std::move(&tex);
+//	return *_depth;
+//}
+//
+//Buffer& RenderPass::AddBufferInput(std::string name)
+//{
+//	auto& buffer = _graph.GetBufferResource(name);
+//	buffer.ReadInPass(_name);
+//
+//	auto itr = std::find_if(_bufferInputs.begin(), _bufferInputs.end(),
+//		[&buffer](const Buffer* other) {
+//			return *other == buffer; // Use the overloaded == operator
+//		});
+//	if (itr != _bufferInputs.end()) return buffer;
+//	else _bufferInputs.push_back(buffer);
+//
+//	return buffer;
+//}
+//
+//Buffer& RenderPass::AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
+//{
+//	auto& buffer = _graph.GetBufferResource(name);
+//	buffer.WrittenInPass(_name);
+//	buffer.CreateBuffer(size, usageFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+//	buffer.WriteToBuffer(data);
+//
+//	_bufferOutputs.push_back(buffer);
+//
+//	if (!input.empty())
+//	{
+//		auto& inputBuffer = _graph.GetBufferResource(input);
+//		inputBuffer.ReadInPass(_name);
+//		_bufferInputs.push_back(inputBuffer);
+//	}
+////	else _bufferInputs.push_back(nullptr);
+//
+//	return buffer;
+//}
+//
+//Buffer& RenderPass::AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
+//{
+//	AddBufferOutput(name, size, data, usageFlags, input);
+//	//_uniformBufferOutput = &std::move(_bufferOutputs.back());
+//	_bufferOutputs.pop_back();
+//
+//	return *_uniformBufferOutput;
+//}
+//
+//Buffer& RenderPass::GetBuffer(const std::string& name)
+//{
+//	return _graph.GetBufferResource(name);
+//}
 
 void RenderPass::Setup()
 {
@@ -253,7 +254,7 @@ void RenderPass::Setup()
 				VkDescriptorImageInfo descriptorImageInfo
 				{
 					.sampler = _vk.GetSampler(),
-					.imageView = _colorInputs[i++]->GetImageView(),
+					.imageView = _colorInputs[i++].get().GetImageView(),
 					.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				};
 
@@ -275,7 +276,7 @@ void RenderPass::Execute()
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
 
 	for (auto& input : _colorInputs)
-	{		input->SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	{		input.get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	std::vector<VkDeviceSize> offsets;
@@ -285,14 +286,14 @@ void RenderPass::Execute()
 	{
 		for (auto& output : _bufferOutputs)
 		{
-			if (output->GetName().find("vertex buffer") != std::string::npos)
+			if (output.get().GetName().find("vertex buffer") != std::string::npos)
 			{
-				vertexBuffers.push_back(output->GetBuffer());
+				vertexBuffers.push_back(output.get().GetBuffer());
 				offsets.push_back(0);
 			}
-			else if (output->GetName().find("index buffer") != std::string::npos)
+			else if (output.get().GetName().find("index buffer") != std::string::npos)
 			{
-				indexBuffer = output->GetBuffer();
+				indexBuffer = output.get().GetBuffer();
 			}
 		}
 	}
@@ -311,12 +312,12 @@ void RenderPass::Execute()
 	if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 	if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depthStencilOutput, _drawCalls);
-	else  _vk.Render(_commandBuffer, _colorOutputs, _depthStencilOutput, _drawCalls);
+	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depth, _drawCalls);
+	else  _vk.Render(_commandBuffer, _colorOutputs, _depth, _drawCalls);
 
 	for (auto& input : _colorInputs)
 	{
-		input->SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		input.get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 

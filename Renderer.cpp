@@ -1521,53 +1521,14 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 
 	LoadModel("Models/Sponza/glTF/Sponza.gltf");
 
-
-
-	//CreateFrameGraphNodes();
-
-	//VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-	//for (size_t i = 0; i < MAX_FRAMES; i++)
-	//	vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_presentCompleteSemaphore[i]);
-	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_offscreenSemaphore);
-	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_compositionSemaphore);
-	//vkCreateSemaphore(_vk.GetDevice(), &semaphoreCreateInfo, nullptr, &_postProcessSemaphore);
-
-	//_submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	//_submitInfo.pWaitDstStageMask = &_submitPipelineStages;
-	//_submitInfo.waitSemaphoreCount = 1;
-	//_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[0];
-	//_submitInfo.signalSemaphoreCount = 1;
-	//_submitInfo.pSignalSemaphores = &_compositionSemaphore;
-
-	//_fences.resize(MAX_FRAMES);
-	//VkFenceCreateInfo fenceCreateInfo{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-	//fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Optional: Start in signaled state
-	//for (size_t i = 0; i < MAX_FRAMES; i++)
-	//	vkCreateFence(_vk.GetDevice(), &fenceCreateInfo, nullptr, &_fences[i]);
-
-	{
-		UniformBufferOffscreen ubo
-		{
-			.world = GW::MATH::GIdentityMatrixF,
-			.deltaTime = 0.f
-		};
-		GMatrix::LookAtLHF(vec4{ 0.f, 10.f, -5.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, ubo.view);
-		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, ubo.proj);
-
-		_graph._blackboard.Set("ubo", ubo);
-	}
-
 	//offscreen
 	{
 		RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
-		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
-		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
-		offscreen.SetCullMode(VK_CULL_MODE_FRONT_BIT);
-		offscreen.SetShaders("Offscreen");
-		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
-		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
-		offscreen.AddTOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM);
-		offscreen.AddDOutput("depth");
+		offscreen.AddVBOutput("position data", _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
+		offscreen.AddVBOutput("normal data", _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
+		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
+		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
+		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
 		UniformBufferOffscreen oub
 		{
 			.world = GW::MATH::GIdentityMatrixF,
@@ -1575,24 +1536,30 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		};
 		GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
+		offscreen.AddUB("offscreen uniform", &oub, sizeof(UniformBufferOffscreen));
 
+		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
+		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
+		offscreen.AddTOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM);
+		offscreen.AddDOutput("depth");
+
+		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
+		offscreen.SetCullMode(VK_CULL_MODE_FRONT_BIT);
+		offscreen.SetShaders("Offscreen");
+		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
+		offscreen.SetRenderables(_renderables);
+
+
 
 		//offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		offscreen.AddVBOutput("position data", _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
-		offscreen.AddVBOutput("normal data", _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
-		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
-		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
-		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
-		offscreen.AddUB("offscreen uniform", &oub, sizeof(UniformBufferOffscreen));
 		//offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		//offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		//offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 		//offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 		//offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
-		offscreen.SetRenderables(_renderables);
 
 		offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
 			{

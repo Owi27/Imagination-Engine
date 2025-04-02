@@ -63,7 +63,8 @@ public:
 		std::vector<const char*> deviceExt =
 		{
 			"VK_KHR_dynamic_rendering",
-			VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
+			VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
+			VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
 		};
 
 		if (+_vulkanSurface.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT | GW::GRAPHICS::TRIPLE_BUFFER, debugLayers.size(), debugLayers.data(), 0, nullptr, deviceExt.size(), deviceExt.data(), false))
@@ -208,7 +209,7 @@ public:
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
-	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<std::reference_wrapper<Texture>>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 	VkCommandBuffer& RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 	//VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

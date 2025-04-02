@@ -366,7 +366,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
-VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<Texture*>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
+VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<std::reference_wrapper<Texture>>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
 
@@ -376,11 +376,11 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-			.imageView = texture->GetImageView(),
+			.imageView = texture.get().GetImageView(),
 			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-			.clearValue = texture->GetClearColorValue(),
+			.clearValue = texture.get().GetClearValue(),
 		};
 
 		colorRenderingAttachmentInfos.push_back(std::move(renderingAttachmentInfo));
@@ -423,10 +423,10 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
-	//for (auto& tex : textures)
-	//{
-	//	GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, tex->GetImage(), tex->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	//}
+	for (auto& texture : textures)
+	{
+		texture.get().SetImageLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
 
 	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;
@@ -434,6 +434,12 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 
 VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
+	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+	VkRect2D scissor = { {0, 0}, {_width, _height} };
+
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
 	_currentSwapchainTexture->SetImageLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
@@ -443,7 +449,7 @@ VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer
 		.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.clearValue = _currentSwapchainTexture->GetClearColorValue(),
+		.clearValue = _currentSwapchainTexture->GetClearValue(),
 	};
 
 	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
@@ -473,12 +479,6 @@ VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer
 	};
 
 	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
-
-	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
-	VkRect2D scissor = { {0, 0}, {_width, _height} };
-
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
