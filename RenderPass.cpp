@@ -36,7 +36,7 @@
 void RenderPass::AddTInput(const std::string& name)
 {
 	_colorInputs.push_back(*_graph._blackboard.Get<Texture*>(name));
-	_colorInputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//_colorInputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
@@ -69,6 +69,11 @@ void RenderPass::UpdateUB(const std::string& name)
 	buffer->WriteToBuffer(data);
 }
 
+void RenderPass::Update()
+{
+	if (_uniformBufferOutput) UpdateUB(_ubDataName);
+}
+
 void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 {
 	if (name.find("swapchain") != std::string::npos)
@@ -87,7 +92,7 @@ void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 		_pipelineDescription.colorAttachmentFormats.push_back(format);
 		_colorOutputs.push_back(*_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, format)));
 		_colorOutputs.back().get().SetName(name);
-		_colorOutputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		//_colorOutputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 
@@ -199,7 +204,6 @@ void RenderPass::Setup()
 		_pipelineDescription.pipelineLayoutCreateInfo.pPushConstantRanges = &_pushConstantRange;
 	}
 
-	int i = 0;
 	if (_descriptorPoolSizes.size() && _descriptorSetLayoutBindings.size())
 	{
 		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo
@@ -235,6 +239,12 @@ void RenderPass::Setup()
 		_pipelineDescription.pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
 
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+		std::vector<VkDescriptorBufferInfo> bufferInfos;
+		std::vector<VkDescriptorImageInfo> imageInfos;
+		imageInfos.reserve(_colorInputs.size());
+		bufferInfos.reserve(_bufferInputs.size());
+		writeDescriptorSets.reserve(_descriptorSetLayoutBindings.size());
+		int i = 0;
 		for (auto& layoutBinding : _descriptorSetLayoutBindings)
 		{
 			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
@@ -246,7 +256,9 @@ void RenderPass::Setup()
 					.range = _uniformBufferOutput->GetSize()
 				};
 
-				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &descriptorBufferInfo));
+				bufferInfos.emplace_back(descriptorBufferInfo);
+
+				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &bufferInfos.back()));
 			}
 
 			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
@@ -255,10 +267,12 @@ void RenderPass::Setup()
 				{
 					.sampler = _vk.GetSampler(),
 					.imageView = _colorInputs[i++].get().GetImageView(),
-					.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					.imageLayout = VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR
 				};
 
-				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &descriptorImageInfo));
+				imageInfos.emplace_back(descriptorImageInfo);
+				//pushback overwrites all 3 images for some reason
+				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
 			}
 		}
 
@@ -271,13 +285,9 @@ void RenderPass::Setup()
 	else _pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout);
 }
 
-void RenderPass::Execute()
+void RenderPass::BuildCommandBuffer()
 {
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
-
-	for (auto& input : _colorInputs)
-	{		input.get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	}
 
 	std::vector<VkDeviceSize> offsets;
 	std::vector<VkBuffer> vertexBuffers;
@@ -300,7 +310,8 @@ void RenderPass::Execute()
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo
 	{
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
 	};
 
 	vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
@@ -314,11 +325,6 @@ void RenderPass::Execute()
 
 	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depth, _drawCalls);
 	else  _vk.Render(_commandBuffer, _colorOutputs, _depth, _drawCalls);
-
-	for (auto& input : _colorInputs)
-	{
-		input.get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)

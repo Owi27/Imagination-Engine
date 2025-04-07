@@ -38,6 +38,8 @@ class VulkanContext
 
 	std::unique_ptr<Texture> _currentSwapchainTexture = std::make_unique<Texture>();
 
+	bool _firstFrame = true;
+
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
 	ComPtr<IDxcUtils> _utils;
@@ -45,6 +47,7 @@ class VulkanContext
 
 	PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR;
 	PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR;
+	//PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR;
 
 public:
 	VulkanContext()
@@ -147,6 +150,7 @@ public:
 
 		vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdBeginRenderingKHR");
 		vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdEndRenderingKHR");
+	//	vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)vkGetInstanceProcAddr(_instance, "vkCmdPipelineBarrier2KHR");
 	}
 
 	VulkanContext(const VulkanContext&) = delete;
@@ -175,6 +179,8 @@ public:
 	void SubmitQueue(VkSemaphore& prevSemaphore, VkSemaphore& currSemaphore, VkCommandBuffer& commandBuffers, VkFence fence = nullptr);
 	void PresentInfo(VkSemaphore& semaphore);
 
+	void MB(VkCommandBuffer& commandBuffer);
+
 	VkDevice GetDevice() const { return _device; }
 	VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
 	VkInstance GetInstance() const { return _instance; }
@@ -200,6 +206,8 @@ public:
 	unsigned GetHeight() const { return _height; }
 	unsigned GetAspectRatio() const { return _aspectRatio; }
 	unsigned GetMaxFrames() const { return _maxFramesInFlight; }
+
+	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	void GetSwapchainImage(Texture* tex, unsigned idx);
 

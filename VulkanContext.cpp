@@ -6,8 +6,6 @@ void VulkanContext::StartFrame()
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
 	vkResetFences(_device, 1, &_fences[_currentFrame]);
 	vkAcquireNextImageKHR(_device, _swapchain, UINT64_MAX, _presentCompleteSemaphores[_currentFrame], nullptr, &_currentImage);
-	_vulkanSurface.GetSwapchainImage(_currentFrame, (void**)&_currentSwapchainTexture->GetImage());
-	_vulkanSurface.GetSwapchainView(_currentFrame, (void**)&_currentSwapchainTexture->GetImageView());
 }
 
 void VulkanContext::EndFrame()
@@ -35,10 +33,63 @@ void VulkanContext::PresentInfo(VkSemaphore& semaphore)
 	_presentInfo.waitSemaphoreCount = 1;
 }
 
+void VulkanContext::MB(VkCommandBuffer& commandBuffer)
+{
+	VkMemoryBarrier2 memoryBarrier
+	{
+		.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2_KHR,
+		.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+		.dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+		.dstAccessMask = VK_ACCESS_2_INPUT_ATTACHMENT_READ_BIT
+	};
+
+	VkDependencyInfoKHR dependencyInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR,
+		.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
+		.memoryBarrierCount = 1,
+		.pMemoryBarriers = &memoryBarrier
+	};
+
+	vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+}
+
 VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 {
 	_vulkanSurface.GetSwapchainFramebuffer(idx, (void**)&_frameBuffer);
 	return _frameBuffer;
+}
+
+void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+	VkImageMemoryBarrier2KHR imageMemoryBarrier
+	{
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR,
+		.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
+		.dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR,
+		.dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT_KHR,
+		.oldLayout = oldLayout,
+		.newLayout = newLayout,
+		.image = image,
+		.subresourceRange
+		{
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel = 0,
+			.levelCount = mipLevels,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		}
+	};
+
+	VkDependencyInfoKHR dependencyInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO_KHR,
+		.imageMemoryBarrierCount = 1,
+		.pImageMemoryBarriers = &imageMemoryBarrier
+	};
+
+	vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 }
 
 void VulkanContext::GetSwapchainImage(Texture* tex, unsigned idx)
@@ -372,12 +423,12 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 
 	for (auto& texture : textures)
 	{
-		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, texture->GetImage(), texture->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		texture.get().TransitionLayout(commandBuffer);
 		VkRenderingAttachmentInfoKHR renderingAttachmentInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
 			.imageView = texture.get().GetImageView(),
-			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.imageLayout = VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue = texture.get().GetClearValue(),
@@ -389,7 +440,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
 	if (depth)
 	{
-		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		depth->SetImageLayout(commandBuffer, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
 		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -421,11 +472,12 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	drawCalls(commandBuffer);
+//	MB(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
 	for (auto& texture : textures)
 	{
-		texture.get().SetImageLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		texture.get().SetImageLayout(commandBuffer, VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR);
 	}
 
 	vkEndCommandBuffer(commandBuffer);
@@ -434,14 +486,17 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 
 VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
+	_vulkanSurface.GetSwapchainImage(_currentFrame, (void**)&_currentSwapchainTexture->GetImage());
+	_vulkanSurface.GetSwapchainView(_currentFrame, (void**)&_currentSwapchainTexture->GetImageView());
+
 	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
 	VkRect2D scissor = { {0, 0}, {_width, _height} };
 
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-	_currentSwapchainTexture->SetImageLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	GvkHelper::transition_image_layout(commandBuffer, _device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
 	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
@@ -482,6 +537,8 @@ VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer
 
 	drawCalls(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
+
+	GvkHelper::transition_image_layout(commandBuffer, _device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;

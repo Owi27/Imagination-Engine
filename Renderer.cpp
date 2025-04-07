@@ -1517,7 +1517,7 @@ void VulkanRenderer::Playground()
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext::GetInst(_win))
 {
 
-		
+
 
 	LoadModel("Models/Sponza/glTF/Sponza.gltf");
 
@@ -1529,14 +1529,21 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
 		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
 		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
-		UniformBufferOffscreen oub
+		/*UniformBufferOffscreen oub
 		{
 			.world = GW::MATH::GIdentityMatrixF,
 			.deltaTime = 0.f
 		};
-		GMatrix::LookAtLHF(vec4{ 7.f, 4.f, -10.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
+		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
+		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);*/
+		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
+			{
+				.world = GW::MATH::GIdentityMatrixF,
+				.deltaTime = 0.f
+			}, sizeof(UniformBufferOffscreen));
+		auto& oub = *static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"));
+		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
-		offscreen.AddUB("offscreen uniform", &oub, sizeof(UniformBufferOffscreen));
 
 		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
 		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
@@ -1570,7 +1577,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 				}
 			});
 
-		offscreen.Setup();
+		//offscreen.Setup();
 	}
 
 	//final
@@ -1606,14 +1613,15 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		//lighting.AddTOutput("lighting out");
 		lighting.AddTOutput("swapchain");
-		lighting.SetDrawCalls([&lighting](VkCommandBuffer& commandBuffer)
+		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)
 			{
 				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 			});
 
-		lighting.Setup();
+		//lighting.Setup();
 	}
 
+	_graph.BuildCommandBuffers();
 
 	_shutdown.Create(_vlk, [&]()
 		{
@@ -1635,51 +1643,6 @@ void VulkanRenderer::Render()
 	_graph.Execute();
 
 	_vk.EndFrame();
-
-	//todo: abstraction layer
-	//split between graph and vk
-
-	//todo write queue submit logic for each frame
-	//_submitInfo.pWaitSemaphores = &_presentCompleteSemaphore[_currentFrame];
-	//_submitInfo.pSignalSemaphores = &_graph.GetSemaphore();
-	//_submitInfo.commandBufferCount = 1;
-	//_submitInfo.pCommandBuffers = &_graph.GetCB();
-
-	//vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, nullptr);
-
-	//_submitInfo.pWaitSemaphores = &_graph.GetSemaphore();
-	//_submitInfo.pSignalSemaphores = &_graph.GetSemaphore2();
-	//_submitInfo.commandBufferCount = 1;
-	//_submitInfo.pCommandBuffers = &_graph.GetCB2();
-
-	//vkQueueSubmit(_vk.GetGraphicsQueue(), 1, &_submitInfo, _fences[_currentFrame]);
-
-	//VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-	//presentInfo.swapchainCount = 1;
-	//presentInfo.pSwapchains = &_vk.GetSwapchain();
-	//presentInfo.pImageIndices = &frameIdx; //change to current frame
-	//presentInfo.pWaitSemaphores = &_graph.GetSemaphore2();
-	//presentInfo.waitSemaphoreCount = 1;
-
-	//vkQueuePresentKHR(_vk.GetGraphicsQueue(), &presentInfo);
-	//_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
-
-
-	////_submitInfo.pWaitSemaphores = &_compositionSemaphore;
-	////_submitInfo.pSignalSemaphores = &_postProcessSemaphore;
-	////_submitInfo.pCommandBuffers = &_commandBuffers[2].data();
-	////
-	////vkQueueSubmit(_queue, 1, &_submitInfo, VK_NULL_HANDLE);
-
-	//VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-	//presentInfo.swapchainCount = 1;
-	//presentInfo.pSwapchains = &_swapchain;
-	//presentInfo.pImageIndices = &frameIdx;
-	//presentInfo.pWaitSemaphores = &_compositionSemaphore;
-	//presentInfo.waitSemaphoreCount = 1;
-
-	//vkQueuePresentKHR(_queue, &presentInfo);
-	//_currentFrame = (_currentFrame + 1) % MAX_FRAMES;
 }
 
 void VulkanRenderer::UpdateCamera()

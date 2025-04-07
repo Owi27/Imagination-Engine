@@ -73037,6 +73037,14 @@ void transition_image_layout(VkCommandBuffer& _commandBuffer, const VkDevice& _d
 			source_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		}
+		else if (_currentLayout == VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR)
+		{
+			image_memory_barrier.srcAccessMask = 0;
+			image_memory_barrier.dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT_KHR;
+
+			source_stage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR;
+			destrination_stage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR;
+		}
 	}
 	else if (_previousLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 	{
@@ -73060,6 +73068,22 @@ void transition_image_layout(VkCommandBuffer& _commandBuffer, const VkDevice& _d
 		image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 		source_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && _currentLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR)
+	{
+		image_memory_barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		image_memory_barrier.dstAccessMask = 0;
+
+		source_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		destrination_stage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	}
+	else if (_previousLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && _currentLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL)
+	{
+		image_memory_barrier.srcAccessMask = 0;
+		image_memory_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		source_stage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 		destrination_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
 
@@ -74519,6 +74543,18 @@ namespace GW
 					.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
 					.dynamicRendering = true
 				};
+				VkPhysicalDeviceDynamicRenderingLocalReadFeaturesKHR physicalDeviceDynamicRenderingLocalReadFeaturesKHR
+				{
+					.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR,
+					.pNext = &physicalDeviceDynamicRenderingFeaturesKHR,
+					.dynamicRenderingLocalRead = true
+				};
+				VkPhysicalDeviceSynchronization2FeaturesKHR physicalDeviceSynchronization2FeaturesKHR
+				{
+					.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,
+					.pNext = &physicalDeviceDynamicRenderingLocalReadFeaturesKHR,
+					.synchronization2 = true
+				};
 				
 				//Setup Logical device create info [*: Two different Queue Indices Check Needed]
 				VkDeviceCreateInfo create_info = {};
@@ -74529,7 +74565,7 @@ namespace GW
 
 				create_info.enabledExtensionCount = m_DeviceExtensionCount;
 				create_info.ppEnabledExtensionNames = m_DeviceExtensions;
-				create_info.pNext = &physicalDeviceDynamicRenderingFeaturesKHR;
+				create_info.pNext = &physicalDeviceSynchronization2FeaturesKHR;
 
 				// add bindless support if requested
 				VkPhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures{};

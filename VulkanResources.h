@@ -20,7 +20,7 @@ public:
 
 	}
 
-		std::string& GetName() { return _name; }
+	std::string& GetName() { return _name; }
 
 	void SetName(const std::string& name) { _name = name; }
 	void WrittenInPass(const std::string& pass) { _writtenInPasses.insert(pass); }
@@ -122,7 +122,7 @@ public:
 		_imageAspectFlags = imageAspectFlags;
 		//_imageUsageFlags = (_imageAspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
 		//_imageMemoryPropertyFlags = VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		_imageUsageFlags = (_imageAspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		_imageUsageFlags = (_imageAspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		_imageMemoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 		GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, 1, _sampleCountFlagBits, _format, _imageTiling, _imageUsageFlags, _imageMemoryPropertyFlags, nullptr, &_image, &_imageMemory);
@@ -138,6 +138,7 @@ public:
 
 	VkImage& GetImage() { return _image; }
 	VkImageView& GetImageView() { return _imageView; }
+	//VkImageView GetImageViewX() { return _imageView; }
 	VkExtent3D& GetExtent() { return _extent; }
 	VkClearValue& GetClearValue() { return _clearValue; }
 	VkFormat GetFormat() const { return _format; }
@@ -145,6 +146,7 @@ public:
 
 	void SetImageLayout(VkImageLayout newLayout);
 	void SetImageLayout(VkCommandBuffer& commandBuffer, VkImageLayout newLayout);
+	void TransitionLayout(VkCommandBuffer& commandBuffer);
 
 	void SetClearColorValue(const VkClearColorValue& clearColorValue) { _clearColorValue = clearColorValue; }
 

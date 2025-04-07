@@ -40,6 +40,7 @@ public:
 	VkCommandBuffer& GetCB2() { return _passes["lighting"]->GetCommandBuffer(); }
 
 	void Execute();
+	void BuildCommandBuffers();
 
 	Texture& GetTextureResource(const std::string& name);
 	Buffer& GetBufferResource(const std::string& name);

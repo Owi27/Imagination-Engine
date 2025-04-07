@@ -57,7 +57,7 @@ public:
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
 			.commandPool = _vk.GetCommandPool(),
 			.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			.commandBufferCount = 1
+			.commandBufferCount = 1,
 		};
 
 		vkAllocateCommandBuffers(_vk.GetDevice(), &commandBufferAllocateInfo, &_commandBuffer);
@@ -82,6 +82,8 @@ public:
 	//template<typename T>
 	void UpdateUB(const std::string& name);
 
+	void Update();
+
 	//Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
 	//Texture& AddDepthOutput(const std::string& name);
 	//Buffer& AddBufferInput(std::string name);
@@ -94,7 +96,7 @@ public:
 
 	// should have color attachments
 	void Setup();
-	void Execute();
+	void BuildCommandBuffer();
 
 	VkCommandBuffer& GetCommandBuffer() { return _commandBuffer; }
 	VkPipeline& GetPipeline() { return _pipeline; }

@@ -3,18 +3,23 @@
 
 void Texture::SetImageLayout(VkImageLayout newLayout)
 {
-	if (_imageLayout = newLayout) return;
+	if (_imageLayout == newLayout) return;
 
-	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _image, _format, _imageLayout, newLayout);
+	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), VK_REMAINING_MIP_LEVELS, _image, _format, _imageLayout, newLayout);
 	_imageLayout = newLayout;
 }
 
 void Texture::SetImageLayout(VkCommandBuffer& commandBuffer, VkImageLayout newLayout)
 {
-	if (_imageLayout = newLayout) return;
+	if (_imageLayout == newLayout) return;
 
-	GvkHelper::transition_image_layout(commandBuffer,_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _image, _format, _imageLayout, newLayout);
+	GvkHelper::transition_image_layout(commandBuffer,_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), VK_REMAINING_MIP_LEVELS, _image, _format, _imageLayout, newLayout);
 	_imageLayout = newLayout;
+}
+
+void Texture::TransitionLayout(VkCommandBuffer& commandBuffer)
+{
+	_vk.TransitionImageLayout(commandBuffer, VK_REMAINING_MIP_LEVELS, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR);
 }
 
 void Texture::CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator)
