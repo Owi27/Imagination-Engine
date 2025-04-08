@@ -36,7 +36,7 @@
 void RenderPass::AddTInput(const std::string& name)
 {
 	_colorInputs.push_back(*_graph._blackboard.Get<Texture*>(name));
-	//_colorInputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//_colorInputs.back().get().TransitionLayout();
 }
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
@@ -83,6 +83,7 @@ void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 		//	Texture* t = new Texture(); // Allocate on the heap
 		//	_vk.GetSwapchainImage(t, i);
 		_pipelineDescription.colorAttachmentFormats.push_back(_vk.GetSwapchainFormat());
+		_vk.CreateSwapchainTextures();
 		//	_colorOutputs.push_back(t); // Store the pointer
 		//}
 		_renderToSwapchain = true;
@@ -92,7 +93,6 @@ void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 		_pipelineDescription.colorAttachmentFormats.push_back(format);
 		_colorOutputs.push_back(*_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, format)));
 		_colorOutputs.back().get().SetName(name);
-		//_colorOutputs.back().get().SetImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 }
 
@@ -274,6 +274,20 @@ void RenderPass::Setup()
 				//pushback overwrites all 3 images for some reason
 				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
 			}
+
+			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
+			{
+				VkDescriptorImageInfo descriptorImageInfo
+				{
+					.sampler = _vk.GetSampler(),
+					.imageView = _colorInputs[i++].get().GetImageView(),
+					.imageLayout = VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR
+				};
+
+				imageInfos.emplace_back(descriptorImageInfo);
+				//pushback overwrites all 3 images for some reason
+				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
+			}
 		}
 
 		vkUpdateDescriptorSets(_vk.GetDevice(), writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
@@ -308,23 +322,43 @@ void RenderPass::BuildCommandBuffer()
 		}
 	}
 
-	VkCommandBufferBeginInfo commandBufferBeginInfo
+	if (_renderToSwapchain)
 	{
-		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
-	};
+		_vk.RenderToSwapchain(_depth, _drawCalls, [this, vertexBuffers, indexBuffer, offsets](VkCommandBuffer& commandBuffer)
+			{
+				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+				if (_descriptorSet) vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+				if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+				if (indexBuffer) vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			});
+	}
+	else
+	{
+		VkCommandBufferBeginInfo commandBufferBeginInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+		};
 
-	vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
+		vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
 
-	vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-	if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+		vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+		if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+		if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+		_vk.Render(_commandBuffer, _colorOutputs, _depth, _drawCalls);
+	}
+}
 
-	if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
-	if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+VkCommandBuffer& RenderPass::GetCommandBuffer()
+{
+	if (_renderToSwapchain)
+	{
+		return _vk.GetCurrentCommandBuffer();
+	}
 
-	if (_renderToSwapchain) _vk.RenderToSwapchain(_commandBuffer, _depth, _drawCalls);
-	else  _vk.Render(_commandBuffer, _colorOutputs, _depth, _drawCalls);
+	return _commandBuffer;
 }
 
 void RenderPass::SetPushConstantRange(VkPushConstantRange pushConstantRange)

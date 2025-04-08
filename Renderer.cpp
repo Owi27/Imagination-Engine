@@ -1568,13 +1568,15 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		//offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 
-		offscreen.SetDrawCalls([&offscreen](VkCommandBuffer& commandBuffer)
+		offscreen.SetDrawCalls([this, &offscreen](VkCommandBuffer& commandBuffer)
 			{
 				for (auto& renderable : offscreen.GetRenderables())
 				{
 					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
 					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
 				}
+
+				_vk.MB(commandBuffer);
 			});
 
 		//offscreen.Setup();
@@ -1606,11 +1608,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddUB("lighting uniform", &lub, sizeof(UniformBufferFinal));
 
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
-		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 3 });
+		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 3 });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		//lighting.AddTOutput("lighting out");
 		lighting.AddTOutput("swapchain");
 		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)

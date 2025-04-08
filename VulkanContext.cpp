@@ -61,6 +61,83 @@ VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 	return _frameBuffer;
 }
 
+void VulkanContext::CreateSwapchainTextures()
+{
+	_currentSwapchainTextures.resize(_maxFramesInFlight);
+
+	for (size_t i = 0; i < _maxFramesInFlight; i++)
+	{
+		_currentSwapchainTextures[i] = std::make_unique<Texture>();
+		_vulkanSurface.GetSwapchainImage(i, (void**)&_currentSwapchainTextures[i]->GetImage());
+		_vulkanSurface.GetSwapchainView(i, (void**)&_currentSwapchainTextures[i]->GetImageView());
+	}
+}
+
+VkCommandBuffer& VulkanContext::GetCurrentCommandBuffer()
+{
+	return _swapchainCommandBuffers[_currentFrame];
+}
+
+VkPipelineStageFlags VulkanContext::GetPipelineStageFlags(VkImageLayout layout)
+{
+	switch (layout)
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+		return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		return VK_PIPELINE_STAGE_HOST_BIT;
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		return VK_PIPELINE_STAGE_TRANSFER_BIT;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+		return VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
+		return VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		return VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+		return VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	case VK_IMAGE_LAYOUT_GENERAL:
+		assert(false && "Don't know how to get a meaningful VkPipelineStageFlags for VK_IMAGE_LAYOUT_GENERAL! Don't use it!");
+		return 0;
+	default:
+		assert(false);
+		return 0;
+	}
+}
+
+VkAccessFlags VulkanContext::GetAccessFlags(VkImageLayout layout)
+{
+	switch (layout)
+	{
+	case VK_IMAGE_LAYOUT_UNDEFINED:
+	case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+		return 0;
+	case VK_IMAGE_LAYOUT_PREINITIALIZED:
+		return VK_ACCESS_HOST_WRITE_BIT;
+	case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+		return VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+		return VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
+		return VK_ACCESS_FRAGMENT_SHADING_RATE_ATTACHMENT_READ_BIT_KHR;
+	case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+		return VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
+	case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+		return VK_ACCESS_TRANSFER_READ_BIT;
+	case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+		return VK_ACCESS_TRANSFER_WRITE_BIT;
+	case VK_IMAGE_LAYOUT_GENERAL:
+		assert(false && "Don't know how to get a meaningful VkAccessFlags for VK_IMAGE_LAYOUT_GENERAL! Don't use it!");
+		return 0;
+	default:
+		assert(false);
+		return 0;
+	}
+}
+
 void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
 	VkImageMemoryBarrier2KHR imageMemoryBarrier
@@ -472,7 +549,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
 	drawCalls(commandBuffer);
-//	MB(commandBuffer);
+	//	MB(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
 	for (auto& texture : textures)
@@ -484,62 +561,112 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	return commandBuffer;
 }
 
-VkCommandBuffer& VulkanContext::RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
+void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls, std::function<void(VkCommandBuffer&)> binds)
 {
-	_vulkanSurface.GetSwapchainImage(_currentFrame, (void**)&_currentSwapchainTexture->GetImage());
-	_vulkanSurface.GetSwapchainView(_currentFrame, (void**)&_currentSwapchainTexture->GetImageView());
-
-	VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
-	VkRect2D scissor = { {0, 0}, {_width, _height} };
-
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-	GvkHelper::transition_image_layout(commandBuffer, _device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
+	for (size_t i = 0; i < _swapchainCommandBuffers.size(); i++)
 	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = _currentSwapchainTexture->GetImageView(),
-		.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		.clearValue = _currentSwapchainTexture->GetClearValue(),
-	};
-
-	VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
-	if (depth)
-	{
-		//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-		depthRenderingAttachmentInfo.imageView = depth->GetImageView();
-		depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-		depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthRenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		depthRenderingAttachmentInfo.clearValue = { .depthStencil = {1.f, 0} };
-		depthRenderingAttachmentInfo.resolveMode = VK_RESOLVE_MODE_NONE;
-	}
-
-	VkRenderingInfo renderingInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.renderArea
+		VkCommandBufferBeginInfo commandBufferBeginInfo
 		{
-			.offset = {0, 0},
-			.extent = {_width, _height}
-		},
-		.layerCount = 1,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &swapchainRenderingAttachmentInfo,
-		.pDepthAttachment = depth ? &depthRenderingAttachmentInfo : nullptr
-	};
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			//.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+		};
 
-	vkCmdBeginRenderingKHR(commandBuffer, &renderingInfo);
+		vkBeginCommandBuffer(_swapchainCommandBuffers[i], &commandBufferBeginInfo);
 
-	drawCalls(commandBuffer);
-	vkCmdEndRenderingKHR(commandBuffer);
+		VkViewport viewport = { 0, 0, static_cast<float>(_width), static_cast<float>(_height), 0, 1 };
+		VkRect2D scissor = { {0, 0}, {_width, _height} };
 
-	GvkHelper::transition_image_layout(commandBuffer, _device, _commandPool, _graphicsQueue, 1, _currentSwapchainTexture->GetImage(), _swapchainFormat.format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		vkCmdSetViewport(_swapchainCommandBuffers[i], 0, 1, &viewport);
+		vkCmdSetScissor(_swapchainCommandBuffers[i], 0, 1, &scissor);
 
-	vkEndCommandBuffer(commandBuffer);
-	return commandBuffer;
+		binds(_swapchainCommandBuffers[i]);
+
+		{
+			VkImageMemoryBarrier imageMemoryBarrier
+			{
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.srcAccessMask = 0,
+				.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+				.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = _currentSwapchainTextures[i]->GetImage(),
+				.subresourceRange
+				{
+					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+					.levelCount = VK_REMAINING_MIP_LEVELS,
+					.layerCount = VK_REMAINING_ARRAY_LAYERS
+				}
+			};
+
+			vkCmdPipelineBarrier(_swapchainCommandBuffers[i], VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+		}
+
+		VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+			.imageView = _currentSwapchainTextures[i]->GetImageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+			.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			.clearValue = _currentSwapchainTextures[i]->GetClearValue(),
+		};
+
+		VkRenderingAttachmentInfoKHR depthRenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR };
+		if (depth)
+		{
+			//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, depth->GetImage(), depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+			depthRenderingAttachmentInfo.imageView = depth->GetImageView();
+			depthRenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+			depthRenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depthRenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+			depthRenderingAttachmentInfo.clearValue = { .depthStencil = {1.f, 0} };
+			depthRenderingAttachmentInfo.resolveMode = VK_RESOLVE_MODE_NONE;
+		}
+
+		VkRenderingInfo renderingInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+			.renderArea
+			{
+				.offset = {0, 0},
+				.extent = {_width, _height}
+			},
+			.layerCount = 1,
+			.colorAttachmentCount = 1,
+			.pColorAttachments = &swapchainRenderingAttachmentInfo,
+			.pDepthAttachment = depth ? &depthRenderingAttachmentInfo : nullptr
+		};
+
+		vkCmdBeginRenderingKHR(_swapchainCommandBuffers[i], &renderingInfo);
+
+		drawCalls(_swapchainCommandBuffers[i]);
+		vkCmdEndRenderingKHR(_swapchainCommandBuffers[i]);
+
+		{
+			VkImageMemoryBarrier imageMemoryBarrier
+			{
+				.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+				.srcAccessMask = GetAccessFlags(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL),
+				.dstAccessMask = GetAccessFlags(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR),
+				.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+				.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+				.image = _currentSwapchainTextures[i]->GetImage(),
+				.subresourceRange
+				{
+					.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+					.levelCount = VK_REMAINING_MIP_LEVELS,
+					.layerCount = VK_REMAINING_ARRAY_LAYERS
+				}
+			};
+
+			vkCmdPipelineBarrier(_swapchainCommandBuffers[i], GetPipelineStageFlags(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL), GetPipelineStageFlags(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR), 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+		}
+
+		vkEndCommandBuffer(_swapchainCommandBuffers[i]);
+
+	}
 }

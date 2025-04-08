@@ -98,7 +98,7 @@ public:
 	void Setup();
 	void BuildCommandBuffer();
 
-	VkCommandBuffer& GetCommandBuffer() { return _commandBuffer; }
+	VkCommandBuffer& GetCommandBuffer();
 	VkPipeline& GetPipeline() { return _pipeline; }
 	VkPipelineLayout& GetPipelineLayout() { return _pipelineLayout; }
 	VkDescriptorSet& GetDescriptorSet() { return _descriptorSet; }

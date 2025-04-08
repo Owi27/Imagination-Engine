@@ -36,7 +36,7 @@ class VulkanContext
 
 	std::vector<VkCommandBuffer> _swapchainCommandBuffers;
 
-	std::unique_ptr<Texture> _currentSwapchainTexture = std::make_unique<Texture>();
+	std::vector<std::unique_ptr<Texture>> _currentSwapchainTextures;
 
 	bool _firstFrame = true;
 
@@ -120,17 +120,17 @@ public:
 			_utils->CreateDefaultIncludeHandler(&_includeHandler);
 			std::filesystem::create_directories("Shaders/SPV");
 
-			for (size_t i = 0; i < _maxFramesInFlight; i++)
-			{
-				VkImage swapchainImage;
-				VkImageView swapchainImageView;
-				VkFormat swapchainFormat;
+			//for (size_t i = 0; i < _maxFramesInFlight; i++)
+			//{
+			//	VkImage swapchainImage;
+			//	VkImageView swapchainImageView;
+			//	VkFormat swapchainFormat;
 
-				_vulkanSurface.GetSwapchainImage(i, (void**)&swapchainImage);
-				_vulkanSurface.GetSwapchainView(i, (void**)&swapchainImageView);
+			//	_vulkanSurface.GetSwapchainImage(i, (void**)&swapchainImage);
+			//	_vulkanSurface.GetSwapchainView(i, (void**)&swapchainImageView);
 
-				GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, swapchainImage, VK_FORMAT_UNDEFINED, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-			}
+			//	//GvkHelper::transition_image_layout(_device, _commandPool, _graphicsQueue, 1, swapchainImage, VK_FORMAT_UNDEFINED, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			//}
 		}
 
 		//create sampler
@@ -197,10 +197,17 @@ public:
 
 	VkFormat GetSwapchainFormat() const { return _swapchainFormat.format; }
 
+	void CreateSwapchainTextures();
+
+	VkCommandBuffer& GetCurrentCommandBuffer();
 
 	ComPtr<IDxcCompiler3> GetCompiler() const { return _compiler; }
 	ComPtr<IDxcUtils> GetUtils() const { return _utils; }
 	ComPtr<IDxcIncludeHandler> GetIncludeHandler() const { return _includeHandler; }
+
+
+	VkPipelineStageFlags GetPipelineStageFlags(VkImageLayout layout);
+	VkAccessFlags GetAccessFlags(VkImageLayout layout);
 
 	unsigned GetWidth() const { return _width; }
 	unsigned GetHeight() const { return _height; }
@@ -218,6 +225,6 @@ public:
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
 	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<std::reference_wrapper<Texture>>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
-	VkCommandBuffer& RenderToSwapchain(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
+	void RenderToSwapchain(Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls, std::function<void(VkCommandBuffer&)> binds);
 	//VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 };

@@ -22,6 +22,14 @@ void Texture::TransitionLayout(VkCommandBuffer& commandBuffer)
 	_vk.TransitionImageLayout(commandBuffer, VK_REMAINING_MIP_LEVELS, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR);
 }
 
+void Texture::TransitionLayout()
+{
+	VkCommandBuffer commandBuffer;
+	GvkHelper::signal_command_start(_vk.GetDevice(), _vk.GetCommandPool(), &commandBuffer);
+	_vk.TransitionImageLayout(commandBuffer, VK_REMAINING_MIP_LEVELS, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR);
+	GvkHelper::signal_command_end(_vk.GetDevice(), _vk.GetGraphicsQueue(), _vk.GetCommandPool(), &commandBuffer);
+}
+
 void Texture::CreateImage(const VkExtent3D& extent, const VkSampleCountFlagBits& msaaBit, const VkFormat& format, const VkImageTiling& tiling, const VkImageUsageFlags& usageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags, VkAllocationCallbacks* allocator)
 {
 	_extent = extent;

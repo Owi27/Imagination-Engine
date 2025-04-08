@@ -1,9 +1,13 @@
-Texture2D textureposition : register(t1);
-SamplerState samplerposition : register(s1);
-Texture2D textureNormal : register(t2);
-SamplerState samplerNormal : register(s2);
-Texture2D textureAlbedo : register(t3);
-SamplerState samplerAlbedo : register(s3);
+//Texture2D textureposition : register(t1);
+//SamplerState samplerposition : register(s1);
+//Texture2D textureNormal : register(t2);
+//SamplerState samplerNormal : register(s2);
+//Texture2D textureAlbedo : register(t3);
+//SamplerState samplerAlbedo : register(s3);
+
+[[vk::input_attachment_index(0)]][[vk::binding(1)]] SubpassInput posAttachment;
+[[vk::input_attachment_index(1)]][[vk::binding(2)]] SubpassInput nrmAttachment;
+[[vk::input_attachment_index(2)]][[vk::binding(3)]] SubpassInput albAttachment;
 
 struct Light
 {
@@ -21,10 +25,10 @@ cbuffer UniformBufferFinal : register(b0)
 
 float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
-    float3 fragPos = normalize(textureposition.Sample(samplerposition, inUV).rgb);
-    float3 normal = normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
-    float3 albedo = textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
-    float specular = textureAlbedo.Sample(samplerAlbedo, inUV).a;
+    float3 fragPos = posAttachment.SubpassLoad().rgb;//    normalize(textureposition.Sample(samplerposition, inUV).rgb);
+    float3 normal = nrmAttachment.SubpassLoad().rgb; //normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
+    float3 albedo = albAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
+    float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
   
    // return float4(inUV, 1, 1);
     //return float4(normalize(fragPos), 1.0); // Visualize position
