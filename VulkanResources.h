@@ -103,7 +103,7 @@ class Texture : public VulkanResource
 	VkAttachmentDescription _attachmentDescription;
 
 	VkClearColorValue _clearColorValue;
-	VkClearValue _clearValue = { .color {0, 0, 0, 0} };
+	VkClearValue _clearValue = { .color {0, 0, 0, 1} };
 
 	VkImageLayout _imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 

@@ -552,10 +552,10 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 	//	MB(commandBuffer);
 	vkCmdEndRenderingKHR(commandBuffer);
 
-	for (auto& texture : textures)
+	/*for (auto& texture : textures)
 	{
 		texture.get().SetImageLayout(commandBuffer, VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR);
-	}
+	}*/
 
 	vkEndCommandBuffer(commandBuffer);
 	return commandBuffer;
@@ -568,7 +568,6 @@ void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkComma
 		VkCommandBufferBeginInfo commandBufferBeginInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-			//.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
 		};
 
 		vkBeginCommandBuffer(_swapchainCommandBuffers[i], &commandBufferBeginInfo);
@@ -609,7 +608,7 @@ void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkComma
 			.imageView = _currentSwapchainTextures[i]->GetImageView(),
 			.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-			.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
 			.clearValue = _currentSwapchainTextures[i]->GetClearValue(),
 		};
 
