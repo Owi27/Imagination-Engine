@@ -10,7 +10,7 @@ protected:
 	bool _isFocused = true;
 
 	//time
-	std::chrono::duration<float> _deltaTime;
+	//std::chrono::duration<float> _deltaTime;
 	std::chrono::steady_clock::time_point _lastUpdate;
 
 	//proxies

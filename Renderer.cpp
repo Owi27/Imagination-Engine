@@ -1656,6 +1656,13 @@ void VulkanRenderer::UpdateCamera()
 	mat4 cam = GW::MATH::GIdentityMatrixF;
 
 	auto& view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view;
+	auto& deltaTime = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->deltaTime;
+
+	auto now = std::chrono::steady_clock::now();
+	std::chrono::duration<float> dt = _lastUpdate - now;
+	deltaTime = -dt.count();
+	_lastUpdate = now;
+
 	GMatrix::InverseF(view, cam);
 
 	float y = 0.0f;
@@ -1664,7 +1671,7 @@ void VulkanRenderer::UpdateCamera()
 	float totalZ = 0.0f;
 	float totalX = 0.0f;
 
-	const float cameraSpeed = 25.f;
+	const float cameraSpeed = 5.f;
 	float spaceKeyState = 0.0f;
 	float leftShiftState = 0.0f;
 	float rightTriggerState = 0.0f;
@@ -1696,6 +1703,11 @@ void VulkanRenderer::UpdateCamera()
 	_gInput.GetState(G_KEY_RIGHT, arrowRight);
 	_gInput.GetState(G_KEY_LEFT, arrowLeft);
 
+	if (+_gInput.GetState(G_KEY_SPACE, spaceKeyState) && spaceKeyState != 0)
+	{
+		std::cout << "space key\n";
+	}
+
 	if (arrowRight != 0)
 	{
 		cam.row4 = { 0.0f, 50.0f, 0.0f, 1 };
@@ -1711,9 +1723,9 @@ void VulkanRenderer::UpdateCamera()
 		totalY = spaceKeyState - leftShiftState + rightTriggerState - leftTriggerState;
 	}
 
-	cam.row4.y += totalY * cameraSpeed * _deltaTime.count();
+	cam.row4.y += totalY * cameraSpeed * deltaTime;
 
-	perFrameSpeed = cameraSpeed * _deltaTime.count();
+	perFrameSpeed = cameraSpeed * deltaTime;
 
 	if (+_gInput.GetState(G_KEY_W, wKeyState) && wKeyState != 0 || +_gInput.GetState(G_KEY_A, aKeyState) && aKeyState != 0 || +_gInput.GetState(G_KEY_S, sKeyState) && sKeyState != 0 || +_gInput.GetState(G_KEY_D, dKeyState) && dKeyState != 0 || +_gController.GetState(0, G_LX_AXIS, leftStickX) && leftStickX != 0 || +_gController.GetState(0, G_LY_AXIS, leftStickY) && leftStickY != 0)
 	{
@@ -1732,7 +1744,7 @@ void VulkanRenderer::UpdateCamera()
 	{
 		float totalPitch = G_DEGREE_TO_RADIAN(65) * mouseDeltaY / screenHeight + rightStickYaxis * -thumbSpeed;
 		GMatrix::RotateXLocalF(cam, totalPitch, cam);
-		float totalYaw = G_DEGREE_TO_RADIAN(65) * _aspect * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
+		float totalYaw = G_DEGREE_TO_RADIAN(65) * _vk.GetAspectRatio() * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
 		mat4 yawMatrix = GW::MATH::GIdentityMatrixF;
 		vec4 camSave = cam.row4;
 		cam.row4 = { 0,0,0,1 };
