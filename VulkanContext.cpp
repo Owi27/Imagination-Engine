@@ -55,6 +55,20 @@ void VulkanContext::MB(VkCommandBuffer& commandBuffer)
 	vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 }
 
+unsigned VulkanContext::FindMemoryType(unsigned typeFilter, VkMemoryPropertyFlags properties)
+{
+	VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+	vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &physicalDeviceMemoryProperties);
+
+	for (unsigned i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
+	{
+		if ((typeFilter & (1 << i)) && (physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+}
+
 VkFramebuffer VulkanContext::GetFrameBuffer(int idx)
 {
 	_vulkanSurface.GetSwapchainFramebuffer(idx, (void**)&_frameBuffer);
@@ -167,6 +181,34 @@ void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsign
 	};
 
 	vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+}
+
+void VulkanContext::TransitionImageLayout(unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+	VkCommandBuffer commandBuffer;
+	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
+
+	VkImageMemoryBarrier imageMemoryBarrier
+	{
+		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.srcAccessMask = GetAccessFlags(oldLayout),
+		.dstAccessMask = GetAccessFlags(newLayout),
+		.oldLayout = oldLayout,
+		.newLayout = newLayout,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image = _currentSwapchainTextures[i]->GetImage(),
+		.subresourceRange
+		{
+			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+			.levelCount = mipLevels,
+			.layerCount = layerCount
+		}
+	};
+
+	vkCmdPipelineBarrier(commandBuffer, GetPipelineStageFlags(oldLayout), GetPipelineStageFlags(newLayout), 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
+
+	GvkHelper::signal_command_end(_device, _graphicsQueue, _commandPool, &commandBuffer);
 }
 
 void VulkanContext::GetSwapchainImage(Texture* tex, unsigned idx)

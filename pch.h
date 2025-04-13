@@ -46,11 +46,14 @@ using mat3 = GW::MATH2D::GMATRIX3F;
 using vec3 = GW::MATH2D::GVECTOR3F;
 using vec2 = GW::MATH2D::GVECTOR2F;
 
+#include "Material.h"
+
 #include "Structs.h"
 #include "Components.h"
 #include "VulkanDescriptions.h"
 #include "VulkanResources.h"
-#include "FrameGraphBlackboard.hpp"
 #include "VulkanContext.h"
+#include "CubeMap.h"
+#include "FrameGraphBlackboard.hpp"
 #include "RenderPass.h"
 #include "FrameGraph.h"

@@ -79,6 +79,7 @@ class VulkanRenderer : public Renderer
 	tinygltf::Model _model;
 
 	std::vector<Renderable> _renderables;
+	std::vector<Material> _materials;
 	//mat4 matrices[3];
 
 	//VulkanContext* _vk = VulkanContext::GetInst(_win);

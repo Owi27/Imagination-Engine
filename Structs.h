@@ -100,6 +100,11 @@ struct PrimData
 	int materialIndex = 0;
 };
 
+struct SkyboxUniform
+{
+	mat4 proj, model;
+};
+
 struct BoundingBox
 {
 	BoundingBox() = default;

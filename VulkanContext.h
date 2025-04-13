@@ -181,6 +181,8 @@ public:
 
 	void MB(VkCommandBuffer& commandBuffer);
 
+	unsigned FindMemoryType(unsigned typeFilter, VkMemoryPropertyFlags properties);
+
 	VkDevice GetDevice() const { return _device; }
 	VkPhysicalDevice GetPhysicalDevice() const { return _physicalDevice; }
 	VkInstance GetInstance() const { return _instance; }
@@ -215,6 +217,7 @@ public:
 	unsigned GetMaxFrames() const { return _maxFramesInFlight; }
 
 	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	void GetSwapchainImage(Texture* tex, unsigned idx);
 

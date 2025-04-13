@@ -74,6 +74,11 @@ void RenderPass::Update()
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
 }
 
+void RenderPass::AddCubeMap(const std::string& name, std::vector<std::string> imagePaths)
+{
+	_graph._blackboard.Set(name, std::make_shared<CubeMap>(imagePaths));
+}
+
 void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 {
 	if (name.find("swapchain") != std::string::npos)

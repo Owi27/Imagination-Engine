@@ -129,6 +129,11 @@ public:
 		GvkHelper::create_image_view(_vk.GetDevice(), _image, _format, _imageAspectFlags, 1, nullptr, &_imageView);
 	}
 
+	Texture(const std::string imgPath)
+	{
+
+	}
+
 	~Texture()
 	{
 		vkDestroyImage(_vk.GetDevice(), _image, nullptr);

@@ -17,6 +17,8 @@ class RenderPass
 	Texture* _depth = nullptr;
 	//Texture* _depthStencilOutput = nullptr;
 
+	std::vector<std::reference_wrapper<CubeMap>> _cubeMaps;
+
 	Buffer* _uniformBufferOutput;
 
 	VkCommandBuffer _commandBuffer;
@@ -83,6 +85,8 @@ public:
 	void UpdateUB(const std::string& name);
 
 	void Update();
+
+	void AddCubeMap(const std::string& name, std::vector<std::string> imagePaths);
 
 	//Texture& AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input = "");
 	//Texture& AddDepthOutput(const std::string& name);

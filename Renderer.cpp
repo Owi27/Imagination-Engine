@@ -264,6 +264,28 @@ void VulkanRenderer::CreateGeometryData()
 		auto& mesh = _model.meshes[node.mesh];
 		for (auto prim : mesh.primitives)
 		{
+			////material
+			//{
+			//	auto glM = _model.materials[prim.material].pbrMetallicRoughness;
+			//	Material m
+			//	{
+			//		.baseColorFactor = {glM.baseColorFactor[0], glM.baseColorFactor[1], glM.baseColorFactor[2]},
+			//		.baseColorTexture = glM.baseColorTexture.index,
+			//		.metallicFactor = glM.metallicFactor,
+			//		.roughnessFactor = glM.roughnessFactor,
+			//		.metallicRoughnessTexture = glM.metallicRoughnessTexture.index,
+			//		.emissiveTexture = -1,
+			//		.emissiveFactor = { 0, 0, 0 },
+			//		.alphaMode = 0,
+			//		.alphaCutoff = 0.5f,
+			//		.doubleSided = 0,
+			//		.normalTexture = g,
+			//		.normalTextureScale = 1.f,
+			//		.occlusionTexture = -1,
+			//		.occlusionTextureStrength = 1.f
+			//	}
+			//}
+
 			r.firstIdx = _geometryData.indices.size();
 			r.vertexOffset = _geometryData.positions.size();
 			r.world = GetLocalMatrix(node);
@@ -1389,45 +1411,45 @@ void VulkanRenderer::Prepare()
 
 void VulkanRenderer::UploadTextureToGPU(tinygltf::Image& image, Texture* texture)
 {
-	////int width, height, component;
-	////auto data = stbi_load(filepath, &width, &height, &component, STBI_rgb_alpha);
-	////component = 4;
+	//int width, height, component;
+	//auto data = stbi_load(filepath, &width, &height, &component, STBI_rgb_alpha);
+	//component = 4;
 
-	//VkDeviceSize size = image.width * image.height * image.component;
+	VkDeviceSize size = image.width * image.height * image.component;
 
-	//VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
-	//if (image.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	//else if (image.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+	if (image.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	else if (image.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
 
-	////staging buffer
-	//Buffer staging;
-	//VkDeviceMemory transient;
+	//staging buffer
+	Buffer staging;
+	VkDeviceMemory transient;
 
-	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging.GetVkBuffer(), &staging.GetVkMemory());
-	//GvkHelper::write_to_buffer(_device, staging.GetVkMemory(), image.image.data(), size);
+	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging.GetVkBuffer(), &staging.GetVkMemory());
+	GvkHelper::write_to_buffer(_device, staging.GetVkMemory(), image.image.data(), size);
 
-	////create the new buffer
-	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->texImage.GetVkBuffer(), &transient);
+	//create the new buffer
+	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->texImage.GetVkBuffer(), &transient);
 
-	////copy staging
-	//GvkHelper::copy_buffer(_device, _commandPool, _queue, staging.GetVkBuffer(), texture.GetVkBuffer(), size);
+	//copy staging
+	GvkHelper::copy_buffer(_device, _commandPool, _queue, staging.GetVkBuffer(), texture.GetVkBuffer(), size);
 
-	//VkExtent3D tempExtent = { image.width, image.height, 1 };
-	//unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(image.width, image.height))) + 1);
-	//GvkHelper::create_image(_physicalDevice, _device, tempExtent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &texture->texImage.image, &texture->texImage.GetVkMemory());
-	////VK_IMAGE_USAGE_STORAGE_BIT
-	////transition
-	//GvkHelper::transition_image_layout(_device, _commandPool, _queue, mipLevels, texture->texImage.image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//GvkHelper::copy_buffer_to_image(_device, _commandPool, _queue, staging.GetVkBuffer(), texture->texImage.image, tempExtent);
+	VkExtent3D tempExtent = { image.width, image.height, 1 };
+	unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(image.width, image.height))) + 1);
+	GvkHelper::create_image(_physicalDevice, _device, tempExtent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &texture->texImage.image, &texture->texImage.GetVkMemory());
+	//VK_IMAGE_USAGE_STORAGE_BIT
+	//transition
+	GvkHelper::transition_image_layout(_device, _commandPool, _queue, mipLevels, texture->texImage.image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	GvkHelper::copy_buffer_to_image(_device, _commandPool, _queue, staging.GetVkBuffer(), texture->texImage.image, tempExtent);
 
-	////create mip maps
-	//GvkHelper::create_mipmaps(_device, _commandPool, _queue, texture->texImage.image, image.width, image.height, mipLevels);
+	//create mip maps
+	GvkHelper::create_mipmaps(_device, _commandPool, _queue, texture->texImage.image, image.width, image.height, mipLevels);
 
-	//GvkHelper::create_image_view(_device, texture->texImage.image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &texture->texImageView);
+	GvkHelper::create_image_view(_device, texture->texImage.image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &texture->texImageView);
 
-	//vkDestroyBuffer(_device, staging.GetVkBuffer(), nullptr);
-	//vkFreeMemory(_device, staging.GetVkMemory(), nullptr);
-	//vkFreeMemory(_device, transient, nullptr);
+	vkDestroyBuffer(_device, staging.GetVkBuffer(), nullptr);
+	vkFreeMemory(_device, staging.GetVkMemory(), nullptr);
+	vkFreeMemory(_device, transient, nullptr);
 }
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
@@ -1516,10 +1538,29 @@ void VulkanRenderer::Playground()
 
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext::GetInst(_win))
 {
-
-
-
 	LoadModel("Models/Sponza/glTF/Sponza.gltf");
+
+	//skybox test
+	{
+		RenderPass& skybox = _graph.AddPass("skybox", FRAMEGRAPH_GRAPHICS_BIT);
+		skybox.AddUB("skybox uniform", new SkyboxUniform
+		{
+			.proj = GW::MATH::GIdentityMatrixF,
+			.model = GW::MATH::GIdentityMatrixF
+		}, sizeof(SkyboxUniform));
+		std::vector<std::string> skyboxPaths =
+		{
+			"skybox/front", "skybox/back",
+			"skybox/top", "skybox/bottom",
+			"skybox/right", "skybox/left"
+		};
+		skybox.AddCubeMap("skybox cubemap", skyboxPaths);
+		skybox.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
+		skybox.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1 });
+		skybox.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
+		skybox.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+	}
+	
 
 	//offscreen
 	{
@@ -1529,18 +1570,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
 		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
 		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
-		/*UniformBufferOffscreen oub
+		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
 		{
 			.world = GW::MATH::GIdentityMatrixF,
 			.deltaTime = 0.f
-		};
-		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
-		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);*/
-		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
-			{
-				.world = GW::MATH::GIdentityMatrixF,
-				.deltaTime = 0.f
-			}, sizeof(UniformBufferOffscreen));
+		}, sizeof(UniformBufferOffscreen));
 		auto& oub = *static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"));
 		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
@@ -1557,29 +1591,16 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
 		offscreen.SetRenderables(_renderables);
-
-
-
-		//offscreen.AddBufferOutput("position buffer", sizeof(vec3) * _geometryData.positions.size(), _geometryData.positions.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		//offscreen.AddBufferOutput("normal buffer", sizeof(vec3) * _geometryData.normals.size(), _geometryData.normals.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		//offscreen.AddBufferOutput("texcoord buffer", sizeof(vec2) * _geometryData.texCoords.size(), _geometryData.texCoords.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		//offscreen.AddBufferOutput("tangent buffer", sizeof(vec4) * _geometryData.tangents.size(), _geometryData.tangents.data(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-		//offscreen.AddBufferOutput("index buffer", sizeof(unsigned) * _geometryData.indices.size(), _geometryData.indices.data(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-		//offscreen.AddUniformBufferOutput("offscreen uniform buffer", sizeof(UniformBufferOffscreen), &oub, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-
-
 		offscreen.SetDrawCalls([this, &offscreen](VkCommandBuffer& commandBuffer)
+		{
+			for (auto& renderable : offscreen.GetRenderables())
 			{
-				for (auto& renderable : offscreen.GetRenderables())
-				{
-					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
-					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
-				}
+				vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
+				vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
+			}
 
-				_vk.MB(commandBuffer);
-			});
-
-		//offscreen.Setup();
+			_vk.MB(commandBuffer);
+		});
 	}
 
 	//final
@@ -1613,14 +1634,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		//lighting.AddTOutput("lighting out");
 		lighting.AddTOutput("swapchain");
 		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)
-			{
-				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-			});
-
-		//lighting.Setup();
+		{
+			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+		});
 	}
 
 	_graph.BuildCommandBuffers();
