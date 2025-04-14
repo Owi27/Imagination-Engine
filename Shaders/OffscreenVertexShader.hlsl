@@ -4,6 +4,7 @@ struct VSInput
     float3 nrm : NORMAL0;
     float2 uv : TEXCOORD0;
     float4 tan : TANGENT;
+    //nointerpolation int matId : SV_InstanceID;
 };
 
 struct VSOutput
@@ -12,6 +13,7 @@ struct VSOutput
     float3 nrm : NORMAL0;
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
+    int idx : INDEX;
 };
 
 cbuffer UniformBuffer : register(b0)
@@ -37,6 +39,8 @@ VSOutput main(VSInput input, uint id : SV_InstanceID)
     //normal in world space
     output.nrm = normalize(input.nrm);
     output.tan = normalize(input.tan).xyz;
+    
+    output.idx = id;
     
     return output;
 }

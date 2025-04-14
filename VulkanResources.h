@@ -135,6 +135,53 @@ public:
 
 	}
 
+	Texture(const tinygltf::Image glImage)
+	{
+		_extent = { (unsigned)glImage.width, (unsigned)glImage.height, 1 };
+		VkDeviceSize size = glImage.width * glImage.height * glImage.component;
+
+		VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+		if (glImage.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
+		else if (glImage.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
+
+		Buffer staging(size, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+		staging.WriteToBuffer(glImage.image.data());
+
+		unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(glImage.width, glImage.height))) + 1);
+		GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &_image, &_imageMemory);
+		
+		VkCommandBuffer copyCommandBuffer;
+		GvkHelper::signal_command_start(_vk.GetDevice(), _vk.GetCommandPool(), &copyCommandBuffer);
+
+		VkBufferImageCopy bufferImageCopy
+		{
+			.bufferOffset = 0,
+			.imageSubresource
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.mipLevel = mipLevels,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			},
+			.imageOffset = 0,
+			.imageExtent = _extent,
+		};
+
+		_vk.TransitionImageLayout(copyCommandBuffer, 1, 1, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		//copy from staging
+		vkCmdCopyBufferToImage(copyCommandBuffer, staging.GetBuffer(), _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopy);
+
+		_vk.TransitionImageLayout(copyCommandBuffer, 1, 1, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		GvkHelper::signal_command_end(_vk.GetDevice(), _vk.GetGraphicsQueue(), _vk.GetCommandPool(), &copyCommandBuffer);
+
+		GvkHelper::create_image_view(_vk.GetDevice(), _image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &_imageView);
+
+
+
+	}
+
 	~Texture()
 	{
 		vkDestroyImage(_vk.GetDevice(), _image, nullptr);

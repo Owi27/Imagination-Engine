@@ -214,6 +214,8 @@ public:
 	VkPipelineStageFlags GetPipelineStageFlags(VkImageLayout layout);
 	VkAccessFlags GetAccessFlags(VkImageLayout layout);
 
+	//Texture& UploadTextureToGPU(tinygltf::Image glImage);
+
 	unsigned GetWidth() const { return _width; }
 	unsigned GetHeight() const { return _height; }
 	unsigned GetAspectRatio() const { return _aspectRatio; }

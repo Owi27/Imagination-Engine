@@ -248,7 +248,7 @@ void VulkanRenderer::LoadModel(std::string filename, ModelID id)
 		int i = 0;
 		for (auto& image : model.images)
 		{
-			UploadTextureToGPU(image, &_textures[i++]);
+			_textures.push_back(Texture(image));
 		}
 	}
 }
@@ -256,7 +256,6 @@ void VulkanRenderer::LoadModel(std::string filename, ModelID id)
 void VulkanRenderer::CreateGeometryData(ModelID id)
 {
 	int vCount = 0, iCount = 0, firstIdx = 0, vertexOffset = 0;
-	//DrawInfo di;
 	Renderable r;
 	auto& geoData = _renderables[id].first;
 	auto& model = _models[id];
@@ -494,6 +493,28 @@ void VulkanRenderer::CreateGeometryData(ModelID id)
 				}
 			}
 
+			//material
+			{
+				auto& glMaterial = model.materials[prim.material];
+				Material material
+				{
+					.baseColorFactor = {(float)glMaterial.pbrMetallicRoughness.baseColorFactor[0], (float)glMaterial.pbrMetallicRoughness.baseColorFactor[1], (float)glMaterial.pbrMetallicRoughness.baseColorFactor[2], (float)glMaterial.pbrMetallicRoughness.baseColorFactor[3]},
+					.baseColorTexture = glMaterial.pbrMetallicRoughness.baseColorTexture.index,
+					.metallicFactor = (float)glMaterial.pbrMetallicRoughness.metallicFactor,
+					.roughnessFactor = (float)glMaterial.pbrMetallicRoughness.roughnessFactor,
+					.metallicRoughnessTexture = glMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index,
+					.emissiveTexture = glMaterial.emissiveTexture.index,
+					.emissiveFactor = { (float)glMaterial.emissiveFactor[0], (float)glMaterial.emissiveFactor[1], (float)glMaterial.emissiveFactor[2]},
+					.alphaMode = 0,
+					.alphaCutoff = (float)glMaterial.alphaCutoff,
+					.doubleSided = 0,
+					.normalTexture = glMaterial.normalTexture.index,
+					.normalTextureScale = (float)glMaterial.normalTexture.scale,
+					.occlusionTexture = glMaterial.occlusionTexture.index,
+					.occlusionTextureStrength = (float)glMaterial.occlusionTexture.strength
+				};
+				r.material = material;
+			}
 			_renderables[id].second.push_back(std::move(r));
 		}
 	}
@@ -1390,45 +1411,6 @@ void VulkanRenderer::Prepare()
 
 void VulkanRenderer::UploadTextureToGPU(tinygltf::Image& image, Texture* texture)
 {
-	////int width, height, component;
-	////auto data = stbi_load(filepath, &width, &height, &component, STBI_rgb_alpha);
-	////component = 4;
-
-	//VkDeviceSize size = image.width * image.height * image.component;
-
-	//VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
-	//if (image.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	//else if (image.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
-
-	////staging buffer
-	//Buffer staging;
-	//VkDeviceMemory transient;
-
-	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging.GetVkBuffer(), &staging.GetVkMemory());
-	//GvkHelper::write_to_buffer(_device, staging.GetVkMemory(), image.image.data(), size);
-
-	////create the new buffer
-	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->texImage.GetVkBuffer(), &transient);
-
-	////copy staging
-	//GvkHelper::copy_buffer(_device, _commandPool, _queue, staging.GetVkBuffer(), texture.GetVkBuffer(), size);
-
-	//VkExtent3D tempExtent = { image.width, image.height, 1 };
-	//unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(image.width, image.height))) + 1);
-	//GvkHelper::create_image(_physicalDevice, _device, tempExtent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &texture->texImage.image, &texture->texImage.GetVkMemory());
-	////VK_IMAGE_USAGE_STORAGE_BIT
-	////transition
-	//GvkHelper::transition_image_layout(_device, _commandPool, _queue, mipLevels, texture->texImage.image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//GvkHelper::copy_buffer_to_image(_device, _commandPool, _queue, staging.GetVkBuffer(), texture->texImage.image, tempExtent);
-
-	////create mip maps
-	//GvkHelper::create_mipmaps(_device, _commandPool, _queue, texture->texImage.image, image.width, image.height, mipLevels);
-
-	//GvkHelper::create_image_view(_device, texture->texImage.image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &texture->texImageView);
-
-	//vkDestroyBuffer(_device, staging.GetVkBuffer(), nullptr);
-	//vkFreeMemory(_device, staging.GetVkMemory(), nullptr);
-	//vkFreeMemory(_device, transient, nullptr);
 }
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
@@ -1589,10 +1571,11 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetRenderables(_renderables[MODEL].second);
 		offscreen.SetDrawCalls([this, &offscreen](VkCommandBuffer& commandBuffer)
 			{
+				unsigned i = 0;
 				for (auto& renderable : offscreen.GetRenderables())
 				{
 					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
-					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
+					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, i++);
 				}
 				_vk.MB(commandBuffer);
 			});

@@ -4,6 +4,7 @@ struct VSOutput
     float3 nrm : NORMAL0;
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
+    nointerpolation int idx : INDEX;
 };
 
 struct FSOutput

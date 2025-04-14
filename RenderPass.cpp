@@ -1,38 +1,6 @@
 #include "pch.h"
 #include "RenderPass.h"
 
-//Texture& RenderPass::AddTextureInput(std::string name)
-//{
-//	//Texture& gottenTex;
-//	//graph.get texture
-//	//add to graphics queue through texture
-//	//read in passes from renderresource (this pass name)
-//	//gottenTex.ReadInPass(_name); 
-//
-//	auto& tex = _graph.GetTextureResource(name);
-//	tex.ReadInPass(_name);
-//
-//	//auto itr = find_if(_colorInputs.begin(), _colorInputs.end(), [&](const std::shared_ptr<Texture>& texx)
-//	//	{
-//	//		return texx->GetImage() == tex.GetImage();
-//	//	});
-//
-//	//if (itr != _colorInputs.end())
-//	//{
-//	//	return *itr;
-//	//}
-//
-//	auto itr = std::find_if(_colorInputs.begin(), _colorInputs.end(),
-//		[&tex](const Texture* other) {
-//			return *other == tex; // Use the overloaded == operator
-//		});
-//
-//	if (itr != _colorInputs.end()) return tex;
-//	else _colorInputs.push_back(tex);
-//
-//	return tex;
-//}
-
 void RenderPass::AddTInput(const std::string& name)
 {
 	_colorInputs.push_back(*_graph._blackboard.Get<Texture*>(name));
