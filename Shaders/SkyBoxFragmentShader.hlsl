@@ -1,5 +1,5 @@
-TextureCube textureCubeMap;
-SamplerState samplerCubeMap;
+TextureCube textureCubeMap : register(t1);
+SamplerState samplerCubeMap : register(s1);
 
 struct VSOutput
 {

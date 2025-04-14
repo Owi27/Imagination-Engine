@@ -1,4 +1,5 @@
 #pragma once
+#include "tinygltf/stb_image.h"
 class CubeMap
 {
 	VulkanContext& _vk;
@@ -23,7 +24,7 @@ public:
 		const VkDeviceSize imageSize = width * height * 4 * 6;
 		const VkDeviceSize layerSize = imageSize / 6;
 
-		Buffer staging(imageSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+		Buffer staging(imageSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 
 		void* data;
 		vkMapMemory(_vk.GetDevice(), staging.GetMemory(), 0, imageSize, 0, &data);
@@ -41,7 +42,7 @@ public:
 			.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
 			.imageType = VK_IMAGE_TYPE_2D,
 			.format = VK_FORMAT_R8G8B8A8_UNORM,
-			.extent = {width, height, 1},
+			.extent = {(unsigned)width, (unsigned)height, 1},
 			.mipLevels = 1,
 			.arrayLayers = 6,
 			.samples = VK_SAMPLE_COUNT_1_BIT,
@@ -86,19 +87,19 @@ public:
 						.baseArrayLayer = face,
 						.layerCount = 1
 					},
-					.imageExtent = {width, height, 1}
+					.imageExtent = {(unsigned)width, (unsigned)height, 1}
 				};
 
 				bufferImageCopies.push_back(bufferImageCopy);
 			}
 		}
 
-		_vk.TransitionImageLayout(1, 6, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		_vk.TransitionImageLayout(copyCommandBuffer, 1, 6, _image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		//copy from staging
 		vkCmdCopyBufferToImage(copyCommandBuffer, staging.GetBuffer(), _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, (unsigned)bufferImageCopies.size(), bufferImageCopies.data());
 
-		_vk.TransitionImageLayout(1, 6, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		_vk.TransitionImageLayout(copyCommandBuffer, 1, 6, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		GvkHelper::signal_command_end(_vk.GetDevice(), _vk.GetGraphicsQueue(), _vk.GetCommandPool(), &copyCommandBuffer);
 
@@ -133,5 +134,9 @@ public:
 		vkDestroyImage(_vk.GetDevice(), _image, nullptr);
 		vkDestroyImageView(_vk.GetDevice(), _imageView, nullptr);
 	}
+
+	VkImage& GetCubeMapImage() { return _image; }
+	VkDeviceMemory& GetCubeMapMemory() { return _imageMemory; }
+	VkImageView& GetCubeMapImageView() { return _imageView; }
 };
 

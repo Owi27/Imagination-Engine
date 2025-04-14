@@ -212,7 +212,7 @@ void VulkanRenderer::CompileShaders()
 	}
 }
 
-void VulkanRenderer::LoadModel(std::string filename)
+void VulkanRenderer::LoadModel(std::string filename, ModelID id)
 {
 	tinygltf::TinyGLTF gltfLoader;
 	std::string error;
@@ -221,8 +221,8 @@ void VulkanRenderer::LoadModel(std::string filename)
 	unsigned long long pos = filename.find_last_of('/');
 	std::string path = filename.substr(0, pos);
 
-	bool fileLoaded = gltfLoader.LoadASCIIFromFile(&_model, &error, &warning, filename);
-	//bool fileLoaded = gltfLoader.LoadBinaryFromFile(&_model, &error, &warning, filename);
+	bool fileLoaded = gltfLoader.LoadASCIIFromFile(&_models[id], &error, &warning, filename);
+	tinygltf::Model& model = _models[id];
 
 	if (!warning.empty())
 	{
@@ -239,61 +239,41 @@ void VulkanRenderer::LoadModel(std::string filename)
 		std::cout << "Failed to parse model\n";
 	}
 
-	CreateGeometryData();
+	CreateGeometryData(id);
 
 	//load textures
-	if (_model.images.size() > 0)
+	if (model.images.size() > 0)
 	{
-		_textures.resize(_model.images.size());
+		_textures.resize(model.images.size());
 		int i = 0;
-		for (auto& image : _model.images)
+		for (auto& image : model.images)
 		{
 			UploadTextureToGPU(image, &_textures[i++]);
 		}
 	}
 }
 
-void VulkanRenderer::CreateGeometryData()
+void VulkanRenderer::CreateGeometryData(ModelID id)
 {
 	int vCount = 0, iCount = 0, firstIdx = 0, vertexOffset = 0;
 	//DrawInfo di;
 	Renderable r;
+	auto& geoData = _renderables[id].first;
+	auto& model = _models[id];
 
-	for (auto& node : _model.nodes)
+	for (auto& node : model.nodes)
 	{
-		auto& mesh = _model.meshes[node.mesh];
+		auto& mesh = model.meshes[node.mesh];
 		for (auto prim : mesh.primitives)
 		{
-			////material
-			//{
-			//	auto glM = _model.materials[prim.material].pbrMetallicRoughness;
-			//	Material m
-			//	{
-			//		.baseColorFactor = {glM.baseColorFactor[0], glM.baseColorFactor[1], glM.baseColorFactor[2]},
-			//		.baseColorTexture = glM.baseColorTexture.index,
-			//		.metallicFactor = glM.metallicFactor,
-			//		.roughnessFactor = glM.roughnessFactor,
-			//		.metallicRoughnessTexture = glM.metallicRoughnessTexture.index,
-			//		.emissiveTexture = -1,
-			//		.emissiveFactor = { 0, 0, 0 },
-			//		.alphaMode = 0,
-			//		.alphaCutoff = 0.5f,
-			//		.doubleSided = 0,
-			//		.normalTexture = g,
-			//		.normalTextureScale = 1.f,
-			//		.occlusionTexture = -1,
-			//		.occlusionTextureStrength = 1.f
-			//	}
-			//}
-
-			r.firstIdx = _geometryData.indices.size();
-			r.vertexOffset = _geometryData.positions.size();
+			r.firstIdx = geoData.indices.size();
+			r.vertexOffset = geoData.positions.size();
 			r.world = GetLocalMatrix(node);
 
 			//position
-			tinygltf::Accessor& accessor = _model.accessors[prim.attributes.find("POSITION")->second];
-			tinygltf::BufferView& bufferView = _model.bufferViews[accessor.bufferView];
-			tinygltf::Buffer& buffer = _model.buffers[bufferView.buffer];
+			tinygltf::Accessor& accessor = model.accessors[prim.attributes.find("POSITION")->second];
+			tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+			tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
 			vCount = accessor.count;
 			{
 				auto pos = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
@@ -302,7 +282,7 @@ void VulkanRenderer::CreateGeometryData()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						_geometryData.positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
+						geoData.positions.push_back(vec3{ pos[i * 3 + 0], pos[i * 3 + 1], pos[i * 3 + 2] });
 					}
 
 					//_offscreenData.min = { (float)accessor.minValues[0], (float)accessor.minValues[1] , (float)accessor.minValues[2] };
@@ -310,9 +290,9 @@ void VulkanRenderer::CreateGeometryData()
 			}
 
 			//normals
-			accessor = _model.accessors[prim.attributes.find("NORMAL")->second];
-			bufferView = _model.bufferViews[accessor.bufferView];
-			buffer = _model.buffers[bufferView.buffer];
+			accessor = model.accessors[prim.attributes.find("NORMAL")->second];
+			bufferView = model.bufferViews[accessor.bufferView];
+			buffer = model.buffers[bufferView.buffer];
 			{
 				auto nrm = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
 
@@ -320,15 +300,15 @@ void VulkanRenderer::CreateGeometryData()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						_geometryData.normals.push_back(vec3{ nrm[i * 3 + 0], nrm[i * 3 + 1], nrm[i * 3 + 2] });
+						geoData.normals.push_back(vec3{ nrm[i * 3 + 0], nrm[i * 3 + 1], nrm[i * 3 + 2] });
 					}
 				}
 			}
 
 			//texCoord
-			accessor = _model.accessors[prim.attributes.find("TEXCOORD_0")->second];
-			bufferView = _model.bufferViews[accessor.bufferView];
-			buffer = _model.buffers[bufferView.buffer];
+			accessor = model.accessors[prim.attributes.find("TEXCOORD_0")->second];
+			bufferView = model.bufferViews[accessor.bufferView];
+			buffer = model.buffers[bufferView.buffer];
 			{
 				auto uv0 = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
 
@@ -336,15 +316,15 @@ void VulkanRenderer::CreateGeometryData()
 				{
 					for (size_t i = 0; i < accessor.count; i++)
 					{
-						_geometryData.texCoords.push_back(vec2{ uv0[i * 2 + 0], uv0[i * 2 + 1] });
+						geoData.texCoords.push_back(vec2{ uv0[i * 2 + 0], uv0[i * 2 + 1] });
 					}
 				}
 			}
 
 			//index buffer
-			accessor = _model.accessors[prim.indices];
-			bufferView = _model.bufferViews[accessor.bufferView];
-			buffer = _model.buffers[bufferView.buffer];
+			accessor = model.accessors[prim.indices];
+			bufferView = model.bufferViews[accessor.bufferView];
+			buffer = model.buffers[bufferView.buffer];
 			iCount = accessor.count;
 			r.idxCount = (unsigned int)accessor.count;
 			{
@@ -355,7 +335,7 @@ void VulkanRenderer::CreateGeometryData()
 					std::vector<unsigned int> uIntPrims;
 					uIntPrims.resize(accessor.count);
 					memcpy(uIntPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned int));
-					_geometryData.indices.insert(_geometryData.indices.end(), uIntPrims.begin(), uIntPrims.end());
+					geoData.indices.insert(geoData.indices.end(), uIntPrims.begin(), uIntPrims.end());
 					break;
 				}
 				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT:
@@ -363,7 +343,7 @@ void VulkanRenderer::CreateGeometryData()
 					std::vector<unsigned short> uShortPrims;
 					uShortPrims.resize(accessor.count);
 					memcpy(uShortPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned short));
-					_geometryData.indices.insert(_geometryData.indices.end(), uShortPrims.begin(), uShortPrims.end());
+					geoData.indices.insert(geoData.indices.end(), uShortPrims.begin(), uShortPrims.end());
 					break;
 				}
 				case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE:
@@ -371,7 +351,7 @@ void VulkanRenderer::CreateGeometryData()
 					std::vector<unsigned char> uCharPrims;
 					uCharPrims.resize(accessor.count);
 					memcpy(uCharPrims.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(unsigned char));
-					_geometryData.indices.insert(_geometryData.indices.end(), uCharPrims.begin(), uCharPrims.end());
+					geoData.indices.insert(geoData.indices.end(), uCharPrims.begin(), uCharPrims.end());
 					break;
 				}
 				default:
@@ -383,9 +363,9 @@ void VulkanRenderer::CreateGeometryData()
 			//tangent
 			if (prim.attributes.contains("TANGENT"))
 			{
-				accessor = _model.accessors[prim.attributes.find("TANGENT")->second];
-				bufferView = _model.bufferViews[accessor.bufferView];
-				buffer = _model.buffers[bufferView.buffer];
+				accessor = model.accessors[prim.attributes.find("TANGENT")->second];
+				bufferView = model.bufferViews[accessor.bufferView];
+				buffer = model.buffers[bufferView.buffer];
 				{
 					auto tan = (const float*)&buffer.data[bufferView.byteOffset + accessor.byteOffset];
 
@@ -393,14 +373,14 @@ void VulkanRenderer::CreateGeometryData()
 					{
 						for (size_t i = 0; i < accessor.count; i++)
 						{
-							_geometryData.tangents.push_back(vec4{ tan[i * 4 + 0], tan[i * 4 + 1], tan[i * 4 + 2], tan[i * 4 + 3] });
+							geoData.tangents.push_back(vec4{ tan[i * 4 + 0], tan[i * 4 + 1], tan[i * 4 + 2], tan[i * 4 + 3] });
 						}
 					}
 				}
 			}
 			else
 			{
-				if (node.name.find("Cone") != std::string::npos) _geometryData.tangents.push_back(vec4{ 0, 0, 0, 0 });
+				if (node.name.find("Cone") != std::string::npos) geoData.tangents.push_back(vec4{ 0, 0, 0, 0 });
 				else
 				{
 					std::vector<vec3> tangent(vCount);
@@ -409,9 +389,9 @@ void VulkanRenderer::CreateGeometryData()
 					for (size_t i = 0; i < iCount; i += 3)
 					{
 						//local index
-						unsigned int i0 = _geometryData.indices[firstIdx + i + 0];
-						unsigned int i1 = _geometryData.indices[firstIdx + i + 1];
-						unsigned int i2 = _geometryData.indices[firstIdx + i + 2];
+						unsigned int i0 = geoData.indices[firstIdx + i + 0];
+						unsigned int i1 = geoData.indices[firstIdx + i + 1];
+						unsigned int i2 = geoData.indices[firstIdx + i + 2];
 						assert(i0 < vCount);
 						assert(i1 < vCount);
 						assert(i2 < vCount);
@@ -421,13 +401,13 @@ void VulkanRenderer::CreateGeometryData()
 						unsigned int gi1 = i1 + vertexOffset;
 						unsigned int gi2 = i2 + vertexOffset;
 
-						const auto& p0 = _geometryData.positions[gi0];
-						const auto& p1 = _geometryData.positions[gi1];
-						const auto& p2 = _geometryData.positions[gi2];
+						const auto& p0 = geoData.positions[gi0];
+						const auto& p1 = geoData.positions[gi1];
+						const auto& p2 = geoData.positions[gi2];
 
-						const auto& uv0 = _geometryData.texCoords[gi0];
-						const auto& uv1 = _geometryData.texCoords[gi1];
-						const auto& uv2 = _geometryData.texCoords[gi2];
+						const auto& uv0 = geoData.texCoords[gi0];
+						const auto& uv1 = geoData.texCoords[gi1];
+						const auto& uv2 = geoData.texCoords[gi2];
 
 						vec3 e1, e2;
 						{
@@ -479,7 +459,7 @@ void VulkanRenderer::CreateGeometryData()
 					{
 						const auto& t = tangent[a];
 						const auto& b = biTangent[a];
-						const auto& n = _geometryData.normals[vertexOffset + a];
+						const auto& n = geoData.normals[vertexOffset + a];
 
 						vec3 oTangent;
 						{
@@ -509,13 +489,12 @@ void VulkanRenderer::CreateGeometryData()
 							handedness = f < 0.f ? 1.f : -1.f;
 						}
 
-						_geometryData.tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
+						geoData.tangents.emplace_back(vec4{ oTangent.x, oTangent.y, oTangent.z, handedness });
 					}
 				}
 			}
 
-			_renderables.push_back(std::move(r));
-			//_drawInfo.push_back(di);
+			_renderables[id].second.push_back(std::move(r));
 		}
 	}
 }
@@ -1411,45 +1390,45 @@ void VulkanRenderer::Prepare()
 
 void VulkanRenderer::UploadTextureToGPU(tinygltf::Image& image, Texture* texture)
 {
-	//int width, height, component;
-	//auto data = stbi_load(filepath, &width, &height, &component, STBI_rgb_alpha);
-	//component = 4;
+	////int width, height, component;
+	////auto data = stbi_load(filepath, &width, &height, &component, STBI_rgb_alpha);
+	////component = 4;
 
-	VkDeviceSize size = image.width * image.height * image.component;
+	//VkDeviceSize size = image.width * image.height * image.component;
 
-	VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
-	if (image.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
-	else if (image.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
+	//VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+	//if (image.bits == 16) format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	//else if (image.bits == 32) format = VK_FORMAT_R32G32B32A32_SFLOAT;
 
-	//staging buffer
-	Buffer staging;
-	VkDeviceMemory transient;
+	////staging buffer
+	//Buffer staging;
+	//VkDeviceMemory transient;
 
-	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging.GetVkBuffer(), &staging.GetVkMemory());
-	GvkHelper::write_to_buffer(_device, staging.GetVkMemory(), image.image.data(), size);
+	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &staging.GetVkBuffer(), &staging.GetVkMemory());
+	//GvkHelper::write_to_buffer(_device, staging.GetVkMemory(), image.image.data(), size);
 
-	//create the new buffer
-	GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->texImage.GetVkBuffer(), &transient);
+	////create the new buffer
+	//GvkHelper::create_buffer(_physicalDevice, _device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texture->texImage.GetVkBuffer(), &transient);
 
-	//copy staging
-	GvkHelper::copy_buffer(_device, _commandPool, _queue, staging.GetVkBuffer(), texture.GetVkBuffer(), size);
+	////copy staging
+	//GvkHelper::copy_buffer(_device, _commandPool, _queue, staging.GetVkBuffer(), texture.GetVkBuffer(), size);
 
-	VkExtent3D tempExtent = { image.width, image.height, 1 };
-	unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(image.width, image.height))) + 1);
-	GvkHelper::create_image(_physicalDevice, _device, tempExtent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &texture->texImage.image, &texture->texImage.GetVkMemory());
-	//VK_IMAGE_USAGE_STORAGE_BIT
-	//transition
-	GvkHelper::transition_image_layout(_device, _commandPool, _queue, mipLevels, texture->texImage.image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	GvkHelper::copy_buffer_to_image(_device, _commandPool, _queue, staging.GetVkBuffer(), texture->texImage.image, tempExtent);
+	//VkExtent3D tempExtent = { image.width, image.height, 1 };
+	//unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(image.width, image.height))) + 1);
+	//GvkHelper::create_image(_physicalDevice, _device, tempExtent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &texture->texImage.image, &texture->texImage.GetVkMemory());
+	////VK_IMAGE_USAGE_STORAGE_BIT
+	////transition
+	//GvkHelper::transition_image_layout(_device, _commandPool, _queue, mipLevels, texture->texImage.image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	//GvkHelper::copy_buffer_to_image(_device, _commandPool, _queue, staging.GetVkBuffer(), texture->texImage.image, tempExtent);
 
-	//create mip maps
-	GvkHelper::create_mipmaps(_device, _commandPool, _queue, texture->texImage.image, image.width, image.height, mipLevels);
+	////create mip maps
+	//GvkHelper::create_mipmaps(_device, _commandPool, _queue, texture->texImage.image, image.width, image.height, mipLevels);
 
-	GvkHelper::create_image_view(_device, texture->texImage.image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &texture->texImageView);
+	//GvkHelper::create_image_view(_device, texture->texImage.image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &texture->texImageView);
 
-	vkDestroyBuffer(_device, staging.GetVkBuffer(), nullptr);
-	vkFreeMemory(_device, staging.GetVkMemory(), nullptr);
-	vkFreeMemory(_device, transient, nullptr);
+	//vkDestroyBuffer(_device, staging.GetVkBuffer(), nullptr);
+	//vkFreeMemory(_device, staging.GetVkMemory(), nullptr);
+	//vkFreeMemory(_device, transient, nullptr);
 }
 
 VkWriteDescriptorSet VulkanRenderer::MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo, const VkDescriptorBufferInfo* pBufferInfo)
@@ -1538,46 +1517,63 @@ void VulkanRenderer::Playground()
 
 VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext::GetInst(_win))
 {
-	LoadModel("Models/Sponza/glTF/Sponza.gltf");
+	LoadModel("Models/Sponza/glTF/Sponza.gltf", MODEL);
+	LoadModel("Models/Cube/Cube.gltf", CUBE);
 
 	//skybox test
 	{
 		RenderPass& skybox = _graph.AddPass("skybox", FRAMEGRAPH_GRAPHICS_BIT);
 		skybox.AddUB("skybox uniform", new SkyboxUniform
-		{
-			.proj = GW::MATH::GIdentityMatrixF,
-			.model = GW::MATH::GIdentityMatrixF
-		}, sizeof(SkyboxUniform));
+			{
+				.proj = GW::MATH::GIdentityMatrixF,
+				.model = GW::MATH::GIdentityMatrixF
+			}, sizeof(SkyboxUniform));
 		std::vector<std::string> skyboxPaths =
 		{
-			"skybox/front", "skybox/back",
-			"skybox/top", "skybox/bottom",
-			"skybox/right", "skybox/left"
+			"skybox/front.png", "skybox/back.png",
+			"skybox/top.png", "skybox/bottom.png",
+			"skybox/right.png", "skybox/left.png"
 		};
 		skybox.AddCubeMap("skybox cubemap", skyboxPaths);
 		skybox.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		skybox.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1 });
 		skybox.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT });
 		skybox.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		skybox.SetVertexInput(POSITION | TEXCOORD);
+		skybox.SetShaders("SkyBox");
+		skybox.AddVBOutput("cube position data", _renderables[CUBE].first.positions.data(), sizeof(vec3) * _renderables[CUBE].first.positions.size());
+		skybox.AddVBOutput("cube texcoord data", _renderables[CUBE].first.texCoords.data(), sizeof(vec2) * _renderables[CUBE].first.texCoords.size());
+		skybox.AddIBOutput("cube indices", _renderables[CUBE].first.indices.data(), sizeof(unsigned) * _renderables[CUBE].first.indices.size());
+		skybox.AddTOutput("sky", VK_FORMAT_R16G16B16A16_SFLOAT);
+		skybox.SetRenderables(_renderables[CUBE].second);
+		skybox.SetDrawCalls([&skybox](VkCommandBuffer& commandBuffer)
+			{
+				for (auto renderable : skybox.GetRenderables())
+				{
+					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
+				}
+			});
 	}
-	
+
 
 	//offscreen
 	{
 		RenderPass& offscreen = _graph.AddPass("offscreen", FRAMEGRAPH_GRAPHICS_BIT);
-		offscreen.AddVBOutput("position data", _geometryData.positions.data(), sizeof(vec3) * _geometryData.positions.size());
-		offscreen.AddVBOutput("normal data", _geometryData.normals.data(), sizeof(vec3) * _geometryData.normals.size());
-		offscreen.AddVBOutput("texcoord data", _geometryData.texCoords.data(), sizeof(vec2) * _geometryData.texCoords.size());
-		offscreen.AddVBOutput("tangent data", _geometryData.tangents.data(), sizeof(vec4) * _geometryData.tangents.size());
-		offscreen.AddIBOutput("indices", _geometryData.indices.data(), sizeof(unsigned) * _geometryData.indices.size());
+		offscreen.AddVBOutput("position data", _renderables[MODEL].first.positions.data(), sizeof(vec3) * _renderables[MODEL].first.positions.size());
+		offscreen.AddVBOutput("normal data", _renderables[MODEL].first.normals.data(), sizeof(vec3) * _renderables[MODEL].first.normals.size());
+		offscreen.AddVBOutput("texcoord data", _renderables[MODEL].first.texCoords.data(), sizeof(vec2) * _renderables[MODEL].first.texCoords.size());
+		offscreen.AddVBOutput("tangent data", _renderables[MODEL].first.tangents.data(), sizeof(vec4) * _renderables[MODEL].first.tangents.size());
+		offscreen.AddIBOutput("indices", _renderables[MODEL].first.indices.data(), sizeof(unsigned) * _renderables[MODEL].first.indices.size());
 		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
-		{
-			.world = GW::MATH::GIdentityMatrixF,
-			.deltaTime = 0.f
-		}, sizeof(UniformBufferOffscreen));
+			{
+				.world = GW::MATH::GIdentityMatrixF,
+				.deltaTime = 0.f
+			}, sizeof(UniformBufferOffscreen));
 		auto& oub = *static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"));
 		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
+		auto& proj = static_cast<SkyboxUniform*>(_graph._blackboard.Get<void*>("skybox uniform"))->proj;
+		proj = oub.proj;
 
 		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
 		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
@@ -1590,27 +1586,28 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
-		offscreen.SetRenderables(_renderables);
+		offscreen.SetRenderables(_renderables[MODEL].second);
 		offscreen.SetDrawCalls([this, &offscreen](VkCommandBuffer& commandBuffer)
-		{
-			for (auto& renderable : offscreen.GetRenderables())
 			{
-				vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
-				vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
-			}
-
-			_vk.MB(commandBuffer);
-		});
+				for (auto& renderable : offscreen.GetRenderables())
+				{
+					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
+					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, 0);
+				}
+				_vk.MB(commandBuffer);
+			});
 	}
 
-	//final
+	//lighting
 	{
 		RenderPass& lighting = _graph.AddPass("lighting", FRAMEGRAPH_GRAPHICS_BIT);
 		lighting.SetCullMode(VK_CULL_MODE_FRONT_BIT);
-		lighting.SetShaders();
+		lighting.SetShaders("Lighting");
 		lighting.AddTInput("gbuffer position");
 		lighting.AddTInput("gbuffer normal");
 		lighting.AddTInput("gbuffer albedo");
+		lighting.AddTInput("depth");
+		lighting.AddTInput("sky");
 
 		UniformBufferFinal lub
 		{
@@ -1629,16 +1626,32 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddUB("lighting uniform", &lub, sizeof(UniformBufferFinal));
 
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
-		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 3 });
+		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 5 });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddTOutput("swapchain");
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 4, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 5, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddTOutput("lighting", VK_FORMAT_R16G16B16A16_SFLOAT);
 		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)
-		{
-			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-		});
+			{
+				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+			});
+	}
+
+	//swapchain
+	{
+		RenderPass& swapchain = _graph.AddPass("swapchain", FRAMEGRAPH_GRAPHICS_BIT);
+		swapchain.AddTInput("lighting");
+		swapchain.AddTOutput("swapchain");
+		swapchain.SetShaders();
+		swapchain.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1 });
+		swapchain.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		swapchain.SetDrawCalls([](VkCommandBuffer& commandBuffer)
+			{
+				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+			});
 	}
 
 	_graph.BuildCommandBuffers();
@@ -1721,11 +1734,6 @@ void VulkanRenderer::UpdateCamera()
 	_gInput.GetState(G_KEY_RIGHT, arrowRight);
 	_gInput.GetState(G_KEY_LEFT, arrowLeft);
 
-	if (+_gInput.GetState(G_KEY_SPACE, spaceKeyState) && spaceKeyState != 0)
-	{
-		std::cout << "space key\n";
-	}
-
 	if (arrowRight != 0)
 	{
 		cam.row4 = { 0.0f, 50.0f, 0.0f, 1 };
@@ -1771,6 +1779,8 @@ void VulkanRenderer::UpdateCamera()
 	}
 
 	GMatrix::InverseF(cam, view);
+	auto& skyView = static_cast<SkyboxUniform*>(_graph._blackboard.Get<void*>("skybox uniform"))->model;
+	skyView = view;
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)

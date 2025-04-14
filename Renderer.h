@@ -29,12 +29,17 @@ public:
 
 class VulkanRenderer : public Renderer
 {
+	enum ModelID : size_t
+	{
+		MODEL,
+		CUBE
+	};
 	//gateware
 	GVulkanSurface _vlk;
 	GEventReceiver _shutdown;
 
 	//FrameGraph* _frameGraph = FrameGraph::GetInstance();
-	GeometryData _geometryData;
+	//GeometryData _geometryData;
 
 	VkQueue _present;
 
@@ -76,9 +81,10 @@ class VulkanRenderer : public Renderer
 	FrameGraph _graph;
 
 	//tinygltf
-	tinygltf::Model _model;
+	//tinygltf::Model _model, _cubeModel;
+	std::unordered_map<size_t, tinygltf::Model> _models;
 
-	std::vector<Renderable> _renderables;
+	std::unordered_map<size_t, std::pair<GeometryData, std::vector<Renderable>>> _renderables;
 	std::vector<Material> _materials;
 	//mat4 matrices[3];
 
@@ -87,8 +93,8 @@ class VulkanRenderer : public Renderer
 
 	void OffscreenTest();
 	void CompileShaders();
-	void LoadModel(std::string filename);
-	void CreateGeometryData();
+	void LoadModel(std::string filename, ModelID id);
+	void CreateGeometryData(ModelID id);
 	void CreateFrameGraphNodes();
 	void CleanUp();
 	void Prepare();

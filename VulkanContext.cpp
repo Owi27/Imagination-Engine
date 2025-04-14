@@ -85,6 +85,8 @@ void VulkanContext::CreateSwapchainTextures()
 		_vulkanSurface.GetSwapchainImage(i, (void**)&_currentSwapchainTextures[i]->GetImage());
 		_vulkanSurface.GetSwapchainView(i, (void**)&_currentSwapchainTextures[i]->GetImageView());
 	}
+
+	_swapchainImagesInit = true;
 }
 
 VkCommandBuffer& VulkanContext::GetCurrentCommandBuffer()
@@ -183,11 +185,8 @@ void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsign
 	vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 }
 
-void VulkanContext::TransitionImageLayout(unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
+void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-	VkCommandBuffer commandBuffer;
-	GvkHelper::signal_command_start(_device, _commandPool, &commandBuffer);
-
 	VkImageMemoryBarrier imageMemoryBarrier
 	{
 		.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -197,7 +196,7 @@ void VulkanContext::TransitionImageLayout(unsigned mipLevels, unsigned layerCoun
 		.newLayout = newLayout,
 		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
 		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-		.image = _currentSwapchainTextures[i]->GetImage(),
+		.image = image,
 		.subresourceRange
 		{
 			.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -207,8 +206,6 @@ void VulkanContext::TransitionImageLayout(unsigned mipLevels, unsigned layerCoun
 	};
 
 	vkCmdPipelineBarrier(commandBuffer, GetPipelineStageFlags(oldLayout), GetPipelineStageFlags(newLayout), 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-
-	GvkHelper::signal_command_end(_device, _graphicsQueue, _commandPool, &commandBuffer);
 }
 
 void VulkanContext::GetSwapchainImage(Texture* tex, unsigned idx)
@@ -310,69 +307,78 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	}
 
 	VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+	std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+	vertexInputBindingDescriptions.reserve(4);
+	vertexInputAttributeDescriptions.reserve(4);
+	VkVertexInputBindingDescription vertexInputBindingDescription;
+	VkVertexInputAttributeDescription vertexInputAttributeDescription;
+	int i = 0;
 
 	if (pipelineDescription.vertexInput & POSITION)
 	{
-		std::array<VkVertexInputBindingDescription, 4> vertexInputBindingDescriptions;
-		std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescriptions;
-		VkVertexInputBindingDescription vertexInputBindingDescription;
-		VkVertexInputAttributeDescription vertexInputAttributeDescription;
+		//std::array<VkVertexInputBindingDescription, 4> vertexInputBindingDescriptions;
+		//std::array<VkVertexInputAttributeDescription, 4> vertexInputAttributeDescriptions;
+		//VkVertexInputBindingDescription posInputBindingDescription, nrmInputBindingDescription, uvInputBindingDescription, tanInputBindingDescription;
+		//VkVertexInputAttributeDescription posInputAttributeDescription, nrmInputAttributeDescription, uvInputAttributeDescription, tanInputAttributeDescription;
 
-		vertexInputBindingDescription.binding = 0;
+		vertexInputBindingDescription.binding = i;
 		vertexInputBindingDescription.stride = sizeof(vec3);
 		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		vertexInputAttributeDescription.binding = 0;
-		vertexInputAttributeDescription.location = 0;
+		vertexInputAttributeDescription.binding = i;
+		vertexInputAttributeDescription.location = i;
 		vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
 		vertexInputAttributeDescription.offset = 0;
 
-		vertexInputBindingDescriptions[0] = std::move(vertexInputBindingDescription);
-		vertexInputAttributeDescriptions[0] = std::move(vertexInputAttributeDescription);
+		vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+		vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+		i++;
 
 		if (pipelineDescription.vertexInput & NORMAL)
 		{
-			vertexInputBindingDescription.binding = 1;
+			vertexInputBindingDescription.binding = i;
 			vertexInputBindingDescription.stride = sizeof(vec3);
 			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescription.binding = 1;
-			vertexInputAttributeDescription.location = 1;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
 			vertexInputAttributeDescription.offset = 0;
 
-			vertexInputBindingDescriptions[1] = std::move(vertexInputBindingDescription);
-			vertexInputAttributeDescriptions[1] = std::move(vertexInputAttributeDescription);
-
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
 		}
 		if (pipelineDescription.vertexInput & TEXCOORD)
 		{
-			vertexInputBindingDescription.binding = 2;
+			vertexInputBindingDescription.binding = i;
 			vertexInputBindingDescription.stride = sizeof(vec2);
 			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescription.binding = 2;
-			vertexInputAttributeDescription.location = 2;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32_SFLOAT;
 			vertexInputAttributeDescription.offset = 0;
 
-			vertexInputBindingDescriptions[2] = std::move(vertexInputBindingDescription);
-			vertexInputAttributeDescriptions[2] = std::move(vertexInputAttributeDescription);
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
 		}
 		if (pipelineDescription.vertexInput & TANGENT)
 		{
-			vertexInputBindingDescription.binding = 3;
+			vertexInputBindingDescription.binding = i;
 			vertexInputBindingDescription.stride = sizeof(vec4);
 			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-			vertexInputAttributeDescription.binding = 3;
-			vertexInputAttributeDescription.location = 3;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			vertexInputAttributeDescription.offset = 0;
 
-			vertexInputBindingDescriptions[3] = std::move(vertexInputBindingDescription);
-			vertexInputAttributeDescriptions[3] = std::move(vertexInputAttributeDescription);
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
 		}
 
-		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = vertexInputBindingDescriptions.size();
+		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)vertexInputBindingDescriptions.size();
 		pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
-		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexInputAttributeDescriptions.size();
+		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)vertexInputAttributeDescriptions.size();
 		pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
 	}

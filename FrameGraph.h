@@ -17,7 +17,7 @@ class FrameGraph
 	std::unordered_map<std::string, std::unique_ptr<Texture>> _textureResources;
 	std::unordered_map<std::string, std::unique_ptr<Buffer>> _bufferResources;
 
-	std::vector<std::string> _passOrder = { "offscreen", "lighting" };
+	std::vector<std::string> _passOrder;// = { "offscreen", "lighting" };
 
 public:
 	FrameGraph()

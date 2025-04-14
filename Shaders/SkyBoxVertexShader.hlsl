@@ -1,4 +1,4 @@
-cbuffer UniformBuffer
+cbuffer UniformBuffer : register(b0)
 {
     matrix projection, model;
 };
@@ -9,7 +9,7 @@ struct VSOutput
     float3 uvw : TEXCOORD0;
 };
 
-float4 main(float3 pos : POSITION)
+VSOutput main(float3 pos : POSITION)
 {
     VSOutput output;
     output.uvw = pos;
@@ -24,5 +24,5 @@ float4 main(float3 pos : POSITION)
     view[2][3] = 0.f;
     output.pos = mul(projection, mul(view, float4(pos, 1)));
     
-	return output;
+    return output;
 }

@@ -29,6 +29,8 @@ class VulkanContext
 	unsigned int _maxFramesInFlight = 0, _width, _height, _currentFrame = 0, _currentImage = 0;;
 	float _aspectRatio;
 
+	bool _swapchainImagesInit = false;
+
 	std::vector<VkFence> _fences;
 	std::vector<VkSemaphore> _presentCompleteSemaphores;
 	VkSubmitInfo _submitInfo;
@@ -97,7 +99,7 @@ public:
 			_fences.resize(_maxFramesInFlight);
 			_presentCompleteSemaphores.resize(_maxFramesInFlight);
 
-			VkSemaphoreCreateInfo semaphoreCreateInfo = { .sType =VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+			VkSemaphoreCreateInfo semaphoreCreateInfo = { .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 			VkFenceCreateInfo fenceCreateInfo = { .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, .flags = VK_FENCE_CREATE_SIGNALED_BIT };
 
 			for (size_t i = 0; i < _maxFramesInFlight; i++)
@@ -150,7 +152,7 @@ public:
 
 		vkCmdBeginRenderingKHR = (PFN_vkCmdBeginRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdBeginRenderingKHR");
 		vkCmdEndRenderingKHR = (PFN_vkCmdEndRenderingKHR)vkGetInstanceProcAddr(_instance, "vkCmdEndRenderingKHR");
-	//	vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)vkGetInstanceProcAddr(_instance, "vkCmdPipelineBarrier2KHR");
+		//	vkCmdPipelineBarrier2KHR = (PFN_vkCmdPipelineBarrier2KHR)vkGetInstanceProcAddr(_instance, "vkCmdPipelineBarrier2KHR");
 	}
 
 	VulkanContext(const VulkanContext&) = delete;
@@ -207,6 +209,7 @@ public:
 	ComPtr<IDxcUtils> GetUtils() const { return _utils; }
 	ComPtr<IDxcIncludeHandler> GetIncludeHandler() const { return _includeHandler; }
 
+	bool SwapchainImagesInitialized() const { return _swapchainImagesInit; }
 
 	VkPipelineStageFlags GetPipelineStageFlags(VkImageLayout layout);
 	VkAccessFlags GetAccessFlags(VkImageLayout layout);
@@ -217,7 +220,7 @@ public:
 	unsigned GetMaxFrames() const { return _maxFramesInFlight; }
 
 	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
-	void TransitionImageLayout(unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	void GetSwapchainImage(Texture* tex, unsigned idx);
 

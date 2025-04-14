@@ -102,6 +102,8 @@ public:
 	void Setup();
 	void BuildCommandBuffer();
 
+	const std::string& GetName() const { return _name; }
+
 	VkCommandBuffer& GetCommandBuffer();
 	VkPipeline& GetPipeline() { return _pipeline; }
 	VkPipelineLayout& GetPipelineLayout() { return _pipelineLayout; }

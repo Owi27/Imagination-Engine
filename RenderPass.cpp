@@ -76,21 +76,17 @@ void RenderPass::Update()
 
 void RenderPass::AddCubeMap(const std::string& name, std::vector<std::string> imagePaths)
 {
-	_graph._blackboard.Set(name, std::make_shared<CubeMap>(imagePaths));
+	_cubeMaps.push_back(*_graph._blackboard.Set(name, std::make_shared<CubeMap>(imagePaths)));
 }
 
 void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 {
 	if (name.find("swapchain") != std::string::npos)
 	{
-		//for (size_t i = 0; i < _vk.GetMaxFrames(); i++)
-		//{
-		//	Texture* t = new Texture(); // Allocate on the heap
-		//	_vk.GetSwapchainImage(t, i);
+
+		if (!_vk.SwapchainImagesInitialized()) _vk.CreateSwapchainTextures();
+
 		_pipelineDescription.colorAttachmentFormats.push_back(_vk.GetSwapchainFormat());
-		_vk.CreateSwapchainTextures();
-		//	_colorOutputs.push_back(t); // Store the pointer
-		//}
 		_renderToSwapchain = true;
 	}
 	else
@@ -119,87 +115,6 @@ void RenderPass::AddDOutput(const std::string& name)
 	GvkHelper::transition_image_layout(_vk.GetDevice(), _vk.GetCommandPool(), _vk.GetGraphicsQueue(), 1, _depth->GetImage(), _depth->GetFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 }
-
-//Texture& RenderPass::AddTextureOutput(const std::string& name, const VkFormat format, const std::string& input)
-//{
-//	_graph._blackboard.Set(name, new Texture(VK_IMAGE_ASPECT_COLOR_BIT, VK_FORMAT_R16G16B16A16_UNORM));
-//	return _graph._blackboard.Get<Texture>(name);
-//}
-//
-//Texture& RenderPass::AddDepthOutput(const std::string& name)
-//{
-//	auto& tex = _graph.GetTextureResource("depth");
-//	tex.WrittenInPass(_name);
-//
-//	VkFormat depthFormat;
-//
-//	std::vector<VkFormat> formats =
-//	{
-//		VK_FORMAT_D32_SFLOAT_S8_UINT,
-//		VK_FORMAT_D32_SFLOAT,
-//		VK_FORMAT_D24_UNORM_S8_UINT,
-//		VK_FORMAT_D16_UNORM_S8_UINT,
-//		VK_FORMAT_D16_UNORM
-//	};
-//
-//	GvkHelper::find_depth_format(_vk.GetPhysicalDevice(), VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT, formats.data(), &depthFormat);
-//	tex.CreateImage({ _vk.GetWidth(), _vk.GetHeight(), 1 }, VK_SAMPLE_COUNT_1_BIT, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-//	tex.CreateImageView(VK_IMAGE_ASPECT_DEPTH_BIT);
-//
-//	_pipelineDescription.depthFormat = depthFormat;
-//
-//	_depth = std::move(&tex);
-//	return *_depth;
-//}
-//
-//Buffer& RenderPass::AddBufferInput(std::string name)
-//{
-//	auto& buffer = _graph.GetBufferResource(name);
-//	buffer.ReadInPass(_name);
-//
-//	auto itr = std::find_if(_bufferInputs.begin(), _bufferInputs.end(),
-//		[&buffer](const Buffer* other) {
-//			return *other == buffer; // Use the overloaded == operator
-//		});
-//	if (itr != _bufferInputs.end()) return buffer;
-//	else _bufferInputs.push_back(buffer);
-//
-//	return buffer;
-//}
-//
-//Buffer& RenderPass::AddBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
-//{
-//	auto& buffer = _graph.GetBufferResource(name);
-//	buffer.WrittenInPass(_name);
-//	buffer.CreateBuffer(size, usageFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-//	buffer.WriteToBuffer(data);
-//
-//	_bufferOutputs.push_back(buffer);
-//
-//	if (!input.empty())
-//	{
-//		auto& inputBuffer = _graph.GetBufferResource(input);
-//		inputBuffer.ReadInPass(_name);
-//		_bufferInputs.push_back(inputBuffer);
-//	}
-////	else _bufferInputs.push_back(nullptr);
-//
-//	return buffer;
-//}
-//
-//Buffer& RenderPass::AddUniformBufferOutput(const std::string& name, unsigned size, void* data, const VkBufferUsageFlags usageFlags, const std::string& input)
-//{
-//	AddBufferOutput(name, size, data, usageFlags, input);
-//	//_uniformBufferOutput = &std::move(_bufferOutputs.back());
-//	_bufferOutputs.pop_back();
-//
-//	return *_uniformBufferOutput;
-//}
-//
-//Buffer& RenderPass::GetBuffer(const std::string& name)
-//{
-//	return _graph.GetBufferResource(name);
-//}
 
 void RenderPass::Setup()
 {
@@ -268,16 +183,30 @@ void RenderPass::Setup()
 
 			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			{
-				VkDescriptorImageInfo descriptorImageInfo
+				if (_colorInputs.size())
 				{
-					.sampler = _vk.GetSampler(),
-					.imageView = _colorInputs[i++].get().GetImageView(),
-					.imageLayout = VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR
-				};
+					VkDescriptorImageInfo descriptorImageInfo
+					{
+						.sampler = _vk.GetSampler(),
+						.imageView = _colorInputs[i++].get().GetImageView(),
+						.imageLayout = VK_IMAGE_LAYOUT_RENDERING_LOCAL_READ_KHR
+					};
 
-				imageInfos.emplace_back(descriptorImageInfo);
-				//pushback overwrites all 3 images for some reason
-				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
+					imageInfos.emplace_back(descriptorImageInfo);
+					writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
+				}
+				else if (_cubeMaps.size())
+				{
+					VkDescriptorImageInfo descriptorImageInfo
+					{
+						.sampler = _vk.GetSampler(),
+						.imageView = _cubeMaps[0].get().GetCubeMapImageView(),
+						.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+					};
+
+					imageInfos.emplace_back(descriptorImageInfo);
+					writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &imageInfos.back()));
+				}
 			}
 
 			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
@@ -337,7 +266,24 @@ void RenderPass::BuildCommandBuffer()
 				if (indexBuffer) vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			});
 	}
-	else
+	else if (_colorOutputs.size())
+	{
+		VkCommandBufferBeginInfo commandBufferBeginInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
+		};
+
+		vkBeginCommandBuffer(_commandBuffer, &commandBufferBeginInfo);
+
+		vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+		if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+		if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
+		if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+		_vk.Render(_commandBuffer, _colorOutputs, _depth, _drawCalls);
+	}
+	else if (_cubeMaps.size())
 	{
 		VkCommandBufferBeginInfo commandBufferBeginInfo
 		{

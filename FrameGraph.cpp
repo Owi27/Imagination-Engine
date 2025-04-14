@@ -27,10 +27,14 @@ void FrameGraph::Execute()
 		{
 			_vk.SubmitQueue(_vk.GetSemaphore(), _passes[_passOrder[i]]->GetSemaphore(), _passes[_passOrder[i]]->GetCommandBuffer());
 		}
-		else
+		else if( i == _passOrder.size() -1)
 		{
 			_vk.SubmitQueue(_passes[_passOrder[i - 1]]->GetSemaphore(), _passes[_passOrder[i]]->GetSemaphore(), _passes[_passOrder[i]]->GetCommandBuffer(), _vk.GetCurrentFence());
 			if (i == _passOrder.size() - 1)	_vk.PresentInfo(_passes[_passOrder[i]]->GetSemaphore());
+		}
+		else
+		{
+			_vk.SubmitQueue(_passes[_passOrder[i - 1]]->GetSemaphore(), _passes[_passOrder[i]]->GetSemaphore(), _passes[_passOrder[i]]->GetCommandBuffer());
 		}
 	}
 
@@ -47,6 +51,7 @@ void FrameGraph::BuildCommandBuffers()
 	for (auto& pass : _passes)
 	{
 		pass.second->BuildCommandBuffer();
+		_passOrder.push_back(pass.second->GetName());
 	}
 }
 
