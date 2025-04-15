@@ -4,7 +4,7 @@
 void RenderPass::AddTInput(const std::string& name)
 {
 	_colorInputs.push_back(*_graph._blackboard.Get<Texture*>(name));
-	//_colorInputs.back().get().TransitionLayout();
+	textureInputCount++;
 }
 
 void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
@@ -13,6 +13,15 @@ void RenderPass::AddUB(const std::string& name, void* data, unsigned size)
 	_graph._blackboard.Set<void*>(name, data);
 	_uniformBufferOutput = _graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT));
 	_uniformBufferOutput->SetName(name + " buffer");
+	bufferInputCount++;
+}
+
+void RenderPass::AddSB(const std::string& name, void* data, unsigned size)
+{
+	_graph._blackboard.Set<void*>(name, data);
+	_storageBufferOutput = _graph._blackboard.Set(name + " buffer", new Buffer(size, data, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT));
+	_storageBufferOutput->SetName(name + " buffer");
+	bufferInputCount++;
 }
 
 void RenderPass::AddVBOutput(const std::string& name, void* data, unsigned size)
@@ -42,9 +51,18 @@ void RenderPass::Update()
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
 }
 
+void RenderPass::SetModelTextures(std::vector<tinygltf::Image> glImages)
+{
+	for (auto& glImg : glImages)
+	{
+		_textures.push_back(std::make_unique<Texture>(glImg));
+	}
+}
+
 void RenderPass::AddCubeMap(const std::string& name, std::vector<std::string> imagePaths)
 {
 	_cubeMaps.push_back(*_graph._blackboard.Set(name, std::make_shared<CubeMap>(imagePaths)));
+	textureInputCount++;
 }
 
 void RenderPass::AddTOutput(const std::string& name, VkFormat format)
@@ -112,6 +130,7 @@ void RenderPass::Setup()
 		};
 
 		vkCreateDescriptorSetLayout(_vk.GetDevice(), &descriptorSetLayoutCreateInfo, nullptr, &_descriptorSetLayout);
+		_layouts.push_back(_descriptorSetLayout);
 
 		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo
 		{
@@ -123,14 +142,11 @@ void RenderPass::Setup()
 
 		vkAllocateDescriptorSets(_vk.GetDevice(), &descriptorSetAllocateInfo, &_descriptorSet);
 
-		_pipelineDescription.pipelineLayoutCreateInfo.setLayoutCount = 1;
-		_pipelineDescription.pipelineLayoutCreateInfo.pSetLayouts = &_descriptorSetLayout;
-
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 		std::vector<VkDescriptorBufferInfo> bufferInfos;
 		std::vector<VkDescriptorImageInfo> imageInfos;
-		imageInfos.reserve(_colorInputs.size());
-		bufferInfos.reserve(_bufferInputs.size());
+		imageInfos.reserve(textureInputCount);
+		bufferInfos.reserve(bufferInputCount);
 		writeDescriptorSets.reserve(_descriptorSetLayoutBindings.size());
 		int i = 0;
 		for (auto& layoutBinding : _descriptorSetLayoutBindings)
@@ -142,6 +158,20 @@ void RenderPass::Setup()
 					.buffer = _uniformBufferOutput->GetBuffer(),
 					.offset = 0,
 					.range = _uniformBufferOutput->GetSize()
+				};
+
+				bufferInfos.emplace_back(descriptorBufferInfo);
+
+				writeDescriptorSets.push_back(_vk.WriteDescriptorSet(_descriptorSet, _descriptorSetLayoutBindings, layoutBinding.binding, &bufferInfos.back()));
+			}
+
+			if (layoutBinding.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+			{
+				VkDescriptorBufferInfo descriptorBufferInfo
+				{
+					.buffer = _storageBufferOutput->GetBuffer(),
+					.offset = 0,
+					.range = _storageBufferOutput->GetSize()
 				};
 
 				bufferInfos.emplace_back(descriptorBufferInfo);
@@ -193,9 +223,56 @@ void RenderPass::Setup()
 		}
 
 		vkUpdateDescriptorSets(_vk.GetDevice(), writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
+
+		if (_textures.size())
+		{
+			std::vector<VkWriteDescriptorSet> textureWriteDescriptorSets;
+
+			_textureDescriptorPoolSizes.push_back(VkDescriptorPoolSize{ .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = 1, });
+			_textureDescriptorSetLayoutBindings.push_back(VkDescriptorSetLayoutBinding{ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = (unsigned)_textures.size(), .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+				.maxSets = (unsigned)_textures.size(),
+				.poolSizeCount = 1,
+				.pPoolSizes = _textureDescriptorPoolSizes.data(),
+			};
+
+			vkCreateDescriptorPool(_vk.GetDevice(), &descriptorPoolCreateInfo, nullptr, &_textureDescriptorPool);
+
+			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+				.bindingCount = 1,
+				.pBindings = _textureDescriptorSetLayoutBindings.data()
+			};
+
+			vkCreateDescriptorSetLayout(_vk.GetDevice(), &descriptorSetLayoutCreateInfo, nullptr, &_textureDescriptorSetLayout);
+			_layouts.push_back(_textureDescriptorSetLayout);
+
+			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo
+			{
+				.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+				.descriptorPool = _textureDescriptorPool,
+				.descriptorSetCount = 1,
+				.pSetLayouts = &_textureDescriptorSetLayout
+			};
+
+			vkAllocateDescriptorSets(_vk.GetDevice(), &descriptorSetAllocateInfo, &_textureDescriptorSet);
+
+
+			for (auto& texture : _textures)
+			{
+				textureWriteDescriptorSets.push_back(_vk.WriteDescriptorSet(_textureDescriptorSet, _textureDescriptorSetLayoutBindings, 0, new VkDescriptorImageInfo{.sampler = _vk.GetSampler(), .imageView = texture->GetImageView(), .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }));
+			}
+
+			vkUpdateDescriptorSets(_vk.GetDevice(), textureWriteDescriptorSets.size(), textureWriteDescriptorSets.data(), 0, nullptr);
+		}
 	}
 
 	_pipelineDescription.pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	_pipelineDescription.pipelineLayoutCreateInfo.setLayoutCount = (unsigned)_layouts.size();
+	_pipelineDescription.pipelineLayoutCreateInfo.pSetLayouts = _layouts.data();
 
 	if (_colorOutputs.size() > 0) _pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout, _colorOutputs.size());
 	else _pipeline = _vk.CreateGraphicsPipeline(_pipelineDescription, _pipelineLayout);
@@ -230,6 +307,7 @@ void RenderPass::BuildCommandBuffer()
 			{
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 				if (_descriptorSet) vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+				if (_textureDescriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_textureDescriptorSet, 0, nullptr);
 				if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 				if (indexBuffer) vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 			});
@@ -246,6 +324,7 @@ void RenderPass::BuildCommandBuffer()
 
 		vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 		if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+		if (_textureDescriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_textureDescriptorSet, 0, nullptr);
 		if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
@@ -263,6 +342,7 @@ void RenderPass::BuildCommandBuffer()
 
 		vkCmdBindPipeline(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 		if (_descriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSet, 0, nullptr);
+		if (_textureDescriptorSet) vkCmdBindDescriptorSets(_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 1, 1, &_textureDescriptorSet, 0, nullptr);
 		if (vertexBuffers.size() > 0) vkCmdBindVertexBuffers(_commandBuffer, 0, vertexBuffers.size(), vertexBuffers.data(), offsets.data());
 		if (indexBuffer) vkCmdBindIndexBuffer(_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 

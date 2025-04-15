@@ -77,6 +77,8 @@ class VulkanRenderer : public Renderer
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	std::vector<Material> _materialInfo;
+
 	VulkanContext& _vk;
 	FrameGraph _graph;
 

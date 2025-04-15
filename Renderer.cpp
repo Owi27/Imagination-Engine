@@ -242,15 +242,15 @@ void VulkanRenderer::LoadModel(std::string filename, ModelID id)
 	CreateGeometryData(id);
 
 	//load textures
-	if (model.images.size() > 0)
-	{
-		_textures.resize(model.images.size());
-		int i = 0;
-		for (auto& image : model.images)
-		{
-			_textures.push_back(Texture(image));
-		}
-	}
+	//if (model.images.size() > 0)
+	//{
+	//	_textures.resize(model.images.size());
+	//	int i = 0;
+	//	for (auto& image : model.images)
+	//	{
+	//		_textures.push_back(Texture(image));
+	//	}
+	//}
 }
 
 void VulkanRenderer::CreateGeometryData(ModelID id)
@@ -513,7 +513,8 @@ void VulkanRenderer::CreateGeometryData(ModelID id)
 					.occlusionTexture = glMaterial.occlusionTexture.index,
 					.occlusionTextureStrength = (float)glMaterial.occlusionTexture.strength
 				};
-				r.material = material;
+
+				_materialInfo.push_back(material);
 			}
 			_renderables[id].second.push_back(std::move(r));
 		}
@@ -1591,6 +1592,8 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTInput("gbuffer albedo");
 		lighting.AddTInput("depth");
 		lighting.AddTInput("sky");
+		lighting.AddSB("lighting storage", _materialInfo.data(), _materialInfo.size() * sizeof(Material));
+		lighting.SetModelTextures(_models[MODEL].images);
 
 		UniformBufferFinal lub
 		{
@@ -1609,13 +1612,15 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddUB("lighting uniform", &lub, sizeof(UniformBufferFinal));
 
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
+		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1 });
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 5 });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
-		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 2, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 4, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 5, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		lighting.AddDescriptorSetLayoutBinding({ .binding = 6, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddTOutput("lighting", VK_FORMAT_R16G16B16A16_SFLOAT);
 		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)
 			{

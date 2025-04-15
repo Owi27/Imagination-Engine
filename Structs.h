@@ -239,5 +239,4 @@ struct Renderable
 {
 	mat4 world;
 	unsigned idxCount, firstIdx, vertexOffset;
-	Material material;
 };

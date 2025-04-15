@@ -17,9 +17,14 @@ class RenderPass
 	Texture* _depth = nullptr;
 	//Texture* _depthStencilOutput = nullptr;
 
+	int bufferInputCount = 0, textureInputCount=0;
+
 	std::vector<std::reference_wrapper<CubeMap>> _cubeMaps;
+	std::vector<std::unique_ptr<Texture>> _textures;
+	//std::vector<Texture> _textures;
 
 	Buffer* _uniformBufferOutput;
+	Buffer* _storageBufferOutput;
 
 	VkCommandBuffer _commandBuffer;
 	VkPipelineLayout _pipelineLayout;
@@ -32,6 +37,15 @@ class RenderPass
 	VkDescriptorPool _descriptorPool;
 	VkDescriptorSetLayout _descriptorSetLayout;
 	VkDescriptorSet _descriptorSet;
+
+	//textures
+	VkDescriptorPool _textureDescriptorPool;
+	VkDescriptorSetLayout _textureDescriptorSetLayout;
+	VkDescriptorSet _textureDescriptorSet;
+	std::vector<VkDescriptorPoolSize> _textureDescriptorPoolSizes;
+	std::vector<VkDescriptorSetLayoutBinding> _textureDescriptorSetLayoutBindings;
+
+	std::vector<VkDescriptorSetLayout> _layouts;
 
 	std::vector<VkDescriptorPoolSize> _descriptorPoolSizes;
 	std::vector<VkDescriptorSetLayoutBinding> _descriptorSetLayoutBindings;
@@ -77,6 +91,7 @@ public:
 
 	//template<typename T>
 	void AddUB(const std::string& name, void* data, unsigned size);
+	void AddSB(const std::string& name, void* data, unsigned size);
 	//template<typename T>
 	void AddVBOutput(const std::string& name, void* data, unsigned size);
 	//template<typename T>
@@ -85,6 +100,8 @@ public:
 	void UpdateUB(const std::string& name);
 
 	void Update();
+
+	void SetModelTextures(std::vector<tinygltf::Image> glImages);
 
 	void AddCubeMap(const std::string& name, std::vector<std::string> imagePaths);
 

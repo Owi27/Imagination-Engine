@@ -49,7 +49,8 @@ public:
 
 		GvkHelper::create_buffer(_vk.GetPhysicalDevice(), _vk.GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
 
-		if (!nullMemory) GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
+		if (nullMemory) return;
+		else GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
 	}
 
 	Buffer(void* data, VkBufferUsageFlags usage)
@@ -147,8 +148,7 @@ public:
 		Buffer staging(size, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 		staging.WriteToBuffer(glImage.image.data());
 
-		unsigned int mipLevels = static_cast<unsigned int>(floor(log2(std::max(glImage.width, glImage.height))) + 1);
-		GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &_image, &_imageMemory);
+		GvkHelper::create_image(_vk.GetPhysicalDevice(), _vk.GetDevice(), _extent, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, nullptr, &_image, &_imageMemory);
 		
 		VkCommandBuffer copyCommandBuffer;
 		GvkHelper::signal_command_start(_vk.GetDevice(), _vk.GetCommandPool(), &copyCommandBuffer);
@@ -159,7 +159,7 @@ public:
 			.imageSubresource
 			{
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-				.mipLevel = mipLevels,
+				.mipLevel = 0,
 				.baseArrayLayer = 0,
 				.layerCount = 1
 			},
@@ -174,12 +174,11 @@ public:
 
 		_vk.TransitionImageLayout(copyCommandBuffer, 1, 1, _image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
+		_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
 		GvkHelper::signal_command_end(_vk.GetDevice(), _vk.GetGraphicsQueue(), _vk.GetCommandPool(), &copyCommandBuffer);
 
-		GvkHelper::create_image_view(_vk.GetDevice(), _image, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, nullptr, &_imageView);
-
-
-
+		GvkHelper::create_image_view(_vk.GetDevice(), _image, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, nullptr, &_imageView);
 	}
 
 	~Texture()
