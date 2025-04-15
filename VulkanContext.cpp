@@ -154,63 +154,6 @@ VkAccessFlags VulkanContext::GetAccessFlags(VkImageLayout layout)
 	}
 }
 
-//Texture& VulkanContext::UploadTextureToGPU(tinygltf::Image glImage)
-//{
-//
-//
-//
-//
-//	/*
-//			const VkDeviceSize imageSize = width * height * 4 * 6;
-//		const VkDeviceSize layerSize = imageSize / 6;
-//
-//		Buffer staging(imageSize, 0, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
-//
-//		void* data;
-//		vkMapMemory(_vk.GetDevice(), staging.GetMemory(), 0, imageSize, 0, &data);
-//
-//		for (size_t i = 0; i < 6; i++)
-//		{
-//			memcpy(static_cast<char*>(data) + layerSize * i, _textureData[i], static_cast<size_t>(layerSize));
-//		}
-//
-//		vkUnmapMemory(_vk.GetDevice(), staging.GetMemory());
-//
-//		VkImageCreateInfo imageCreateInfo
-//		{
-//			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-//			.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
-//			.imageType = VK_IMAGE_TYPE_2D,
-//			.format = VK_FORMAT_R8G8B8A8_UNORM,
-//			.extent = {(unsigned)width, (unsigned)height, 1},
-//			.mipLevels = 1,
-//			.arrayLayers = 6,
-//			.samples = VK_SAMPLE_COUNT_1_BIT,
-//			.tiling = VK_IMAGE_TILING_OPTIMAL,
-//			.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-//			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-//			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
-//		};
-//
-//		vkCreateImage(_vk.GetDevice(), &imageCreateInfo, nullptr, &_image);
-//
-//		VkMemoryRequirements memoryRequirements;
-//		vkGetImageMemoryRequirements(_vk.GetDevice(), _image, &memoryRequirements);
-//
-//		VkMemoryAllocateInfo memoryAllocateInfo
-//		{
-//			.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-//			.allocationSize = memoryRequirements.size,
-//			.memoryTypeIndex = _vk.FindMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-//		};
-//
-//		vkAllocateMemory(_vk.GetDevice(), &memoryAllocateInfo, nullptr, &_imageMemory);
-//		vkBindImageMemory(_vk.GetDevice(), _image, _imageMemory, 0);
-//*/
-//
-//
-//}
-
 void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
 	VkImageMemoryBarrier2KHR imageMemoryBarrier

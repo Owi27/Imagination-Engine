@@ -74570,11 +74570,13 @@ namespace GW
 				// add bindless support if requested
 				VkPhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures{};
 				if (m_InitMask & GRAPHICS::BINDLESS_SUPPORT) {
+
 					physicalDeviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
 					physicalDeviceDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 					physicalDeviceDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
 					physicalDeviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
 					physicalDeviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+					physicalDeviceDescriptorIndexingFeatures.pNext = &physicalDeviceSynchronization2FeaturesKHR;
 					create_info.pNext = &physicalDeviceDescriptorIndexingFeatures;
 				}
 				//Create the Surface (With Results) [VK_SUCCESS = 0]

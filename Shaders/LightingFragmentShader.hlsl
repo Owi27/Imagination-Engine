@@ -11,35 +11,12 @@
 [[vk::input_attachment_index(3)]][[vk::binding(4)]] SubpassInput depthAttachment;
 [[vk::input_attachment_index(4)]][[vk::binding(5)]] SubpassInput skybox;
 
-Texture2D _texure : register(t0, space1);
-SamplerState _sampler : register(s0, space1);
-
 struct Light
 {
     float3 pos;
     float3 col;
     float radius;
 };
-
-struct Material
-{
-    float4 baseColorFactor;
-    int baseColorTexture;
-    float metallicFactor;
-    float roughnessFactor;
-    int metallicRoughnessTexture;
-    int emissiveTexture;
-    float3 emissiveFactor;
-    int alphaMode;
-    float alphaCutoff;
-    int doubleSided;
-    int normalTexture;
-    float normalTextureScale;
-    int occlusionTexture;
-    float occlusionTextureStrength;
-};
-
-StructuredBuffer<Material> materialInfo : register(t1, space0);
 
 cbuffer UniformBufferFinal : register(b0)
 {
@@ -57,7 +34,8 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
    
     // return float4(normal, 1.0); // Visualize normal
    //return float4(albedo.rgb, 1.0); // Visualize albedo
-    
+    return float4(albedo, 1);
+
    // return float4(lights[0].col, 1);
 #define lightCount 10
 #define ambient 1
@@ -69,7 +47,6 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     }
     else
     {
-        return float4(normal, 1);
         float3 fragcolor = albedo * ambient;
         float3 viewDir = normalize(view.xyz - fragPos);
         for (int i = 0; i < 10; i++)
