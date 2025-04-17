@@ -33,7 +33,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
    
     //return float4(normal, 1.0); // Visualize normal
-   return float4(albedo.rgb, 1.0); // Visualize albedo
+   //return float4(albedo.rgb, 1.0); // Visualize albedo
     //return float4(albedo, 1);
 
    // return float4(lights[0].col, 1);

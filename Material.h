@@ -16,5 +16,6 @@ struct Material
 	float normalTextureScale = 1.f;
 	int occlusionTexture = -1;
 	float occlusionTextureStrength = 1.f;
+	int _pad = 0;
 };
 

@@ -224,7 +224,7 @@ VkWriteDescriptorSet VulkanContext::WriteDescriptorSet(VkDescriptorSet& destinat
 	{
 		if (layoutBindings[i].binding == destinationBinding)
 		{
-			writeDescriptorSet.descriptorCount = 1;
+			writeDescriptorSet.descriptorCount = layoutBindings[i].descriptorCount;
 			writeDescriptorSet.descriptorType = layoutBindings[i].descriptorType;
 			writeDescriptorSet.dstBinding = destinationBinding;
 			writeDescriptorSet.dstSet = destinationSet;

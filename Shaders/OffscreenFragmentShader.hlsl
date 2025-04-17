@@ -17,6 +17,7 @@ struct Material
     float normalTextureScale;
     int occlusionTexture;
     float occlusionTextureStrength;
+    int _pad;
 };
 
 StructuredBuffer<Material> materialInfo : register(t1, space0);
@@ -48,20 +49,37 @@ FSOutput main(VSOutput input)
     float3x3 TBN = float3x3(T, B, N);
     // Use a flat tangent-space normal (0, 0, 1)
     float3 flatNormal = float3(0.0, 0.0, 1.0);
+    
+    if (materialInfo[input.idx].normalTexture > -1)
+    {
+        float3 n = materialTexures[materialInfo[input.idx].normalTexture].Sample(materialSampler, input.uv).xyz;
+        flatNormal = normalize(n * 2.0f - 1.0f) * materialInfo[input.idx].normalTextureScale;
+    }
 
     // Transform flat tangent-space normal to world space
     float3 worldNormal = normalize(mul(flatNormal, TBN));
 
     // Output world-space normal
-    output.Normal = float4(worldNormal, 1.0);
+    output.Normal = float4(worldNormal, materialInfo[input.idx].roughnessFactor);
     
+    output.albedo = materialInfo[input.idx].baseColorFactor;
     if (materialInfo[input.idx].baseColorTexture > -1) 
-        output.albedo = materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSampler, input.uv);
-    else
-        output.albedo = materialInfo[input.idx].baseColorFactor;
+        output.albedo *= materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSampler, input.uv);
     
- //   output.albedo = materialTexures[0].Sample(materialSamplers[0], input.uv);
-    //materialInfo[input.idx].b
-   // output.UV = float4(0.7, 0.7, 0.7, 1);
+    output.albedo.a = materialInfo[input.idx].metallicFactor;
+    
+    //emissive
+    float3 emissive = materialInfo[input.idx].emissiveFactor;
+    if (materialInfo[input.idx].emissiveTexture > -1) 
+        emissive *= materialTexures[materialInfo[input.idx].emissiveTexture].Sample(materialSampler, input.uv).rgb;
+    
+    //ao
+    float ao = 1;
+    if (materialInfo[input.idx].occlusionTexture > -1)
+        ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
+    
+    //else
+    //    output.albedo = materialInfo[input.idx].baseColorFactor;
+    
     return output;
 }

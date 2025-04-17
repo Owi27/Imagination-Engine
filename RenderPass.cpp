@@ -260,11 +260,19 @@ void RenderPass::Setup()
 
 			vkAllocateDescriptorSets(_vk.GetDevice(), &descriptorSetAllocateInfo, &_textureDescriptorSet);
 
-
+			std::vector<VkDescriptorImageInfo> descriptorImageInfos;
+			descriptorImageInfos.reserve(_textures.size()); // Pre-allocate memory
 			for (auto& texture : _textures)
 			{
-				textureWriteDescriptorSets.push_back(_vk.WriteDescriptorSet(_textureDescriptorSet, _textureDescriptorSetLayoutBindings, 0, new VkDescriptorImageInfo{.sampler = _vk.GetSampler(), .imageView = texture->GetImageView(), .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }));
+				descriptorImageInfos.push_back(VkDescriptorImageInfo
+					{
+						.sampler = _vk.GetSampler(),          // Assuming this is the sampler you want for all textures
+						.imageView = texture->GetImageView(),
+						.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+					});
 			}
+				
+			textureWriteDescriptorSets.push_back(_vk.WriteDescriptorSet(_textureDescriptorSet, _textureDescriptorSetLayoutBindings, 0, descriptorImageInfos.data()));
 
 			vkUpdateDescriptorSets(_vk.GetDevice(), textureWriteDescriptorSets.size(), textureWriteDescriptorSets.data(), 0, nullptr);
 		}
