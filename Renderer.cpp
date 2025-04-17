@@ -1574,7 +1574,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		offscreen.SetRenderables(_renderables[MODEL].second);
 		offscreen.AddSB("offscreen storage", _materialInfo.data(), _materialInfo.size() * sizeof(Material));
-		offscreen.SetModelTextures(_models[MODEL].images);
+		offscreen.SetModelTextures(_models[MODEL].textures, _models[MODEL].images);
 		offscreen.SetDrawCalls([this, &offscreen](VkCommandBuffer& commandBuffer)
 			{
 				unsigned i = 0;

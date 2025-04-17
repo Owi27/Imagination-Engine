@@ -51,11 +51,11 @@ void RenderPass::Update()
 	if (_uniformBufferOutput) UpdateUB(_ubDataName);
 }
 
-void RenderPass::SetModelTextures(std::vector<tinygltf::Image>& glImages)
+void RenderPass::SetModelTextures(std::vector<tinygltf::Texture>& glTextures, std::vector<tinygltf::Image>& glImages)
 {
-	for (auto& glImg : glImages)
+	for (auto& glTex : glTextures)
 	{
-		_textures.push_back(std::make_shared<Texture>(glImg));
+		_textures.push_back(std::make_shared<Texture>(glImages[glTex.source]));
 	}
 }
 

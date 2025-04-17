@@ -101,7 +101,7 @@ public:
 
 	void Update();
 
-	void SetModelTextures(std::vector<tinygltf::Image>& glImages);
+	void SetModelTextures(std::vector<tinygltf::Texture>& glTextures, std::vector<tinygltf::Image>& glImages);
 
 	void AddCubeMap(const std::string& name, std::vector<std::string> imagePaths);
 
