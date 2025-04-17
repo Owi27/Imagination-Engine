@@ -32,9 +32,9 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 albedo = albAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
     float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
    
-    // return float4(normal, 1.0); // Visualize normal
-   //return float4(albedo.rgb, 1.0); // Visualize albedo
-    return float4(albedo, 1);
+    //return float4(normal, 1.0); // Visualize normal
+   return float4(albedo.rgb, 1.0); // Visualize albedo
+    //return float4(albedo, 1);
 
    // return float4(lights[0].col, 1);
 #define lightCount 10
@@ -47,6 +47,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     }
     else
     {
+      //  return float4(normal, 1.0);
         float3 fragcolor = albedo * ambient;
         float3 viewDir = normalize(view.xyz - fragPos);
         for (int i = 0; i < 10; i++)

@@ -20,7 +20,7 @@ class RenderPass
 	int bufferInputCount = 0, textureInputCount=0;
 
 	std::vector<std::reference_wrapper<CubeMap>> _cubeMaps;
-	std::vector<std::unique_ptr<Texture>> _textures;
+	std::vector<std::shared_ptr<Texture>> _textures;
 	//std::vector<Texture> _textures;
 
 	Buffer* _uniformBufferOutput;
@@ -101,7 +101,7 @@ public:
 
 	void Update();
 
-	void SetModelTextures(std::vector<tinygltf::Image> glImages);
+	void SetModelTextures(std::vector<tinygltf::Image>& glImages);
 
 	void AddCubeMap(const std::string& name, std::vector<std::string> imagePaths);
 

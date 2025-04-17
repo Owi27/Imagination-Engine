@@ -1,5 +1,5 @@
 Texture2D materialTexures[] : register(t0, space1);
-SamplerState materialSamplers[] : register(s0, space1);
+SamplerState materialSampler : register(s0, space1);
 
 struct Material
 {
@@ -54,9 +54,13 @@ FSOutput main(VSOutput input)
 
     // Output world-space normal
     output.Normal = float4(worldNormal, 1.0);
+    
     if (materialInfo[input.idx].baseColorTexture > -1) 
-        output.albedo = materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSamplers[input.idx], input.uv);
-    else output.albedo = materialInfo[input.idx].baseColorFactor;
+        output.albedo = materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSampler, input.uv);
+    else
+        output.albedo = materialInfo[input.idx].baseColorFactor;
+    
+ //   output.albedo = materialTexures[0].Sample(materialSamplers[0], input.uv);
     //materialInfo[input.idx].b
    // output.UV = float4(0.7, 0.7, 0.7, 1);
     return output;

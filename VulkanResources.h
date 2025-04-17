@@ -136,7 +136,7 @@ public:
 
 	}
 
-	Texture(const tinygltf::Image glImage)
+	Texture(const tinygltf::Image& glImage)
 	{
 		_extent = { (unsigned)glImage.width, (unsigned)glImage.height, 1 };
 		VkDeviceSize size = glImage.width * glImage.height * glImage.component;

@@ -241,7 +241,7 @@ void VulkanRenderer::LoadModel(std::string filename, ModelID id)
 
 	CreateGeometryData(id);
 
-	//load textures
+	////load textures
 	//if (model.images.size() > 0)
 	//{
 	//	_textures.resize(model.images.size());
