@@ -36,6 +36,7 @@ struct FSOutput
     float4 Position : SV_TARGET0;
     float4 Normal : SV_TARGET1;
     float4 albedo : SV_TARGET2;
+    //float4 emissive : SV_TARGET3;
 };
 
 FSOutput main(VSOutput input)
@@ -50,11 +51,11 @@ FSOutput main(VSOutput input)
     // Use a flat tangent-space normal (0, 0, 1)
     float3 flatNormal = float3(0.0, 0.0, 1.0);
     
-    if (materialInfo[input.idx].normalTexture > -1)
-    {
-        float3 n = materialTexures[materialInfo[input.idx].normalTexture].Sample(materialSampler, input.uv).xyz;
-        flatNormal = normalize(n * 2.0f - 1.0f) * materialInfo[input.idx].normalTextureScale;
-    }
+    //if (materialInfo[input.idx].normalTexture > -1)
+    //{
+    //    float3 n = materialTexures[materialInfo[input.idx].normalTexture].Sample(materialSampler, input.uv).xyz;
+    //    //flatNormal = normalize(n * 2.0f - 1.0f) * materialInfo[input.idx].normalTextureScale;
+    //}
 
     // Transform flat tangent-space normal to world space
     float3 worldNormal = normalize(mul(flatNormal, TBN));
@@ -68,16 +69,17 @@ FSOutput main(VSOutput input)
     
     output.albedo.a = materialInfo[input.idx].metallicFactor;
     
-    //emissive
-    float3 emissive = materialInfo[input.idx].emissiveFactor;
-    if (materialInfo[input.idx].emissiveTexture > -1) 
-        emissive *= materialTexures[materialInfo[input.idx].emissiveTexture].Sample(materialSampler, input.uv).rgb;
+    ////emissive
+    //float3 emissive = materialInfo[input.idx].emissiveFactor;
+    //if (materialInfo[input.idx].emissiveTexture > -1) 
+    //    emissive *= materialTexures[materialInfo[input.idx].emissiveTexture].Sample(materialSampler, input.uv).rgb;
     
-    //ao
-    float ao = 1;
-    if (materialInfo[input.idx].occlusionTexture > -1)
-        ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
+    ////ao
+    //float ao = 1;
+    //if (materialInfo[input.idx].occlusionTexture > -1)
+    //    ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
     
+    //output.emissive = float4(emissive, ao);
     //else
     //    output.albedo = materialInfo[input.idx].baseColorFactor;
     

@@ -1561,6 +1561,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddTOutput("gbuffer position", VK_FORMAT_R16G16B16A16_SFLOAT);
 		offscreen.AddTOutput("gbuffer normal", VK_FORMAT_R16G16B16A16_SFLOAT);
 		offscreen.AddTOutput("gbuffer albedo", VK_FORMAT_R8G8B8A8_UNORM);
+		//offscreen.AddTOutput("gbuffer emissive", VK_FORMAT_R8G8B8A8_UNORM);
 		offscreen.AddDOutput("depth");
 
 		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
@@ -1594,6 +1595,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTInput("gbuffer position");
 		lighting.AddTInput("gbuffer normal");
 		lighting.AddTInput("gbuffer albedo");
+		//lighting.AddTInput("gbuffer emissive");
 		lighting.AddTInput("depth");
 		lighting.AddTInput("sky");
 
@@ -1621,6 +1623,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 3, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 4, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddDescriptorSetLayoutBinding({ .binding = 5, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
+		//lighting.AddDescriptorSetLayoutBinding({ .binding = 6, .descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		lighting.AddTOutput("lighting", VK_FORMAT_R16G16B16A16_SFLOAT);
 		lighting.SetDrawCalls([](VkCommandBuffer& commandBuffer)
 			{

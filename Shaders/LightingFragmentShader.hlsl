@@ -10,6 +10,7 @@
 [[vk::input_attachment_index(2)]][[vk::binding(3)]] SubpassInput albAttachment;
 [[vk::input_attachment_index(3)]][[vk::binding(4)]] SubpassInput depthAttachment;
 [[vk::input_attachment_index(4)]][[vk::binding(5)]] SubpassInput skybox;
+// [[vk::input_attachment_index(5)]][[vk::binding(6)]] SubpassInput emissiveAttachment;
 
 struct Light
 {
@@ -30,7 +31,10 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 fragPos = posAttachment.SubpassLoad().rgb; //    normalize(textureposition.Sample(samplerposition, inUV).rgb);
     float3 normal = nrmAttachment.SubpassLoad().rgb; //normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
     float3 albedo = albAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
+   // float3 emmisive = emissiveAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
     float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
+    
+   // return emissiveAttachment.SubpassLoad();
    
     //return float4(normal, 1.0); // Visualize normal
    //return float4(albedo.rgb, 1.0); // Visualize albedo
@@ -47,7 +51,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     }
     else
     {
-      //  return float4(normal, 1.0);
+        return albAttachment.SubpassLoad();
         float3 fragcolor = albedo * ambient;
         float3 viewDir = normalize(view.xyz - fragPos);
         for (int i = 0; i < 10; i++)
@@ -69,44 +73,4 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
   
         return float4(fragcolor, 1);
     }
-	//// Ambient part
- //   fragcolor = albedo.rgb * ambient;
-
- //   for (int i = 0; i < lightCount; ++i)
- //   {
-	//	// Vector to light
- //       float3 L = lights[i].pos.xyz - fragPos;
-
-	//	// Distance from light to fragment position
- //       float dist = length(L);
-
-	//	// Viewer to fragment
- //       float3 V = view.xyz - fragPos;
- //       V = normalize(V);
-
-	//	//if(dist < lights[i].radius)
-	//	{
-	//		// Light to fragment
- //           L = normalize(L);
-
-	//		// Attenuation
- //           float atten = lights[i].radius / (pow(dist, 2.0) + 1.0);
-
-	//		// Diffuse part
- //           float3 N = normalize(normal);
- //           float NdotL = max(0.0, dot(N, L));
- //           float3 diff = lights[i].col * albedo.rgb * NdotL * atten;
-
-	//		// Specular part
-	//		// Specular map values are stored in alpha of albedo mrt
- //           float3 R = reflect(-L, N);
- //           float NdotR = max(0.0, dot(R, V));
- //           float3 spec = lights[i].col * specular * pow(NdotR, 16.0) * atten;
-
- //           fragcolor += diff + spec;
- //       }
- //   }
-
- //   return float4(fragcolor, 1.0);
-   // return float4(fragPos, 1);
 }
