@@ -79,7 +79,7 @@ FSOutput main(VSOutput input)
     //if (materialInfo[input.idx].occlusionTexture > -1)
     //    ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
     
-    //output.emissive = float4(emissive, ao);
+   // output.emissive = float4(emissive, ao);
     //else
     //    output.albedo = materialInfo[input.idx].baseColorFactor;
     
