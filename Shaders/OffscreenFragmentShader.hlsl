@@ -35,8 +35,8 @@ struct FSOutput
 {
     float4 Position : SV_TARGET0;
     float4 Normal : SV_TARGET1;
-    float4 albedo : SV_TARGET2;
-    //float4 emissive : SV_TARGET3;
+    float4 Albedo : SV_TARGET2;
+    float4 MProperties : SV_TARGET3;
 };
 
 FSOutput main(VSOutput input)
@@ -57,31 +57,44 @@ FSOutput main(VSOutput input)
     //    //flatNormal = normalize(n * 2.0f - 1.0f) * materialInfo[input.idx].normalTextureScale;
     //}
 
+    Material m = materialInfo[input.idx];
+    
+     
     // Transform flat tangent-space normal to world space
     float3 worldNormal = normalize(mul(flatNormal, TBN));
 
     // Output world-space normal
     output.Normal = float4(worldNormal, materialInfo[input.idx].roughnessFactor);
     
-    output.albedo = materialInfo[input.idx].baseColorFactor;
+    output.Albedo = materialInfo[input.idx].baseColorFactor;
     if (materialInfo[input.idx].baseColorTexture > -1) 
-        output.albedo *= materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSampler, input.uv);
+        output.Albedo *= materialTexures[materialInfo[input.idx].baseColorTexture].Sample(materialSampler, input.uv);
     
-    output.albedo.a = materialInfo[input.idx].metallicFactor;
+    //output.Albedo.a = materialInfo[input.idx].roughnessFactor;
     
-    ////emissive
-    //float3 emissive = materialInfo[input.idx].emissiveFactor;
-    //if (materialInfo[input.idx].emissiveTexture > -1) 
-    //    emissive *= materialTexures[materialInfo[input.idx].emissiveTexture].Sample(materialSampler, input.uv).rgb;
+    //emissive
+    float3 emissive = m.emissiveFactor;
+    if (m.emissiveTexture > -1) 
+        emissive *= materialTexures[m.emissiveTexture].Sample(materialSampler, input.uv).rgb;
     
-    ////ao
-    //float ao = 1;
-    //if (materialInfo[input.idx].occlusionTexture > -1)
-    //    ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
+    float emissiveMask = step(0.001, dot(emissive.rgb, float3(1.f, 1.f, 1.f)));
     
+    //ao
+    float ao = 1;
+    if (materialInfo[input.idx].occlusionTexture > -1)
+        ao = materialTexures[materialInfo[input.idx].occlusionTexture].Sample(materialSampler, input.uv).r * materialInfo[input.idx].occlusionTextureStrength;
    // output.emissive = float4(emissive, ao);
     //else
     //    output.albedo = materialInfo[input.idx].baseColorFactor;
+    
+    output.MProperties = float4(m.metallicFactor, emissiveMask, ao, input.idx);
+    
+  
+    
+    
+    
+    
+    
     
     return output;
 }
