@@ -1,6 +1,12 @@
 #include "pch.h"
 #include "VulkanContext.h"
 
+void VulkanContext::InitImGUI()
+{
+
+
+}
+
 void VulkanContext::StartFrame()
 {
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);

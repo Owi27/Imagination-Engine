@@ -6,6 +6,7 @@ enum FrameGraphQueueBit;
 
 class RenderPass
 {
+protected:
 	VulkanContext& _vk;
 	FrameGraph& _graph;
 	std::string _name;
@@ -116,8 +117,8 @@ public:
 	//Buffer& GetBuffer(const std::string& name);
 
 	// should have color attachments
-	void Setup();
-	void BuildCommandBuffer();
+	virtual void Setup();
+	virtual void BuildCommandBuffer();
 
 	const std::string& GetName() const { return _name; }
 

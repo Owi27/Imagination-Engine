@@ -46,7 +46,7 @@ void FrameGraph::BuildCommandBuffers()
 	for (auto& pass : _passes)
 	{
 		pass.second->BuildCommandBuffer();
-		_passOrder.push_back(pass.second->GetName());
+		//_passOrder.push_back(pass.second->GetName());
 	}
 }
 

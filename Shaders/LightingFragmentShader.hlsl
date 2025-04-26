@@ -21,7 +21,7 @@ float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(float3 N, float3 V, float3 L, float roughness);
 
 #define PI 3.14159265359
-// [[vk::input_attachment_index(5)]][[vk::binding(6)]] SubpassInput emissiveAttachment;
+#define lightCount 10
 
 struct Light
 {
@@ -42,7 +42,6 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float3 fragPos = posAttachment.SubpassLoad().rgb; //    normalize(textureposition.Sample(samplerposition, inUV).rgb);
     float3 normal = nrmAttachment.SubpassLoad().rgb; //normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
     float3 albedo = albAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
-   // float3 emmisive = emissiveAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
     float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
     
     float roughness = nrmAttachment.SubpassLoad().a;
@@ -50,95 +49,56 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
     float emissive = mpAttachment.SubpassLoad().g;
     float ao = mpAttachment.SubpassLoad().b;
     float mIdx = mpAttachment.SubpassLoad().a;
-    
-    
-    
-    
-    //return mpAttachment.SubpassLoad();
-   
-    //return float4(normal, 1.0); // Visualize normal
-   //return float4(albedo.rgb, 1.0); // Visualize albedo
-    //return float4(albedo, 1);
-
-   // return float4(lights[0].col, 1);
-#define lightCount 10
-//#define ambient 1
-    //float3 fragcolor;
         
-    if(fragPos.r < 0.999)
+    if (fragPos.r < 0.999)
     {
-       return skybox.SubpassLoad();
-    }
-    else
-    {
-        //return albAttachment.SubpassLoad();
-        //float3 fragcolor = albedo * ambient;
-        //float3 viewDir = normalize(view.xyz - fragPos);
-        //for (int i = 0; i < 10; i++)
-        //{
-        ////float4 lightPos = mul(viewProj, float4(lights[i].pos, 1));
-        ////diffuse
-        //    float3 lightDir = normalize(lights[i].pos - fragPos);
-        //    float3 diffuse = max(dot(normal, lightDir), 0.0) * albedo * lights[i].col;
-        
-        ////attenuation
-        //    float dist = length(lights[i].pos - fragPos);
-        //    float attenuation = saturate(1.0 - (dist / lights[i].radius));
-        //    diffuse *= attenuation;
-        
-        ////accumulate the light contribution
-        //    fragcolor += diffuse;
-        //}
-   
-  
-        //return float4(fragcolor, 1);
-        
-        float3 N = normalize(normal);
-        float3 V = normalize(view.xyz - fragPos);
-        
-        float3 F0 = float3(0.04f, 0.04f, 0.04f);
-        F0 = lerp(F0, albedo, metallic);
-        
-        //direct lighting
-        float3 Lo = float3(0, 0, 0);
-        for (int i = 0; i < 10; i++)
-        {
-            float3 L = normalize(lights[i].pos - fragPos);
-            float3 H = normalize(V + L);
-            
-            float distance = length(lights[i].pos - fragPos);
-            float attenuation = 1.f / (distance * distance);
-            float3 radiance = lights[i].col * attenuation;
-
-            
-            float3 F = FresnelSchlick(max(dot(H, V), 0.f), F0);
-            float NDF = DistributionGGX(N, H, roughness);
-            float G = GeometrySmith(N, V, L, roughness);
-            
-            float3 numerator = NDF * G * F;
-            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-            float3 specular = numerator / denominator;
-            
-            float3 kS = F;
-            float3 kD = float3(1.f, 1.f, 1.f) - kS;
-  
-            kD *= 1.0 - metallic;
-            
-            float NdotL = max(dot(N, L), 0.0);
-            Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-        }
-        
-        float3 ambient = float3(0.4, 0.4, 0.4) * albedo * ao;
-        float3 color = ambient + Lo;
-        color = color / (color + float3(1.f, 1.f, 1.f));
-        color = pow(color, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
-        
-        
-        return float4(color, 1);
-
+        return skybox.SubpassLoad();
     }
     
     return albAttachment.SubpassLoad();
+    
+    float3 N = normalize(normal);
+    float3 V = normalize(view.xyz - fragPos);
+        
+    float3 F0 = float3(0.04f, 0.04f, 0.04f);
+    F0 = lerp(F0, albedo, metallic);
+        
+        //direct lighting
+    float3 Lo = float3(0, 0, 0);
+    for (int i = 0; i < lightCount; i++)
+    {
+        float3 L = normalize(lights[i].pos - fragPos);
+        float3 H = normalize(V + L);
+            
+        float distance = length(lights[i].pos - fragPos);
+        float attenuation = 1.f / (distance * distance);
+        float3 radiance = lights[i].col * attenuation;
+
+            
+        float3 F = FresnelSchlick(max(dot(H, V), 0.f), F0);
+        float NDF = DistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
+            
+        float3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        float3 specular = numerator / denominator;
+            
+        float3 kS = F;
+        float3 kD = float3(1.f, 1.f, 1.f) - kS;
+  
+        kD *= 1.0 - metallic;
+            
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }
+        
+    float3 ambient = float3(0.3, 0.3, 0.3) * albedo * ao;
+    float3 color = ambient + Lo;
+    color = color / (color + float3(1.f, 1.f, 1.f));
+    color = pow(color, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));
+        
+        
+    return float4(color, 1);
 }
 
 float3 FresnelSchlick(float cosTheta, float3 F0)

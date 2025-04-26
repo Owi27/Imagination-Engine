@@ -49,7 +49,12 @@ class VulkanContext
 
 	PFN_vkCmdBeginRenderingKHR vkCmdBeginRenderingKHR;
 	PFN_vkCmdEndRenderingKHR vkCmdEndRenderingKHR;
+
+
+	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _windowHandle;
 	//PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR;
+
+	void InitImGUI();
 
 public:
 	VulkanContext()
@@ -59,6 +64,8 @@ public:
 
 	VulkanContext(GWindow& win)
 	{
+		
+		win.GetWindowHandle(_windowHandle);
 #ifndef NDEBUG
 		std::vector<const char*> debugLayers =
 		{
@@ -213,6 +220,11 @@ public:
 
 	VkPipelineStageFlags GetPipelineStageFlags(VkImageLayout layout);
 	VkAccessFlags GetAccessFlags(VkImageLayout layout);
+
+
+
+	void* GetWindowHandle() { return _windowHandle.window; }
+
 
 	//Texture& UploadTextureToGPU(tinygltf::Image glImage);
 

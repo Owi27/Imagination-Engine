@@ -1600,21 +1600,29 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		lighting.AddTInput("depth");
 		lighting.AddTInput("sky");
 
-		UniformBufferFinal lub
-		{
-			.view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view.row4,
-		};
 		std::default_random_engine gen(777);
 		std::uniform_real_distribution<float> distribution(0.f, 1.f);
 		std::uniform_real_distribution<float> distribution2(-3.f, 3.f);
 
+		/*for (size_t i = 0; i < 10; i++)
+		{
+			lub.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
+			lub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
+			lub.lights[i].radius = 5.f;
+		}*/
+		lighting.AddUB("lighting uniform", new UniformBufferFinal
+			{
+				.view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view.row4
+			}, sizeof(UniformBufferFinal));
+
+		auto& lub = *static_cast<UniformBufferFinal*>(_graph._blackboard.Get<void*>("lighting uniform"));
 		for (size_t i = 0; i < 10; i++)
 		{
 			lub.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
 			lub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
 			lub.lights[i].radius = 5.f;
 		}
-		lighting.AddUB("lighting uniform", &lub, sizeof(UniformBufferFinal));
+
 		lighting.SetModelTextures(_models[MODEL].textures, _models[MODEL].images);
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = 5 });
