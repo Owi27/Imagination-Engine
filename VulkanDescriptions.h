@@ -7,7 +7,8 @@ enum VertexInput
 	POSITION = (1 << 0),
 	NORMAL = (1 << 1),
 	TEXCOORD = (1 << 2),
-	TANGENT = (1 << 3)
+	TANGENT = (1 << 3),
+	COLOR = (1 << 4)
 };
 
 enum Topology : unsigned char
@@ -54,6 +55,9 @@ struct PipelineDescription
 	VkCullModeFlags cullMode = VK_CULL_MODE_NONE;
 	FrontFace frontFace = COUNTER_CLOCKWISE;
 
+	int offsets[5] = {0, 0, 0, 0, 0};
+	
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo;
+
 };
 

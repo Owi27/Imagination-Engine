@@ -80,6 +80,7 @@ class VulkanRenderer : public Renderer
 	std::vector<Material> _materialInfo;
 
 	VulkanContext& _vk;
+	ImGuiContext _imGuiContext;
 	FrameGraph _graph;
 
 	//tinygltf

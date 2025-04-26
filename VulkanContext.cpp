@@ -334,7 +334,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 		vertexInputAttributeDescription.binding = i;
 		vertexInputAttributeDescription.location = i;
 		vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
-		vertexInputAttributeDescription.offset = 0;
+		vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
 
 		vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
 		vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
@@ -348,7 +348,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 			vertexInputAttributeDescription.binding = i;
 			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
-			vertexInputAttributeDescription.offset = 0;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
 
 			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
 			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
@@ -362,7 +362,7 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 			vertexInputAttributeDescription.binding = i;
 			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32_SFLOAT;
-			vertexInputAttributeDescription.offset = 0;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
 
 			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
 			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
@@ -376,10 +376,25 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 			vertexInputAttributeDescription.binding = i;
 			vertexInputAttributeDescription.location = i;
 			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			vertexInputAttributeDescription.offset = 0;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
 
 			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
 			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
+		}
+		if (pipelineDescription.vertexInput & COLOR)
+		{
+			vertexInputBindingDescription.binding = i;
+			vertexInputBindingDescription.stride = sizeof(vec4);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
 		}
 
 		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)vertexInputBindingDescriptions.size();

@@ -64,7 +64,6 @@ public:
 
 	VulkanContext(GWindow& win)
 	{
-		
 		win.GetWindowHandle(_windowHandle);
 #ifndef NDEBUG
 		std::vector<const char*> debugLayers =
