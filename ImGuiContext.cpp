@@ -9,8 +9,6 @@ void ImGuiContext::Render()
 
 	ImGui::ShowDemoWindow();
 
-
-
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffer);
 }
