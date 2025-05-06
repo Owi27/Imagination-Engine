@@ -60,5 +60,19 @@ void Buffer::CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bu
 
 void Buffer::WriteToBuffer(const void* dataToWrite)
 {
+	//_data = dataToWrite;
 	GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, dataToWrite, _size);
+}
+
+void Buffer::Flush(VkDeviceSize size, VkDeviceSize offset)
+{
+	VkMappedMemoryRange mappedMemoryRange
+	{
+		.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+		.memory = _bufferMemory,
+		.offset = offset,
+		.size = size,
+	};
+
+	vkFlushMappedMemoryRanges(_vk.GetDevice(), 1, &mappedMemoryRange);
 }

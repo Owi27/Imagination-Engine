@@ -16,6 +16,7 @@ class FrameGraph
 	std::unordered_map<std::string, std::unique_ptr<RenderPass>> _passes;
 	std::unordered_map<std::string, std::unique_ptr<Texture>> _textureResources;
 	std::unordered_map<std::string, std::unique_ptr<Buffer>> _bufferResources;
+	//std::unique_ptr<GuiContext> _guiContext = std::make_unique < GuiContext>();
 
 	std::vector<std::string> _passOrder = { "skybox", "offscreen", "lighting", "swapchain" };
 

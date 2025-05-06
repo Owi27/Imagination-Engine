@@ -52,6 +52,7 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 #include "Components.h"
 #include "VulkanDescriptions.h"
 #include "VulkanResources.h"
+#include "GuiContext.h"
 #include "VulkanContext.h"
 #include "CubeMap.h"
 #include "FrameGraphBlackboard.hpp"

@@ -14,6 +14,12 @@ RenderPass& FrameGraph::AddPass(const std::string& name, FrameGraphQueueBit queu
 
 void FrameGraph::Execute()
 {
+	for (auto& pass : _passes)
+	{
+		pass.second->BuildCommandBuffer();
+		//_passOrder.push_back(pass.second->GetName());
+	}
+
 	for (size_t i = 0; i < _passOrder.size(); i++)
 	{
 		_passes[_passOrder[i]]->Update();
@@ -32,6 +38,12 @@ void FrameGraph::Execute()
 			_vk.SubmitQueue(_passes[_passOrder[i - 1]]->GetSemaphore(), _passes[_passOrder[i]]->GetSemaphore(), _passes[_passOrder[i]]->GetCommandBuffer());
 		}
 	}
+
+	//_guiContext->BuildCommandBuffer();
+
+	//ui
+	/*_vk.SubmitQueue(_passes.end()->second->GetSemaphore(), _guiContext->GetSemaphore(), _guiContext->GetCommandBuffer(), _vk.GetCurrentFence());
+	_vk.PresentInfo(_guiContext->GetSemaphore());*/
 
 	//	RunCBs();
 }

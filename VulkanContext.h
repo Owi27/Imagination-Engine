@@ -4,6 +4,7 @@ using namespace Microsoft::WRL;
 struct PipelineDescription;
 class Buffer;
 class Texture;
+class GuiContext;
 
 class VulkanContext
 {
@@ -54,7 +55,7 @@ class VulkanContext
 	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _windowHandle;
 	//PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR;
 
-	void InitImGUI();
+	std::unique_ptr<GuiContext> _guiContext;
 
 public:
 	VulkanContext()
@@ -220,8 +221,6 @@ public:
 	VkPipelineStageFlags GetPipelineStageFlags(VkImageLayout layout);
 	VkAccessFlags GetAccessFlags(VkImageLayout layout);
 
-
-
 	void* GetWindowHandle() { return _windowHandle.window; }
 
 
@@ -231,6 +230,8 @@ public:
 	unsigned GetHeight() const { return _height; }
 	unsigned GetAspectRatio() const { return _aspectRatio; }
 	unsigned GetMaxFrames() const { return _maxFramesInFlight; }
+
+	void ReadImGuiInputs(GInput& input);
 
 	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
 	void TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, unsigned layerCount, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout);
@@ -242,6 +243,7 @@ public:
 	VkWriteDescriptorSet WriteDescriptorSet(VkDescriptorSet& destinationSet, std::vector<VkDescriptorSetLayoutBinding>& layoutBindings, unsigned int destinationBinding, const VkDescriptorImageInfo* descriptorImageInfo, unsigned int arrayElement = 0);
 
 	VkPipeline CreateGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
+	VkPipeline CreateGuiGraphicsPipeline(struct PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount = 1);
 
 	VkCommandBuffer& Render(VkCommandBuffer& commandBuffer, std::vector<std::reference_wrapper<Texture>>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls);
 	void RenderToSwapchain(Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls, std::function<void(VkCommandBuffer&)> binds);

@@ -135,7 +135,7 @@
   <ItemGroup>
     <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="FrameGraph.cpp" />
-    <ClCompile Include="ImGuiContext.cpp">
+    <ClCompile Include="GuiContext.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
@@ -179,7 +179,7 @@
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphBlackboard.hpp" />
     <ClInclude Include="Gateware\Gateware.h" />
-    <ClInclude Include="ImGuiContext.h" />
+    <ClInclude Include="GuiContext.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
     <ClInclude Include="ImGui\imgui_impl_vulkan.h" />

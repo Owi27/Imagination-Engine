@@ -72,7 +72,7 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiContext.cpp">
+    <ClCompile Include="GuiContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -152,7 +152,7 @@
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiContext.h">
+    <ClInclude Include="GuiContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

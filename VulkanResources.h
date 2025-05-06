@@ -34,6 +34,7 @@ class Buffer : public VulkanResource
 	VkDeviceSize _size;
 	VkBufferUsageFlags _bufferUsageFlags;
 	VkMemoryPropertyFlags _bufferMemoryPropertyFlags;
+	void* _data = nullptr;
 
 public:
 	Buffer()
@@ -43,6 +44,7 @@ public:
 
 	Buffer(VkDeviceSize size, void* data, VkBufferUsageFlags usage, bool nullMemory = false)
 	{
+		_data = data;
 		_size = size;
 		_bufferUsageFlags = usage;
 		_bufferMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -50,17 +52,18 @@ public:
 		GvkHelper::create_buffer(_vk.GetPhysicalDevice(), _vk.GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
 
 		if (nullMemory) return;
-		else GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
+		else GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, _data, _size);
 	}
 
 	Buffer(void* data, VkBufferUsageFlags usage)
 	{
+		_data = data;
 		_size = sizeof(data);
 		_bufferUsageFlags = usage;
 		_bufferMemoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
 		GvkHelper::create_buffer(_vk.GetPhysicalDevice(), _vk.GetDevice(), _size, _bufferUsageFlags, _bufferMemoryPropertyFlags, &_buffer, &_bufferMemory);
-		GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, data, _size);
+		GvkHelper::write_to_buffer(_vk.GetDevice(), _bufferMemory, _data, _size);
 	}
 
 	~Buffer()
@@ -73,8 +76,11 @@ public:
 	VkDeviceMemory& GetMemory() { return _bufferMemory; }
 	VkDeviceSize& GetSize() { return _size; }
 
+	void* GetData() { return _data; }
+
 	void CreateBuffer(const VkDeviceSize& size, const VkBufferUsageFlags& bufferUsageFlags, const VkMemoryPropertyFlags& memoryPropertyFlags);
 	void WriteToBuffer(const void* data);
+	void Flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 	bool operator==(const Buffer& other) const
 	{

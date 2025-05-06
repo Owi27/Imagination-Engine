@@ -1,12 +1,6 @@
 #include "pch.h"
 #include "VulkanContext.h"
 
-void VulkanContext::InitImGUI()
-{
-
-
-}
-
 void VulkanContext::StartFrame()
 {
 	vkWaitForFences(_device, 1, &_fences[_currentFrame], true, UINT64_MAX);
@@ -93,6 +87,7 @@ void VulkanContext::CreateSwapchainTextures()
 	}
 
 	_swapchainImagesInit = true;
+	_guiContext = std::make_unique<GuiContext>();
 }
 
 VkCommandBuffer& VulkanContext::GetCurrentCommandBuffer()
@@ -158,6 +153,11 @@ VkAccessFlags VulkanContext::GetAccessFlags(VkImageLayout layout)
 		assert(false);
 		return 0;
 	}
+}
+
+void VulkanContext::ReadImGuiInputs(GInput& input)
+{
+	_guiContext->ReadInputs(input);
 }
 
 void VulkanContext::TransitionImageLayout(VkCommandBuffer& commandBuffer, unsigned mipLevels, const VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -315,8 +315,8 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 	std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 	std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
-	vertexInputBindingDescriptions.reserve(4);
-	vertexInputAttributeDescriptions.reserve(4);
+	vertexInputBindingDescriptions.reserve(5);
+	vertexInputAttributeDescriptions.reserve(5);
 	VkVertexInputBindingDescription vertexInputBindingDescription;
 	VkVertexInputAttributeDescription vertexInputAttributeDescription;
 	int i = 0;
@@ -563,6 +563,308 @@ VkPipeline VulkanContext::CreateGraphicsPipeline(PipelineDescription pipelineDes
 	return outPipeline;
 }
 
+VkPipeline VulkanContext::CreateGuiGraphicsPipeline(PipelineDescription pipelineDescription, VkPipelineLayout& pipelineLayout, unsigned colorAttachmentCount)
+{
+	if (!pipelineDescription.vertexShader || !pipelineDescription.fragmentShader)
+	{
+		std::cout << "Missing a fragment or vertex shader\n";
+		return nullptr;
+	}
+
+	VkPipeline outPipeline;
+
+	VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfos[2] =
+	{
+		//fragment
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			.stage = pipelineDescription.fragmentShader->GetShaderStageFlagBits(),
+			.module = pipelineDescription.fragmentShader->GetShaderModule(),
+			.pName = "main"
+		},
+		//vertex
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			.stage = pipelineDescription.vertexShader->GetShaderStageFlagBits(),
+			.module = pipelineDescription.vertexShader->GetShaderModule(),
+			.pName = "main"
+		}
+	};
+
+	//assembly state
+	VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+		.primitiveRestartEnable = false
+	};
+
+	switch (pipelineDescription.topology)
+	{
+	case POINT_TOPOLOGY:
+		pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+		break;
+	case LINE_TOPOLOGY:
+		pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+		break;
+	case LINE_STRIP_TOPOLOGY:
+		pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+		break;
+	case TRIANGLE_TOPOLOGY:
+		pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		break;
+	case TRIANGLE_STRIP_TOPOLOGY:
+		pipelineInputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+		break;
+	default:
+		break;
+	}
+
+	VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+	std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+	vertexInputBindingDescriptions.reserve(5);
+	vertexInputAttributeDescriptions.reserve(5);
+	VkVertexInputBindingDescription vertexInputBindingDescription;
+	VkVertexInputAttributeDescription vertexInputAttributeDescription;
+	int i = 0;
+
+	if (pipelineDescription.vertexInput & POSITION)
+	{
+		vertexInputBindingDescription.binding = i;
+		vertexInputBindingDescription.stride = sizeof(vec3);
+		vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		vertexInputAttributeDescription.binding = i;
+		vertexInputAttributeDescription.location = i;
+		vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
+		vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+		vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+		vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+		i++;
+
+		if (pipelineDescription.vertexInput & NORMAL)
+		{
+			vertexInputBindingDescription.binding = i;
+			vertexInputBindingDescription.stride = sizeof(vec3);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
+		}
+		if (pipelineDescription.vertexInput & TEXCOORD)
+		{
+			vertexInputBindingDescription.binding = i;
+			vertexInputBindingDescription.stride = sizeof(vec2);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32_SFLOAT;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
+		}
+		if (pipelineDescription.vertexInput & TANGENT)
+		{
+			vertexInputBindingDescription.binding = i;
+			vertexInputBindingDescription.stride = sizeof(vec4);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
+		}
+		if (pipelineDescription.vertexInput & COLOR)
+		{
+			vertexInputBindingDescription.binding = i;
+			vertexInputBindingDescription.stride = sizeof(vec4);
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			vertexInputAttributeDescription.binding = i;
+			vertexInputAttributeDescription.location = i;
+			vertexInputAttributeDescription.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			vertexInputAttributeDescription.offset = pipelineDescription.offsets[i];
+
+			vertexInputBindingDescriptions.push_back(std::move(vertexInputBindingDescription));
+			vertexInputAttributeDescriptions.push_back(std::move(vertexInputAttributeDescription));
+			i++;
+		}
+
+		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)vertexInputBindingDescriptions.size();
+		pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)vertexInputAttributeDescriptions.size();
+		pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
+
+	}
+	else
+	{
+		pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
+		pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
+		pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
+		pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
+	}
+
+	VkViewport viewport
+	{
+		.x = 0,
+		.y = 0,
+		.width = static_cast<float>(_width),
+		.height = static_cast<float>(_height),
+		.minDepth = 0,
+		.maxDepth = 1
+	};
+
+	VkRect2D scissor
+	{
+		.offset = {0, 0},
+		.extent = {_width, _height}
+	};
+
+	VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+		.viewportCount = 1,
+		.pViewports = &viewport,
+		.scissorCount = 1,
+		.pScissors = &scissor
+	};
+
+	VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+		.depthClampEnable = false,
+		.rasterizerDiscardEnable = false,
+		.cullMode = pipelineDescription.cullMode,
+		.depthBiasEnable = false,
+		.depthBiasConstantFactor = 0.0f,
+		.depthBiasClamp = 0.0f,
+		.depthBiasSlopeFactor = 0.0f,
+		.lineWidth = 1.f,
+	};
+
+	switch (pipelineDescription.polygonMode)
+	{
+	case FILL:
+		pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
+		break;
+	case LINE:
+		pipelineRasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_LINE;
+		break;
+	}
+
+	switch (pipelineDescription.frontFace)
+	{
+	case CLOCKWISE:
+		pipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		break;
+	case COUNTER_CLOCKWISE:
+		pipelineRasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		break;
+	}
+
+	VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+		.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+		.sampleShadingEnable = false,
+		.minSampleShading = 1.0f,
+		.pSampleMask = nullptr,
+		.alphaToCoverageEnable = false,
+		.alphaToOneEnable = false,
+	};
+
+	VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+		.depthTestEnable = true,
+		.depthWriteEnable = true,
+		.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
+		.depthBoundsTestEnable = false,
+		.stencilTestEnable = false,
+		.minDepthBounds = 0.0f,
+		.maxDepthBounds = 1.0f,
+	};
+
+	VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState = {};
+	pipelineColorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	pipelineColorBlendAttachmentState.blendEnable = true;
+	pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
+	pipelineColorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	pipelineColorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+	pipelineColorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	pipelineColorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates;
+	if (colorAttachmentCount > 1) pipelineColorBlendAttachmentStates.resize(colorAttachmentCount, pipelineColorBlendAttachmentState);
+	else pipelineColorBlendAttachmentStates.push_back(std::move(pipelineColorBlendAttachmentState));
+
+	VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+		.logicOpEnable = false,
+		.logicOp = VK_LOGIC_OP_COPY,
+		.attachmentCount = (unsigned)pipelineColorBlendAttachmentStates.size(),
+		.pAttachments = pipelineColorBlendAttachmentStates.data(),
+		.blendConstants = { {0.f}, {0.f},{0.f},{0.f}}
+	};
+
+	VkDynamicState dynamicState[2] =
+	{
+		// By setting these we do not need to re-create the pipeline on Resize
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+		.dynamicStateCount = 2,
+		.pDynamicStates = dynamicState
+	};
+
+	vkCreatePipelineLayout(_device, &pipelineDescription.pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+
+	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+		.colorAttachmentCount = colorAttachmentCount,
+		.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
+		.depthAttachmentFormat = pipelineDescription.depthFormat,
+		.stencilAttachmentFormat = pipelineDescription.depthFormat
+	};
+
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.pNext = &pipelineRenderingCreateInfo,
+		.stageCount = 2,
+		.pStages = pipelineShaderStageCreateInfos,
+		.pVertexInputState = &pipelineVertexInputStateCreateInfo,
+		.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo,
+		.pViewportState = &pipelineViewportStateCreateInfo,
+		.pRasterizationState = &pipelineRasterizationStateCreateInfo,
+		.pMultisampleState = &pipelineMultisampleStateCreateInfo,
+		.pDepthStencilState = &pipelineDepthStencilStateCreateInfo,
+		.pColorBlendState = &pipelineColorBlendStateCreateInfo,
+		.pDynamicState = &pipelineDynamicStateCreateInfo,
+		.layout = pipelineLayout
+	};
+
+	vkCreateGraphicsPipelines(_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);
+
+	return outPipeline;
+}
+
 VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vector<std::reference_wrapper<Texture>>& textures, Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls)
 {
 	std::vector< VkRenderingAttachmentInfoKHR> colorRenderingAttachmentInfos;
@@ -632,6 +934,7 @@ VkCommandBuffer& VulkanContext::Render(VkCommandBuffer& commandBuffer, std::vect
 
 void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkCommandBuffer&)> drawCalls, std::function<void(VkCommandBuffer&)> binds)
 {
+
 	for (size_t i = 0; i < _swapchainCommandBuffers.size(); i++)
 	{
 		VkCommandBufferBeginInfo commandBufferBeginInfo
@@ -710,6 +1013,8 @@ void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkComma
 		vkCmdBeginRenderingKHR(_swapchainCommandBuffers[i], &renderingInfo);
 
 		drawCalls(_swapchainCommandBuffers[i]);
+		_guiContext->BuildCommandBuffer(_swapchainCommandBuffers[i]);
+
 		vkCmdEndRenderingKHR(_swapchainCommandBuffers[i]);
 
 		{

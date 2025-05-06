@@ -1548,10 +1548,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddVBOutput("tangent data", _renderables[MODEL].first.tangents.data(), sizeof(vec4) * _renderables[MODEL].first.tangents.size());
 		offscreen.AddIBOutput("indices", _renderables[MODEL].first.indices.data(), sizeof(unsigned) * _renderables[MODEL].first.indices.size());
 		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
-			{
-				.world = GW::MATH::GIdentityMatrixF,
-				.deltaTime = 0.f
-			}, sizeof(UniformBufferOffscreen));
+		{
+			.world = GW::MATH::GIdentityMatrixF,
+			.deltaTime = 0.f
+		}, sizeof(UniformBufferOffscreen));
 		auto& oub = *static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"));
 		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
@@ -1674,7 +1674,10 @@ void VulkanRenderer::Render()
 {
 	_vk.StartFrame();
 
+	//_imGuiContext.Render();
+	_vk.ReadImGuiInputs(_gInput);
 	_graph.Execute();
+	//_vk.RenderImGui();
 
 	_vk.EndFrame();
 }
