@@ -75,6 +75,12 @@
     <ClCompile Include="GuiContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FGPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FGCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -153,6 +159,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GuiContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FGPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FGCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FGBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

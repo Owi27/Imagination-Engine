@@ -1615,6 +1615,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 				.view = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->view.row4
 			}, sizeof(UniformBufferFinal));
 
+
 		auto& lub = *static_cast<UniformBufferFinal*>(_graph._blackboard.Get<void*>("lighting uniform"));
 		for (size_t i = 0; i < 10; i++)
 		{

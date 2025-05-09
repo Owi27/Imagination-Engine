@@ -46,6 +46,7 @@ using mat3 = GW::MATH2D::GMATRIX3F;
 using vec3 = GW::MATH2D::GVECTOR3F;
 using vec2 = GW::MATH2D::GVECTOR2F;
 
+#include "FGBase.h"
 #include "Material.h"
 
 #include "Structs.h"

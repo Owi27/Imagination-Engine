@@ -1,4 +1,5 @@
 #pragma once
+#include "FGPass.h"
 enum FrameGraphQueueBit
 {
 	FRAMEGRAPH_GRAPHICS_BIT = 1 << 0,
@@ -30,6 +31,8 @@ public:
 	{
 
 	}
+
+	FGPass& AddPass(const std::string& name, FGPassQueueType queueType, FrameGraphPass::ExecuteFunction&& executeFunc)
 
 	FrameGraphBlackboard _blackboard;
 

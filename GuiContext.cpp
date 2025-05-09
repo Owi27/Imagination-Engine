@@ -47,7 +47,6 @@ void GuiContext::BuildCommandBuffer(VkCommandBuffer& commandBuffer)
 	ImGui::Begin("Render Options");
 
 	ImGui::ShowDemoWindow();
-
 	ImGui::End();
 
 	ImGui::Render();
