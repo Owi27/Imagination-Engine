@@ -142,6 +142,7 @@
     <ClCompile Include="FGPass.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="FGPassNode.cpp" />
     <ClCompile Include="FrameGraph.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
@@ -200,9 +201,10 @@
     <ClInclude Include="Components.h" />
     <ClInclude Include="CubeMap.h" />
     <ClInclude Include="dFrameGraph.h" />
-    <ClInclude Include="FGBase.h" />
+    <ClInclude Include="FGBase.hpp" />
     <ClInclude Include="FGCore.h" />
     <ClInclude Include="FGPass.h" />
+    <ClInclude Include="FGPassNode.hpp" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphBlackboard.hpp" />
     <ClInclude Include="Gateware\Gateware.h" />

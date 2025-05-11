@@ -32,7 +32,7 @@ public:
 
 	}
 
-	FGPass& AddPass(const std::string& name, FGPassQueueType queueType, FrameGraphPass::ExecuteFunction&& executeFunc)
+	//FGPass& AddPass(const std::string& name, FGPassQueueType queueType, FrameGraphPass::ExecuteFunction&& executeFunc)
 
 	FrameGraphBlackboard _blackboard;
 
@@ -48,4 +48,16 @@ public:
 
 	Texture& GetTextureResource(const std::string& name);
 	Buffer& GetBufferResource(const std::string& name);
+};
+
+class FGPassResources
+{
+	friend class FrameGraph;
+
+public:
+	FGPassResources();
+	~FGPassResources();
+
+private:
+
 };
