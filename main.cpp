@@ -3,6 +3,10 @@
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetBreakAlloc(-1); // set block of memory to find memory leak
+	_CrtDumpMemoryLeaks();
+
 	GWindow win;
 	Renderer* renderer;
 	entt::registry registry;

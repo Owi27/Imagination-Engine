@@ -33,7 +33,7 @@ struct Light
 cbuffer UniformBufferFinal : register(b0)
 {
     Light lights[10];
-    float4 view;
+    float4 camPos;
     matrix viewProj;
 };
 
@@ -41,7 +41,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
 {
     float3 fragPos = posAttachment.SubpassLoad().rgb; //    normalize(textureposition.Sample(samplerposition, inUV).rgb);
     float3 normal = nrmAttachment.SubpassLoad().rgb; //normalize(textureNormal.Sample(samplerNormal, inUV).rgb);
-    float3 albedo = albAttachment.SubpassLoad().rgb; //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
+    float3 albedo = pow(albAttachment.SubpassLoad().rgb, 2.2); //textureAlbedo.Sample(samplerAlbedo, inUV).rgb;
     float specular = albAttachment.SubpassLoad().a; //textureAlbedo.Sample(samplerAlbedo, inUV).a;
     
     float roughness = nrmAttachment.SubpassLoad().a;
@@ -55,10 +55,13 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         return skybox.SubpassLoad();
     }
     
-    return albAttachment.SubpassLoad();
+    float3 nrm = normal;
+    nrm = nrm * 2.0 - 1.0; // remap
     
+   // return float4(nrm, 1);
+    //return albAttachment.SubpassLoad();
     float3 N = normalize(normal);
-    float3 V = normalize(view.xyz - fragPos);
+    float3 V = normalize(camPos.xyz - fragPos);
         
     float3 F0 = float3(0.04f, 0.04f, 0.04f);
     F0 = lerp(F0, albedo, metallic);
@@ -99,6 +102,15 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         
         
     return float4(color, 1);
+    
+    
+    
+    
+    
+    //pbr
+    float4 output;
+    
+    
 }
 
 float3 FresnelSchlick(float cosTheta, float3 F0)

@@ -1568,7 +1568,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetVertexInput(POSITION | NORMAL | TEXCOORD | TANGENT);
 		offscreen.SetCullMode(VK_CULL_MODE_FRONT_BIT);
 		offscreen.SetShaders("Offscreen");
-		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(mat4) });
+		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(PCR) });
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1 }); 
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
@@ -1581,7 +1581,15 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 				unsigned i = 0;
 				for (auto& renderable : offscreen.GetRenderables())
 				{
-					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mat4), &renderable.world);
+					mat4 nMatrix;
+					GMatrix::InverseF(renderable.world, nMatrix);
+					GMatrix::TransposeF(nMatrix, nMatrix);
+					PCR pcr
+					{
+						.model = renderable.world,
+						.normal = nMatrix
+					};
+					vkCmdPushConstants(commandBuffer, offscreen.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &pcr);
 					vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, i++);
 				}
 				_vk.MB(commandBuffer);
@@ -1782,6 +1790,8 @@ void VulkanRenderer::UpdateCamera()
 		cam.row4 = camSave;
 	}
 
+	auto& camPos = static_cast<UniformBufferFinal*>(_graph._blackboard.Get<void*>("lighting uniform"))->view;
+	camPos = cam.row4;
 	GMatrix::InverseF(cam, view);
 	auto& skyView = static_cast<SkyboxUniform*>(_graph._blackboard.Get<void*>("skybox uniform"))->model;
 	skyView = view;

@@ -28,6 +28,7 @@ struct VSOutput
     float3 nrm : NORMAL0;
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
+    float3x3 TBN : TEXCOORD1;
     nointerpolation int idx : INDEX;
 };
 
@@ -49,22 +50,19 @@ FSOutput main(VSOutput input)
     float3 B = cross(N, T); 
     float3x3 TBN = float3x3(T, B, N);
     // Use a flat tangent-space normal (0, 0, 1)
-    float3 flatNormal = float3(0.0, 0.0, 1.0);
-    
-    //if (materialInfo[input.idx].normalTexture > -1)
-    //{
-    //    float3 n = materialTexures[materialInfo[input.idx].normalTexture].Sample(materialSampler, input.uv).xyz;
-    //    //flatNormal = normalize(n * 2.0f - 1.0f) * materialInfo[input.idx].normalTextureScale;
-    //}
-
     Material m = materialInfo[input.idx];
+        
+    float3 worldNormal;
+    if (m.normalTexture > -1)
+    {
+        float3 normalMap = materialTexures[m.normalTexture].Sample(materialSampler, input.uv).xyz;
+        float3 tangentNormal = normalize(normalMap * 2.0f - 1.0f);
+        worldNormal = normalize(mul(input.TBN, tangentNormal));
+    }
+    else worldNormal = normalize(N);
     
-     
-    // Transform flat tangent-space normal to world space
-    float3 worldNormal = normalize(mul(flatNormal, TBN));
-
     // Output world-space normal
-    output.Normal = float4(worldNormal, materialInfo[input.idx].roughnessFactor);
+    output.Normal = float4(worldNormal * 0.5 +0.5, m.roughnessFactor);
     
     output.Albedo = materialInfo[input.idx].baseColorFactor;
     if (materialInfo[input.idx].baseColorTexture > -1) 

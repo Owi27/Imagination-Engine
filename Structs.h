@@ -88,7 +88,7 @@ struct Vertex
 
 struct PCR
 {
-	mat4 model;
+	mat4 model, normal;
 };
 
 struct PrimData
