@@ -95,7 +95,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
         
-    float3 ambient = float3(0.3, 0.3, 0.3) * albedo * ao;
+    float3 ambient = float3(0.4, 0.4, 0.4) * albedo * ao;
     float3 color = ambient + Lo;
     color = color / (color + float3(1.f, 1.f, 1.f));
     color = pow(color, float3(1.0 / 2.2, 1.0 / 2.2, 1.0 / 2.2));

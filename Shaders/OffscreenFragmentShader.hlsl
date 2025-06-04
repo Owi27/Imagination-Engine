@@ -62,7 +62,7 @@ FSOutput main(VSOutput input)
     else worldNormal = normalize(N);
     
     // Output world-space normal
-    output.Normal = float4(worldNormal * 0.5 +0.5, m.roughnessFactor);
+    output.Normal = float4(worldNormal, m.roughnessFactor);
     
     output.Albedo = materialInfo[input.idx].baseColorFactor;
     if (materialInfo[input.idx].baseColorTexture > -1) 
