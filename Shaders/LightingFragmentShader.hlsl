@@ -55,25 +55,25 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         return skybox.SubpassLoad();
     }
     
-    float3 nrm = normal;
-    nrm = nrm * 2.0 - 1.0; // remap
+    //float3 nrm = normal;
+    //nrm = nrm * 2.0 - 1.0; // remap
     
-   // return float4(nrm, 1);
+    //return float4(normal, 1);
     //return albAttachment.SubpassLoad();
     float3 N = normalize(normal);
     float3 V = normalize(camPos.xyz - fragPos);
         
     float3 F0 = float3(0.04f, 0.04f, 0.04f);
-    F0 = lerp(F0, albedo, metallic);
+    F0 = lerp(F0, albedo, metallic); //review
         
-        //direct lighting
+        //direct lighting | todo REVIEW
     float3 Lo = float3(0, 0, 0);
     for (int i = 0; i < lightCount; i++)
     {
-        float3 L = normalize(lights[i].pos - fragPos);
+        float3 L = normalize(mul(float4(lights[i].pos, 1), viewProj).xyz - fragPos); //todo handle pos
         float3 H = normalize(V + L);
             
-        float distance = length(lights[i].pos - fragPos);
+        float distance = length(mul(float4(lights[i].pos, 1), viewProj).xyz - fragPos);
         float attenuation = 1.f / (distance * distance);
         float3 radiance = lights[i].col * attenuation;
 

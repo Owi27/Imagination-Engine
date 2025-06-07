@@ -740,8 +740,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		{
 			lub.lights[i].pos = { distribution2(gen) , distribution2(gen) , distribution2(gen) };
 			lub.lights[i].col = { distribution(gen) , distribution(gen) , distribution(gen) };
-			lub.lights[i].radius = 5.f;
+			lub.lights[i].radius = 15.f;
 		}
+
+		lub.lights[0].pos = { 0.f, 0.f, 0.f };
 
 		lighting.SetModelTextures(_models[MODEL].textures, _models[MODEL].images);
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
