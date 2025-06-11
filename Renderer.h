@@ -96,12 +96,10 @@ class VulkanRenderer : public Renderer
 
 	//VulkanContext* _vk = VulkanContext::GetInst(_win);
 
-
 	void OffscreenTest();
 	void CompileShaders();
 	void LoadModel(std::string filename, ModelID id);
 	void CreateGeometryData(ModelID id);
-	void CreateFrameGraphNodes();
 	void CleanUp();
 	void Prepare();
 	void UploadTextureToGPU(tinygltf::Image& image, Texture* texture);
@@ -110,7 +108,6 @@ class VulkanRenderer : public Renderer
 	VkWriteDescriptorSet MakeWrite(VkDescriptorSet descriptorSet, unsigned int binding, unsigned int descriptorCount, VkDescriptorType type, const VkDescriptorImageInfo* pImageInfo = nullptr, const VkDescriptorBufferInfo* pBufferInfo = nullptr);
 	mat4 GetLocalMatrix(const tinygltf::Node& node);
 	std::string ShaderAsString(const char* shaderFilePath);
-	void Playground();
 
 public:
 	VulkanRenderer(GWindow win);

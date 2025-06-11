@@ -79,6 +79,11 @@ struct UniformBufferFinal
 	mat4 viewProj;
 };
 
+struct UniformBufferForward
+{
+	mat4 view, proj;
+};
+
 struct Vertex
 {
 	vec3* pos, nrm;

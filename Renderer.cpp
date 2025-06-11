@@ -262,7 +262,7 @@ void VulkanRenderer::CreateGeometryData(ModelID id)
 
 	for (auto& node : model.nodes)
 	{
-		if (node.mesh >-1)
+		if (node.mesh > -1)
 		{
 			auto& mesh = model.meshes[node.mesh];
 			for (auto prim : mesh.primitives)
@@ -660,10 +660,10 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.AddVBOutput("tangent data", _renderables[MODEL].first.tangents.data(), sizeof(vec4) * _renderables[MODEL].first.tangents.size());
 		offscreen.AddIBOutput("indices", _renderables[MODEL].first.indices.data(), sizeof(unsigned) * _renderables[MODEL].first.indices.size());
 		offscreen.AddUB("offscreen uniform", new UniformBufferOffscreen
-		{
-			.world = GW::MATH::GIdentityMatrixF,
-			.deltaTime = 0.f
-		}, sizeof(UniformBufferOffscreen));
+			{
+				.world = GW::MATH::GIdentityMatrixF,
+				.deltaTime = 0.f
+			}, sizeof(UniformBufferOffscreen));
 		auto& oub = *static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"));
 		GMatrix::LookAtLHF(vec4{ 0.f, 0.f, 0.f }, vec4{ 0.f, 0.f, 0.f }, vec4{ 0, 1, 0 }, oub.view);
 		GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(65), _vk.GetAspectRatio(), .1f, 256.f, oub.proj);
@@ -682,7 +682,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 		offscreen.SetShaders("Offscreen");
 		offscreen.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(PCR) });
 		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
-		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1 }); 
+		offscreen.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1 });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
 		offscreen.AddDescriptorSetLayoutBinding({ .binding = 1, .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT });
 		offscreen.SetRenderables(_renderables[MODEL].second);
@@ -722,7 +722,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 
 		std::default_random_engine gen(777);
 		std::uniform_real_distribution<float> distribution(0.f, 1.f);
-		std::uniform_real_distribution<float> distribution2(-3.f, 3.f);
+		std::uniform_real_distribution<float> distribution2(-20.f, 20.f);
 
 		/*for (size_t i = 0; i < 10; i++)
 		{
@@ -743,7 +743,7 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 			lub.lights[i].radius = 15.f;
 		}
 
-		lub.lights[0].pos = { 0.f, 0.f, 0.f };
+		lub.lights[0].pos = { 0.f, 1.f, 0.f };
 
 		lighting.SetModelTextures(_models[MODEL].textures, _models[MODEL].images);
 		lighting.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
@@ -763,6 +763,8 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 			});
 	}
 
+
+
 	//swapchain
 	{
 		RenderPass& swapchain = _graph.AddPass("swapchain", FRAMEGRAPH_GRAPHICS_BIT);
@@ -775,6 +777,73 @@ VulkanRenderer::VulkanRenderer(GWindow win) : Renderer(win), _vk(*VulkanContext:
 			{
 				vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 			});
+	}
+	
+	_vk._guiContext->imGuiCalls.push_back([this]()
+		{
+			auto& lub = *static_cast<UniformBufferFinal*>(_graph._blackboard.Get<void*>("lighting uniform"));
+
+			ImGui::Begin("Lights");
+			ImGui::DragFloat3("Light[0] Pos", lub.lights[0].pos.data);
+			ImGui::DragFloat3("Light[0] Col", lub.lights[0].col.data);
+			ImGui::DragFloat("Light[0] Rad", &lub.lights[0].radius);
+			ImGui::End();
+		});
+
+	//forward
+	{
+		////setup cube
+
+		//auto& lub = *static_cast<UniformBufferFinal*>(_graph._blackboard.Get<void*>("lighting uniform"));
+		//std::vector<Renderable> renderable;
+		//for (size_t i = 0; i < 10; i++)
+		//{
+		//	// = _renderables[CUBE].second[0];
+		//	
+		//	mat4 model = GW::MATH::GIdentityMatrixF;
+		//	vec4 v = { lub.lights[i].pos.x, lub.lights[i].pos.y, lub.lights[i].pos.z, 1 };
+		//	GMatrix::TranslateGlobalF(model, v, model);
+		//	GMatrix::ScaleGlobalF(model, vec4{ .25f , .25f , .25f , 1}, model);
+		//	Renderable r
+		//	{
+		//		.world = model,
+		//		.idxCount = 36,
+		//		.firstIdx = 0,
+		//		.vertexOffset = 0
+		//	};
+
+		//	renderable.push_back(r);
+		//}
+
+		//RenderPass& forward = _graph.AddPass("forward", FRAMEGRAPH_GRAPHICS_BIT);
+		//forward.SetShaders("Forward");
+		//forward.AddVBOutput("position data", _renderables[CUBE].first.positions.data(), sizeof(vec3)* _renderables[CUBE].first.positions.size());
+		//forward.AddUB("forward uniform", new UniformBufferForward
+		//	{
+		//		.view = GW::MATH::GIdentityMatrixF,
+		//		.proj = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->proj
+		//	}, sizeof(UniformBufferForward));
+		//forward.SetVertexInput(POSITION);
+		//forward.SetCullMode(VK_CULL_MODE_FRONT_BIT);
+		//forward.SetPushConstantRange({ .stageFlags = VK_SHADER_STAGE_VERTEX_BIT, .offset = 0, .size = sizeof(PCR) });
+		//forward.AddDescriptorPoolSize({ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1 });
+		//forward.AddDescriptorSetLayoutBinding({ .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT });
+		//forward.AddTOutput("forward");
+		//forward.SetRenderables(renderable);
+		//forward.SetDrawCalls([this, &forward](VkCommandBuffer& commandBuffer)
+		//	{
+		//		unsigned i = 0;
+		//		for (auto& renderable : forward.GetRenderables())
+		//		{
+		//			PCR pcr
+		//			{
+		//				.model = renderable.world,
+		//			};
+		//			vkCmdPushConstants(commandBuffer, forward.GetPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PCR), &pcr);
+		//			vkCmdDrawIndexed(commandBuffer, renderable.idxCount, 1, renderable.firstIdx, renderable.vertexOffset, i++);
+		//		}
+		//	});
+
 	}
 
 	_graph.BuildCommandBuffers();
@@ -909,6 +978,7 @@ void VulkanRenderer::UpdateCamera()
 	GMatrix::InverseF(cam, view);
 	auto& skyView = static_cast<SkyboxUniform*>(_graph._blackboard.Get<void*>("skybox uniform"))->model;
 	skyView = view;
+	//static_cast<UniformBufferForward*>(_graph._blackboard.Get<void*>("forward uniform"))->view = view;
 }
 
 DX12Renderer::DX12Renderer(GWindow win) : Renderer(win)

@@ -55,9 +55,12 @@ class VulkanContext
 	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _windowHandle;
 	//PFN_vkCmdPipelineBarrier2KHR vkCmdPipelineBarrier2KHR;
 
-	std::unique_ptr<GuiContext> _guiContext;
+
 
 public:
+	std::vector<std::function<void(VkCommandBuffer&)>> forwardCalls;
+	std::unique_ptr<GuiContext> _guiContext;
+
 	VulkanContext()
 	{
 

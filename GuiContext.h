@@ -28,6 +28,8 @@ class GuiContext
 	unsigned vertexCount = 0, indexCount = 0;
 
 public:
+	std::vector<std::function<void()>> imGuiCalls;
+
 	GuiContext() : _vk(*VulkanContext::GetInst())
 	{
 		VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };

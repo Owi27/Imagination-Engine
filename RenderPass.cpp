@@ -75,6 +75,12 @@ void RenderPass::AddTOutput(const std::string& name, VkFormat format)
 		_pipelineDescription.colorAttachmentFormats.push_back(_vk.GetSwapchainFormat());
 		_renderToSwapchain = true;
 	}
+	else if (name.find("forward") != std::string::npos)
+	{
+		_renderToSwapchain = true;
+		_forwardPass = true;
+		_pipelineDescription.colorAttachmentFormats.push_back(_vk.GetSwapchainFormat());
+	}
 	else
 	{
 		_pipelineDescription.colorAttachmentFormats.push_back(format);
@@ -311,6 +317,10 @@ void RenderPass::BuildCommandBuffer()
 
 	if (_renderToSwapchain)
 	{
+		if (_forwardPass)
+		{
+			_vk.forwardCalls.push_back(_drawCalls);
+		}
 		_vk.RenderToSwapchain(_depth, _drawCalls, [this, vertexBuffers, indexBuffer, offsets](VkCommandBuffer& commandBuffer)
 			{
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);

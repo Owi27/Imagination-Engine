@@ -59,7 +59,7 @@ protected:
 
 	std::string _ubDataName;
 
-	bool _renderToSwapchain = false;
+	bool _renderToSwapchain = false, _forwardPass = false;
 
 	bool _firstRun = true;
 

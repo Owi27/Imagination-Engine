@@ -1013,6 +1013,13 @@ void VulkanContext::RenderToSwapchain(Texture* depth, std::function<void(VkComma
 		vkCmdBeginRenderingKHR(_swapchainCommandBuffers[i], &renderingInfo);
 
 		drawCalls(_swapchainCommandBuffers[i]);
+		if (!forwardCalls.empty())
+		{
+			for (auto calls : forwardCalls)
+			{
+				calls(_swapchainCommandBuffers[i]);
+			}
+		}
 		_guiContext->BuildCommandBuffer(_swapchainCommandBuffers[i]);
 
 		vkCmdEndRenderingKHR(_swapchainCommandBuffers[i]);

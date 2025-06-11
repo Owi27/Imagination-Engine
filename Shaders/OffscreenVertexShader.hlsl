@@ -48,6 +48,7 @@ VSOutput main(VSInput input, uint id : SV_InstanceID)
     
     output.nrm = normalize(mul(_pcr.model, float4(input.nrm, 0))).xyz;
     output.tan = normalize(mul(_pcr.model, float4(input.tan.xyz, 0))).xyz;
+    output.tan = normalize(output.tan - dot(output.tan, output.nrm) * output.nrm);
     output.TBN = float3x3(output.tan, cross(output.nrm, output.tan), output.nrm);
     output.idx = id;
     

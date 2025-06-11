@@ -102,8 +102,7 @@ float4 main(float2 inUV : TEXCOORD0) : SV_TARGET
         
         
     return float4(color, 1);
-    
-    
+ 
     
     
     

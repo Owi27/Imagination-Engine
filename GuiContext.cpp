@@ -48,6 +48,14 @@ void GuiContext::BuildCommandBuffer(VkCommandBuffer& commandBuffer)
 
 	ImGui::ShowDemoWindow();
 
+	if (!imGuiCalls.empty())
+	{
+		for (auto& calls : imGuiCalls)
+		{
+			calls();
+		}
+	}
+
 	ImGui::End();
 
 	ImGui::Render();
