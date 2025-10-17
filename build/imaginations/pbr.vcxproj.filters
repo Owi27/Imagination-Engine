@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\pbr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\pbr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Owi\Desktop\Imagination\imaginations\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <none Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\Shaders\PBRFragmentShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
+    <none Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\Shaders\PBRVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{47E88A94-F49C-3A09-AF0C-165D5545F9EA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{B3337DE7-4C76-3332-A1D3-A7D4BA9F80DA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9E3E043D-5A6F-3560-8A71-8A5F9C772CA3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

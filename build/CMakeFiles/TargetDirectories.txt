@@ -1,0 +1,5 @@
+C:/Users/Owi/Desktop/Imagination/build/CMakeFiles/Imagination.dir
+C:/Users/Owi/Desktop/Imagination/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Owi/Desktop/Imagination/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Owi/Desktop/Imagination/build/imaginations/CMakeFiles/pbr.dir
+C:/Users/Owi/Desktop/Imagination/build/ImaginaryMathLibrary/CMakeFiles/ImaginaryMathLibrary.dir
