@@ -1,17 +1,24 @@
-
 #include "ImaginaryMath.hpp"
 #include "RenderContext.h"
 #include <memory>
+#include <IWindow.h>
 #include <VulkanBackend.h>
 using namespace std;
 
 int main()
 {
-	unique_ptr<RenderContext> renderContext = make_unique<RenderContext>();
-	renderContext->Init();
+	ImgnWindow& win = ImgnWindow::GetInstance();
+	win.Init(800, 600, "Demo");
 
-	VulkanBackend* vk = new VulkanBackend();
-	vk->Init();
+	VulkanBackend vk;
+	vk.Init();
+
+
+	while (win.ProcessEvents())
+	{
+
+	}
+
 
 	return 0;
 }
