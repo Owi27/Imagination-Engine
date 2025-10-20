@@ -213,8 +213,45 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 	_swapchainImages.resize(imageCount);
 	vkGetSwapchainImagesKHR(_device, _swapchain, &imageCount, _swapchainImages.data());
 
-	swapchainImageFormat = surfaceFormat.format;
-	swapchainExtent = extent;
+	_swapchainImageFormat = surfaceFormat.format;
+	_swapchainExtent = extent;
+}
+
+RETURN(void) VulkanBackend::CreateSwapchainImageViews()
+{
+	_swapchainImageViews.resize(_swapchainImages.size());
+
+	for (size_t i = 0; i < _swapchainImages.size(); i++)
+	{
+		VkImageViewCreateInfo imageViewCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+			//.pNext = ,
+			//.flags = ,
+			.image = _swapchainImages[i],
+			.viewType = VK_IMAGE_VIEW_TYPE_2D,
+			.format = _swapchainImageFormat,
+			.components
+			{
+				.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+				.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+			},
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1,
+			}
+		};
+
+		if (vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
+
+
+	}
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)

@@ -40,9 +40,9 @@ class VulkanBackend
 	VkSurfaceKHR _surface;
 	VkSwapchainKHR _swapchain;
 	std::vector<VkImage> _swapchainImages;
-	VkFormat swapchainImageFormat;
-	VkExtent2D swapchainExtent;
-	std::vector<VkImageView> swapchainImageViews;
+	VkFormat _swapchainImageFormat;
+	VkExtent2D _swapchainExtent;
+	std::vector<VkImageView> _swapchainImageViews;
 
 
 
@@ -56,6 +56,7 @@ class VulkanBackend
 	RETURN(void) CreateDevice();
 	RETURN(void) CreateSurface();
 	RETURN(void) CreateSwapchain();
+	RETURN(void) CreateSwapchainImageViews();
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);
@@ -80,6 +81,11 @@ public:
 
 	~VulkanBackend()
 	{
+		for (auto imageView : _swapchainImageViews) 
+		{
+			vkDestroyImageView(_device, imageView, nullptr);
+		}
+
 		vkDestroySwapchainKHR(_device, _swapchain, nullptr);
 		vkDestroySurfaceKHR(_instance, _surface, nullptr);
 		vkDestroyInstance(_instance, nullptr);

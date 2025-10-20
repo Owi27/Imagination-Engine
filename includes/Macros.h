@@ -17,7 +17,7 @@ inline void ResetColor() { std::cout << "\033[0m"; }
 #endif
 
 #define DEBUG(msg) \
-    do { SetColorRed(); std::cout << msg << '\n'; ResetColor(); } while(0)
+    do { SetColorRed(); std::cout << '\n' << msg << '\n'; ResetColor(); } while(0)
 
 //#define DEBUG(msg) std::cout << msg << '\n';
 
