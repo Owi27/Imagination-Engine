@@ -5,12 +5,25 @@
 #include <Macros.h>
 #include <optional>
 
+struct VulkanContext
+{
+	VkInstance _instance = nullptr;
+	VkPhysicalDevice _physicalDevice = nullptr;
+	VkDevice _device = nullptr;
+	VkQueue _graphicsQueue = nullptr;
+	unsigned _graphicsQueueFamily = 0;
+	VkQueue _presentQueue = nullptr;
+	unsigned _presentQueueFamily = 0;
+	VkPipelineCache _pipelineCache = nullptr;
+	VkDescriptorPool _descriptorPool = nullptr;
+};
+
 class VulkanBackend
 {
 	struct QueueFamilyIndices
 	{
 		std::optional<unsigned> graphicsFamily;
-		std::optional<uint32_t> presentFamily;
+		std::optional<unsigned> presentFamily;
 
 		bool IsComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
 	};
@@ -28,9 +41,25 @@ class VulkanBackend
 	const bool _enableValidationLayers = true;
 #endif
 
-	std::vector<const char*> _instanceLayers;
-	std::vector<const char*> _instanceExtensions;
-	std::vector<const char*> _deviceExtensions;
+	std::vector<const char*> _instanceLayers =
+	{
+#ifdef DEBUG
+		"VK_LAYER_KHRONOS_validation"
+#endif
+	};
+
+	std::vector<const char*> _instanceExtensions =
+	{
+		"VK_KHR_surface",
+		"VK_KHR_win32_surface"
+	};
+
+	std::vector<const char*> _deviceExtensions =
+	{
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+		VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
+	};
 
 	//vulkan
 	VkInstance _instance = nullptr;
@@ -53,10 +82,13 @@ class VulkanBackend
 	RETURN(bool) IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
 	RETURN(QueueFamilyIndices) FindQueueFamilies(VkPhysicalDevice physicalDevice);
 
+	
+
 	RETURN(void) CreateDevice();
 	RETURN(void) CreateSurface();
 	RETURN(void) CreateSwapchain();
 	RETURN(void) CreateSwapchainImageViews();
+	RETURN(void) CreateGraphicsPipeline();
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);
@@ -69,19 +101,11 @@ class VulkanBackend
 public:
 	VulkanBackend()
 	{
-#ifdef DEBUG
-		_instanceLayers.emplace_back("VK_LAYER_KHRONOS_validation");
-#endif
-
-		_instanceExtensions.push_back("VK_KHR_surface");
-		_instanceExtensions.push_back("VK_KHR_win32_surface");
-
-		_deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 	}
 
 	~VulkanBackend()
 	{
-		for (auto imageView : _swapchainImageViews) 
+		for (auto imageView : _swapchainImageViews)
 		{
 			vkDestroyImageView(_device, imageView, nullptr);
 		}

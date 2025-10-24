@@ -1,69 +1,77 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\build\CMakeFiles\Imagination.dir\cmake_pch.cxx">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\cmake_pch.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\src\DX12Backend.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\DX12Backend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\src\RenderContext.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\RenderContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\src\VulkanBackend.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\VulkanBackend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\src\main.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Shader.cpp" />
+    <ClCompile Include="..\src\ThreadPool.cpp" />
+    <ClCompile Include="..\src\HotReloader.cpp" />
+    <ClCompile Include="..\src\FrameGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\DX12Backend.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\Gateware.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Gateware.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\IWindow.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\IWindow.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\Macros.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Macros.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\RenderContext.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\RenderContext.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\VulkanBackend.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\VulkanBackend.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\includes\pch.h">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\pch.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\build\CMakeFiles\Imagination.dir\Debug\cmake_pch.hxx">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\Debug\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\build\CMakeFiles\Imagination.dir\Release\cmake_pch.hxx">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\Release\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\build\CMakeFiles\Imagination.dir\MinSizeRel\cmake_pch.hxx">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\MinSizeRel\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="..\includes\Shader.h" />
+    <ClInclude Include="..\includes\ThreadPool.h" />
+    <ClInclude Include="..\includes\HotReloader.h" />
+    <ClInclude Include="..\includes\FrameGraph.h" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Owi\Desktop\Imagination\CMakeLists.txt" />
+    <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
-      <UniqueIdentifier>{329CFC38-98AB-3F02-A6F8-CD69BB5D87F0}</UniqueIdentifier>
+      <UniqueIdentifier>{180B150E-2DF4-354A-B2A0-95083B3D8258}</UniqueIdentifier>
     </Filter>
     <Filter Include="Precompile Header File">
-      <UniqueIdentifier>{C31525B9-23D9-3D3A-B4EB-4B500F726E15}</UniqueIdentifier>
+      <UniqueIdentifier>{E133613F-F2A2-35C6-8839-11BA33B1055F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{9E3E043D-5A6F-3560-8A71-8A5F9C772CA3}</UniqueIdentifier>
+      <UniqueIdentifier>{303D06DA-9390-3BB0-AD1D-65224C4F6004}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

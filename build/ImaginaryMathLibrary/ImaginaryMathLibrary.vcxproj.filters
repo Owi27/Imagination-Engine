@@ -1,24 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary\ImaginaryMath.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginaryMathLibrary\ImaginaryMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary\ImaginaryMath.hpp">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginaryMathLibrary\ImaginaryMath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary\CMakeLists.txt" />
+    <CustomBuild Include="D:\GitHub\Imagination-Engine\ImaginaryMathLibrary\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{47E88A94-F49C-3A09-AF0C-165D5545F9EA}</UniqueIdentifier>
+      <UniqueIdentifier>{12FBA9E3-B586-3A93-B92A-EDA3FF620AAB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{9E3E043D-5A6F-3560-8A71-8A5F9C772CA3}</UniqueIdentifier>
+      <UniqueIdentifier>{303D06DA-9390-3BB0-AD1D-65224C4F6004}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -50,7 +50,7 @@ RETURN(void) VulkanBackend::PickPhysicalDevice()
 	unsigned deviceCount = 0;
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
-	if (deviceCount == 0)  return std::unexpected("VulkanBackend.cpp | PickPhysicalDevice() | physical device not found");
+	if (deviceCount == 0) return std::unexpected("VulkanBackend.cpp | PickPhysicalDevice() | physical device not found");
 
 	std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
 	vkEnumeratePhysicalDevices(_instance, &deviceCount, physicalDevices.data());
@@ -248,10 +248,13 @@ RETURN(void) VulkanBackend::CreateSwapchainImageViews()
 			}
 		};
 
-		if (vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
-
-
+		if (vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
 	}
+}
+
+RETURN(void) VulkanBackend::CreateGraphicsPipeline()
+{
+	return RETURN(void)();
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
@@ -382,7 +385,7 @@ std::expected<bool, const char*> VulkanBackend::Init(unsigned layerCount, const 
 	ATTEMPT(PickPhysicalDevice());
 	ATTEMPT(CreateDevice());
 	ATTEMPT(CreateSwapchain());
-
+	ATTEMPT(CreateGraphicsPipeline());
 
 	return true;
 }

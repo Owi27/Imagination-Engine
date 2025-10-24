@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Owi/Desktop/Imagination/imaginations
+# Install script for directory: D:/GitHub/Imagination-Engine/imaginations
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

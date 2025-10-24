@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{ADED1744-8BE9-3FC6-9B07-E32CDC3BB9B9}</ProjectGuid>
+    <ProjectGuid>{9936FBE1-0954-312E-9087-1A087453DC64}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -59,38 +59,38 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\GitHub\Imagination-Engine\build\imaginations\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pbr.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pbr</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:/Users/Owi/Desktop/Imagination/bin</LocalDebuggerWorkingDirectory>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\Release\</OutDir>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/bin</LocalDebuggerWorkingDirectory>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\GitHub\Imagination-Engine\build\imaginations\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pbr.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pbr</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:/Users/Owi/Desktop/Imagination/bin</LocalDebuggerWorkingDirectory>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\MinSizeRel\</OutDir>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/bin</LocalDebuggerWorkingDirectory>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\GitHub\Imagination-Engine\build\imaginations\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">pbr.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">pbr</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:/Users/Owi/Desktop/Imagination/bin</LocalDebuggerWorkingDirectory>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\RelWithDebInfo\</OutDir>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/bin</LocalDebuggerWorkingDirectory>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\GitHub\Imagination-Engine\build\imaginations\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">pbr.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">pbr</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
-    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:/Users/Owi/Desktop/Imagination/bin</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/bin</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -111,10 +111,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;UNICODE;_UNICODE;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -127,8 +127,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Owi/Desktop/Imagination/build/imaginations/Debug/pbr.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Owi/Desktop/Imagination/build/imaginations/Debug/pbr.pdb</ProgramDataBaseFile>
+      <ImportLibrary>D:/GitHub/Imagination-Engine/build/imaginations/Debug/pbr.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/imaginations/Debug/pbr.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -159,10 +159,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -175,8 +175,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Owi/Desktop/Imagination/build/imaginations/Release/pbr.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Owi/Desktop/Imagination/build/imaginations/Release/pbr.pdb</ProgramDataBaseFile>
+      <ImportLibrary>D:/GitHub/Imagination-Engine/build/imaginations/Release/pbr.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/imaginations/Release/pbr.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -185,7 +185,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -207,10 +207,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -223,8 +223,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Owi/Desktop/Imagination/build/imaginations/MinSizeRel/pbr.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Owi/Desktop/Imagination/build/imaginations/MinSizeRel/pbr.pdb</ProgramDataBaseFile>
+      <ImportLibrary>D:/GitHub/Imagination-Engine/build/imaginations/MinSizeRel/pbr.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/imaginations/MinSizeRel/pbr.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -233,7 +233,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -254,10 +254,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;C:\Users\Owi\Desktop\Imagination\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.290.0\Include;D:\GitHub\Imagination-Engine\ImaginaryMathLibrary;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -270,8 +270,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Owi/Desktop/Imagination/build/imaginations/RelWithDebInfo/pbr.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Owi/Desktop/Imagination/build/imaginations/RelWithDebInfo/pbr.pdb</ProgramDataBaseFile>
+      <ImportLibrary>D:/GitHub/Imagination-Engine/build/imaginations/RelWithDebInfo/pbr.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/imaginations/RelWithDebInfo/pbr.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -279,11 +279,11 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Owi\Desktop\Imagination\imaginations\CMakeLists.txt">
+    <CustomBuild Include="D:\GitHub\Imagination-Engine\imaginations\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Owi/Desktop/Imagination/imaginations/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/GitHub/Imagination-Engine/imaginations/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owi/Desktop/Imagination -BC:/Users/Owi/Desktop/Imagination/build --check-stamp-file C:/Users/Owi/Desktop/Imagination/build/imaginations/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/GitHub/Imagination-Engine -BD:/GitHub/Imagination-Engine/build --check-stamp-file D:/GitHub/Imagination-Engine/build/imaginations/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -292,11 +292,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\GitHub\Imagination-Engine\build\imaginations\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Owi/Desktop/Imagination/imaginations/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/GitHub/Imagination-Engine/imaginations/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owi/Desktop/Imagination -BC:/Users/Owi/Desktop/Imagination/build --check-stamp-file C:/Users/Owi/Desktop/Imagination/build/imaginations/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/GitHub/Imagination-Engine -BD:/GitHub/Imagination-Engine/build --check-stamp-file D:/GitHub/Imagination-Engine/build/imaginations/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -305,11 +305,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\GitHub\Imagination-Engine\build\imaginations\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Owi/Desktop/Imagination/imaginations/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule D:/GitHub/Imagination-Engine/imaginations/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owi/Desktop/Imagination -BC:/Users/Owi/Desktop/Imagination/build --check-stamp-file C:/Users/Owi/Desktop/Imagination/build/imaginations/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/GitHub/Imagination-Engine -BD:/GitHub/Imagination-Engine/build --check-stamp-file D:/GitHub/Imagination-Engine/build/imaginations/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -318,11 +318,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\GitHub\Imagination-Engine\build\imaginations\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Owi/Desktop/Imagination/imaginations/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule D:/GitHub/Imagination-Engine/imaginations/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owi/Desktop/Imagination -BC:/Users/Owi/Desktop/Imagination/build --check-stamp-file C:/Users/Owi/Desktop/Imagination/build/imaginations/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/GitHub/Imagination-Engine -BD:/GitHub/Imagination-Engine/build --check-stamp-file D:/GitHub/Imagination-Engine/build/imaginations/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -331,27 +331,27 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Owi\Desktop\Imagination\build\imaginations\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\GitHub\Imagination-Engine\build\imaginations\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\pbr.cpp" />
-    <ClInclude Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\pbr.h" />
-    <none Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\Shaders\PBRFragmentShader.hlsl">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\imaginations\pbr\pbr.cpp" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\imaginations\pbr\pbr.h" />
+    <none Include="D:\GitHub\Imagination-Engine\imaginations\pbr\Shaders\PBRFragmentShader.hlsl">
     </none>
-    <none Include="C:\Users\Owi\Desktop\Imagination\imaginations\pbr\Shaders\PBRVertexShader.hlsl">
+    <none Include="D:\GitHub\Imagination-Engine\imaginations\pbr\Shaders\PBRVertexShader.hlsl">
     </none>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Owi\Desktop\Imagination\build\ZERO_CHECK.vcxproj">
-      <Project>{18403A29-3630-3BC4-AA7E-E2B2435BBD4D}</Project>
+    <ProjectReference Include="D:\GitHub\Imagination-Engine\build\ZERO_CHECK.vcxproj">
+      <Project>{196DD04E-2BDE-3E63-A81E-28B71DE72372}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\Owi\Desktop\Imagination\build\ImaginaryMathLibrary\ImaginaryMathLibrary.vcxproj">
-      <Project>{83967F90-52F6-3ACD-8694-0AC26A03742B}</Project>
+    <ProjectReference Include="D:\GitHub\Imagination-Engine\build\ImaginaryMathLibrary\ImaginaryMathLibrary.vcxproj">
+      <Project>{6FCA5529-8CD3-35CC-A2B2-B6208FCA25E6}</Project>
       <Name>ImaginaryMathLibrary</Name>
     </ProjectReference>
   </ItemGroup>

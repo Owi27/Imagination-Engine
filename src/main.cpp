@@ -10,10 +10,6 @@ int main()
 	ImgnWindow& win = ImgnWindow::GetInstance();
 	win.Init(800, 600, "Demo");
 
-	VulkanBackend vk;
-	vk.Init();
-
-
 	while (win.ProcessEvents())
 	{
 
