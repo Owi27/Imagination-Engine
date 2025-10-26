@@ -404,6 +404,76 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<Shader>
 	return *this;
 }
 
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions)
+{
+	std::vector<VkVertexInputBindingDescription> inputBindingDescriptions(inputDescriptions.size());
+	std::vector<VkVertexInputAttributeDescription> inputAttributeDescriptions(inputDescriptions.size());
+
+	int i = 0;
+	for (auto inputDescription : inputDescriptions)
+	{
+		VkVertexInputBindingDescription inputBinding
+		{
+			.binding = inputDescription.binding,
+			.stride = inputDescription.stride,
+			.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+		};
+
+		VkVertexInputAttributeDescription inputAttribute
+		{
+			.location = inputDescription.location,
+			.binding = inputDescription.binding,
+			.format = (VkFormat)inputDescription.format,
+			.offset = inputDescription.offset
+		};
+
+		inputBindingDescriptions[i] = inputBinding;
+		inputAttributeDescriptions[i] = inputAttribute;
+	}
+
+	_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)inputBindingDescriptions.size();
+	_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = inputBindingDescriptions.data();
+	_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)inputAttributeDescriptions.size();
+	_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = inputAttributeDescriptions.data();
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetTopology(Topology topology)
+{
+	_pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)topology;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildTessellationState(unsigned patchControlPoints)
+{
+	_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned width, unsigned height)
+{
+	VkViewport viewport
+	{
+		.x = 0,
+		.y = 0,
+		.width = static_cast<float>(width),
+		.height = static_cast<float>(height),
+		.minDepth = 0,
+		.maxDepth = 1
+	};
+
+	VkRect2D scissor
+	{
+		.offset = {0, 0},
+		.extent = {width, height}
+	};
+
+	_pipelineViewportStateCreateInfo.pViewports = &viewport;
+	_pipelineViewportStateCreateInfo.pScissors = &scissor;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizationState(RasterStateInfo rasterStateInfo)
+{
+	_pipelineRasterizationStateCreateInfo.polygonMode = (VkPolygonMode)rasterStateInfo.polygonMode;
+}
+
 VkPipeline GraphicsPipelineBuilder::BuildPipeline()
 {
 	VkPipeline pipeline;

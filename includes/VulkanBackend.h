@@ -34,8 +34,54 @@ protected:
 	std::unique_ptr<VulkanContext> _vk;
 };
 
+enum class PipelineFormat
+{
+	FLOAT = VK_FORMAT_R32_SFLOAT,
+	FLOAT2 = VK_FORMAT_R32G32_SFLOAT,
+	FLOAT3 = VK_FORMAT_R32G32B32_SFLOAT,
+	FLOAT4 = VK_FORMAT_R32G32B32A32_SFLOAT,
+	HFLOAT = VK_FORMAT_R16_SFLOAT,
+	HFLOAT2 = VK_FORMAT_R16G16_SFLOAT,
+	HFLOAT3 = VK_FORMAT_R16G16B16_SFLOAT,
+	HFLOAT4 = VK_FORMAT_R16G16B16A16_SFLOAT,
+	INT = VK_FORMAT_R32_SINT,
+	INT2 = VK_FORMAT_R32G32_SINT,
+	INT3 = VK_FORMAT_R32G32B32_SINT,
+	INT4 = VK_FORMAT_R32G32B32A32_SINT,
+	UINT = VK_FORMAT_R32_UINT,
+	UINT2 = VK_FORMAT_R32G32_UINT,
+	UINT3 = VK_FORMAT_R32G32B32_UINT,
+	UINT4 = VK_FORMAT_R32G32B32A32_UINT,
+	COLOR = VK_FORMAT_R8G8B8A8_UNORM
+};
+
+struct VertexInputDescription
+{
+	unsigned binding;
+	unsigned location;
+	unsigned stride;
+	PipelineFormat format;
+	unsigned offset;
+};
+
 enum class Topology
 {
+	POINT = VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+	LINE_LIST = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+	LINE_STRIP = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
+	TRIANGLE_LIST = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+	TRIANGLE_STRIPVK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
+};
+
+enum class PolygonMode
+{
+	FILL = VK_POLYGON_MODE_FILL,
+	LINE = VK_POLYGON_MODE_LINE
+};
+
+struct RasterStateInfo
+{
+	PolygonMode polygonMode;
 
 };
 
@@ -43,13 +89,17 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 {
 	GraphicsPipelineBuilder(VulkanContext& vk) : PipelineBuilder(vk) 
 	{
-
+		
 	}
 
 	~GraphicsPipelineBuilder() = default;
 
 	GraphicsPipelineBuilder& AddShaders(std::vector<class Shader> shaders);
-	GraphicsPipelineBuilder& BuildInputAssembly();
+	GraphicsPipelineBuilder& AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions);
+	GraphicsPipelineBuilder& BuildTessellationState(unsigned patchControlPoints);
+	GraphicsPipelineBuilder& BuildViewportState(unsigned width, unsigned height);
+	GraphicsPipelineBuilder& SetTopology(Topology topology);
+	GraphicsPipelineBuilder& SetRasterizationState(RasterStateInfo rasterStateInfo);
 
 	VkPipeline BuildPipeline() override;
 
