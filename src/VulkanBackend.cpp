@@ -480,6 +480,70 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned wi
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizationState(RasterStateInfo rasterStateInfo)
 {
 	_pipelineRasterizationStateCreateInfo.polygonMode = (VkPolygonMode)rasterStateInfo.polygonMode;
+	_pipelineRasterizationStateCreateInfo.cullMode = (VkCullModeFlags)rasterStateInfo.cullMode;
+	_pipelineRasterizationStateCreateInfo.frontFace = (VkFrontFace)rasterStateInfo.frontFace;
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDepthTest()
+{
+	_pipelineDepthStencilStateCreateInfo.depthTestEnable = true;
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDepthWrite()
+{
+	_pipelineDepthStencilStateCreateInfo.depthWriteEnable = true;
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddStencilTest()
+{
+	_pipelineDepthStencilStateCreateInfo.stencilTestEnable = true;
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPipelineAttachments(std::vector<PipelineAttachment> pipelineAttachments)
+{
+	std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates(pipelineAttachments.size());
+	std::vector<VkFormat> attachmentFormats(pipelineAttachments.size());
+
+	int i = 0;
+	for (auto pipelineAttachment : pipelineAttachments)
+	{
+		VkPipelineColorBlendAttachmentState attachmentState
+		{
+			.blendEnable = pipelineAttachment.blend,
+			.srcColorBlendFactor = (VkBlendFactor)pipelineAttachment.colorSource,
+			.dstColorBlendFactor = (VkBlendFactor)pipelineAttachment.colorDestination,
+			.colorBlendOp = (VkBlendOp)pipelineAttachment.colorOperation,
+			.srcAlphaBlendFactor = (VkBlendFactor)pipelineAttachment.alphaSource,
+			.dstAlphaBlendFactor = (VkBlendFactor)pipelineAttachment.alphaDestination,
+			.alphaBlendOp = (VkBlendOp)pipelineAttachment.alphaOperation,
+			.colorWriteMask = pipelineAttachment.writeMask,
+		};
+
+		blendAttachmentStates.emplace_back(attachmentState);
+		attachmentFormats.emplace_back(pipelineAttachment.format);
+	}
+
+	_pipelineColorBlendStateCreateInfo.attachmentCount = (unsigned)blendAttachmentStates.size();
+	_pipelineColorBlendStateCreateInfo.pAttachments = blendAttachmentStates.data();
+
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRenderingInfo(RenderingInfo renderingInfo)
+{
+	_pipelineRenderingCreateInfo.colorAttachmentCount = (unsigned)renderingInfo.colorAttachmentFormats.size();
+	_pipelineRenderingCreateInfo.pColorAttachmentFormats = (VkFormat*)renderingInfo.colorAttachmentFormats.data();
+	_pipelineRenderingCreateInfo.depthAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
+	_pipelineRenderingCreateInfo.stencilAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
 
 	return *this;
 }
@@ -488,19 +552,10 @@ VkPipeline GraphicsPipelineBuilder::BuildPipeline()
 {
 	VkPipeline pipeline;
 
-	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-		//.colorAttachmentCount = colorAttachmentCount,
-		//.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
-		//.depthAttachmentFormat = pipelineDescription.depthFormat,
-		//.stencilAttachmentFormat = pipelineDescription.depthFormat
-	};
-
-	VkGraphicsPipelineCreateInfo pipelineCreateInfo
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		.pNext = &pipelineRenderingCreateInfo,
+		.pNext = &_pipelineRenderingCreateInfo,
 		//.flags = ,
 		.stageCount = (unsigned)_pipelineShaderStageCreateInfos.size(),
 		.pStages = _pipelineShaderStageCreateInfos.data(),
@@ -520,7 +575,7 @@ VkPipeline GraphicsPipelineBuilder::BuildPipeline()
 		//.basePipelineIndex = ,
 	};
 
-	//vkCreateGraphicsPipelines(*_vk. , nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);
+	vkCreateGraphicsPipelines(_vk->_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
 
 	return pipeline;
 }
