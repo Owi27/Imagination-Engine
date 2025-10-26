@@ -82,14 +82,22 @@ enum class PolygonMode
 struct RasterStateInfo
 {
 	PolygonMode polygonMode;
-
 };
 
 struct GraphicsPipelineBuilder : PipelineBuilder
 {
 	GraphicsPipelineBuilder(VulkanContext& vk) : PipelineBuilder(vk) 
 	{
-		
+		VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+			//.pNext = ,
+			//.flags = ,
+			.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+			.primitiveRestartEnable = false
+		};
+
+		_pipelineInputAssemblyStateCreateInfo = pipelineInputAssemblyStateCreateInfo;
 	}
 
 	~GraphicsPipelineBuilder() = default;
