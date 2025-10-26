@@ -435,16 +435,22 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexBindingDescriptions(s
 	_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = inputBindingDescriptions.data();
 	_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)inputAttributeDescriptions.size();
 	_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = inputAttributeDescriptions.data();
+
+	return *this;
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetTopology(Topology topology)
 {
 	_pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)topology;
+
+	return *this;
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildTessellationState(unsigned patchControlPoints)
 {
 	_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
+
+	return *this;
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned width, unsigned height)
@@ -467,11 +473,15 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned wi
 
 	_pipelineViewportStateCreateInfo.pViewports = &viewport;
 	_pipelineViewportStateCreateInfo.pScissors = &scissor;
+
+	return *this;
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizationState(RasterStateInfo rasterStateInfo)
 {
 	_pipelineRasterizationStateCreateInfo.polygonMode = (VkPolygonMode)rasterStateInfo.polygonMode;
+
+	return *this;
 }
 
 VkPipeline GraphicsPipelineBuilder::BuildPipeline()
@@ -481,10 +491,10 @@ VkPipeline GraphicsPipelineBuilder::BuildPipeline()
 	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
-		.colorAttachmentCount = colorAttachmentCount,
-		.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
-		.depthAttachmentFormat = pipelineDescription.depthFormat,
-		.stencilAttachmentFormat = pipelineDescription.depthFormat
+		//.colorAttachmentCount = colorAttachmentCount,
+		//.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
+		//.depthAttachmentFormat = pipelineDescription.depthFormat,
+		//.stencilAttachmentFormat = pipelineDescription.depthFormat
 	};
 
 	VkGraphicsPipelineCreateInfo pipelineCreateInfo
