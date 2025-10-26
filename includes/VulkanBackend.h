@@ -355,7 +355,8 @@ class VulkanBackend
 
 	std::vector<const char*> _instanceLayers =
 	{
-#ifdef DEBUG
+#ifdef NDEBUG
+#else
 		"VK_LAYER_KHRONOS_validation"
 #endif
 	};
