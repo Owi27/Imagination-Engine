@@ -18,6 +18,55 @@ struct VulkanContext
 	VkDescriptorPool _descriptorPool = nullptr;
 };
 
+struct PipelineBuilder
+{
+	PipelineBuilder(VulkanContext& vk)
+	{
+		_vk = std::make_unique<VulkanContext>(vk);
+	}
+
+	~PipelineBuilder() = default;
+
+
+	virtual VkPipeline BuildPipeline() = 0;
+
+protected:
+	std::unique_ptr<VulkanContext> _vk;
+};
+
+enum class Topology
+{
+
+};
+
+struct GraphicsPipelineBuilder : PipelineBuilder
+{
+	GraphicsPipelineBuilder(VulkanContext& vk) : PipelineBuilder(vk) 
+	{
+
+	}
+
+	~GraphicsPipelineBuilder() = default;
+
+	GraphicsPipelineBuilder& AddShaders(std::vector<class Shader> shaders);
+	GraphicsPipelineBuilder& BuildInputAssembly();
+
+	VkPipeline BuildPipeline() override;
+
+private:
+	VkPipelineLayout _pipelineLayout;
+	std::vector<VkPipelineShaderStageCreateInfo> _pipelineShaderStageCreateInfos;
+	VkPipelineVertexInputStateCreateInfo _pipelineVertexInputStateCreateInfo;
+	VkPipelineInputAssemblyStateCreateInfo _pipelineInputAssemblyStateCreateInfo;
+	VkPipelineTessellationStateCreateInfo _pipelineTessellationStateCreateInfo;
+	VkPipelineViewportStateCreateInfo _pipelineViewportStateCreateInfo;
+	VkPipelineRasterizationStateCreateInfo _pipelineRasterizationStateCreateInfo;
+	VkPipelineMultisampleStateCreateInfo _pipelineMultisampleStateCreateInfo;
+	VkPipelineDepthStencilStateCreateInfo _pipelineDepthStencilStateCreateInfo;
+	VkPipelineColorBlendStateCreateInfo _pipelineColorBlendStateCreateInfo;
+	VkPipelineDynamicStateCreateInfo _pipelineDynamicStateCreateInfo;
+};
+
 class VulkanBackend
 {
 	struct QueueFamilyIndices
@@ -82,7 +131,7 @@ class VulkanBackend
 	RETURN(bool) IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
 	RETURN(QueueFamilyIndices) FindQueueFamilies(VkPhysicalDevice physicalDevice);
 
-	
+
 
 	RETURN(void) CreateDevice();
 	RETURN(void) CreateSurface();

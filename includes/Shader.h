@@ -20,7 +20,7 @@ class Shader
 	std::string _entryPointName = "main", _shaderString, _spvPath, _shader;
 	unsigned long long _shaderSize;
 	//std::string _shaderString, _spvPath, _newShader;
-	char* data;
+	//char* data;
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -46,7 +46,7 @@ public:
 	~Shader()
 	{
 		vkDestroyShaderModule(_device, _shaderModule, nullptr);
-		delete[] data;
+		//delete[] data;
 	}
 
 	VkShaderModule GetShaderModule() const { return _shaderModule; }

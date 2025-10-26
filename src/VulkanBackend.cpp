@@ -1,11 +1,11 @@
 #include "pch.h"
+#include "Shader.h"
 #include "VulkanBackend.h"
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
 #include <set>
 #include <limits>
 #include <algorithm>
-
 
 RETURN(bool, const char*) VulkanBackend::CheckCompatibility(const char** instanceExtensions, const char** deviceExtensions)
 {
@@ -388,4 +388,59 @@ std::expected<bool, const char*> VulkanBackend::Init(unsigned layerCount, const 
 	ATTEMPT(CreateGraphicsPipeline());
 
 	return true;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<Shader> shaders)
+{
+	_pipelineShaderStageCreateInfos.resize(shaders.size());
+
+	int i = 0;
+	for (auto& shader : shaders)
+	{
+		_pipelineShaderStageCreateInfos[i] = *shader.GetPipelineShaderStageCreateInfo();
+		i++;
+	}
+
+	return *this;
+}
+
+VkPipeline GraphicsPipelineBuilder::BuildPipeline()
+{
+	VkPipeline pipeline;
+
+	VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+		.colorAttachmentCount = colorAttachmentCount,
+		.pColorAttachmentFormats = pipelineDescription.colorAttachmentFormats.data(),
+		.depthAttachmentFormat = pipelineDescription.depthFormat,
+		.stencilAttachmentFormat = pipelineDescription.depthFormat
+	};
+
+	VkGraphicsPipelineCreateInfo pipelineCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.pNext = &pipelineRenderingCreateInfo,
+		//.flags = ,
+		.stageCount = (unsigned)_pipelineShaderStageCreateInfos.size(),
+		.pStages = _pipelineShaderStageCreateInfos.data(),
+		.pVertexInputState = &_pipelineVertexInputStateCreateInfo,
+		.pInputAssemblyState = &_pipelineInputAssemblyStateCreateInfo,
+		.pTessellationState = &_pipelineTessellationStateCreateInfo,
+		.pViewportState = &_pipelineViewportStateCreateInfo,
+		.pRasterizationState = &_pipelineRasterizationStateCreateInfo,
+		.pMultisampleState = &_pipelineMultisampleStateCreateInfo,
+		.pDepthStencilState = &_pipelineDepthStencilStateCreateInfo,
+		.pColorBlendState = &_pipelineColorBlendStateCreateInfo,
+		.pDynamicState = &_pipelineDynamicStateCreateInfo,
+		.layout = _pipelineLayout,
+		//.renderPass = ,
+		//.subpass = ,
+		//.basePipelineHandle = ,
+		//.basePipelineIndex = ,
+	};
+
+	//vkCreateGraphicsPipelines(*_vk. , nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &outPipeline);
+
+	return pipeline;
 }
