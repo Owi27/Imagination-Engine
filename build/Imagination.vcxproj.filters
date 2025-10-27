@@ -7,7 +7,19 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\DX12Backend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\FrameGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\HotReloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\RenderContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\ThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\VulkanBackend.cpp">
@@ -16,16 +28,18 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Shader.cpp" />
-    <ClCompile Include="..\src\ThreadPool.cpp" />
-    <ClCompile Include="..\src\HotReloader.cpp" />
-    <ClCompile Include="..\src\FrameGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\FrameGraph.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Gateware.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\HotReloader.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\IWindow.h">
@@ -35,6 +49,12 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\RenderContext.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Shader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\ThreadPool.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\VulkanBackend.h">
@@ -55,10 +75,6 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\Shader.h" />
-    <ClInclude Include="..\includes\ThreadPool.h" />
-    <ClInclude Include="..\includes\HotReloader.h" />
-    <ClInclude Include="..\includes\FrameGraph.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />
@@ -73,8 +89,5 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{303D06DA-9390-3BB0-AD1D-65224C4F6004}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

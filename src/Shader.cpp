@@ -19,6 +19,25 @@ RETURN(std::string) Shader::ShaderAsString(const char* shaderFilePath)
 	return out;
 }
 
+RETURN(void) Shader::ReadSPVFile(const std::string& filename)
+{
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open()) {
+		throw std::runtime_error("failed to open file!");
+	}
+
+	_spvSize = (size_t)file.tellg();
+	_spv.resize(_spvSize);
+
+	file.seekg(0);
+	file.read(_spv.data(), _spvSize);
+
+	file.close();
+
+	return {};
+}
+
 //RETURN(void) Shader::WritetToSPVFile()
 //{
 //	std::ifstream spv(_spvPath, std::ios::binary | std::ios::ate);
@@ -71,7 +90,7 @@ RETURN(void) Shader::Compile(const std::string& filename, ShaderType shaderType)
 	std::wstring hlsl, out;
 
 	//convert shader to dxc buffer
-	full = "Shaders/" + filename + ".hlsl";
+	full = "../Shaders/" + filename + ".hlsl";
 	_shaderString = *ShaderAsString(full.c_str());
 	sourceBuffer.Ptr = _shaderString.c_str();
 	sourceBuffer.Size = _shaderString.size();
@@ -123,15 +142,17 @@ RETURN(void) Shader::Compile(const std::string& filename, ShaderType shaderType)
 	if (SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr)))
 	{
 		// Write the compiled shader to file
-		std::ofstream outFile(L"Shaders/SPV/" + out, std::ios::binary);
+		std::ofstream outFile(L"../Shaders/SPV/" + out, std::ios::binary);
 		outFile.write(static_cast<const char*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize());
 		outFile.close();
 
-		//_spvPath = "Shaders/SPV/" + filename + ".spv";
+		_spvPath = "../Shaders/SPV/" + filename + ".spv";
 		//GvkHelper::create_shader(_device, spvPath.c_str(), "main", _shaderStageFlagBits, &_shaderModule, &_pssci);
-
-		ATTEMPT(CreateShaderModule());
+		Attempt(ReadSPVFile(_spvPath));
+		Attempt(CreateShaderModule());
 	}
+
+	return {};
 }
 
 RETURN(bool) Shader::Reload()
@@ -143,11 +164,11 @@ RETURN(bool) Shader::Reload()
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 		//.pNext = ,
 		//.flags = ,
-		.codeSize = _shaderSize,
-		.pCode = (const unsigned*)_shaderString.c_str(),
+		.codeSize = _spvSize,
+		.pCode = (const unsigned*)_spv.c_str(),
 	};
 
-	vkDestroyShaderModule(_device, _shaderModule, nullptr);
+	//vkDestroyShaderModule(_device, _shaderModule, nullptr);
 	if (vkCreateShaderModule(_device, &shaderModuleCreateInfo, nullptr, &_shaderModule)) return std::unexpected("Shader.cpp | CreateShaderModule() | vkCreateShaderModule");
 }
 
@@ -159,11 +180,13 @@ RETURN(void) Shader::CreateShaderModule()
 		.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 		//.pNext = ,
 		//.flags = ,
-		.codeSize = _shaderSize,
-		.pCode = (const unsigned*)_shaderString.c_str(),
+		.codeSize = _spvSize,
+		.pCode = (const unsigned*)_spv.c_str(),
 	};
 
 	if (vkCreateShaderModule(_device, &shaderModuleCreateInfo, nullptr, &_shaderModule)) return std::unexpected("Shader.cpp | CreateShaderModule() | vkCreateShaderModule");
+
+	return {};
 }
 
 RETURN(VkPipelineShaderStageCreateInfo) Shader::GetPipelineShaderStageCreateInfo() const

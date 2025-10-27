@@ -5,18 +5,19 @@
 #include <Macros.h>
 #include <optional>
 #include <IWindow.h>
+#include "Shader.h"
 
 struct VulkanContext
 {
-	VkInstance _instance = nullptr;
-	VkPhysicalDevice _physicalDevice = nullptr;
-	VkDevice _device = nullptr;
-	VkQueue _graphicsQueue = nullptr;
-	unsigned _graphicsQueueFamily = 0;
-	VkQueue _presentQueue = nullptr;
-	unsigned _presentQueueFamily = 0;
-	VkPipelineCache _pipelineCache = nullptr;
-	VkDescriptorPool _descriptorPool = nullptr;
+	VkInstance instance = nullptr;
+	VkPhysicalDevice physicalDevice = nullptr;
+	VkDevice device = nullptr;
+	VkQueue graphicsQueue = nullptr;
+	unsigned graphicsQueueFamily = 0;
+	VkQueue presentQueue = nullptr;
+	unsigned presentQueueFamily = 0;
+	VkPipelineCache pipelineCache = nullptr;
+	VkDescriptorPool descriptorPool = nullptr;
 };
 
 struct PipelineBuilder
@@ -29,7 +30,7 @@ struct PipelineBuilder
 	~PipelineBuilder() = default;
 
 
-	virtual VkPipeline BuildPipeline() = 0;
+	virtual RETURN(VkPipeline) BuildPipeline() = 0;
 
 protected:
 	std::unique_ptr<VulkanContext> _vk;
@@ -54,6 +55,7 @@ enum class PipelineFormat
 	UINT3 = VK_FORMAT_R32G32B32_UINT,
 	UINT4 = VK_FORMAT_R32G32B32A32_UINT,
 	COLOR = VK_FORMAT_R8G8B8A8_UNORM,
+	SWAPCHAIN = VK_FORMAT_B8G8R8A8_SRGB,
 	UNDEFINED = VK_FORMAT_UNDEFINED
 };
 
@@ -105,6 +107,8 @@ enum class BlendFactor
 {
 	FULL = VK_BLEND_FACTOR_ONE,
 	NONE = VK_BLEND_FACTOR_ZERO,
+	SOURCE_ALPHA = VK_BLEND_FACTOR_SRC_ALPHA,
+	NEG_SOURCE_ALPHA = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA
 };
 
 enum class BlendOperation
@@ -125,12 +129,12 @@ enum class ColorComponent
 
 struct PipelineAttachment
 {
-	bool blend = false;
+	bool blend = true;
 
-	BlendFactor colorSource, colorDestination;
+	BlendFactor colorSource = BlendFactor::SOURCE_ALPHA, colorDestination = BlendFactor::NEG_SOURCE_ALPHA;
 	BlendOperation colorOperation = BlendOperation::ADD;
 
-	BlendFactor alphaSource, alphaDestination;
+	BlendFactor alphaSource = BlendFactor::FULL, alphaDestination = BlendFactor::NONE;
 	BlendOperation alphaOperation = BlendOperation::ADD;
 
 	VkColorComponentFlags writeMask = (VkColorComponentFlags)ColorComponent::R | (VkColorComponentFlags)ColorComponent::G | (VkColorComponentFlags)ColorComponent::B | (VkColorComponentFlags)ColorComponent::A;
@@ -146,6 +150,17 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 {
 	GraphicsPipelineBuilder(VulkanContext& vk) : PipelineBuilder(vk)
 	{
+		VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+			//.pNext = ,
+			//.flags = ,
+			.vertexBindingDescriptionCount = 0,
+			.pVertexBindingDescriptions = nullptr,
+			.vertexAttributeDescriptionCount = 0,
+			.pVertexAttributeDescriptions = nullptr
+		};
+
 		VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
@@ -163,7 +178,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			.patchControlPoints = 0,
 		};
 
-		VkViewport viewport
+		_viewport =
 		{
 			.x = 0,
 			.y = 0,
@@ -173,7 +188,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			.maxDepth = 1,
 		};
 
-		VkRect2D scissor
+		_scissor =
 		{
 			.offset
 			{
@@ -193,9 +208,9 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			//.pNext = ,
 			//.flags = ,
 			.viewportCount = 1,
-			.pViewports = &viewport,
+			.pViewports = &_viewport,
 			.scissorCount = 1,
-			.pScissors = &scissor,
+			.pScissors = &_scissor,
 		};
 
 		VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo
@@ -209,8 +224,8 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			.depthClampEnable = false,
 			.rasterizerDiscardEnable = false,
 			.polygonMode = VK_POLYGON_MODE_FILL,
-			.cullMode = VK_CULL_MODE_FRONT_BIT,
-			.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+			.cullMode = VK_CULL_MODE_BACK_BIT,
+			.frontFace = VK_FRONT_FACE_CLOCKWISE,
 			.depthBiasEnable = false,
 			.depthBiasConstantFactor = 0.0f,
 			.depthBiasClamp = 0.0f,
@@ -262,7 +277,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			},
 		};
 
-		VkDynamicState dynamicState[2] =
+		_dynamicStates =
 		{
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR
@@ -273,8 +288,8 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
 			//.pNext = ,
 			//.flags = ,
-			.dynamicStateCount = 2,
-			.pDynamicStates = dynamicState
+			.dynamicStateCount = (unsigned)_dynamicStates.size(),
+			.pDynamicStates = _dynamicStates.data()
 		};
 
 		VkPipelineRenderingCreateInfoKHR pipelineRenderingCreateInfo
@@ -288,6 +303,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			.stencilAttachmentFormat = VK_FORMAT_UNDEFINED,
 		};
 
+		_pipelineVertexInputStateCreateInfo = pipelineVertexInputStateCreateInfo;
 		_pipelineInputAssemblyStateCreateInfo = pipelineInputAssemblyStateCreateInfo;
 		_pipelineTessellationStateCreateInfo = pipelineTessellationStateCreateInfo;
 		_pipelineViewportStateCreateInfo = pipelineViewportStateCreateInfo;
@@ -301,7 +317,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 
 	~GraphicsPipelineBuilder() = default;
 
-	GraphicsPipelineBuilder& AddShaders(std::vector<class Shader> shaders);
+	GraphicsPipelineBuilder& AddShaders(std::vector<std::pair<std::string, ShaderType>> shader);
 	GraphicsPipelineBuilder& AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions);
 	GraphicsPipelineBuilder& BuildTessellationState(unsigned patchControlPoints);
 	GraphicsPipelineBuilder& BuildViewportState(unsigned width, unsigned height);
@@ -311,12 +327,25 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 	GraphicsPipelineBuilder& AddDepthWrite();
 	GraphicsPipelineBuilder& AddStencilTest();
 	GraphicsPipelineBuilder& AddPipelineAttachments(std::vector<PipelineAttachment> pipelineAttachments);
+	GraphicsPipelineBuilder& AddDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+	GraphicsPipelineBuilder& AddPushConstantRange(VkPushConstantRange pushConstantRange);
 	GraphicsPipelineBuilder& SetRenderingInfo(RenderingInfo renderingInfo);
 
-	VkPipeline BuildPipeline() override;
+	RETURN(VkPipeline) BuildPipeline() override;
 
 private:
+	VkViewport _viewport;
+	VkRect2D   _scissor;
 	VkPipelineLayout _pipelineLayout;
+	std::vector<Shader> _shaders;
+	std::vector<VkDynamicState> _dynamicStates;          // dynamic states
+	std::vector<VkFormat> _colorAttachmentFormats;   // real VkFormat storage
+	std::vector<VkVertexInputBindingDescription> _inputBindingDescriptions;
+	std::vector<VkVertexInputAttributeDescription> _inputAttributeDescriptions;
+	std::vector<VkPipelineColorBlendAttachmentState> _blendAttachments;
+	std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
+	std::vector<VkPushConstantRange> _pipelinePushConstantRanges;
+	std::vector<VkDescriptorSetLayout> _pipelineDescriptorSetLayouts;
 	std::vector<VkPipelineShaderStageCreateInfo> _pipelineShaderStageCreateInfos;
 	VkPipelineVertexInputStateCreateInfo _pipelineVertexInputStateCreateInfo;
 	VkPipelineInputAssemblyStateCreateInfo _pipelineInputAssemblyStateCreateInfo;
@@ -347,6 +376,7 @@ class VulkanBackend
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
+
 #ifdef NDEBUG
 	const bool _enableValidationLayers = false;
 #else
@@ -371,14 +401,16 @@ class VulkanBackend
 	{
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-		VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME
+		VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
+		"VK_KHR_pipeline_executable_properties"
 	};
 
 	//vulkan
-	VkInstance _instance = nullptr;
-	VkDevice _device = nullptr;
-	VkPhysicalDevice _physicalDevice = nullptr;
-	VkQueue _graphicsQueue, _presentQueue;
+	VulkanContext _vk;
+	//VkInstance _instance = nullptr;
+	//VkDevice _device = nullptr;
+	//VkPhysicalDevice _physicalDevice = nullptr;
+	//VkQueue _graphicsQueue, _presentQueue;
 	VkSurfaceKHR _surface;
 	VkSwapchainKHR _swapchain;
 	std::vector<VkImage> _swapchainImages;
@@ -397,11 +429,12 @@ class VulkanBackend
 
 
 
+	RETURN(void) CreateInstance(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions);
 	RETURN(void) CreateDevice();
 	RETURN(void) CreateSurface();
 	RETURN(void) CreateSwapchain();
 	RETURN(void) CreateSwapchainImageViews();
-	RETURN(void) CreateGraphicsPipeline();
+	void CreateGraphicsPipeline();
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);
@@ -409,7 +442,6 @@ class VulkanBackend
 	RETURN(VkPresentModeKHR) ChooseSwapchainPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	RETURN(VkExtent2D) ChooseSwapchainExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
 
-	RETURN(void) CreateInstance(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions);
 
 public:
 	VulkanBackend()
@@ -420,13 +452,12 @@ public:
 	{
 		for (auto imageView : _swapchainImageViews)
 		{
-			vkDestroyImageView(_device, imageView, nullptr);
+			vkDestroyImageView(_vk.device, imageView, nullptr);
 		}
 
-		vkDestroySwapchainKHR(_device, _swapchain, nullptr);
-		vkDestroySurfaceKHR(_instance, _surface, nullptr);
-		vkDestroyInstance(_instance, nullptr);
-
+		vkDestroySwapchainKHR(_vk.device, _swapchain, nullptr);
+		vkDestroySurfaceKHR(_vk.instance, _surface, nullptr);
+		vkDestroyInstance(_vk.instance, nullptr);
 	}
 
 	RETURN(bool) Init(unsigned layerCount = 0, const char** layers = nullptr, unsigned extensionCount = 0, const char** extensions = nullptr, unsigned dExtensionCount = 0, const char** dExtensions = nullptr);

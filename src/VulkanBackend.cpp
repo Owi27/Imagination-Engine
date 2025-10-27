@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "Shader.h"
 #include "VulkanBackend.h"
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
 #include <set>
 #include <limits>
 #include <algorithm>
+#include <cassert>
 
 RETURN(bool, const char*) VulkanBackend::CheckCompatibility(const char** instanceExtensions, const char** deviceExtensions)
 {
@@ -48,24 +48,25 @@ RETURN(bool, const char*) VulkanBackend::CheckLayerSupport()
 RETURN(void) VulkanBackend::PickPhysicalDevice()
 {
 	unsigned deviceCount = 0;
-	vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
+	vkEnumeratePhysicalDevices(_vk.instance, &deviceCount, nullptr);
 
 	if (deviceCount == 0) return std::unexpected("VulkanBackend.cpp | PickPhysicalDevice() | physical device not found");
 
 	std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
-	vkEnumeratePhysicalDevices(_instance, &deviceCount, physicalDevices.data());
+	vkEnumeratePhysicalDevices(_vk.instance, &deviceCount, physicalDevices.data());
 
 	for (const auto& device : physicalDevices)
 	{
 		if (*IsPhysicalDeviceSuitable(device))
 		{
-			_physicalDevice = device;
+			_vk.physicalDevice = device;
 			break;
 		}
 	}
 
-	if (_physicalDevice == nullptr) return std::unexpected("VulkanBackend.cpp | PickPhysicalDevice() | no suitable physical device");
+	if (_vk.physicalDevice == nullptr) return std::unexpected("VulkanBackend.cpp | PickPhysicalDevice() | no suitable physical device");
 
+	return {};
 }
 
 RETURN(bool) VulkanBackend::IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice)
@@ -113,7 +114,7 @@ RETURN(VulkanBackend::QueueFamilyIndices) VulkanBackend::FindQueueFamilies(VkPhy
 
 RETURN(void) VulkanBackend::CreateDevice()
 {
-	QueueFamilyIndices indices = *FindQueueFamilies(_physicalDevice);
+	QueueFamilyIndices indices = *FindQueueFamilies(_vk.physicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<unsigned> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -135,10 +136,17 @@ RETURN(void) VulkanBackend::CreateDevice()
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
 
+	VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering
+	{
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+		.pNext = nullptr,
+		.dynamicRendering = true
+	};
+
 	VkDeviceCreateInfo createInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		//.pNext = ,
+		.pNext = &dynamicRendering,
 		//.flags = ,
 		.queueCreateInfoCount = (unsigned)queueCreateInfos.size(),
 		.pQueueCreateInfos = queueCreateInfos.data(),
@@ -149,11 +157,12 @@ RETURN(void) VulkanBackend::CreateDevice()
 		.pEnabledFeatures = &deviceFeatures,
 	};
 
-	if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device)) return std::unexpected("VulkanBackend.cpp | CreateDevice() | vkCreateDevice");
+	if (vkCreateDevice(_vk.physicalDevice, &createInfo, nullptr, &_vk.device)) return std::unexpected("VulkanBackend.cpp | CreateDevice() | vkCreateDevice");
 
-	vkGetDeviceQueue(_device, indices.graphicsFamily.value(), 0, &_graphicsQueue);
-	vkGetDeviceQueue(_device, indices.presentFamily.value(), 0, &_presentQueue);
+	vkGetDeviceQueue(_vk.device, indices.graphicsFamily.value(), 0, &_vk.graphicsQueue);
+	vkGetDeviceQueue(_vk.device, indices.presentFamily.value(), 0, &_vk.presentQueue);
 
+	return {};
 }
 
 RETURN(void) VulkanBackend::CreateSurface()
@@ -167,12 +176,14 @@ RETURN(void) VulkanBackend::CreateSurface()
 		.hwnd = (HWND)ImgnWindow::GetInstance().GetWindowHandle(),
 	};
 
-	if (vkCreateWin32SurfaceKHR(_instance, &createInfo, nullptr, &_surface)) return std::unexpected("VulkanBackend.cpp | CreateSurface() | vkCreateWin32SurfaceKHR");
+	if (vkCreateWin32SurfaceKHR(_vk.instance, &createInfo, nullptr, &_surface)) return std::unexpected("VulkanBackend.cpp | CreateSurface() | vkCreateWin32SurfaceKHR");
+
+	return {};
 }
 
 RETURN(void) VulkanBackend::CreateSwapchain()
 {
-	SwapchainSupportDetails swapchainSupport = *QuerySwapchainSupport(_physicalDevice);
+	SwapchainSupportDetails swapchainSupport = *QuerySwapchainSupport(_vk.physicalDevice);
 
 	VkSurfaceFormatKHR surfaceFormat = *ChooseSwapchainSurfaceFormat(swapchainSupport.surfaceFormats);
 	VkPresentModeKHR presentMode = *ChooseSwapchainPresentMode(swapchainSupport.presentModes);
@@ -182,7 +193,7 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 
 	if (swapchainSupport.surfaceCapabilities.maxImageCount > 0 && imageCount > swapchainSupport.surfaceCapabilities.maxImageCount)imageCount = swapchainSupport.surfaceCapabilities.maxImageCount;
 
-	QueueFamilyIndices indices = *FindQueueFamilies(_physicalDevice);
+	QueueFamilyIndices indices = *FindQueueFamilies(_vk.physicalDevice);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	VkSwapchainCreateInfoKHR createInfo
@@ -207,14 +218,16 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 		.oldSwapchain = nullptr,
 	};
 
-	if (vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapchain)) return std::unexpected("VulkanBackend.cpp | CreateSwapchain() | vkCreateSwapchainKHR");
+	if (vkCreateSwapchainKHR(_vk.device, &createInfo, nullptr, &_swapchain)) return std::unexpected("VulkanBackend.cpp | CreateSwapchain() | vkCreateSwapchainKHR");
 
-	vkGetSwapchainImagesKHR(_device, _swapchain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &imageCount, nullptr);
 	_swapchainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(_device, _swapchain, &imageCount, _swapchainImages.data());
+	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &imageCount, _swapchainImages.data());
 
 	_swapchainImageFormat = surfaceFormat.format;
 	_swapchainExtent = extent;
+
+	return {};
 }
 
 RETURN(void) VulkanBackend::CreateSwapchainImageViews()
@@ -248,13 +261,54 @@ RETURN(void) VulkanBackend::CreateSwapchainImageViews()
 			}
 		};
 
-		if (vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
+		if (vkCreateImageView(_vk.device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
 	}
 }
 
-RETURN(void) VulkanBackend::CreateGraphicsPipeline()
+void VulkanBackend::CreateGraphicsPipeline()
 {
-	return RETURN(void)();
+	GraphicsPipelineBuilder pipelineBuilder(_vk);
+
+	std::vector<std::pair<std::string, ShaderType>> shaders
+	{
+		{ "Pixel Shader", ShaderType::FRAGMENT },
+		{ "VertexShader", ShaderType::VERTEX }
+	};
+
+	std::vector<VertexInputDescription> vertexInputDescriptions
+	{
+		VertexInputDescription
+		{
+			.binding = 0,
+			.location = 0,
+			.stride = sizeof(float) * 3,
+			.format = PipelineFormat::FLOAT3,
+			.offset = 0,
+		},
+		VertexInputDescription
+		{
+			.binding = 1,
+			.location = 1,
+			.stride = sizeof(float) * 4,
+			.format = PipelineFormat::COLOR,
+			.offset = 12,
+		},
+	};
+
+	std::vector<PipelineAttachment> pipelineAttachments
+	{
+		PipelineAttachment{}
+	};
+
+	RenderingInfo renderInfo
+	{
+		.colorAttachmentFormats
+		{
+			(PipelineFormat)_swapchainImageFormat
+		}
+	};
+
+	Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).BuildPipeline());
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
@@ -342,7 +396,7 @@ RETURN(VkExtent2D) VulkanBackend::ChooseSwapchainExtent(const VkSurfaceCapabilit
 	}
 }
 
-std::expected<void, const char*> VulkanBackend::CreateInstance(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions)
+RETURN(void) VulkanBackend::CreateInstance(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions)
 {
 	if (_enableValidationLayers && !*CheckLayerSupport()) return std::unexpected("VulkanBackend.cpp | CreateInstance() | instance layers requested, but not available");
 
@@ -366,10 +420,12 @@ std::expected<void, const char*> VulkanBackend::CreateInstance(unsigned layerCou
 		.ppEnabledExtensionNames = _instanceExtensions.data()
 	};
 
-	if (vkCreateInstance(&instanceCreateInfo, nullptr, &_instance)) return std::unexpected("VulkanBackend.cpp | CreateInstance() | vkCreateInstance");
+	if (vkCreateInstance(&instanceCreateInfo, nullptr, &_vk.instance)) return std::unexpected("VulkanBackend.cpp | CreateInstance() | vkCreateInstance");
+
+	return {};
 }
 
-std::expected<bool, const char*> VulkanBackend::Init(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions, unsigned dExtensionCount, const char** dExtensions)
+RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions, unsigned dExtensionCount, const char** dExtensions)
 {
 	_instanceLayers.resize(_instanceLayers.size() + layerCount);
 	for (size_t i = _instanceLayers.size() - layerCount; i < layerCount; i++) _instanceLayers[i] = layers[i];
@@ -380,24 +436,28 @@ std::expected<bool, const char*> VulkanBackend::Init(unsigned layerCount, const 
 	_deviceExtensions.resize(_deviceExtensions.size() + dExtensionCount);
 	for (size_t i = _deviceExtensions.size() - dExtensionCount; i < dExtensionCount; i++) _deviceExtensions[i] = dExtensions[i];
 
-	ATTEMPT(CreateInstance(_instanceLayers.size(), _instanceLayers.data(), _instanceExtensions.size(), _instanceExtensions.data()));
-	ATTEMPT(CreateSurface());
-	ATTEMPT(PickPhysicalDevice());
-	ATTEMPT(CreateDevice());
-	ATTEMPT(CreateSwapchain());
-	ATTEMPT(CreateGraphicsPipeline());
+	std::filesystem::create_directories("../Shaders/SPV");
+
+	Attempt(CreateInstance(_instanceLayers.size(), _instanceLayers.data(), _instanceExtensions.size(), _instanceExtensions.data()));
+	Attempt(CreateSurface());
+	Attempt(PickPhysicalDevice());
+	Attempt(CreateDevice());
+	Attempt(CreateSwapchain());
+	CreateGraphicsPipeline();
 
 	return true;
 }
 
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<Shader> shaders)
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<std::pair<std::string, ShaderType>> shader)
 {
-	_pipelineShaderStageCreateInfos.resize(shaders.size());
+	_shaders.reserve(shader.size());
+	_pipelineShaderStageCreateInfos.resize(shader.size());
 
 	int i = 0;
-	for (auto& shader : shaders)
+	for (auto& s : shader)
 	{
-		_pipelineShaderStageCreateInfos[i] = *shader.GetPipelineShaderStageCreateInfo();
+		_shaders.emplace_back(_vk->device, s.first, s.second);
+		_pipelineShaderStageCreateInfos[i] = Attempt(_shaders[i].GetPipelineShaderStageCreateInfo());
 		i++;
 	}
 
@@ -406,8 +466,8 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<Shader>
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions)
 {
-	std::vector<VkVertexInputBindingDescription> inputBindingDescriptions(inputDescriptions.size());
-	std::vector<VkVertexInputAttributeDescription> inputAttributeDescriptions(inputDescriptions.size());
+	_inputBindingDescriptions.resize(inputDescriptions.size());
+	_inputAttributeDescriptions.resize(inputDescriptions.size());
 
 	int i = 0;
 	for (auto inputDescription : inputDescriptions)
@@ -427,14 +487,15 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexBindingDescriptions(s
 			.offset = inputDescription.offset
 		};
 
-		inputBindingDescriptions[i] = inputBinding;
-		inputAttributeDescriptions[i] = inputAttribute;
+		_inputBindingDescriptions[i] = inputBinding;
+		_inputAttributeDescriptions[i] = inputAttribute;
+		i++;
 	}
 
-	_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)inputBindingDescriptions.size();
-	_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = inputBindingDescriptions.data();
-	_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)inputAttributeDescriptions.size();
-	_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = inputAttributeDescriptions.data();
+	_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)_inputBindingDescriptions.size();
+	_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = _inputBindingDescriptions.data();
+	_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)_inputAttributeDescriptions.size();
+	_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = _inputAttributeDescriptions.data();
 
 	return *this;
 }
@@ -455,7 +516,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildTessellationState(unsigne
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned width, unsigned height)
 {
-	VkViewport viewport
+	_viewport =
 	{
 		.x = 0,
 		.y = 0,
@@ -465,14 +526,14 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned wi
 		.maxDepth = 1
 	};
 
-	VkRect2D scissor
+	_scissor =
 	{
 		.offset = {0, 0},
 		.extent = {width, height}
 	};
 
-	_pipelineViewportStateCreateInfo.pViewports = &viewport;
-	_pipelineViewportStateCreateInfo.pScissors = &scissor;
+	_pipelineViewportStateCreateInfo.pViewports = &_viewport;
+	_pipelineViewportStateCreateInfo.pScissors = &_scissor;
 
 	return *this;
 }
@@ -509,8 +570,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddStencilTest()
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPipelineAttachments(std::vector<PipelineAttachment> pipelineAttachments)
 {
-	std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates(pipelineAttachments.size());
-	std::vector<VkFormat> attachmentFormats(pipelineAttachments.size());
+	_blendAttachments.resize(pipelineAttachments.size());
 
 	int i = 0;
 	for (auto pipelineAttachment : pipelineAttachments)
@@ -527,30 +587,65 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPipelineAttachments(std::ve
 			.colorWriteMask = pipelineAttachment.writeMask,
 		};
 
-		blendAttachmentStates.emplace_back(attachmentState);
-		attachmentFormats.emplace_back(pipelineAttachment.format);
+		_blendAttachments[i] = attachmentState;
+		i++;
 	}
 
-	_pipelineColorBlendStateCreateInfo.attachmentCount = (unsigned)blendAttachmentStates.size();
-	_pipelineColorBlendStateCreateInfo.pAttachments = blendAttachmentStates.data();
+	_pipelineColorBlendStateCreateInfo.attachmentCount = (unsigned)_blendAttachments.size();
+	_pipelineColorBlendStateCreateInfo.pAttachments = _blendAttachments.data();
 
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+{
+	_pipelineDescriptorSetLayouts.emplace_back(descriptorSetLayout);
+
+	return *this;
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPushConstantRange(VkPushConstantRange pushConstantRange)
+{
+	_pipelinePushConstantRanges.emplace_back(pushConstantRange);
 
 	return *this;
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRenderingInfo(RenderingInfo renderingInfo)
 {
-	_pipelineRenderingCreateInfo.colorAttachmentCount = (unsigned)renderingInfo.colorAttachmentFormats.size();
-	_pipelineRenderingCreateInfo.pColorAttachmentFormats = (VkFormat*)renderingInfo.colorAttachmentFormats.data();
+	_colorAttachmentFormats.resize(renderingInfo.colorAttachmentFormats.size());
+
+	int i = 0;
+	for (auto format : renderingInfo.colorAttachmentFormats)
+	{
+		_colorAttachmentFormats[i] = (VkFormat)format;
+		i++;
+	}
+
+	_pipelineRenderingCreateInfo.colorAttachmentCount = (unsigned)_colorAttachmentFormats.size();
+	_pipelineRenderingCreateInfo.pColorAttachmentFormats = (VkFormat*)_colorAttachmentFormats.data();
 	_pipelineRenderingCreateInfo.depthAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
 	_pipelineRenderingCreateInfo.stencilAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
 
 	return *this;
 }
 
-VkPipeline GraphicsPipelineBuilder::BuildPipeline()
+RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline()
 {
-	VkPipeline pipeline;
+	VkPipeline pipeline = nullptr;
+
+	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+		//.pNext = ,
+		//.flags = ,
+		.setLayoutCount = (unsigned)_pipelineDescriptorSetLayouts.size(),
+		.pSetLayouts = _pipelineDescriptorSetLayouts.data(),
+		.pushConstantRangeCount = (unsigned)_pipelinePushConstantRanges.size(),
+		.pPushConstantRanges = _pipelinePushConstantRanges.data(),
+	};
+
+	if (vkCreatePipelineLayout(_vk->device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreatePipelineLayout");
 
 	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
@@ -575,7 +670,7 @@ VkPipeline GraphicsPipelineBuilder::BuildPipeline()
 		//.basePipelineIndex = ,
 	};
 
-	vkCreateGraphicsPipelines(_vk->_device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
+	if (vkCreateGraphicsPipelines(_vk->device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreateGraphicsPipelines");
 
 	return pipeline;
 }
