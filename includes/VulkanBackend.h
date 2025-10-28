@@ -487,8 +487,11 @@ class VulkanBackend
 	VkExtent2D _swapchainExtent;
 	std::vector<VkImageView> _swapchainImageViews;
 	std::vector<VkCommandBuffer> _swapchainCommandBuffers;
+	std::vector<VkSemaphore> _imageAvailableSemaphores, _renderFinishedSemaphores;
+	std::vector<VkFence> _renderingFences;
 
-	unsigned _currentFrame;
+	bool _frameLocked;
+	unsigned _currentFrame, _targetFrame, _maxFrames;
 
 
 
@@ -510,7 +513,7 @@ class VulkanBackend
 
 	RETURN(VkCommandBuffer) StartFrame();
 	RETURN(void) EndFrame(VkCommandBuffer commandBuffer);
-	
+
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);

@@ -189,9 +189,9 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 	VkPresentModeKHR presentMode = *ChooseSwapchainPresentMode(swapchainSupport.presentModes);
 	VkExtent2D extent = *ChooseSwapchainExtent(swapchainSupport.surfaceCapabilities);
 
-	unsigned imageCount = swapchainSupport.surfaceCapabilities.minImageCount + 1;
+	_maxFrames = swapchainSupport.surfaceCapabilities.minImageCount + 1;
 
-	if (swapchainSupport.surfaceCapabilities.maxImageCount > 0 && imageCount > swapchainSupport.surfaceCapabilities.maxImageCount)imageCount = swapchainSupport.surfaceCapabilities.maxImageCount;
+	if (swapchainSupport.surfaceCapabilities.maxImageCount > 0 && _maxFrames > swapchainSupport.surfaceCapabilities.maxImageCount) _maxFrames = swapchainSupport.surfaceCapabilities.maxImageCount;
 
 	QueueFamilyIndices indices = *FindQueueFamilies(_vk.physicalDevice);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -202,7 +202,7 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 		//.pNext = ,
 		//.flags = ,
 		.surface = _surface,
-		.minImageCount = imageCount,
+		.minImageCount = _maxFrames,
 		.imageFormat = surfaceFormat.format,
 		.imageColorSpace = surfaceFormat.colorSpace,
 		.imageExtent = extent,
@@ -220,9 +220,9 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 
 	if (vkCreateSwapchainKHR(_vk.device, &createInfo, nullptr, &_swapchain)) return std::unexpected("VulkanBackend.cpp | CreateSwapchain() | vkCreateSwapchainKHR");
 
-	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &imageCount, nullptr);
-	_swapchainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &imageCount, _swapchainImages.data());
+	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &_maxFrames, nullptr);
+	_swapchainImages.resize(_maxFrames);
+	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &_maxFrames, _swapchainImages.data());
 
 	_swapchainImageFormat = surfaceFormat.format;
 	_swapchainExtent = extent;
@@ -450,6 +450,15 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 
 RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 {
+	//Frame is now Locked
+	_frameLocked = true;
+
+	//Wait for Queue to be ready
+	//if (m_PrevFrame != m_CurrentFrame)
+	vkWaitForFences(_vk.device, 1, &_renderingFences[_currentFrame], VK_TRUE, ~(static_cast<uint64_t>(0)));
+
+	vkAcquireNextImageKHR(_vk.device, _swapchain,~(0ull), _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &_targetFrame);
+
 	VkCommandBuffer commandBuffer = _swapchainCommandBuffers[_currentFrame];
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo
@@ -520,6 +529,41 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 {
 	vkCmdEndRendering(commandBuffer);
 	vkEndCommandBuffer(commandBuffer);
+
+	//Setup the Semaphores and Command Buffer to be sent into Queue Submit
+	VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[_currentFrame] }, signalSemaphores[] = { _renderFinishedSemaphores[_targetFrame] };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	VkCommandBuffer commandBuffers[] = { _swapchainCommandBuffers[_currentFrame] };
+
+	//Setup the Queue Submit Info
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = waitSemaphores;
+	submit_info.pWaitDstStageMask = waitStages;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = commandBuffers;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = signalSemaphores;
+
+	//Reset the Fence
+	vkResetFences(_vk.device, 1, &_renderingFences[_currentFrame]);
+	vkQueueSubmit(_vk.graphicsQueue, 1, &submit_info, _renderingFences[_currentFrame]);
+
+	VkSwapchainKHR swapchains[] = { _swapchain };
+	VkPresentInfoKHR present_info = {};
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.waitSemaphoreCount = 1;
+	present_info.pWaitSemaphores = signalSemaphores;
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = swapchains;
+	present_info.pImageIndices = &_targetFrame;//&m_CurrentFrame;
+	present_info.pResults = nullptr;
+	vkQueuePresentKHR(_vk.presentQueue, &present_info);
+
+	if (++_currentFrame >= _maxFrames) _currentFrame = 0;
+
+	_frameLocked = false;
 
 	return {};
 }
