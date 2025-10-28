@@ -271,7 +271,7 @@ void VulkanBackend::CreateGraphicsPipeline()
 
 	std::vector<std::pair<std::string, ShaderType>> shaders
 	{
-		{ "Pixel Shader", ShaderType::FRAGMENT },
+		{ "PixelShader", ShaderType::FRAGMENT },
 		{ "VertexShader", ShaderType::VERTEX }
 	};
 
@@ -308,7 +308,7 @@ void VulkanBackend::CreateGraphicsPipeline()
 		}
 	};
 
-	Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).BuildPipeline());
+	_vk.pipeline = Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddDepthTest().AddDepthWrite().AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).BuildPipeline());
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
@@ -448,17 +448,97 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 	return true;
 }
 
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<std::pair<std::string, ShaderType>> shader)
+RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 {
-	_shaders.reserve(shader.size());
-	_pipelineShaderStageCreateInfos.resize(shader.size());
+	VkCommandBuffer commandBuffer = _swapchainCommandBuffers[_currentFrame];
 
-	int i = 0;
-	for (auto& s : shader)
+	VkCommandBufferBeginInfo commandBufferBeginInfo
 	{
-		_shaders.emplace_back(_vk->device, s.first, s.second);
-		_pipelineShaderStageCreateInfos[i] = Attempt(_shaders[i].GetPipelineShaderStageCreateInfo());
-		i++;
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+		//.pNext = ,
+		.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
+		//.pInheritanceInfo = ,
+	};
+
+	vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+
+	VkViewport viewport = { 0, 0, static_cast<float>(ImgnWindow::GetInstance().GetWidth()), static_cast<float>(ImgnWindow::GetInstance().GetHeight()), 0, 1 };
+	VkRect2D scissor = { {0, 0}, {ImgnWindow::GetInstance().GetWidth(), ImgnWindow::GetInstance().GetHeight()} };
+
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+		.imageView = _swapchainImageViews[_currentFrame],
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+		.clearValue
+		{
+			.color = {0, 0, 0, 1},
+			//.depthStencil = ,
+		}
+	};
+
+	VkRenderingAttachmentInfoKHR swapchainDepthRenderingAttachmentInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+		.imageView = _swapchainImageViews[_currentFrame],
+		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+		.clearValue
+		{
+			//.color = ,
+			.depthStencil = { 1.f, 0},
+		}
+	};
+
+	VkRenderingInfo renderingInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+		.renderArea
+		{
+			.offset = { 0, 0 },
+			.extent = { ImgnWindow::GetInstance().GetWidth(), ImgnWindow::GetInstance().GetHeight() }
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = 1, //(unsigned)colorRenderingAttachmentInfos.size(),
+		.pColorAttachments = &swapchainRenderingAttachmentInfo,//colorRenderingAttachmentInfos.data(),
+		.pDepthAttachment = &swapchainDepthRenderingAttachmentInfo
+	};
+
+	vkCmdBeginRendering(commandBuffer, &renderingInfo);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vk.pipeline);
+
+	return commandBuffer;
+}
+
+RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
+{
+	vkCmdEndRendering(commandBuffer);
+	vkEndCommandBuffer(commandBuffer);
+
+	return {};
+}
+
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<std::pair<std::string, ShaderType>> shaders)
+{
+	_shaders.clear();
+	_pipelineShaderStageCreateInfos.clear();
+	_shaders.reserve(shaders.size());
+	_pipelineShaderStageCreateInfos.reserve(shaders.size());
+
+	for (auto& shader : shaders)
+	{
+		// Construct Shader in-place (move-only class)
+		_shaders.emplace_back(_vk->device, shader.first, shader.second);
+
+		// Get stage info from the just-added shader
+		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = Attempt(_shaders.back().GetPipelineShaderStageCreateInfo());
+		_pipelineShaderStageCreateInfos.push_back(pipelineShaderStageCreateInfo);
 	}
 
 	return *this;

@@ -18,7 +18,69 @@ struct VulkanContext
 	unsigned presentQueueFamily = 0;
 	VkPipelineCache pipelineCache = nullptr;
 	VkDescriptorPool descriptorPool = nullptr;
+	VkPipeline pipeline = nullptr;
+	VkPipelineLayout pipelineLayout = nullptr;
 };
+
+
+//enum class ShaderType
+//{
+//	FRAGMENT = VK_SHADER_STAGE_FRAGMENT_BIT,
+//	VERTEX = VK_SHADER_STAGE_VERTEX_BIT,
+//	COMPUTE = VK_SHADER_STAGE_COMPUTE_BIT
+//};
+//
+//struct Shader
+//{
+//	Shader() = default;
+//
+//	Shader(VkDevice device, const std::string& filename, ShaderType shaderType)
+//	{
+//		_device = device;
+//		_shaderStageFlagBits = (VkShaderStageFlagBits)shaderType;
+//
+//		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
+//		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
+//		_utils->CreateDefaultIncludeHandler(&_includeHandler);
+//
+//		Attempt(Compile(filename, shaderType));
+//	}
+//
+//	~Shader()
+//	{
+//		vkDestroyShaderModule(_device, _shaderModule, nullptr);
+//		//delete[] data;
+//	}
+//
+//	VkShaderModule GetShaderModule() const { return _shaderModule; }
+//	VkShaderStageFlagBits GetShaderStageFlagBits() const { return _shaderStageFlagBits; }
+//	std::string GetEntryPointName() const { return _entryPointName; }
+//	RETURN(VkPipelineShaderStageCreateInfo) GetPipelineShaderStageCreateInfo() const;
+//
+//	void SetEntryPointName(const std::string& entryPointName) { _entryPointName = entryPointName; }
+//
+//private:
+//	VkDevice _device;
+//	VkShaderModule _shaderModule;
+//	VkShaderStageFlagBits _shaderStageFlagBits;
+//	VkPipelineShaderStageCreateInfo _pssci;
+//	std::string _entryPointName = "main", _shaderString, _spvPath, _shader, _spv;
+//	unsigned long long _shaderSize, _spvSize;
+//	//std::string _shaderString, _spvPath, _newShader;
+//	//char* data;
+//
+//	//dxc
+//	ComPtr<IDxcCompiler3> _compiler;
+//	ComPtr<IDxcUtils> _utils;
+//	ComPtr<IDxcIncludeHandler> _includeHandler;
+//
+//	RETURN(std::string) ShaderAsString(const char* shaderFilePath);
+//	RETURN(void) ReadSPVFile(const std::string& filename);
+//	//RETURN(void) CreateShader();
+//	RETURN(void) Compile(const std::string& filename, ShaderType shaderType);
+//	RETURN(bool) Reload();
+//	RETURN(void) CreateShaderModule();
+//};
 
 struct PipelineBuilder
 {
@@ -74,7 +136,7 @@ enum class Topology
 	LINE_LIST = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
 	LINE_STRIP = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
 	TRIANGLE_LIST = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-	TRIANGLE_STRIPVK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
+	TRIANGLE_STRIP = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
 };
 
 enum class PolygonMode
@@ -317,7 +379,7 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 
 	~GraphicsPipelineBuilder() = default;
 
-	GraphicsPipelineBuilder& AddShaders(std::vector<std::pair<std::string, ShaderType>> shader);
+	GraphicsPipelineBuilder& AddShaders(std::vector<std::pair<std::string, ShaderType>> shaders);
 	GraphicsPipelineBuilder& AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions);
 	GraphicsPipelineBuilder& BuildTessellationState(unsigned patchControlPoints);
 	GraphicsPipelineBuilder& BuildViewportState(unsigned width, unsigned height);
@@ -357,6 +419,13 @@ private:
 	VkPipelineColorBlendStateCreateInfo _pipelineColorBlendStateCreateInfo;
 	VkPipelineDynamicStateCreateInfo _pipelineDynamicStateCreateInfo;
 	VkPipelineRenderingCreateInfoKHR _pipelineRenderingCreateInfo;
+};
+
+struct Image
+{
+	VkImage image;
+	VkImageView imageView;
+	VkDeviceMemory memory;
 };
 
 class VulkanBackend
@@ -417,6 +486,9 @@ class VulkanBackend
 	VkFormat _swapchainImageFormat;
 	VkExtent2D _swapchainExtent;
 	std::vector<VkImageView> _swapchainImageViews;
+	std::vector<VkCommandBuffer> _swapchainCommandBuffers;
+
+	unsigned _currentFrame;
 
 
 
@@ -427,7 +499,7 @@ class VulkanBackend
 	RETURN(bool) IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
 	RETURN(QueueFamilyIndices) FindQueueFamilies(VkPhysicalDevice physicalDevice);
 
-
+	//RETURN(VkImage) CreateImage
 
 	RETURN(void) CreateInstance(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions);
 	RETURN(void) CreateDevice();
@@ -435,6 +507,10 @@ class VulkanBackend
 	RETURN(void) CreateSwapchain();
 	RETURN(void) CreateSwapchainImageViews();
 	void CreateGraphicsPipeline();
+
+	RETURN(VkCommandBuffer) StartFrame();
+	RETURN(void) EndFrame(VkCommandBuffer commandBuffer);
+	
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);
@@ -455,6 +531,8 @@ public:
 			vkDestroyImageView(_vk.device, imageView, nullptr);
 		}
 
+		vkDestroyPipeline(_vk.device, _vk.pipeline, nullptr);
+		vkDestroyPipelineLayout(_vk.device, _vk.pipelineLayout, nullptr);
 		vkDestroySwapchainKHR(_vk.device, _swapchain, nullptr);
 		vkDestroySurfaceKHR(_vk.instance, _surface, nullptr);
 		vkDestroyInstance(_vk.instance, nullptr);

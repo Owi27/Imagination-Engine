@@ -1,4 +1,5 @@
 #pragma once
+#include <vulkan/vulkan.h>
 #include <dxcapi.h>
 #include <wrl/client.h>
 #pragma comment(lib, "dxcompiler.lib")

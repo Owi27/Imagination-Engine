@@ -3,6 +3,9 @@
 #define GATEWARE_ENABLE_CORE // All libraries need this
 #define GATEWARE_ENABLE_SYSTEM // Graphics libs require system level libraries
 #define GATEWARE_ENABLE_INPUT // Graphics libs require system level libraries
+#define GATEWARE_DISABLE_GVULKANSURFACE
+#define GATEWARE_DISABLE_GOPENGLSURFACE
+#define GATEWARE_DISABLE_GDIRECTX12SURFACE
 #include "Gateware.h"
 
 using namespace GW;
