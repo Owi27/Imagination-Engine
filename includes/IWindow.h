@@ -89,7 +89,7 @@ public:
 	unsigned GetWidth()
 	{
 		unsigned w;
-		_window.GetWidth(w);
+		_window.GetClientWidth(w);
 
 		return w;
 	}
@@ -97,7 +97,7 @@ public:
 	unsigned GetHeight()
 	{
 		unsigned h;
-		_window.GetHeight(h);
+		_window.GetClientHeight(h);
 
 		return h;
 	}

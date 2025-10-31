@@ -15,9 +15,13 @@ int main()
 
 	while (win.ProcessEvents())
 	{
+		VkCommandBuffer commandBuffer = Attempt(vk.StartFrame());
 
+		Attempt(vk.EndFrame(commandBuffer));
 	}
 
 
 	return 0;
 }
+
+// vin, 

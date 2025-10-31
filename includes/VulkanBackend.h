@@ -9,78 +9,25 @@
 
 struct VulkanContext
 {
+	struct QueueFamilyIndices
+	{
+		std::optional<unsigned> graphicsFamily = 0;
+		std::optional<unsigned> presentFamily = 0;
+
+		bool IsComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
+	} queueFamilyIndices;
+	ImgnWindow& win = ImgnWindow::GetInstance();
 	VkInstance instance = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkDevice device = nullptr;
 	VkQueue graphicsQueue = nullptr;
-	unsigned graphicsQueueFamily = 0;
 	VkQueue presentQueue = nullptr;
-	unsigned presentQueueFamily = 0;
 	VkPipelineCache pipelineCache = nullptr;
 	VkDescriptorPool descriptorPool = nullptr;
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
+	VkCommandPool commandPool = nullptr;
 };
-
-
-//enum class ShaderType
-//{
-//	FRAGMENT = VK_SHADER_STAGE_FRAGMENT_BIT,
-//	VERTEX = VK_SHADER_STAGE_VERTEX_BIT,
-//	COMPUTE = VK_SHADER_STAGE_COMPUTE_BIT
-//};
-//
-//struct Shader
-//{
-//	Shader() = default;
-//
-//	Shader(VkDevice device, const std::string& filename, ShaderType shaderType)
-//	{
-//		_device = device;
-//		_shaderStageFlagBits = (VkShaderStageFlagBits)shaderType;
-//
-//		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
-//		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
-//		_utils->CreateDefaultIncludeHandler(&_includeHandler);
-//
-//		Attempt(Compile(filename, shaderType));
-//	}
-//
-//	~Shader()
-//	{
-//		vkDestroyShaderModule(_device, _shaderModule, nullptr);
-//		//delete[] data;
-//	}
-//
-//	VkShaderModule GetShaderModule() const { return _shaderModule; }
-//	VkShaderStageFlagBits GetShaderStageFlagBits() const { return _shaderStageFlagBits; }
-//	std::string GetEntryPointName() const { return _entryPointName; }
-//	RETURN(VkPipelineShaderStageCreateInfo) GetPipelineShaderStageCreateInfo() const;
-//
-//	void SetEntryPointName(const std::string& entryPointName) { _entryPointName = entryPointName; }
-//
-//private:
-//	VkDevice _device;
-//	VkShaderModule _shaderModule;
-//	VkShaderStageFlagBits _shaderStageFlagBits;
-//	VkPipelineShaderStageCreateInfo _pssci;
-//	std::string _entryPointName = "main", _shaderString, _spvPath, _shader, _spv;
-//	unsigned long long _shaderSize, _spvSize;
-//	//std::string _shaderString, _spvPath, _newShader;
-//	//char* data;
-//
-//	//dxc
-//	ComPtr<IDxcCompiler3> _compiler;
-//	ComPtr<IDxcUtils> _utils;
-//	ComPtr<IDxcIncludeHandler> _includeHandler;
-//
-//	RETURN(std::string) ShaderAsString(const char* shaderFilePath);
-//	RETURN(void) ReadSPVFile(const std::string& filename);
-//	//RETURN(void) CreateShader();
-//	RETURN(void) Compile(const std::string& filename, ShaderType shaderType);
-//	RETURN(bool) Reload();
-//	RETURN(void) CreateShaderModule();
-//};
 
 struct PipelineBuilder
 {
@@ -98,28 +45,6 @@ protected:
 	std::unique_ptr<VulkanContext> _vk;
 };
 
-enum class PipelineFormat
-{
-	FLOAT = VK_FORMAT_R32_SFLOAT,
-	FLOAT2 = VK_FORMAT_R32G32_SFLOAT,
-	FLOAT3 = VK_FORMAT_R32G32B32_SFLOAT,
-	FLOAT4 = VK_FORMAT_R32G32B32A32_SFLOAT,
-	HFLOAT = VK_FORMAT_R16_SFLOAT,
-	HFLOAT2 = VK_FORMAT_R16G16_SFLOAT,
-	HFLOAT3 = VK_FORMAT_R16G16B16_SFLOAT,
-	HFLOAT4 = VK_FORMAT_R16G16B16A16_SFLOAT,
-	INT = VK_FORMAT_R32_SINT,
-	INT2 = VK_FORMAT_R32G32_SINT,
-	INT3 = VK_FORMAT_R32G32B32_SINT,
-	INT4 = VK_FORMAT_R32G32B32A32_SINT,
-	UINT = VK_FORMAT_R32_UINT,
-	UINT2 = VK_FORMAT_R32G32_UINT,
-	UINT3 = VK_FORMAT_R32G32B32_UINT,
-	UINT4 = VK_FORMAT_R32G32B32A32_UINT,
-	COLOR = VK_FORMAT_R8G8B8A8_UNORM,
-	SWAPCHAIN = VK_FORMAT_B8G8R8A8_SRGB,
-	UNDEFINED = VK_FORMAT_UNDEFINED
-};
 
 struct VertexInputDescription
 {
@@ -130,63 +55,12 @@ struct VertexInputDescription
 	unsigned offset;
 };
 
-enum class Topology
-{
-	POINT = VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
-	LINE_LIST = VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-	LINE_STRIP = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
-	TRIANGLE_LIST = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-	TRIANGLE_STRIP = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP
-};
-
-enum class PolygonMode
-{
-	FILL = VK_POLYGON_MODE_FILL,
-	LINE = VK_POLYGON_MODE_LINE
-};
-
-enum class CullMode
-{
-	FRONT = VK_CULL_MODE_FRONT_BIT,
-	BACK = VK_CULL_MODE_BACK_BIT,
-	NONE = VK_CULL_MODE_NONE
-};
-
-enum class FrontFace
-{
-	COUNTER_CLOCKWISE = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-	CLOCKWISE = VK_FRONT_FACE_CLOCKWISE
-};
 
 struct RasterStateInfo
 {
 	PolygonMode polygonMode;
 	CullMode cullMode;
 	FrontFace frontFace;
-};
-
-enum class BlendFactor
-{
-	FULL = VK_BLEND_FACTOR_ONE,
-	NONE = VK_BLEND_FACTOR_ZERO,
-	SOURCE_ALPHA = VK_BLEND_FACTOR_SRC_ALPHA,
-	NEG_SOURCE_ALPHA = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA
-};
-
-enum class BlendOperation
-{
-	ADD = VK_BLEND_OP_ADD,
-	SUBTRACT = VK_BLEND_OP_SUBTRACT,
-	MIN = VK_BLEND_OP_MIN,
-	MAX = VK_BLEND_OP_MAX
-};
-
-enum class ColorComponent
-{
-	R = VK_COLOR_COMPONENT_R_BIT,
-	G = VK_COLOR_COMPONENT_G_BIT,
-	B = VK_COLOR_COMPONENT_B_BIT,
-	A = VK_COLOR_COMPONENT_A_BIT
 };
 
 struct PipelineAttachment
@@ -244,8 +118,8 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 		{
 			.x = 0,
 			.y = 0,
-			.width = (float)ImgnWindow::GetInstance().GetWidth(),
-			.height = (float)ImgnWindow::GetInstance().GetHeight(),
+			.width = static_cast<float>(_vk->win.GetWidth()),
+			.height = static_cast<float>(_vk->win.GetHeight()),
 			.minDepth = 0,
 			.maxDepth = 1,
 		};
@@ -259,8 +133,8 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 			},
 			.extent
 			{
-				.width = ImgnWindow::GetInstance().GetWidth(),
-				.height = ImgnWindow::GetInstance().GetHeight()
+				.width = _vk->win.GetWidth(),
+				.height = _vk->win.GetHeight()
 			}
 		};
 
@@ -421,23 +295,32 @@ private:
 	VkPipelineRenderingCreateInfoKHR _pipelineRenderingCreateInfo;
 };
 
-struct Image
+struct Texture
 {
 	VkImage image;
 	VkImageView imageView;
 	VkDeviceMemory memory;
 };
 
+
+enum class MemoryFlags : unsigned
+{
+
+};
+
+struct Buffer
+{
+	
+
+	Buffer() = default;
+	Buffer(VkDeviceSize pSize, void* pData, BufferUsage pUsage)
+	{
+
+	}
+};
+
 class VulkanBackend
 {
-	struct QueueFamilyIndices
-	{
-		std::optional<unsigned> graphicsFamily;
-		std::optional<unsigned> presentFamily;
-
-		bool IsComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
-	};
-
 	struct SwapchainSupportDetails
 	{
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;
@@ -491,8 +374,7 @@ class VulkanBackend
 	std::vector<VkFence> _renderingFences;
 
 	bool _frameLocked;
-	unsigned _currentFrame, _targetFrame, _maxFrames;
-
+	unsigned _currentFrame = 0, _targetFrame = 0, _maxFrames;
 
 
 	RETURN(bool) CheckCompatibility(const char** instanceExtensions, const char** deviceExtensions);
@@ -500,7 +382,7 @@ class VulkanBackend
 
 	RETURN(void) PickPhysicalDevice();
 	RETURN(bool) IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
-	RETURN(QueueFamilyIndices) FindQueueFamilies(VkPhysicalDevice physicalDevice);
+	RETURN(VulkanContext::QueueFamilyIndices) FindQueueFamilies(VkPhysicalDevice physicalDevice);
 
 	//RETURN(VkImage) CreateImage
 
@@ -511,8 +393,6 @@ class VulkanBackend
 	RETURN(void) CreateSwapchainImageViews();
 	void CreateGraphicsPipeline();
 
-	RETURN(VkCommandBuffer) StartFrame();
-	RETURN(void) EndFrame(VkCommandBuffer commandBuffer);
 
 
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
@@ -542,6 +422,8 @@ public:
 	}
 
 	RETURN(bool) Init(unsigned layerCount = 0, const char** layers = nullptr, unsigned extensionCount = 0, const char** extensions = nullptr, unsigned dExtensionCount = 0, const char** dExtensions = nullptr);
-	//std::expected<bool, const char*> Init(unsigned layerCount, const char** layers, unsigned extensionCount, const char** extensions);
+
+	RETURN(VkCommandBuffer) StartFrame();
+	RETURN(void) EndFrame(VkCommandBuffer commandBuffer);
 };
 

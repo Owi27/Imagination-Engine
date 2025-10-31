@@ -71,7 +71,7 @@ RETURN(void) VulkanBackend::PickPhysicalDevice()
 
 RETURN(bool) VulkanBackend::IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice)
 {
-	QueueFamilyIndices indices = *FindQueueFamilies(physicalDevice);
+	_vk.queueFamilyIndices = *FindQueueFamilies(physicalDevice);
 	bool extensionsSupported = *CheckDeviceExtensionSupport(physicalDevice);
 
 	bool swapChainAdequate = false;
@@ -82,13 +82,11 @@ RETURN(bool) VulkanBackend::IsPhysicalDeviceSuitable(VkPhysicalDevice physicalDe
 	}
 
 
-	return indices.IsComplete() && extensionsSupported && swapChainAdequate;
+	return _vk.queueFamilyIndices.IsComplete() && extensionsSupported && swapChainAdequate;
 }
 
-RETURN(VulkanBackend::QueueFamilyIndices) VulkanBackend::FindQueueFamilies(VkPhysicalDevice physicalDevice)
+RETURN(VulkanContext::QueueFamilyIndices) VulkanBackend::FindQueueFamilies(VkPhysicalDevice physicalDevice)
 {
-	QueueFamilyIndices indices;
-
 	unsigned queueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
@@ -98,26 +96,26 @@ RETURN(VulkanBackend::QueueFamilyIndices) VulkanBackend::FindQueueFamilies(VkPhy
 	int i = 0;
 	for (const auto& queueFamily : queueFamilies)
 	{
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) indices.graphicsFamily = i;
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) _vk.queueFamilyIndices.graphicsFamily = i;
 
 		unsigned presentSupport = false;
 		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, _surface, &presentSupport);
 
-		if (presentSupport) indices.presentFamily = i;
-		if (indices.IsComplete()) break;
+		if (presentSupport) _vk.queueFamilyIndices.presentFamily = i;
+		if (_vk.queueFamilyIndices.IsComplete()) break;
 
 		i++;
 	}
 
-	return indices;
+	return _vk.queueFamilyIndices;
 }
 
 RETURN(void) VulkanBackend::CreateDevice()
 {
-	QueueFamilyIndices indices = *FindQueueFamilies(_vk.physicalDevice);
+	_vk.queueFamilyIndices = *FindQueueFamilies(_vk.physicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<unsigned> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	std::set<unsigned> uniqueQueueFamilies = { _vk.queueFamilyIndices.graphicsFamily.value(), _vk.queueFamilyIndices.presentFamily.value() };
 
 	float queuePriority = 1.0f;
 	for (unsigned queueFamily : uniqueQueueFamilies)
@@ -159,8 +157,8 @@ RETURN(void) VulkanBackend::CreateDevice()
 
 	if (vkCreateDevice(_vk.physicalDevice, &createInfo, nullptr, &_vk.device)) return std::unexpected("VulkanBackend.cpp | CreateDevice() | vkCreateDevice");
 
-	vkGetDeviceQueue(_vk.device, indices.graphicsFamily.value(), 0, &_vk.graphicsQueue);
-	vkGetDeviceQueue(_vk.device, indices.presentFamily.value(), 0, &_vk.presentQueue);
+	vkGetDeviceQueue(_vk.device, _vk.queueFamilyIndices.graphicsFamily.value(), 0, &_vk.graphicsQueue);
+	vkGetDeviceQueue(_vk.device, _vk.queueFamilyIndices.presentFamily.value(), 0, &_vk.presentQueue);
 
 	return {};
 }
@@ -193,8 +191,8 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 
 	if (swapchainSupport.surfaceCapabilities.maxImageCount > 0 && _maxFrames > swapchainSupport.surfaceCapabilities.maxImageCount) _maxFrames = swapchainSupport.surfaceCapabilities.maxImageCount;
 
-	QueueFamilyIndices indices = *FindQueueFamilies(_vk.physicalDevice);
-	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+	_vk.queueFamilyIndices = *FindQueueFamilies(_vk.physicalDevice);
+	uint32_t queueFamilyIndices[] = { _vk.queueFamilyIndices.graphicsFamily.value(), _vk.queueFamilyIndices.presentFamily.value() };
 
 	VkSwapchainCreateInfoKHR createInfo
 	{
@@ -208,9 +206,9 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 		.imageExtent = extent,
 		.imageArrayLayers = 1,
 		.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		.imageSharingMode = indices.graphicsFamily != indices.presentFamily ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE,
-		.queueFamilyIndexCount = indices.graphicsFamily != indices.presentFamily ? (unsigned)2 : 0,
-		.pQueueFamilyIndices = indices.graphicsFamily != indices.presentFamily ? queueFamilyIndices : nullptr,
+		.imageSharingMode = _vk.queueFamilyIndices.graphicsFamily != _vk.queueFamilyIndices.presentFamily ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE,
+		.queueFamilyIndexCount = _vk.queueFamilyIndices.graphicsFamily != _vk.queueFamilyIndices.presentFamily ? (unsigned)2 : 0,
+		.pQueueFamilyIndices = _vk.queueFamilyIndices.graphicsFamily != _vk.queueFamilyIndices.presentFamily ? queueFamilyIndices : nullptr,
 		.preTransform = swapchainSupport.surfaceCapabilities.currentTransform,
 		.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
 		.presentMode = presentMode,
@@ -263,6 +261,8 @@ RETURN(void) VulkanBackend::CreateSwapchainImageViews()
 
 		if (vkCreateImageView(_vk.device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
 	}
+
+	return {};
 }
 
 void VulkanBackend::CreateGraphicsPipeline()
@@ -443,6 +443,55 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 	Attempt(PickPhysicalDevice());
 	Attempt(CreateDevice());
 	Attempt(CreateSwapchain());
+	Attempt(CreateSwapchainImageViews());
+
+	_swapchainCommandBuffers.resize(_maxFrames);
+	_imageAvailableSemaphores.resize(_maxFrames);
+	_renderFinishedSemaphores.resize(_maxFrames);
+	_renderingFences.resize(_maxFrames);
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+		//.pNext = ,
+		//.flags = ,
+	};
+
+	VkFenceCreateInfo fenceCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+		//.pNext = ,
+		.flags = VK_FENCE_CREATE_SIGNALED_BIT,
+	};
+
+	VkCommandPoolCreateInfo commandPoolCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		//.pNext = ,
+		.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+		.queueFamilyIndex = _vk.queueFamilyIndices.graphicsFamily.value(),
+	};
+
+	vkCreateCommandPool(_vk.device, &commandPoolCreateInfo, nullptr, &_vk.commandPool);
+
+	VkCommandBufferAllocateInfo commandBufferAllocateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		//.pNext = ,
+		.commandPool = _vk.commandPool,
+		.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		.commandBufferCount = _maxFrames,
+	};
+
+	vkAllocateCommandBuffers(_vk.device, &commandBufferAllocateInfo, _swapchainCommandBuffers.data());
+	
+	for (size_t i = 0; i < _maxFrames; i++)
+	{
+		vkCreateSemaphore(_vk.device, &semaphoreCreateInfo, nullptr, &_imageAvailableSemaphores[i]);
+		vkCreateSemaphore(_vk.device, &semaphoreCreateInfo, nullptr, &_renderFinishedSemaphores[i]);
+		vkCreateFence(_vk.device, &fenceCreateInfo, nullptr, &_renderingFences[i]);
+	}
+
 	CreateGraphicsPipeline();
 
 	return true;
@@ -471,8 +520,25 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 
 	vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 
-	VkViewport viewport = { 0, 0, static_cast<float>(ImgnWindow::GetInstance().GetWidth()), static_cast<float>(ImgnWindow::GetInstance().GetHeight()), 0, 1 };
-	VkRect2D scissor = { {0, 0}, {ImgnWindow::GetInstance().GetWidth(), ImgnWindow::GetInstance().GetHeight()} };
+	VkViewport viewport
+	{
+		.x = 0,
+		.y = 0,
+		.width = (float)_vk.win.GetWidth(),
+		.height = (float)_vk.win.GetHeight(),
+		.minDepth = 0,
+		.maxDepth = 1,
+	};
+
+	VkRect2D scissor =
+	{
+		.offset
+		{
+			.x = 0,
+			.y = 0
+		},
+		.extent = { _vk.win.GetWidth(), _vk.win.GetHeight() }
+	};
 
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
@@ -511,7 +577,7 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 		.renderArea
 		{
 			.offset = { 0, 0 },
-			.extent = { ImgnWindow::GetInstance().GetWidth(), ImgnWindow::GetInstance().GetHeight() }
+			.extent = { _vk.win.GetWidth(), _vk.win.GetHeight() }
 		},
 		.layerCount = 1,
 		.colorAttachmentCount = 1, //(unsigned)colorRenderingAttachmentInfos.size(),
@@ -536,30 +602,36 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 	VkCommandBuffer commandBuffers[] = { _swapchainCommandBuffers[_currentFrame] };
 
 	//Setup the Queue Submit Info
-	VkSubmitInfo submit_info = {};
-	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = waitSemaphores;
-	submit_info.pWaitDstStageMask = waitStages;
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = commandBuffers;
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = signalSemaphores;
+	VkSubmitInfo submitInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		//.pNext = ,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = waitSemaphores,
+		.pWaitDstStageMask = waitStages,
+		.commandBufferCount = 1,
+		.pCommandBuffers = commandBuffers,
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores = signalSemaphores,
+	};
 
 	//Reset the Fence
 	vkResetFences(_vk.device, 1, &_renderingFences[_currentFrame]);
-	vkQueueSubmit(_vk.graphicsQueue, 1, &submit_info, _renderingFences[_currentFrame]);
+	vkQueueSubmit(_vk.graphicsQueue, 1, &submitInfo, _renderingFences[_currentFrame]);
 
 	VkSwapchainKHR swapchains[] = { _swapchain };
-	VkPresentInfoKHR present_info = {};
-	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = signalSemaphores;
-	present_info.swapchainCount = 1;
-	present_info.pSwapchains = swapchains;
-	present_info.pImageIndices = &_targetFrame;//&m_CurrentFrame;
-	present_info.pResults = nullptr;
-	vkQueuePresentKHR(_vk.presentQueue, &present_info);
+	VkPresentInfoKHR presentInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+		//.pNext = ,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores = signalSemaphores,
+		.swapchainCount = 1,
+		.pSwapchains = swapchains,
+		.pImageIndices = &_targetFrame,
+		.pResults = nullptr,
+	};
+	vkQueuePresentKHR(_vk.presentQueue, &presentInfo);
 
 	if (++_currentFrame >= _maxFrames) _currentFrame = 0;
 

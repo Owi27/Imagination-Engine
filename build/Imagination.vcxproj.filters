@@ -28,6 +28,7 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\includes\Resource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h">
@@ -75,6 +76,7 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="..\includes\Resource.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />
