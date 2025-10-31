@@ -59,5 +59,5 @@ public:
 	}
 
 	Texture& CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCount pSampleCount, PipelineFormat pFormat, ImageTiling pImageTiling, ImageUsage pUsage, MemoryFlags pMemory);
-	Texture& CreateImageView(ImageAspect pImageAspect);
+	void CreateImageView(ImageAspect pImageAspect);
 };

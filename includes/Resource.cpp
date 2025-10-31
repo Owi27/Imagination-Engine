@@ -133,4 +133,6 @@ Texture& Texture::CreateImageView(ImageAspect pImageAspect)
 	};
 
 	vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &imageView);
+
+	return *this;
 }
