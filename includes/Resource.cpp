@@ -1,6 +1,6 @@
 #include "D:/GitHub/Imagination-Engine/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
 
-Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, void* pData, BufferUsage pUsage, MemoryFlags pMemory)
+Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory)
 {
 	size = pSize;
 
@@ -80,7 +80,7 @@ Texture& Texture::CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCou
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 		//.queueFamilyIndexCount = ,
 		//.pQueueFamilyIndices = ,
-		.initialLayout = (VkImageLayout)ImageLayout::GENERAL,
+		.initialLayout = (VkImageLayout)ImageLayout::UNDEFINED,
 	};
 
 	vkCreateImage(_device, &imageCreateInfo, nullptr, &image);
@@ -100,12 +100,13 @@ Texture& Texture::CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCou
 	vkAllocateMemory(_device, &memoryAllocateInfo, nullptr, &memory);
 	vkBindImageMemory(_device, image, memory, 0);
 
-	_format = pFormat;
+	format = pFormat;
+	_mipLevels = pMipLevels;
 
 	return *this;
 }
 
-Texture& Texture::CreateImageView(ImageAspect pImageAspect)
+void Texture::CreateImageView(ImageAspect pImageAspect)
 {
 	VkImageViewCreateInfo imageViewCreateInfo
 	{
@@ -114,7 +115,7 @@ Texture& Texture::CreateImageView(ImageAspect pImageAspect)
 		//.flags = ,
 		.image = image,
 		.viewType = VK_IMAGE_VIEW_TYPE_2D,
-		.format = (VkFormat)_format,
+		.format = (VkFormat)format,
 		.components
 		{
 			.r = VK_COMPONENT_SWIZZLE_R,
@@ -133,6 +134,4 @@ Texture& Texture::CreateImageView(ImageAspect pImageAspect)
 	};
 
 	vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &imageView);
-
-	return *this;
 }

@@ -140,11 +140,18 @@ RETURN(void) VulkanBackend::CreateDevice()
 		.pNext = nullptr,
 		.dynamicRendering = true
 	};
+	VkPhysicalDeviceVulkan13Features vulkan13features
+	{
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+		.synchronization2 = true,
+		.dynamicRendering = true
+	};
+
 
 	VkDeviceCreateInfo createInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.pNext = &dynamicRendering,
+		.pNext = &vulkan13features,
 		//.flags = ,
 		.queueCreateInfoCount = (unsigned)queueCreateInfos.size(),
 		.pQueueCreateInfos = queueCreateInfos.data(),
@@ -281,17 +288,17 @@ void VulkanBackend::CreateGraphicsPipeline()
 		{
 			.binding = 0,
 			.location = 0,
-			.stride = sizeof(float) * 3,
-			.format = PipelineFormat::FLOAT3,
+			.stride = sizeof(float) * 2,
+			.format = PipelineFormat::FLOAT2,
 			.offset = 0,
 		},
 		VertexInputDescription
 		{
 			.binding = 1,
 			.location = 1,
-			.stride = sizeof(float) * 4,
+			.stride = sizeof(unsigned char) * 4,
 			.format = PipelineFormat::COLOR,
-			.offset = 12,
+			.offset = 0,
 		},
 	};
 
@@ -305,10 +312,43 @@ void VulkanBackend::CreateGraphicsPipeline()
 		.colorAttachmentFormats
 		{
 			(PipelineFormat)_swapchainImageFormat
-		}
+		},
+		.depthStencilFormat = _depth.format
 	};
 
-	_vk.pipeline = Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddDepthTest().AddDepthWrite().AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).BuildPipeline());
+	_vk.pipeline = Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddDepthTest().AddDepthWrite().AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).AddPushConstantRange(VkPushConstantRange{
+	.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT, // or VERTEX_BIT|FRAGMENT_BIT if both use it
+	.offset = 0,
+	.size = sizeof(float)}).BuildPipeline(_vk.pipelineLayout));
+}
+
+void VulkanBackend::InitDepthTexture()
+{
+	_depth = Texture(_vk.device, _vk.physicalDevice);
+
+	VkFormat depthFormat;
+	std::vector<VkFormat> formats =
+	{
+		VK_FORMAT_D32_SFLOAT_S8_UINT,
+		VK_FORMAT_D32_SFLOAT,
+		VK_FORMAT_D24_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM_S8_UINT,
+		VK_FORMAT_D16_UNORM
+	};
+
+	for (size_t i = 0; i < formats.size(); i++)
+	{
+		VkFormatProperties formatProperties;
+		vkGetPhysicalDeviceFormatProperties(_vk.physicalDevice, formats[i], &formatProperties);
+
+		if ((formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			depthFormat = formats[i];
+			break;
+		}
+	}
+
+	_depth.CreateImage({ _vk.win.GetWidth(), _vk.win.GetHeight(), 1 }, 1, SampleCount::SAMPLE_1BIT, (PipelineFormat)depthFormat, ImageTiling::OPTIMAL, ImageUsage::DEPTH_STENCIL, MemoryFlags::GPU).CreateImageView(ImageAspect::DEPTH);
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
@@ -444,6 +484,7 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 	Attempt(CreateDevice());
 	Attempt(CreateSwapchain());
 	Attempt(CreateSwapchainImageViews());
+	InitDepthTexture();
 
 	_swapchainCommandBuffers.resize(_maxFrames);
 	_imageAvailableSemaphores.resize(_maxFrames);
@@ -543,10 +584,117 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+	if (_initialFrames)
+	{
+		VkImageMemoryBarrier2 colorImageMemoryBarrier
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			//.pNext = ,
+			.srcStageMask = VK_PIPELINE_STAGE_2_NONE,
+			.srcAccessMask = 0,
+			.dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			//.srcQueueFamilyIndex = ,
+			//.dstQueueFamilyIndex = ,
+			.image = _swapchainImages[_targetFrame],
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		VkImageMemoryBarrier2 depthImageMemoryBarrier
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			//.pNext = ,
+			.srcStageMask = VK_PIPELINE_STAGE_2_NONE,
+			.srcAccessMask = 0,
+			.dstStageMask = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT,
+			.dstAccessMask = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+			.newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+			//.srcQueueFamilyIndex = ,
+			//.dstQueueFamilyIndex = ,
+			.image = _swapchainImages[_targetFrame],
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		VkDependencyInfo dependencyInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+			//.pNext = ,
+			//.dependencyFlags = ,
+			//.memoryBarrierCount = ,
+			//.pMemoryBarriers = ,
+			//.bufferMemoryBarrierCount = ,
+			//.pBufferMemoryBarriers = ,
+			.imageMemoryBarrierCount = 1,
+			.pImageMemoryBarriers = &colorImageMemoryBarrier,
+		};
+
+		vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+		
+		_frame++;
+		if (_frame >= 3) _initialFrames = false;
+	}
+	else
+	{
+		VkImageMemoryBarrier2 colorImageMemoryBarrier
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			//.pNext = ,
+			.srcStageMask = VK_PIPELINE_STAGE_2_NONE,
+			.srcAccessMask = 0,
+			.dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			//.srcQueueFamilyIndex = ,
+			//.dstQueueFamilyIndex = ,
+			.image = _swapchainImages[_targetFrame],
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		VkDependencyInfo dependencyInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+			//.pNext = ,
+			//.dependencyFlags = ,
+			//.memoryBarrierCount = ,
+			//.pMemoryBarriers = ,
+			//.bufferMemoryBarrierCount = ,
+			//.pBufferMemoryBarriers = ,
+			.imageMemoryBarrierCount = 1,
+			.pImageMemoryBarriers = &colorImageMemoryBarrier,
+		};
+
+		vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+	}
+
 	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = _swapchainImageViews[_currentFrame],
+		.imageView = _swapchainImageViews[_targetFrame],
 		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -560,7 +708,7 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 	VkRenderingAttachmentInfoKHR swapchainDepthRenderingAttachmentInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = _swapchainImageViews[_currentFrame],
+		.imageView = _depth.imageView,
 		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
 		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
 		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -594,6 +742,47 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 {
 	vkCmdEndRendering(commandBuffer);
+
+	{
+		VkImageMemoryBarrier2 presentImageMemoryBarrier
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			//.pNext = ,
+			.srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+			.dstStageMask = VK_PIPELINE_STAGE_2_NONE,
+			.dstAccessMask = 0,
+			.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			//.srcQueueFamilyIndex = ,
+			//.dstQueueFamilyIndex = ,
+			.image = _swapchainImages[_targetFrame],
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		VkDependencyInfo dependencyInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+			//.pNext = ,
+			//.dependencyFlags = ,
+			//.memoryBarrierCount = ,
+			//.pMemoryBarriers = ,
+			//.bufferMemoryBarrierCount = ,
+			//.pBufferMemoryBarriers = ,
+			.imageMemoryBarrierCount = 1,
+			.pImageMemoryBarriers = &presentImageMemoryBarrier,
+		};
+
+		vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+	}
+
 	vkEndCommandBuffer(commandBuffer);
 
 	//Setup the Semaphores and Command Buffer to be sent into Queue Submit
@@ -826,7 +1015,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRenderingInfo(RenderingInfo
 	return *this;
 }
 
-RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline()
+RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline(VkPipelineLayout& pipelineLayout)
 {
 	VkPipeline pipeline = nullptr;
 
@@ -841,7 +1030,7 @@ RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline()
 		.pPushConstantRanges = _pipelinePushConstantRanges.data(),
 	};
 
-	if (vkCreatePipelineLayout(_vk->device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreatePipelineLayout");
+	if (vkCreatePipelineLayout(_vk->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreatePipelineLayout");
 
 	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
 	{
@@ -859,7 +1048,7 @@ RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline()
 		.pDepthStencilState = &_pipelineDepthStencilStateCreateInfo,
 		.pColorBlendState = &_pipelineColorBlendStateCreateInfo,
 		.pDynamicState = &_pipelineDynamicStateCreateInfo,
-		.layout = _pipelineLayout,
+		.layout = pipelineLayout,
 		//.renderPass = ,
 		//.subpass = ,
 		//.basePipelineHandle = ,

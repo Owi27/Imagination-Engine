@@ -4,6 +4,7 @@ struct IResource
 {
 	VkDeviceMemory memory;
 
+	IResource() = default;
 	IResource(VkDevice pDevice, VkPhysicalDevice pPhysicalDevice)
 	{
 		_device = pDevice;
@@ -34,18 +35,18 @@ public:
 
 	}
 
-	Buffer& CreateBuffer(VkDeviceSize pSize, void* pData, BufferUsage pUsage, MemoryFlags pMemory);
+	Buffer& CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory);
 	void WriteToBuffer(const void* pData);
 };
 
 class Texture : IResource //texture, image same shii
 {
-	PipelineFormat _format;
 	unsigned _mipLevels;
 
 public:
 	VkImage image;
 	VkImageView imageView;
+	PipelineFormat format;
 
 	Texture() = default;
 	Texture(VkDevice pDevice, VkPhysicalDevice pPhysicalDevice) : IResource(pDevice, pPhysicalDevice)

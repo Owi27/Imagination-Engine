@@ -6,6 +6,7 @@
 #include <optional>
 #include <IWindow.h>
 #include "Shader.h"
+#include "Resource.hpp"
 
 struct VulkanContext
 {
@@ -39,7 +40,7 @@ struct PipelineBuilder
 	~PipelineBuilder() = default;
 
 
-	virtual RETURN(VkPipeline) BuildPipeline() = 0;
+	virtual RETURN(VkPipeline) BuildPipeline(VkPipelineLayout& pipelineLayout) = 0;
 
 protected:
 	std::unique_ptr<VulkanContext> _vk;
@@ -267,12 +268,12 @@ struct GraphicsPipelineBuilder : PipelineBuilder
 	GraphicsPipelineBuilder& AddPushConstantRange(VkPushConstantRange pushConstantRange);
 	GraphicsPipelineBuilder& SetRenderingInfo(RenderingInfo renderingInfo);
 
-	RETURN(VkPipeline) BuildPipeline() override;
+	RETURN(VkPipeline) BuildPipeline(VkPipelineLayout& pipelineLayout) override;
 
 private:
 	VkViewport _viewport;
 	VkRect2D   _scissor;
-	VkPipelineLayout _pipelineLayout;
+	//VkPipelineLayout _pipelineLayout;
 	std::vector<Shader> _shaders;
 	std::vector<VkDynamicState> _dynamicStates;          // dynamic states
 	std::vector<VkFormat> _colorAttachmentFormats;   // real VkFormat storage
@@ -293,30 +294,6 @@ private:
 	VkPipelineColorBlendStateCreateInfo _pipelineColorBlendStateCreateInfo;
 	VkPipelineDynamicStateCreateInfo _pipelineDynamicStateCreateInfo;
 	VkPipelineRenderingCreateInfoKHR _pipelineRenderingCreateInfo;
-};
-
-struct Texture
-{
-	VkImage image;
-	VkImageView imageView;
-	VkDeviceMemory memory;
-};
-
-
-enum class MemoryFlags : unsigned
-{
-
-};
-
-struct Buffer
-{
-	
-
-	Buffer() = default;
-	Buffer(VkDeviceSize pSize, void* pData, BufferUsage pUsage)
-	{
-
-	}
 };
 
 class VulkanBackend
@@ -352,13 +329,12 @@ class VulkanBackend
 	std::vector<const char*> _deviceExtensions =
 	{
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-		VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
+		//VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+		//VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
 		"VK_KHR_pipeline_executable_properties"
 	};
 
 	//vulkan
-	VulkanContext _vk;
 	//VkInstance _instance = nullptr;
 	//VkDevice _device = nullptr;
 	//VkPhysicalDevice _physicalDevice = nullptr;
@@ -372,9 +348,10 @@ class VulkanBackend
 	std::vector<VkCommandBuffer> _swapchainCommandBuffers;
 	std::vector<VkSemaphore> _imageAvailableSemaphores, _renderFinishedSemaphores;
 	std::vector<VkFence> _renderingFences;
+	Texture _depth;
 
-	bool _frameLocked;
-	unsigned _currentFrame = 0, _targetFrame = 0, _maxFrames;
+	bool _frameLocked, _initialFrames = true;
+	unsigned _currentFrame = 0, _targetFrame = 0, _maxFrames, _frame = 0;
 
 
 	RETURN(bool) CheckCompatibility(const char** instanceExtensions, const char** deviceExtensions);
@@ -394,7 +371,7 @@ class VulkanBackend
 	void CreateGraphicsPipeline();
 
 
-
+	void InitDepthTexture();
 	RETURN(bool) CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 	RETURN(SwapchainSupportDetails) QuerySwapchainSupport(VkPhysicalDevice physicalDevice);
 	RETURN(VkSurfaceFormatKHR) ChooseSwapchainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -403,6 +380,8 @@ class VulkanBackend
 
 
 public:
+	VulkanContext _vk;
+
 	VulkanBackend()
 	{
 	}
