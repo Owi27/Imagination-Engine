@@ -5,15 +5,13 @@ struct IResource
 	VkDeviceMemory memory;
 
 	IResource() = default;
-	IResource(VkDevice pDevice, VkPhysicalDevice pPhysicalDevice)
+	IResource(VulkanContext pCtx)
 	{
-		_device = pDevice;
-		_physicalDevice = pPhysicalDevice;
+		_vk = pCtx;
 	}
 
 protected:
-	VkDevice _device;
-	VkPhysicalDevice _physicalDevice;
+	VulkanContext _vk;
 
 	unsigned FindMemoryType(unsigned pFilter, MemoryFlags pMemoryFlags);
 };
@@ -25,16 +23,18 @@ public:
 	VkDeviceSize size;
 
 	Buffer() = default;
-	Buffer(VkDevice pDevice, VkPhysicalDevice pPhysicalDevice) : IResource(pDevice, pPhysicalDevice)
+	Buffer(VulkanContext pCtx) : IResource(pCtx)
 	{
 
 	}
 
 	~Buffer()
 	{
-
+		vkDestroyBuffer(_vk.device, buffer, nullptr);
+		vkFreeMemory(_vk.device, memory, nullptr);
 	}
 
+	void CopyBuffer(Buffer pSourceBuffer);
 	Buffer& CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory);
 	void WriteToBuffer(const void* pData);
 };
@@ -42,6 +42,8 @@ public:
 class Texture : IResource //texture, image same shii
 {
 	unsigned _mipLevels;
+	unsigned _width, _height;
+	VkExtent3D _extent;
 
 public:
 	VkImage image;
@@ -49,16 +51,20 @@ public:
 	PipelineFormat format;
 
 	Texture() = default;
-	Texture(VkDevice pDevice, VkPhysicalDevice pPhysicalDevice) : IResource(pDevice, pPhysicalDevice)
+	Texture(VulkanContext pCtx) : IResource(pCtx)
 	{
 
 	}
 
 	~Texture()
 	{
-
+		vkDestroyImage(_vk.device, image, nullptr);
+		vkDestroyImageView(_vk.device, imageView, nullptr);
+		vkFreeMemory(_vk.device, memory, nullptr);
 	}
 
+	Texture& LoadImage(const std::string& pImgPath);
 	Texture& CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCount pSampleCount, PipelineFormat pFormat, ImageTiling pImageTiling, ImageUsage pUsage, MemoryFlags pMemory);
 	void CreateImageView(ImageAspect pImageAspect);
+	Texture& CopyBuffer(Buffer pSourceBuffer);
 };

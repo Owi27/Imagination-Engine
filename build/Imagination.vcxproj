@@ -417,6 +417,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ClInclude Include="..\includes\Enums.h" />
     <ClInclude Include="..\includes\Resource.hpp" />
+    <ClInclude Include="..\includes\Structs.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\FrameGraph.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Gateware.h" />

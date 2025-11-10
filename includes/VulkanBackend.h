@@ -3,32 +3,8 @@
 #include <expected>
 #include <vector>
 #include <Macros.h>
-#include <optional>
-#include <IWindow.h>
 #include "Shader.h"
 #include "Resource.hpp"
-
-struct VulkanContext
-{
-	struct QueueFamilyIndices
-	{
-		std::optional<unsigned> graphicsFamily = 0;
-		std::optional<unsigned> presentFamily = 0;
-
-		bool IsComplete() { return graphicsFamily.has_value() && presentFamily.has_value(); }
-	} queueFamilyIndices;
-	ImgnWindow& win = ImgnWindow::GetInstance();
-	VkInstance instance = nullptr;
-	VkPhysicalDevice physicalDevice = nullptr;
-	VkDevice device = nullptr;
-	VkQueue graphicsQueue = nullptr;
-	VkQueue presentQueue = nullptr;
-	VkPipelineCache pipelineCache = nullptr;
-	VkDescriptorPool descriptorPool = nullptr;
-	VkPipeline pipeline = nullptr;
-	VkPipelineLayout pipelineLayout = nullptr;
-	VkCommandPool commandPool = nullptr;
-};
 
 struct PipelineBuilder
 {
@@ -405,4 +381,3 @@ public:
 	RETURN(VkCommandBuffer) StartFrame();
 	RETURN(void) EndFrame(VkCommandBuffer commandBuffer);
 };
-

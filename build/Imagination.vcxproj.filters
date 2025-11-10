@@ -77,6 +77,10 @@
       <Filter>Precompile Header File</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\Resource.hpp" />
+    <ClInclude Include="..\includes\Enums.h" />
+    <ClInclude Include="..\includes\Structs.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />

@@ -324,7 +324,7 @@ void VulkanBackend::CreateGraphicsPipeline()
 
 void VulkanBackend::InitDepthTexture()
 {
-	_depth = Texture(_vk.device, _vk.physicalDevice);
+	_depth = Texture(_vk);
 
 	VkFormat depthFormat;
 	std::vector<VkFormat> formats =
@@ -958,7 +958,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPipelineAttachments(std::ve
 	_blendAttachments.resize(pipelineAttachments.size());
 
 	int i = 0;
-	for (auto pipelineAttachment : pipelineAttachments)
+	for (auto& pipelineAttachment : pipelineAttachments)
 	{
 		VkPipelineColorBlendAttachmentState attachmentState
 		{
@@ -1011,7 +1011,7 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRenderingInfo(RenderingInfo
 	_pipelineRenderingCreateInfo.pColorAttachmentFormats = (VkFormat*)_colorAttachmentFormats.data();
 	_pipelineRenderingCreateInfo.depthAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
 	_pipelineRenderingCreateInfo.stencilAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
-
+	
 	return *this;
 }
 

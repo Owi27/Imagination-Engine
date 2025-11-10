@@ -1,4 +1,23 @@
 #include "D:/GitHub/Imagination-Engine/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+//#include "stb/stb_image_write.h"
+
+void Buffer::CopyBuffer(Buffer pSourceBuffer)
+{
+	VkCommandBuffer commandBuffer = Attempt(StartCommandBuffer(_vk));
+
+	VkBufferCopy bufferCopy
+	{
+		.srcOffset = 0,
+		.dstOffset = 0,
+		.size = pSourceBuffer.size,
+	};
+
+	vkCmdCopyBuffer(commandBuffer, pSourceBuffer.buffer, buffer, 1, &bufferCopy);
+
+	Attempt(EndCommandBuffer(_vk, commandBuffer));
+}
 
 Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory)
 {
@@ -16,10 +35,10 @@ Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags
 		//.pQueueFamilyIndices = ,
 	};
 
-	vkCreateBuffer(_device, &bufferCreateInfo, nullptr, &buffer);
+	vkCreateBuffer(_vk.device, &bufferCreateInfo, nullptr, &buffer);
 
 	VkMemoryRequirements memoryRequirements;
-	vkGetBufferMemoryRequirements(_device, buffer, &memoryRequirements);
+	vkGetBufferMemoryRequirements(_vk.device, buffer, &memoryRequirements);
 	VkMemoryAllocateInfo memoryAllocateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -30,8 +49,8 @@ Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags
 
 	memoryAllocateInfo.memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, pMemory);
 
-	vkAllocateMemory(_device, &memoryAllocateInfo, nullptr, &memory);
-	vkBindBufferMemory(_device, buffer, memory, 0);
+	vkAllocateMemory(_vk.device, &memoryAllocateInfo, nullptr, &memory);
+	vkBindBufferMemory(_vk.device, buffer, memory, 0);
 
 	return *this;
 }
@@ -39,16 +58,16 @@ Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags
 void Buffer::WriteToBuffer(const void* pData)
 {
 	void* data;
-	vkMapMemory(_device, memory, 0, size, 0, &data);
+	vkMapMemory(_vk.device, memory, 0, size, 0, &data);
 	memcpy(data, pData, size);
-	vkUnmapMemory(_device, memory);
+	vkUnmapMemory(_vk.device, memory);
 }
 
 unsigned IResource::FindMemoryType(unsigned pFilter, MemoryFlags pMemoryFlags)
 {
 	unsigned out;
 	VkPhysicalDeviceMemoryProperties memoryProperties;
-	vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memoryProperties);
+	vkGetPhysicalDeviceMemoryProperties(_vk.physicalDevice, &memoryProperties);
 
 	for (size_t i = 0; i < memoryProperties.memoryTypeCount; i++)
 	{
@@ -83,10 +102,10 @@ Texture& Texture::CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCou
 		.initialLayout = (VkImageLayout)ImageLayout::UNDEFINED,
 	};
 
-	vkCreateImage(_device, &imageCreateInfo, nullptr, &image);
+	vkCreateImage(_vk.device, &imageCreateInfo, nullptr, &image);
 
 	VkMemoryRequirements memoryRequirements;
-	vkGetImageMemoryRequirements(_device, image, &memoryRequirements);
+	vkGetImageMemoryRequirements(_vk.device, image, &memoryRequirements);
 	VkMemoryAllocateInfo memoryAllocateInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -97,11 +116,14 @@ Texture& Texture::CreateImage(VkExtent3D pExtent, unsigned pMipLevels, SampleCou
 
 	memoryAllocateInfo.memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, pMemory);
 
-	vkAllocateMemory(_device, &memoryAllocateInfo, nullptr, &memory);
-	vkBindImageMemory(_device, image, memory, 0);
+	vkAllocateMemory(_vk.device, &memoryAllocateInfo, nullptr, &memory);
+	vkBindImageMemory(_vk.device, image, memory, 0);
 
 	format = pFormat;
 	_mipLevels = pMipLevels;
+	_extent = pExtent;
+	_width = pExtent.width;
+	_height = pExtent.height;
 
 	return *this;
 }
@@ -133,5 +155,56 @@ void Texture::CreateImageView(ImageAspect pImageAspect)
 		}
 	};
 
-	vkCreateImageView(_device, &imageViewCreateInfo, nullptr, &imageView);
+	vkCreateImageView(_vk.device, &imageViewCreateInfo, nullptr, &imageView);
+}
+
+Texture& Texture::LoadImage(const std::string& pImgPath)
+{
+	int width, height, component;
+
+	auto data = stbi_load(pImgPath.c_str(), &width, &height, &component, STBI_rgb_alpha);
+
+	int imgSize = width * height * component;
+	format = PipelineFormat::COLOR;
+
+	Buffer staging(_vk);
+	staging.CreateBuffer(imgSize, BufferUsage::SOURCE, MemoryFlags::CPU | MemoryFlags::BOTH);
+	staging.WriteToBuffer(data);
+
+	Buffer transition(_vk);
+	transition.CreateBuffer(imgSize, BufferUsage::DESTINATION, MemoryFlags::GPU).CopyBuffer(staging);
+
+	unsigned mipLevels = static_cast<unsigned>(floor(log2(std::max(width, height))) + 1);
+	
+	CreateImage({ static_cast<unsigned>(width), static_cast<unsigned>(height), 1 }, mipLevels, SampleCount::SAMPLE_1BIT, format, ImageTiling::OPTIMAL, ImageUsage::SOURCE | ImageUsage::DESTINATION | ImageUsage::SAMPLED, MemoryFlags::GPU).CopyBuffer(staging).CreateImageView(ImageAspect::COLOR);
+
+	return *this;
+}
+
+
+Texture& Texture::CopyBuffer(Buffer pSourceBuffer)
+{
+	VkCommandBuffer commandBuffer = Attempt(StartCommandBuffer(_vk));
+
+	VkBufferImageCopy bufferImageCopy
+	{
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+		.imageSubresource
+		{
+			.aspectMask = (VkImageAspectFlags)ImageAspect::COLOR,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 0,
+		},
+		.imageOffset = { 0, 0, 0 },
+		.imageExtent = _extent,
+	};
+
+	vkCmdCopyBufferToImage(commandBuffer, pSourceBuffer.buffer, image, (VkImageLayout)ImageLayout::GENERAL, 1, &bufferImageCopy);
+
+	Attempt(EndCommandBuffer(_vk, commandBuffer));
+
+	return *this
 }

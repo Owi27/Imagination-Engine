@@ -36,14 +36,14 @@ int main()
 	float pos[] = { v1.x, v1.y, v2.x, v2.y, v3.x, v3.y };
 	unsigned char col[] = { v1.r, v1.g, v1.b, v1.a, v2.r, v2.g, v2.b, v2.a , v3.r, v3.g, v3.b, v3.a };
 
-	Buffer posB(vk._vk.device, vk._vk.physicalDevice), colB(vk._vk.device, vk._vk.physicalDevice);
+	Buffer posB(vk._vk), colB(vk._vk);
 	posB.CreateBuffer(sizeof(float) * 2 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(pos);
 	colB.CreateBuffer(sizeof(unsigned char) * 4 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(col);
 
 	VkBuffer bs[] = { posB.buffer, colB.buffer };
 	VkDeviceSize o[] = { 0 };
 
-	Buffer vertex(vk._vk.device, vk._vk.physicalDevice);
+	Buffer vertex(vk._vk);
 	vertex.CreateBuffer(sizeof(Vertex) * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(vsp);
 
 	while (win.ProcessEvents())
