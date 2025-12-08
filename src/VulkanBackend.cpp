@@ -6,6 +6,8 @@
 #include <limits>
 #include <algorithm>
 #include <cassert>
+#include "PipelineBuilder.h"
+#include <memory>
 
 RETURN(bool, const char*) VulkanBackend::CheckCompatibility(const char** instanceExtensions, const char** deviceExtensions)
 {
@@ -134,19 +136,89 @@ RETURN(void) VulkanBackend::CreateDevice()
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
 
-	VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering
+	VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatureExt
 	{
-		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
-		.pNext = nullptr,
-		.dynamicRendering = true
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
+		//.pNext = , 
+		.descriptorBuffer = true,
+		//.descriptorBufferCaptureReplay = , 
+		//.descriptorBufferImageLayoutIgnored = , 
+		//.descriptorBufferPushDescriptors = , 
 	};
+
+	VkPhysicalDeviceVulkan12Features vulkan12features
+	{
+		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+		.pNext = &descriptorBufferFeatureExt,
+		//.samplerMirrorClampToEdge = ,
+		//.drawIndirectCount = ,
+		//.storageBuffer8BitAccess = ,
+		//.uniformAndStorageBuffer8BitAccess = ,
+		//.storagePushConstant8 = ,
+		//.shaderBufferInt64Atomics = ,
+		//.shaderSharedInt64Atomics = ,
+		//.shaderFloat16 = ,
+		//.shaderInt8 = ,
+		//.descriptorIndexing = ,
+		//.shaderInputAttachmentArrayDynamicIndexing = ,
+		//.shaderUniformTexelBufferArrayDynamicIndexing = ,
+		//.shaderStorageTexelBufferArrayDynamicIndexing = ,
+		//.shaderUniformBufferArrayNonUniformIndexing = ,
+		//.shaderSampledImageArrayNonUniformIndexing = ,
+		//.shaderStorageBufferArrayNonUniformIndexing = ,
+		//.shaderStorageImageArrayNonUniformIndexing = ,
+		//.shaderInputAttachmentArrayNonUniformIndexing = ,
+		//.shaderUniformTexelBufferArrayNonUniformIndexing = ,
+		//.shaderStorageTexelBufferArrayNonUniformIndexing = ,
+		//.descriptorBindingUniformBufferUpdateAfterBind = ,
+		//.descriptorBindingSampledImageUpdateAfterBind = ,
+		//.descriptorBindingStorageImageUpdateAfterBind = ,
+		//.descriptorBindingStorageBufferUpdateAfterBind = ,
+		//.descriptorBindingUniformTexelBufferUpdateAfterBind = ,
+		//.descriptorBindingStorageTexelBufferUpdateAfterBind = ,
+		//.descriptorBindingUpdateUnusedWhilePending = ,
+		//.descriptorBindingPartiallyBound = ,
+		//.descriptorBindingVariableDescriptorCount = ,
+		//.runtimeDescriptorArray = ,
+		//.samplerFilterMinmax = ,
+		//.scalarBlockLayout = ,
+		//.imagelessFramebuffer = ,
+		//.uniformBufferStandardLayout = ,
+		//.shaderSubgroupExtendedTypes = ,
+		//.separateDepthStencilLayouts = ,
+		//.hostQueryReset = ,
+		//.timelineSemaphore = ,
+		.bufferDeviceAddress = true,
+		//.bufferDeviceAddressCaptureReplay = ,
+		//.bufferDeviceAddressMultiDevice = ,
+		//.vulkanMemoryModel = ,
+		//.vulkanMemoryModelDeviceScope = ,
+		//.vulkanMemoryModelAvailabilityVisibilityChains = ,
+		//.shaderOutputViewportIndex = ,
+		//.shaderOutputLayer = ,
+		//.subgroupBroadcastDynamicId = ,
+	};
+
 	VkPhysicalDeviceVulkan13Features vulkan13features
 	{
 		.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+		.pNext = &vulkan12features,
+		//.robustImageAccess = ,
+		//.inlineUniformBlock = ,
+		//.descriptorBindingInlineUniformBlockUpdateAfterBind = ,
+		//.pipelineCreationCacheControl = ,
+		//.privateData = ,
+		//.shaderDemoteToHelperInvocation = ,
+		//.shaderTerminateInvocation = ,
+		//.subgroupSizeControl = ,
+		//.computeFullSubgroups = ,
 		.synchronization2 = true,
-		.dynamicRendering = true
+		//.textureCompressionASTC_HDR = ,
+		//.shaderZeroInitializeWorkgroupMemory = ,
+		.dynamicRendering = true,
+		//.shaderIntegerDotProduct = ,
+		//.maintenance4 = ,
 	};
-
 
 	VkDeviceCreateInfo createInfo
 	{
@@ -226,29 +298,30 @@ RETURN(void) VulkanBackend::CreateSwapchain()
 	if (vkCreateSwapchainKHR(_vk.device, &createInfo, nullptr, &_swapchain)) return std::unexpected("VulkanBackend.cpp | CreateSwapchain() | vkCreateSwapchainKHR");
 
 	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &_maxFrames, nullptr);
-	_swapchainImages.resize(_maxFrames);
-	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &_maxFrames, _swapchainImages.data());
-
-	_swapchainImageFormat = surfaceFormat.format;
-	_swapchainExtent = extent;
+	_vk.swapchainImages.resize(_maxFrames);
+	vkGetSwapchainImagesKHR(_vk.device, _swapchain, &_maxFrames, _vk.swapchainImages.data());
+	
+	_vk.swapchainFormat = (PipelineFormat)surfaceFormat.format;
+	_vk.swapchainExtent = extent;
+	//_swapchainExtent = extent;
 
 	return {};
 }
 
 RETURN(void) VulkanBackend::CreateSwapchainImageViews()
 {
-	_swapchainImageViews.resize(_swapchainImages.size());
+	_vk.swapchainImageViews.resize(_maxFrames);
 
-	for (size_t i = 0; i < _swapchainImages.size(); i++)
+	for (size_t i = 0; i < _vk.swapchainImages.size(); i++)
 	{
 		VkImageViewCreateInfo imageViewCreateInfo
 		{
 			.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			//.pNext = ,
 			//.flags = ,
-			.image = _swapchainImages[i],
+			.image = _vk.swapchainImages[i],
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
-			.format = _swapchainImageFormat,
+			.format = (VkFormat)_vk.swapchainFormat,
 			.components
 			{
 				.r = VK_COMPONENT_SWIZZLE_IDENTITY,
@@ -266,7 +339,7 @@ RETURN(void) VulkanBackend::CreateSwapchainImageViews()
 			}
 		};
 
-		if (vkCreateImageView(_vk.device, &imageViewCreateInfo, nullptr, &_swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
+		if (vkCreateImageView(_vk.device, &imageViewCreateInfo, nullptr, &_vk.swapchainImageViews[i])) return std::unexpected("VulkanBackend.cpp | CreateSwapchainImageViews() | vkCreateImageView");
 	}
 
 	return {};
@@ -311,9 +384,9 @@ void VulkanBackend::CreateGraphicsPipeline()
 	{
 		.colorAttachmentFormats
 		{
-			(PipelineFormat)_swapchainImageFormat
+			_vk.swapchainFormat
 		},
-		.depthStencilFormat = _depth.format
+		.depthStencilFormat = _vk.depthFormat
 	};
 
 	_vk.pipeline = Attempt(pipelineBuilder.AddShaders(shaders).AddVertexBindingDescriptions(vertexInputDescriptions).AddDepthTest().AddDepthWrite().AddPipelineAttachments(pipelineAttachments).SetRenderingInfo(renderInfo).AddPushConstantRange(VkPushConstantRange{
@@ -324,7 +397,8 @@ void VulkanBackend::CreateGraphicsPipeline()
 
 void VulkanBackend::InitDepthTexture()
 {
-	_depth = Texture(_vk);
+	//_vk.depth = std::make_unique<Texture>(_vk);
+	Texture depth(_vk);
 
 	VkFormat depthFormat;
 	std::vector<VkFormat> formats =
@@ -348,7 +422,11 @@ void VulkanBackend::InitDepthTexture()
 		}
 	}
 
-	_depth.CreateImage({ _vk.win.GetWidth(), _vk.win.GetHeight(), 1 }, 1, SampleCount::SAMPLE_1BIT, (PipelineFormat)depthFormat, ImageTiling::OPTIMAL, ImageUsage::DEPTH_STENCIL, MemoryFlags::GPU).CreateImageView(ImageAspect::DEPTH);
+	depth.CreateImage({ _vk.win.GetWidth(), _vk.win.GetHeight(), 1 }, 1, SampleCount::SAMPLE_1BIT, (PipelineFormat)depthFormat, ImageTiling::OPTIMAL, ImageUsage::DEPTH_STENCIL, MemoryFlags::GPU).CreateImageView(ImageAspect::DEPTH | ImageAspect::STENCIL).TransitionImageLayout(ImageLayout::DEPTH_STENCIL);
+	_vk.depthImage = depth.image;
+	_vk.depthImageView = depth.imageView;
+	_vk.depthFormat = (PipelineFormat)depthFormat;
+	depth.owns = false;
 }
 
 RETURN(bool) VulkanBackend::CheckDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
@@ -459,7 +537,7 @@ RETURN(void) VulkanBackend::CreateInstance(unsigned layerCount, const char** lay
 		.enabledExtensionCount = (unsigned)_instanceExtensions.size(),
 		.ppEnabledExtensionNames = _instanceExtensions.data()
 	};
-
+	
 	if (vkCreateInstance(&instanceCreateInfo, nullptr, &_vk.instance)) return std::unexpected("VulkanBackend.cpp | CreateInstance() | vkCreateInstance");
 
 	return {};
@@ -484,7 +562,6 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 	Attempt(CreateDevice());
 	Attempt(CreateSwapchain());
 	Attempt(CreateSwapchainImageViews());
-	InitDepthTexture();
 
 	_swapchainCommandBuffers.resize(_maxFrames);
 	_imageAvailableSemaphores.resize(_maxFrames);
@@ -533,6 +610,7 @@ RETURN(bool) VulkanBackend::Init(unsigned layerCount, const char** layers, unsig
 		vkCreateFence(_vk.device, &fenceCreateInfo, nullptr, &_renderingFences[i]);
 	}
 
+	InitDepthTexture();
 	CreateGraphicsPipeline();
 
 	return true;
@@ -544,12 +622,12 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 	_frameLocked = true;
 
 	//Wait for Queue to be ready
-	//if (m_PrevFrame != m_CurrentFrame)
-	vkWaitForFences(_vk.device, 1, &_renderingFences[_currentFrame], VK_TRUE, ~(static_cast<uint64_t>(0)));
+	//if (m_PrevFrame != m_vk.currentFrame)
+	vkWaitForFences(_vk.device, 1, &_renderingFences[_vk.currentFrame], VK_TRUE, ~(static_cast<uint64_t>(0)));
 
-	vkAcquireNextImageKHR(_vk.device, _swapchain,~(0ull), _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &_targetFrame);
+	vkAcquireNextImageKHR(_vk.device, _swapchain,~(0ull), _imageAvailableSemaphores[_vk.currentFrame], VK_NULL_HANDLE, &_vk.targetFrame);
 
-	VkCommandBuffer commandBuffer = _swapchainCommandBuffers[_currentFrame];
+	VkCommandBuffer commandBuffer = _swapchainCommandBuffers[_vk.currentFrame];
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo
 	{
@@ -598,7 +676,7 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			//.srcQueueFamilyIndex = ,
 			//.dstQueueFamilyIndex = ,
-			.image = _swapchainImages[_targetFrame],
+			.image = _vk.swapchainImages[_vk.targetFrame],
 			.subresourceRange
 			{
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -621,7 +699,7 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 			.newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
 			//.srcQueueFamilyIndex = ,
 			//.dstQueueFamilyIndex = ,
-			.image = _swapchainImages[_targetFrame],
+			.image = _vk.swapchainImages[_vk.targetFrame],
 			.subresourceRange
 			{
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -664,7 +742,7 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			//.srcQueueFamilyIndex = ,
 			//.dstQueueFamilyIndex = ,
-			.image = _swapchainImages[_targetFrame],
+			.image = _vk.swapchainImages[_vk.targetFrame],
 			.subresourceRange
 			{
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -691,57 +769,57 @@ RETURN(VkCommandBuffer) VulkanBackend::StartFrame()
 		vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
 	}
 
-	VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = _swapchainImageViews[_targetFrame],
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.clearValue
-		{
-			.color = {0, 0, 0, 1},
-			//.depthStencil = ,
-		}
-	};
+	//VkRenderingAttachmentInfoKHR swapchainRenderingAttachmentInfo
+	//{
+	//	.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+	//	.imageView = _vk.swapchainImageViews[_vk.targetFrame],
+	//	.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+	//	.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+	//	.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+	//	.clearValue
+	//	{
+	//		.color = {0, 0, 0, 1},
+	//		//.depthStencil = ,
+	//	}
+	//};
 
-	VkRenderingAttachmentInfoKHR swapchainDepthRenderingAttachmentInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
-		.imageView = _depth.imageView,
-		.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
-		.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-		.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-		.clearValue
-		{
-			//.color = ,
-			.depthStencil = { 1.f, 0},
-		}
-	};
+	//VkRenderingAttachmentInfoKHR swapchainDepthRenderingAttachmentInfo
+	//{
+	//	.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR,
+	//	.imageView = _vk.depthImageView,
+	//	.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+	//	.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+	//	.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+	//	.clearValue
+	//	{
+	//		//.color = ,
+	//		.depthStencil = { 1.f, 0},
+	//	}
+	//};
 
-	VkRenderingInfo renderingInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
-		.renderArea
-		{
-			.offset = { 0, 0 },
-			.extent = { _vk.win.GetWidth(), _vk.win.GetHeight() }
-		},
-		.layerCount = 1,
-		.colorAttachmentCount = 1, //(unsigned)colorRenderingAttachmentInfos.size(),
-		.pColorAttachments = &swapchainRenderingAttachmentInfo,//colorRenderingAttachmentInfos.data(),
-		.pDepthAttachment = &swapchainDepthRenderingAttachmentInfo
-	};
+	//VkRenderingInfo renderingInfo
+	//{
+	//	.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+	//	.renderArea
+	//	{
+	//		.offset = { 0, 0 },
+	//		.extent = { _vk.win.GetWidth(), _vk.win.GetHeight() }
+	//	},
+	//	.layerCount = 1,
+	//	.colorAttachmentCount = 1, //(unsigned)colorRenderingAttachmentInfos.size(),
+	//	.pColorAttachments = &swapchainRenderingAttachmentInfo,//colorRenderingAttachmentInfos.data(),
+	//	.pDepthAttachment = &swapchainDepthRenderingAttachmentInfo
+	//};
 
-	vkCmdBeginRendering(commandBuffer, &renderingInfo);
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vk.pipeline);
+	//vkCmdBeginRendering(commandBuffer, &renderingInfo);
+	//vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _vk.pipeline);
 
 	return commandBuffer;
 }
 
 RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 {
-	vkCmdEndRendering(commandBuffer);
+	//vkCmdEndRendering(commandBuffer);
 
 	{
 		VkImageMemoryBarrier2 presentImageMemoryBarrier
@@ -756,7 +834,7 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 			.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 			//.srcQueueFamilyIndex = ,
 			//.dstQueueFamilyIndex = ,
-			.image = _swapchainImages[_targetFrame],
+			.image = _vk.swapchainImages[_vk.targetFrame],
 			.subresourceRange
 			{
 				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -786,9 +864,9 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 	vkEndCommandBuffer(commandBuffer);
 
 	//Setup the Semaphores and Command Buffer to be sent into Queue Submit
-	VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[_currentFrame] }, signalSemaphores[] = { _renderFinishedSemaphores[_targetFrame] };
+	VkSemaphore waitSemaphores[] = { _imageAvailableSemaphores[_vk.currentFrame] }, signalSemaphores[] = { _renderFinishedSemaphores[_vk.targetFrame] };
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	VkCommandBuffer commandBuffers[] = { _swapchainCommandBuffers[_currentFrame] };
+	VkCommandBuffer commandBuffers[] = { _swapchainCommandBuffers[_vk.currentFrame] };
 
 	//Setup the Queue Submit Info
 	VkSubmitInfo submitInfo
@@ -805,8 +883,8 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 	};
 
 	//Reset the Fence
-	vkResetFences(_vk.device, 1, &_renderingFences[_currentFrame]);
-	vkQueueSubmit(_vk.graphicsQueue, 1, &submitInfo, _renderingFences[_currentFrame]);
+	vkResetFences(_vk.device, 1, &_renderingFences[_vk.currentFrame]);
+	vkQueueSubmit(_vk.graphicsQueue, 1, &submitInfo, _renderingFences[_vk.currentFrame]);
 
 	VkSwapchainKHR swapchains[] = { _swapchain };
 	VkPresentInfoKHR presentInfo
@@ -817,245 +895,14 @@ RETURN(void) VulkanBackend::EndFrame(VkCommandBuffer commandBuffer)
 		.pWaitSemaphores = signalSemaphores,
 		.swapchainCount = 1,
 		.pSwapchains = swapchains,
-		.pImageIndices = &_targetFrame,
+		.pImageIndices = &_vk.targetFrame,
 		.pResults = nullptr,
 	};
 	vkQueuePresentKHR(_vk.presentQueue, &presentInfo);
 
-	if (++_currentFrame >= _maxFrames) _currentFrame = 0;
+	if (++_vk.currentFrame >= _maxFrames) _vk.currentFrame = 0;
 
 	_frameLocked = false;
 
 	return {};
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<std::pair<std::string, ShaderType>> shaders)
-{
-	_shaders.clear();
-	_pipelineShaderStageCreateInfos.clear();
-	_shaders.reserve(shaders.size());
-	_pipelineShaderStageCreateInfos.reserve(shaders.size());
-
-	for (auto& shader : shaders)
-	{
-		// Construct Shader in-place (move-only class)
-		_shaders.emplace_back(_vk->device, shader.first, shader.second);
-
-		// Get stage info from the just-added shader
-		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = Attempt(_shaders.back().GetPipelineShaderStageCreateInfo());
-		_pipelineShaderStageCreateInfos.push_back(pipelineShaderStageCreateInfo);
-	}
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddVertexBindingDescriptions(std::vector<VertexInputDescription> inputDescriptions)
-{
-	_inputBindingDescriptions.resize(inputDescriptions.size());
-	_inputAttributeDescriptions.resize(inputDescriptions.size());
-
-	int i = 0;
-	for (auto inputDescription : inputDescriptions)
-	{
-		VkVertexInputBindingDescription inputBinding
-		{
-			.binding = inputDescription.binding,
-			.stride = inputDescription.stride,
-			.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
-		};
-
-		VkVertexInputAttributeDescription inputAttribute
-		{
-			.location = inputDescription.location,
-			.binding = inputDescription.binding,
-			.format = (VkFormat)inputDescription.format,
-			.offset = inputDescription.offset
-		};
-
-		_inputBindingDescriptions[i] = inputBinding;
-		_inputAttributeDescriptions[i] = inputAttribute;
-		i++;
-	}
-
-	_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = (unsigned)_inputBindingDescriptions.size();
-	_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = _inputBindingDescriptions.data();
-	_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = (unsigned)_inputAttributeDescriptions.size();
-	_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = _inputAttributeDescriptions.data();
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetTopology(Topology topology)
-{
-	_pipelineInputAssemblyStateCreateInfo.topology = (VkPrimitiveTopology)topology;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildTessellationState(unsigned patchControlPoints)
-{
-	_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::BuildViewportState(unsigned width, unsigned height)
-{
-	_viewport =
-	{
-		.x = 0,
-		.y = 0,
-		.width = static_cast<float>(width),
-		.height = static_cast<float>(height),
-		.minDepth = 0,
-		.maxDepth = 1
-	};
-
-	_scissor =
-	{
-		.offset = {0, 0},
-		.extent = {width, height}
-	};
-
-	_pipelineViewportStateCreateInfo.pViewports = &_viewport;
-	_pipelineViewportStateCreateInfo.pScissors = &_scissor;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRasterizationState(RasterStateInfo rasterStateInfo)
-{
-	_pipelineRasterizationStateCreateInfo.polygonMode = (VkPolygonMode)rasterStateInfo.polygonMode;
-	_pipelineRasterizationStateCreateInfo.cullMode = (VkCullModeFlags)rasterStateInfo.cullMode;
-	_pipelineRasterizationStateCreateInfo.frontFace = (VkFrontFace)rasterStateInfo.frontFace;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDepthTest()
-{
-	_pipelineDepthStencilStateCreateInfo.depthTestEnable = true;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDepthWrite()
-{
-	_pipelineDepthStencilStateCreateInfo.depthWriteEnable = true;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddStencilTest()
-{
-	_pipelineDepthStencilStateCreateInfo.stencilTestEnable = true;
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPipelineAttachments(std::vector<PipelineAttachment> pipelineAttachments)
-{
-	_blendAttachments.resize(pipelineAttachments.size());
-
-	int i = 0;
-	for (auto& pipelineAttachment : pipelineAttachments)
-	{
-		VkPipelineColorBlendAttachmentState attachmentState
-		{
-			.blendEnable = pipelineAttachment.blend,
-			.srcColorBlendFactor = (VkBlendFactor)pipelineAttachment.colorSource,
-			.dstColorBlendFactor = (VkBlendFactor)pipelineAttachment.colorDestination,
-			.colorBlendOp = (VkBlendOp)pipelineAttachment.colorOperation,
-			.srcAlphaBlendFactor = (VkBlendFactor)pipelineAttachment.alphaSource,
-			.dstAlphaBlendFactor = (VkBlendFactor)pipelineAttachment.alphaDestination,
-			.alphaBlendOp = (VkBlendOp)pipelineAttachment.alphaOperation,
-			.colorWriteMask = pipelineAttachment.writeMask,
-		};
-
-		_blendAttachments[i] = attachmentState;
-		i++;
-	}
-
-	_pipelineColorBlendStateCreateInfo.attachmentCount = (unsigned)_blendAttachments.size();
-	_pipelineColorBlendStateCreateInfo.pAttachments = _blendAttachments.data();
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
-{
-	_pipelineDescriptorSetLayouts.emplace_back(descriptorSetLayout);
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddPushConstantRange(VkPushConstantRange pushConstantRange)
-{
-	_pipelinePushConstantRanges.emplace_back(pushConstantRange);
-
-	return *this;
-}
-
-GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetRenderingInfo(RenderingInfo renderingInfo)
-{
-	_colorAttachmentFormats.resize(renderingInfo.colorAttachmentFormats.size());
-
-	int i = 0;
-	for (auto format : renderingInfo.colorAttachmentFormats)
-	{
-		_colorAttachmentFormats[i] = (VkFormat)format;
-		i++;
-	}
-
-	_pipelineRenderingCreateInfo.colorAttachmentCount = (unsigned)_colorAttachmentFormats.size();
-	_pipelineRenderingCreateInfo.pColorAttachmentFormats = (VkFormat*)_colorAttachmentFormats.data();
-	_pipelineRenderingCreateInfo.depthAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
-	_pipelineRenderingCreateInfo.stencilAttachmentFormat = (VkFormat)renderingInfo.depthStencilFormat;
-	
-	return *this;
-}
-
-RETURN(VkPipeline) GraphicsPipelineBuilder::BuildPipeline(VkPipelineLayout& pipelineLayout)
-{
-	VkPipeline pipeline = nullptr;
-
-	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		//.pNext = ,
-		//.flags = ,
-		.setLayoutCount = (unsigned)_pipelineDescriptorSetLayouts.size(),
-		.pSetLayouts = _pipelineDescriptorSetLayouts.data(),
-		.pushConstantRangeCount = (unsigned)_pipelinePushConstantRanges.size(),
-		.pPushConstantRanges = _pipelinePushConstantRanges.data(),
-	};
-
-	if (vkCreatePipelineLayout(_vk->device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreatePipelineLayout");
-
-	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo
-	{
-		.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		.pNext = &_pipelineRenderingCreateInfo,
-		//.flags = ,
-		.stageCount = (unsigned)_pipelineShaderStageCreateInfos.size(),
-		.pStages = _pipelineShaderStageCreateInfos.data(),
-		.pVertexInputState = &_pipelineVertexInputStateCreateInfo,
-		.pInputAssemblyState = &_pipelineInputAssemblyStateCreateInfo,
-		.pTessellationState = &_pipelineTessellationStateCreateInfo,
-		.pViewportState = &_pipelineViewportStateCreateInfo,
-		.pRasterizationState = &_pipelineRasterizationStateCreateInfo,
-		.pMultisampleState = &_pipelineMultisampleStateCreateInfo,
-		.pDepthStencilState = &_pipelineDepthStencilStateCreateInfo,
-		.pColorBlendState = &_pipelineColorBlendStateCreateInfo,
-		.pDynamicState = &_pipelineDynamicStateCreateInfo,
-		.layout = pipelineLayout,
-		//.renderPass = ,
-		//.subpass = ,
-		//.basePipelineHandle = ,
-		//.basePipelineIndex = ,
-	};
-
-	if (vkCreateGraphicsPipelines(_vk->device, nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline)) return std::unexpected("VulkanBackend.cpp | BuildPipeline() | vkCreateGraphicsPipelines");
-
-	return pipeline;
 }

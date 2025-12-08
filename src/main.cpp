@@ -3,22 +3,28 @@
 #include <memory>
 #include <IWindow.h>
 #include <VulkanBackend.h>
+#include "Passes.h"
 using namespace std;
 
 struct Vertex
 {
 	float x, y;
-	unsigned char r, g, b, a;
+	std::array<unsigned char, 4> col;
+
+	void AddToColorBuffer(std::vector<unsigned char>& pColorBuffer)
+	{
+		pColorBuffer.insert(pColorBuffer.end(), col.begin(), col.end());
+	}
 };
 
-float GetTimeSeconds()
-{
-	using clock = std::chrono::steady_clock;
-	static auto start = clock::now();                // record start once
-	auto now = clock::now();
-	std::chrono::duration<float> elapsed = now - start;
-	return elapsed.count();                          // seconds since start
-}
+//float GetTimeSeconds()
+//{
+//	using clock = std::chrono::steady_clock;
+//	static auto start = clock::now();                // record start once
+//	auto now = clock::now();
+//	std::chrono::duration<float> elapsed = now - start;
+//	return elapsed.count();                          // seconds since start
+//}
 
 int main()
 {
@@ -28,36 +34,95 @@ int main()
 	VulkanBackend vk;
 	vk.Init();
 
-	//Vertex v1 = { 0.f, -.5f, 0xFF, 0x00, 0x00, 0xFF }, v2 = { .5f, .5f, 0x00, 0xFF, 0x00, 0xFF }, v3 = { -.5f, .5f, 0x00, 0x00, 0xFF, 0xFF };
-	Vertex v1 = { 0.f, -5.f, 0xFF, 0x00, 0x00, 0xFF }, v2 = { 5.f, 5.f, 0x00, 0xFF, 0x00, 0xFF }, v3 = { -5.f, 5.f, 0x00, 0x00, 0xFF, 0xFF };
+	Vertex v1 = { 0.f, -.5f, {255, 183, 197, 255} }, v2 = { .5f, .5f, {255, 183, 255, 255} }, v3 = { -.5f, .5f, {255, 255, 197, 255} };
+	//Vertex v1 = { 0.f, -5.f, 0xFF, 0x00, 0x00, 0xFF }, v2 = { 5.f, 5.f, 0x00, 0xFF, 0x00, 0xFF }, v3 = { -5.f, 5.f, 0x00, 0x00, 0xFF, 0xFF };
 
 	Vertex vsp[] = { v1, v2, v3 };
 
 	float pos[] = { v1.x, v1.y, v2.x, v2.y, v3.x, v3.y };
-	unsigned char col[] = { v1.r, v1.g, v1.b, v1.a, v2.r, v2.g, v2.b, v2.a , v3.r, v3.g, v3.b, v3.a };
+	std::vector<unsigned char> colorBytes;
+	//v1.AddToColorBuffer(colorBytes);
+	//v2.AddToColorBuffer(colorBytes);
+	//v3.AddToColorBuffer(colorBytes);
+
+	for (auto& v : vsp)
+	{
+		v.AddToColorBuffer(colorBytes);
+	}
 
 	Buffer posB(vk._vk), colB(vk._vk);
-	posB.CreateBuffer(sizeof(float) * 2 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(pos);
-	colB.CreateBuffer(sizeof(unsigned char) * 4 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(col);
+
 
 	VkBuffer bs[] = { posB.buffer, colB.buffer };
 	VkDeviceSize o[] = { 0 };
 
 	Buffer vertex(vk._vk);
-	vertex.CreateBuffer(sizeof(Vertex) * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::BOTH).WriteToBuffer(vsp);
+	vertex.CreateBuffer(sizeof(Vertex) * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::CPU2GPU).WriteToBuffer(vsp);
+
+	Texture tex(vk._vk);
+	tex.LoadImage("../Tex/red.png");
+
+	TrianglePass trianglePass(vk._vk);
+	GBufferPass gBufferPass(vk._vk);
+
+	posB.CreateBuffer(sizeof(float) * 2 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::CPU2GPU).WriteToBuffer(pos);
+	colB.CreateBuffer(sizeof(unsigned char) * 4 * 3, BufferUsage::VERTEX, MemoryFlags::CPU | MemoryFlags::CPU2GPU).WriteToBuffer(colorBytes.data());
+
+	trianglePass.pos = std::move(posB);
+	trianglePass.col = std::move(colB);
+
+	std::array<Texture, 3> swapchain = { Texture(vk._vk), Texture(vk._vk), Texture(vk._vk) };
+	swapchain[0].Swapchain(vk._vk.swapchainImages[0], vk._vk.swapchainImageViews[0], PipelineFormat::SWAPCHAIN, { vk._vk.win.GetWidth(), vk._vk.win.GetHeight(), 1 }, ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
+	swapchain[1].Swapchain(vk._vk.swapchainImages[1], vk._vk.swapchainImageViews[1], PipelineFormat::SWAPCHAIN, { vk._vk.win.GetWidth(), vk._vk.win.GetHeight(), 1 }, ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
+	swapchain[2].Swapchain(vk._vk.swapchainImages[2], vk._vk.swapchainImageViews[2], PipelineFormat::SWAPCHAIN, { vk._vk.win.GetWidth(), vk._vk.win.GetHeight(), 1 }, ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
+	
+	int i = 0;
+	//vk.GetCurrentFrame(swap);
+	AttachmentDesc color
+	{
+		.texture = &swapchain[i],
+		.loadOp = LoadOp::CLEAR,
+		.storeOp = StoreOp::STORE,
+		.clearValue
+		{
+			.color = {{ 0.f, 0.f, 0.f, 1.f }},
+			//.depthStencil = ,
+		}
+	};
+
+	Texture dep(vk._vk);
+	dep.Swapchain(vk._vk.depthImage, vk._vk.depthImageView, vk._vk.depthFormat, { vk._vk.swapchainExtent.width, vk._vk.swapchainExtent.height, 1 }, ImageAspect::DEPTH);
+	
+	AttachmentDesc depth
+	{
+		.texture = &dep,
+		.loadOp = LoadOp::CLEAR,
+		.storeOp = StoreOp::TRASH,
+		.clearValue
+		{
+			//.color = ,
+			.depthStencil = { 1.f, 0 },
+		}
+	};
+
+	trianglePass.AddColorAttachment(color);
+	//trianglePass.AddColorAttachment(s2);
+	//trianglePass.AddColorAttachment(s3);
+	trianglePass.SetDepthAttachment(depth);
 
 	while (win.ProcessEvents())
 	{
-		float time = GetTimeSeconds();
+		//float time = GetTimeSeconds();
 
 		VkCommandBuffer commandBuffer = Attempt(vk.StartFrame());
 
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vk._vk.pipeline);
-		vkCmdPushConstants(commandBuffer, vk._vk.pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(float), &time);
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &posB.buffer, o);
-		vkCmdBindVertexBuffers(commandBuffer, 1, 1, &colB.buffer, o);
+		color.texture = &swapchain[i];
 
-		vkCmdDraw(commandBuffer, /*vertexCount*/ 3, /*instanceCount*/ 1, /*firstVertex*/ 0, /*firstInstance*/ 0);
+		trianglePass.GetColorAttachment(0).texture = &swapchain[vk._vk.currentFrame];
+		i++;
+		if (i == 2)  i = 0;
+
+		trianglePass.Execute(commandBuffer);
 
 		Attempt(vk.EndFrame(commandBuffer));
 	}

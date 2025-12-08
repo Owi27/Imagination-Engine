@@ -16,7 +16,18 @@ RETURN(std::string) Shader::ShaderAsString(const char* shaderFilePath)
 		file.Read(&out[0], stringLength);
 	}
 
-	return out;
+	//return out;
+
+	std::fstream ffile(shaderFilePath, std::ios::in | std::ios::binary);
+	uint64_t s = (uint64_t)ffile.tellg();
+
+	std::string t;
+	t.resize(s);
+	ffile.seekg(0);
+	ffile.read(t.data(), s);
+	ffile.close();
+
+	return t;
 }
 
 RETURN(void) Shader::ReadSPVFile(const std::string& filename)

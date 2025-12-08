@@ -21,6 +21,11 @@ file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/includes/*.h ${CMAKE_CURRENT_SOURC
 source_group("Headers" FILES ${HEADERS})
 target_sources(Imagination PRIVATE ${HEADERS})
 
+file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/Shaders/*.hlsl)
+source_group("Shaders" FILES ${SHADERS})
+target_sources(Imagination PRIVATE ${SHADERS})
+set_source_files_properties(${SHADERS} PROPERTIES VS_TOOL_OVERRIDE "none")
+
 target_include_directories(Imagination PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/includes/ ${PROJECT_SOURCE_DIR}/ImaginaryMathLibrary ${Vulkan_INCLUDE_DIRS})
 
 target_link_libraries(Imagination PUBLIC ImaginaryMathLibrary ${Vulkan_LIBRARIES})

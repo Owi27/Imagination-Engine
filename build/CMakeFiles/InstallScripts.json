@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/GitHub/Imagination-Engine/build/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/imaginations/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/ImaginaryMathLibrary/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

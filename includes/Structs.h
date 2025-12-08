@@ -1,7 +1,18 @@
 #pragma once
 #include <optional>
 #include <IWindow.h>
+#include <memory>
 #undef LoadImage
+
+#define GATEWARE_ENABLE_MATH //enable all math libraries
+#include "Gateware.h"
+using GMatrix = GW::MATH::GMatrix;
+using mat4 = GW::MATH::GMATRIXF;
+using vec4 = GW::MATH::GVECTORF;
+using GVector2D = GW::MATH2D::GVector2D;
+using mat3 = GW::MATH2D::GMATRIX3F;
+using vec3 = GW::MATH2D::GVECTOR3F;
+using vec2 = GW::MATH2D::GVECTOR2F;
 
 struct VulkanContext
 {
@@ -23,6 +34,14 @@ struct VulkanContext
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
 	VkCommandPool commandPool = nullptr;
+	VkExtent2D swapchainExtent;
+	PipelineFormat swapchainFormat;
+	std::vector<VkImage> swapchainImages;
+	std::vector<VkImageView> swapchainImageViews;
+	VkImage depthImage;
+	VkImageView depthImageView;
+	PipelineFormat depthFormat;
+	unsigned currentFrame = 0, targetFrame = 0;
 
 	VulkanContext& operator=(const VulkanContext& pCtx)
 	{
@@ -40,9 +59,18 @@ struct VulkanContext
 		pipelineLayout = pCtx.pipelineLayout;
 		commandPool = pCtx.commandPool;
 		queueFamilyIndices = pCtx.queueFamilyIndices;
+		swapchainExtent = pCtx.swapchainExtent;
+		swapchainFormat = pCtx.swapchainFormat;
+		swapchainImages = pCtx.swapchainImages;
+		swapchainImageViews = pCtx.swapchainImageViews;
 
 		return *this;
 	}
+};
+
+struct SceneMatrices
+{
+	mat4 view, proj;
 };
 
 inline static RETURN(VkCommandBuffer) StartCommandBuffer(VulkanContext pCtx)

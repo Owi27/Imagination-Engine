@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\cmake_pch.cxx">
       <Filter>Source Files</Filter>
@@ -13,7 +13,19 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\HotReloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\Passes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\PipelineBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\RenderContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\RenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\Resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\Shader.cpp">
@@ -28,10 +40,13 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\includes\Resource.cpp" />
+    <ClCompile Include="..\src\GLTFLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Enums.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\FrameGraph.h">
@@ -49,10 +64,25 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Macros.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Passes.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\PipelineBuilder.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\RenderContext.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\RenderPass.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Resource.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Shader.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Structs.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\ThreadPool.h">
@@ -76,14 +106,24 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\Resource.hpp" />
-    <ClInclude Include="..\includes\Enums.h" />
-    <ClInclude Include="..\includes\Structs.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
+    <ClInclude Include="..\includes\GLTFLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <none Include="D:\GitHub\Imagination-Engine\Shaders\GBufferFragmentShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
+    <none Include="D:\GitHub\Imagination-Engine\Shaders\GBufferVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
+    <none Include="D:\GitHub\Imagination-Engine\Shaders\PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
+    <none Include="D:\GitHub\Imagination-Engine\Shaders\VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </none>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">
@@ -91,6 +131,9 @@
     </Filter>
     <Filter Include="Precompile Header File">
       <UniqueIdentifier>{E133613F-F2A2-35C6-8839-11BA33B1055F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{D6F9206A-4CC8-31CC-A367-B0084BE7A31C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{303D06DA-9390-3BB0-AD1D-65224C4F6004}</UniqueIdentifier>
