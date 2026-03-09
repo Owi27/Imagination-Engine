@@ -238,6 +238,11 @@ void VkBackend::CreateDevice()
 		//.maintenance4 = ,
 	};
 
+	VkPhysicalDeviceVulkan14Features vulkan14features
+	{
+
+	};
+
 	VkDeviceCreateInfo createInfo
 	{
 		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -268,12 +273,18 @@ void VkBackend::CreateDevice()
 		.pNext = &descriptorBufferProperties
 	};
 
+	vkGetPhysicalDeviceProperties2(VkCtx::Instance().physicalDevice, &properties2);
+
 	VkCtx::Instance().uniformSize = descriptorBufferProperties.uniformBufferDescriptorSize;
 	VkCtx::Instance().storageSize = descriptorBufferProperties.storageBufferDescriptorSize;
 	VkCtx::Instance().combinedSamplerSize = descriptorBufferProperties.combinedImageSamplerDescriptorSize;
 	VkCtx::Instance().setAlign = descriptorBufferProperties.descriptorBufferOffsetAlignment;
 
-	vkGetPhysicalDeviceProperties2(VkCtx::Instance().physicalDevice, &properties2);
+	VkCtx::Instance().vkGetDescriptorEXT = reinterpret_cast<PFN_vkGetDescriptorEXT>(vkGetDeviceProcAddr(VkCtx::Instance().device, "vkGetDescriptorEXT"));
+	VkCtx::Instance().vkGetDescriptorSetLayoutSizeEXT = reinterpret_cast<PFN_vkGetDescriptorSetLayoutSizeEXT>(vkGetDeviceProcAddr(VkCtx::Instance().device, "vkGetDescriptorSetLayoutSizeEXT"));
+	VkCtx::Instance().vkGetDescriptorSetLayoutBindingOffsetEXT = reinterpret_cast<PFN_vkGetDescriptorSetLayoutBindingOffsetEXT>(vkGetDeviceProcAddr(VkCtx::Instance().device, "vkGetDescriptorSetLayoutBindingOffsetEXT"));
+	VkCtx::Instance().vkCmdBindDescriptorBuffersEXT = reinterpret_cast<PFN_vkCmdBindDescriptorBuffersEXT>(vkGetDeviceProcAddr(VkCtx::Instance().device, "vkCmdBindDescriptorBuffersEXT"));
+	VkCtx::Instance().vkCmdSetDescriptorBufferOffsetsEXT = reinterpret_cast<PFN_vkCmdSetDescriptorBufferOffsetsEXT>(vkGetDeviceProcAddr(VkCtx::Instance().device, "vkCmdSetDescriptorBufferOffsetsEXT"));
 }
 
 void VkBackend::CreateSurface()
@@ -336,6 +347,33 @@ void VkBackend::CreateGraphicsPipeline()
 {
 }
 
+void VkBackend::CreateDefaultSampler()
+{
+	VkSamplerCreateInfo samplerCreateInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+		//.pNext = ,
+		//.flags = ,
+		.magFilter = VK_FILTER_NEAREST,
+		.minFilter = VK_FILTER_NEAREST,
+		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+		.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		.mipLodBias = 0,
+		//.anisotropyEnable = ,
+		.maxAnisotropy = 1.f,
+		//.compareEnable = ,
+		//.compareOp = ,
+		.minLod = 0,
+		.maxLod = 1.f,
+		.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
+		//.unnormalizedCoordinates = ,
+	};
+
+	vkCreateSampler(VkCtx::Instance().device, &samplerCreateInfo, nullptr, &VkCtx::Instance().sampler);
+}
+
 bool VkBackend::CheckDeviceExtensionSupport(VkPhysicalDevice pPhysicalDevice)
 {
 	unsigned extensionCount;
@@ -365,7 +403,7 @@ void VkBackend::Init(unsigned layerCount, const char** layers, unsigned extensio
 	_deviceExtensions.resize(_deviceExtensions.size() + dExtensionCount);
 	for (size_t i = _deviceExtensions.size() - dExtensionCount; i < dExtensionCount; i++) _deviceExtensions[i] = dExtensions[i];
 
-	std::filesystem::create_directories("../shaders/SPV");
+	std::filesystem::create_directories("shaders/SPV");
 
 	CreateInstance(_instanceLayers.size(), _instanceLayers.data(), _instanceExtensions.size(), _instanceExtensions.data());
 	CreateSurface();
@@ -377,6 +415,7 @@ void VkBackend::Init(unsigned layerCount, const char** layers, unsigned extensio
 
 	//InitDepthTexture();
 	CreateGraphicsPipeline();
+	CreateDefaultSampler();
 }
 
 VkCommandBuffer VkBackend::StartFrame()
@@ -401,6 +440,47 @@ VkCommandBuffer VkBackend::StartFrame()
 	};
 
 	vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+
+	{
+		VkImageMemoryBarrier2 acquireImageMemoryBarrier
+		{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+			//.pNext = ,
+			.srcStageMask = VK_PIPELINE_STAGE_2_NONE,
+			.srcAccessMask = 0,
+			.dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+			.dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+			.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			//.srcQueueFamilyIndex = ,
+			//.dstQueueFamilyIndex = ,
+			.image = _swapchain.swapchainImages[VkCtx::Instance().targetFrame]->image,
+			.subresourceRange
+			{
+				.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		VkDependencyInfo dependencyInfo
+		{
+			.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+			//.pNext = ,
+			//.dependencyFlags = ,
+			//.memoryBarrierCount = ,
+			//.pMemoryBarriers = ,
+			//.bufferMemoryBarrierCount = ,
+			//.pBufferMemoryBarriers = ,
+			.imageMemoryBarrierCount = 1,
+			.pImageMemoryBarriers = &acquireImageMemoryBarrier,
+		};
+
+		vkCmdPipelineBarrier2(commandBuffer, &dependencyInfo);
+	}
+
 
 	VkViewport viewport
 	{

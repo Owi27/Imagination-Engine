@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\build\CMakeFiles\3ec69c2243e9d529b96ea0b028251c0e\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8B42F7A7-99D1-31BE-BD8E-A5F64D877CEF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

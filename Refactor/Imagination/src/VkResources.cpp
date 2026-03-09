@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VkResources.h"
 #include "VulkanCtx.h"
-#include "gltf/tiny_gltf.h"
+#include "gltf/stb_image.h"
 #undef LoadImage
 
 unsigned IResource::FindMemoryType(unsigned pFilter, MemoryFlags pMemoryFlags)
@@ -66,11 +66,18 @@ Buffer& Buffer::CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags
 	return *this;
 }
 
-void Buffer::WriteToBuffer(const void* pData)
+Buffer& Buffer::CreateMappedBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory)
 {
-	void* data;
-	vkMapMemory(VkCtx::Instance().device, memory, 0, size, 0, &data);
-	memcpy(data, pData, size);
+	CreateBuffer(pSize, pUsage, pMemory);
+	vkMapMemory(VkCtx::Instance().device, memory, 0, size, 0, &_data);
+
+	return *this;
+}
+
+void Buffer::WriteToBuffer(void* pData)
+{
+	vkMapMemory(VkCtx::Instance().device, memory, 0, size, 0, &_data);
+	memcpy(_data, pData, size);
 	vkUnmapMemory(VkCtx::Instance().device, memory);
 }
 
@@ -274,14 +281,30 @@ Texture& Texture::LoadImage(const std::string& pImgPath)
 	format = PipelineFormat::COLOR;
 
 	Buffer staging;
-	staging.CreateBuffer(imgSize, BufferUsage::SOURCE, MemoryFlags::CPU | MemoryFlags::CPU2GPU);
-	staging.WriteToBuffer(data);
+	staging.CreateBuffer(imgSize, BufferUsage::SOURCE, MemoryFlags::CPU | MemoryFlags::CPU2GPU).WriteToBuffer(data);
 
 	unsigned mipLevels = static_cast<unsigned>(floor(log2(std::max(width, height))) + 1);
 
-	CreateImage({ static_cast<unsigned>(width), static_cast<unsigned>(height), 1 }, mipLevels, SampleCount::SAMPLE_1BIT, format, ImageTiling::OPTIMAL, ImageUsage::SOURCE | ImageUsage::DESTINATION | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::DESTINATION).CopyBuffer(staging);
+	CreateImage({ static_cast<unsigned>(width), static_cast<unsigned>(height), 1 }, mipLevels, SampleCount::SAMPLE_1BIT, format, ImageTiling::OPTIMAL, ImageUsage::SOURCE | ImageUsage::DESTINATION | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::DESTINATION).CopyBuffer(staging).TransitionImageLayout(ImageLayout::SHADER_READ);
 	stbi_image_free(data);
 
+	return *this;
+}
+
+Texture& Texture::LoadImage(VkExtent3D pExtent, unsigned pComponent, void* pData)
+{
+	int width = pExtent.width, height = pExtent.height, component = pComponent;
+
+	int imgSize = width * height * component;
+	format = PipelineFormat::COLOR;
+
+	Buffer staging;
+	staging.CreateBuffer(imgSize, BufferUsage::SOURCE, MemoryFlags::CPU | MemoryFlags::CPU2GPU).WriteToBuffer(pData);
+
+	unsigned mipLevels = static_cast<unsigned>(floor(log2(std::max(width, height))) + 1);
+
+	CreateImage(pExtent, mipLevels, SampleCount::SAMPLE_1BIT, format, ImageTiling::OPTIMAL, ImageUsage::SOURCE | ImageUsage::DESTINATION | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::DESTINATION).CopyBuffer(staging).TransitionImageLayout(ImageLayout::SHADER_READ);
+	
 	return *this;
 }
 

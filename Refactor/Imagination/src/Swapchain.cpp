@@ -210,4 +210,8 @@ void Swapchain::Init()
 	CreateSwapchainImageViews();
 	CreateCommandBuffers();
 	CreateDepthTexture();
+	for (auto& image : swapchainImages)
+	{
+		image->TransitionImageLayout(ImageLayout::PRESENT_SRC);
+	}
 }

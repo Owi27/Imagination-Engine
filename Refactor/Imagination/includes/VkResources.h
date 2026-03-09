@@ -94,13 +94,14 @@ public:
 	Texture& CreateImageView(ImageAspect pImageAspect);
 	Texture& CopyBuffer(Buffer& pSourceBuffer);
 	Texture& LoadImage(const std::string& pImgPath);
+	Texture& LoadImage(VkExtent3D pExtent, unsigned pComponent, void* pData);
 	Texture& TransitionImageLayout(ImageLayout pNewLayout);
 
 };
 
 class Buffer : public IResource
 {
-
+	void* _data = nullptr;
 
 public:
 	VkBuffer buffer;
@@ -146,8 +147,11 @@ public:
 	}
 
 	Buffer& CreateBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory);
-	void WriteToBuffer(const void* pData);
+	Buffer& CreateMappedBuffer(VkDeviceSize pSize, BufferUsage pUsage, MemoryFlags pMemory);
+	void WriteToBuffer(void* pData);
 	void CopyBuffer(Buffer pSourceBuffer);
 	uint64_t GetDeviceAddress();
+
+	void* GetData() { return _data; }
 
 };

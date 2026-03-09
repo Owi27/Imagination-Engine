@@ -92,11 +92,11 @@ void Shader::Compile(const std::string& pFilename, ShaderType pShaderType)
 	if (SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr)))
 	{
 		// Write the compiled shader to file
-		std::ofstream outFile(L"../shaders/SPV/" + out, std::ios::binary);
+		std::ofstream outFile(L"shaders/SPV/" + out, std::ios::binary);
 		outFile.write(static_cast<const char*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize());
 		outFile.close();
 
-		_spvPath = "../shaders/SPV/" + pFilename + ".spv";
+		_spvPath = "shaders/SPV/" + pFilename + ".spv";
 		ReadSPVFile(_spvPath);
 		CreateShaderModule();
 	}

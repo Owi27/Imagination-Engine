@@ -6,10 +6,16 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaders(std::vector<std::pa
     _shaders.clear();
     _shaderStages.clear();
 
+    _shaders.resize(pShaders.size());
+    _shaderStages.resize(pShaders.size());
+
+    int i = 0;
     for (auto& [file, type] : pShaders)
     {
-        _shaders.emplace_back(std::move(Shader(file, type)));
-        _shaderStages.push_back(_shaders.back().GetPipelineShaderStageCreateInfo());
+        _shaders[i] = std::move(Shader(file, type));
+        _shaderStages[i] = _shaders[i].GetPipelineShaderStageCreateInfo();
+
+        i++;
     }
 
     return *this;
@@ -170,6 +176,7 @@ VkPipeline GraphicsPipelineBuilder::BuildPipeline(VkPipelineLayout& pOutLayout)
     {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         .pNext = &renderingCreateInfo,
+        .flags = VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT,
         .stageCount = static_cast<uint32_t>(_shaderStages.size()),
         .pStages = _shaderStages.data(),
         .pVertexInputState = &vertexInputStateCreateInfo,

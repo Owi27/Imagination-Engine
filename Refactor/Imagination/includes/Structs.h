@@ -12,10 +12,10 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 
 struct SceneData
 {
-	mat4 view, proj;
+	mat4 view = GW::MATH::GIdentityMatrixF, proj = GW::MATH::GIdentityMatrixF;
 };
 
 struct ModelData
 {
-	mat4 world;
+	mat4 world = GW::MATH::GIdentityMatrixF;
 };

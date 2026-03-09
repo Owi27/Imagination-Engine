@@ -138,7 +138,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="includes\pch.cpp">
+    <ClCompile Include="src\GLTFLoader.cpp" />
+    <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes\Gateware\Gateware.h" />
+    <ClInclude Include="includes\GLTFLoader.h" />
     <ClInclude Include="includes\gltf\json.hpp" />
     <ClInclude Include="includes\gltf\stb_image.h" />
     <ClInclude Include="includes\gltf\stb_image_write.h" />

@@ -52,6 +52,7 @@ class VkBackend
 	void CreateCommandPool();
 	void CreateSemaphoreAndFences();
 	void CreateGraphicsPipeline();
+	void CreateDefaultSampler();
 	bool CheckDeviceExtensionSupport(VkPhysicalDevice pPhysicalDevice);
 
 public:

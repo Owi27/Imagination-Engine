@@ -3,6 +3,7 @@
 #include "PipelineBuilder.h"
 #include "Window.h"
 #include "Structs.h"
+#include "GLTFLoader.h"
 
 struct AttachmentDesc
 {
@@ -35,6 +36,8 @@ public:
 	}
 
 	virtual ~RenderPass() = default;
+
+	virtual void InitPass() = 0;
 
 	void AddColorAttachment(const AttachmentDesc& pDesc)
 	{
@@ -144,171 +147,23 @@ public:
 	}
 };
 
-class TrianglePass : public RenderPass
+class GBufferPass : public RenderPass
 {
 	Descriptor gBufferDescriptor; //0: scenedata, 1: material, 2: textures
+	Texture normal, albedo, emissive, aoRM;
 
 public:
-	Buffer pos, col;
+	std::array<Buffer, 4> gBufferBuffers; //vertex, scenedata, material, textures;
+	Buffer idxBuffer;
+	std::vector<Texture> textures;
+	glMesh model;
+	SceneData sceneData;
 
-	TrianglePass() : RenderPass()
+	GBufferPass() : RenderPass()
 	{
-		//_depth.Swapchain(_vk.depthImage, _vk.depthImageView, _vk.depthFormat, { _vk.win.GetWidth(), _vk.win.GetHeight(), 1 }, ImageAspect::DEPTH | ImageAspect::STENCIL);
-		//_depth.TransitionImageLayout(ImageLayout::DEPTH_STENCIL);
-
-		std::vector<std::pair<std::string, ShaderType>> shaders
-		{
-			{ "FragmentShader", ShaderType::FRAGMENT },
-			{ "VertexShader", ShaderType::VERTEX }
-		};
-
-		Texture normal, albedo, emissive, aoRM;
-		normal.CreateImage(VkCtx::Instance().swapchainExtent, 1, SampleCount::SAMPLE_1BIT, PipelineFormat::COLOR2, ImageTiling::OPTIMAL, ImageUsage::COLOR_ATTACHMENT | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
-		albedo.CreateImage(VkCtx::Instance().swapchainExtent, 1, SampleCount::SAMPLE_1BIT, PipelineFormat::COLOR, ImageTiling::OPTIMAL, ImageUsage::COLOR_ATTACHMENT | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
-		emissive.CreateImage(VkCtx::Instance().swapchainExtent, 1, SampleCount::SAMPLE_1BIT, PipelineFormat::COLOR, ImageTiling::OPTIMAL, ImageUsage::COLOR_ATTACHMENT | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
-		aoRM.CreateImage(VkCtx::Instance().swapchainExtent, 1, SampleCount::SAMPLE_1BIT, PipelineFormat::COLOR, ImageTiling::OPTIMAL, ImageUsage::COLOR_ATTACHMENT | ImageUsage::SAMPLED, MemoryFlags::GPU).CreateImageView(ImageAspect::COLOR).TransitionImageLayout(ImageLayout::COLOR_ATTACHMENT);
-
-		AddColorAttachment(AttachmentDesc
-			{
-				.texture = std::move(&normal),
-				.loadOp = LoadOp::CLEAR,
-				.storeOp = StoreOp::STORE,
-				.clearValue
-				{
-					.color = {{ 0.f, 0.f, 0.f, 1.f }},
-					//.depthStencil = ,
-				}
-			});
-		AddColorAttachment(AttachmentDesc
-			{
-				.texture = std::move(&albedo),
-				.loadOp = LoadOp::CLEAR,
-				.storeOp = StoreOp::STORE,
-				.clearValue
-				{
-					.color = {{ 0.f, 0.f, 0.f, 1.f }},
-					//.depthStencil = ,
-				}
-			});
-		AddColorAttachment(AttachmentDesc
-			{
-				.texture = std::move(&emissive),
-				.loadOp = LoadOp::CLEAR,
-				.storeOp = StoreOp::STORE,
-				.clearValue
-				{
-					.color = {{ 0.f, 0.f, 0.f, 1.f }},
-					//.depthStencil = ,
-				}
-			});
-		AddColorAttachment(AttachmentDesc
-			{
-				.texture = std::move(&aoRM),
-				.loadOp = LoadOp::CLEAR,
-				.storeOp = StoreOp::STORE,
-				.clearValue
-				{
-					.color = {{ 0.f, 0.f, 0.f, 1.f }},
-					//.depthStencil = ,
-				}
-			});
-		SetDepthAttachment(AttachmentDesc
-			{
-				.texture = VkCtx::Instance().depth.get(),
-				.loadOp = LoadOp::CLEAR,
-				.storeOp = StoreOp::STORE,
-				.clearValue
-				{
-				//.color = {{ 0.f, 0.f, 0.f, 1.f }},
-				.depthStencil = { 1.f, 0 },
-			}
-			});
-
-
-
-		std::vector<PipelineFormat> colorFormats;
-		colorFormats.push_back(PipelineFormat::COLOR2);
-		colorFormats.push_back(PipelineFormat::COLOR);
-		colorFormats.push_back(PipelineFormat::COLOR);
-		colorFormats.push_back(PipelineFormat::COLOR);
-
-		std::vector<PipelineAttachment> attachments =
-		{
-			PipelineAttachment(),
-			PipelineAttachment(),
-			PipelineAttachment(),
-			PipelineAttachment(),
-		};
-
-		gBufferDescriptor
-			.AddLayoutBinding(0, DescriptorType::UNIFORM_BUFFER, ShaderStage::VERTEX)
-			.AddLayoutBinding(1, DescriptorType::STORAGE_BUFFER, ShaderStage::FRAGMENT)
-			.AddLayoutBinding(2, DescriptorType::IMAGE_SAMPLER, ShaderStage::FRAGMENT, 256)
-			.CreateDescriptorSetLayout();
-
-		vkGetDescriptorSetLayoutBindingOffsetEXT(VkCtx::Instance().device, gBufferDescriptor.layout, 0, )
-
-		//vkGetDescriptorSetLayoutSizeEXT(VkCtx::Instance().device, gBufferDescriptor.layout, sizeof(SceneData) + )
-		
-		GraphicsPipelineBuilder pipelineBuilder;
-
-		_pipeline = pipelineBuilder
-			.AddShaders(shaders)
-			.AddDescriptorSetLayout(gBufferDescriptor.layout)
-			.AddPushConstantRange(VkPushConstantRange
-				{
-					.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-					.offset = 0,
-					.size = sizeof(mat4),
-				})
-			.SetRenderingFormats(colorFormats, VkCtx::Instance().depth->format)
-			.SetBlendAttachments(attachments)
-			.BuildPipeline(_pipelineLayout);
-
-
-		//std::vector<VertexInputDescription> vertexInputDescriptions
-		//{
-		//	VertexInputDescription
-		//	{
-		//		.binding = 0,
-		//		.location = 0,
-		//		.stride = sizeof(float) * 2,
-		//		.format = PipelineFormat::FLOAT2,
-		//		.offset = 0,
-		//	},
-		//	VertexInputDescription
-		//	{
-		//		.binding = 1,
-		//		.location = 1,
-		//		.stride = sizeof(unsigned char) * 4,
-		//		.format = PipelineFormat::COLOR,
-		//		.offset = 0,
-		//	},
-		//};
-
-		//std::vector<PipelineAttachment> pipelineAttachments
-		//{
-		//	PipelineAttachment{},
-		//};
-
-		//RenderingInfo renderInfo
-		//{
-		//	.colorAttachmentFormats
-		//	{
-		//		PipelineFormat::SWAPCHAIN,
-		//	},
-		//	.depthStencilFormat = pCtx.depthFormat
-		//};
-
-		//_pipeline = Attempt(pipelineBuilder.AddShaders(shaders)
-		//	.AddVertexBindingDescriptions(vertexInputDescriptions)
-		//	.AddDepthTest()
-		//	.AddDepthWrite()
-		//	.AddPipelineAttachments(pipelineAttachments)
-		//	.SetRenderingInfo(renderInfo)
-		//	.AddPushConstantRange(VkPushConstantRange{ .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT, /* or VERTEX_BIT | FRAGMENT_BIT if both use it*/ .offset = 0, .size = sizeof(float) })
-		//	.BuildPipeline(_pipelineLayout));
 	}
+
+	void InitPass();
 
 	void Record(VkCommandBuffer pCommandBuffer) override;
 };

@@ -10,6 +10,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\FrameGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\src\GLTFLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\HotReloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,7 +43,6 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\GLTFLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\DX12Backend.h">
@@ -50,6 +52,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\FrameGraph.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\includes\GLTFLoader.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\includes\Gateware.h">
@@ -106,7 +111,6 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="..\includes\GLTFLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />

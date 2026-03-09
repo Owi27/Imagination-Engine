@@ -1,0 +1,3 @@
+D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir
+D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/ZERO_CHECK.dir
