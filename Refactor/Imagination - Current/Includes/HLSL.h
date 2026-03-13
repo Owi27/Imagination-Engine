@@ -9,6 +9,14 @@ namespace Shaders
     float3 col : COLOR;
 };
 
+struct UniformBuffer 
+{
+    matrix model;
+    matrix view;
+    matrix proj;
+};
+ConstantBuffer<UniformBuffer> ubo;
+
 struct VOut
 {
     float4 pos : SV_Position;
@@ -18,7 +26,7 @@ struct VOut
 VOut main(VIn input)
 {
     VOut output;
-    output.pos = float4(input.pos, 0.0, 1.0);
+    output.pos = mul(ubo.proj, mul(ubo.view, mul(ubo.model, float4(input.pos, 0.0, 1.0))));
     output.col = input.col;
     
     return output;

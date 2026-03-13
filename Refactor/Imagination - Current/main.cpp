@@ -12,6 +12,12 @@ int main()
 	ImgnVulkan imgnVulkan;
 	imgnVulkan.InitVulkan(window.get());
 
+	//vec3<float> x = { 1, 0, 1 };
+	//vec3<float> y = { 2, 0, 0 };
+
+	//float z = Angle(x, y);
+	//std::cout << z;
+
 	while (window->ProcessMessages())
 	{
 		imgnVulkan.DrawFrame();

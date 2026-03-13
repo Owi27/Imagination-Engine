@@ -23,7 +23,7 @@ struct VOut
     float3 col : COLOR;
 };
 
-float4 main(VIn input)
+VOut main(VIn input)
 {
     VOut output;
     output.pos = float4(input.pos, 0.0, 1.0);

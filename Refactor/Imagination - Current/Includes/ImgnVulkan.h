@@ -11,14 +11,13 @@ import vulkan_hpp;
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 using namespace Microsoft::WRL;
-using namespace Math;
 
 constexpr int MAXFRAMESINFLIGHT = 3;
 
 struct Vertex
 {
-	vec2<float> pos;
-	vec3<float> col;
+	Math::vec2<float> pos;
+	Math::vec3<float> col;
 
 	static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }
 	static std::array<vk::VertexInputAttributeDescription, 2> GetAttributeDescriptions()
@@ -29,6 +28,11 @@ struct Vertex
 			vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, col)),
 		};
 	}
+};
+
+struct UniformBufferObject
+{
+	Math::mat4<float> model, view, proj;
 };
 
 struct vkBuffer
@@ -82,11 +86,14 @@ class ImgnVulkan
 		std::make_pair("comp", L"cs_6_6")
 	};
 
+	const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
+
 	const std::vector<Vertex> vertices =
 	{
-		{{0.f, -.5f,}, {1.f, 0.f, 0.f}},
-		{{.5f, .5f,}, {1.f, 1.f, 0.f}},
-		{{-.5f, .5f,}, {1.f, 0.f, 1.f}},
+		{{-.5f, -.5f,}, {1.f, 0.f, 0.f}},
+		{{.5f, -.5f,}, {1.f, 1.f, 0.f}},
+		{{.5f, .5f,}, {1.f, 0.f, 1.f}},
+		{{-.5f, .5f}, {1.f, 1.f, 1.f}}
 	};
 
 	ImgnWindow* _win;
@@ -113,15 +120,22 @@ class ImgnVulkan
 
 	vk::raii::Pipeline _pipeline = nullptr;
 	vk::raii::PipelineLayout _pipelineLayout = nullptr;
+	vk::raii::DescriptorPool _descriptorPool = nullptr;
+	std::vector<vk::raii::DescriptorSet> _descriptorSets;
+	vk::raii::DescriptorSetLayout _descriptorSetLayout = nullptr;
 
 	vk::raii::CommandPool _commandPool = nullptr;
 	std::vector<vk::raii::CommandBuffer> _commandBuffers;
 
-	std::vector<vk::raii::Semaphore> _presentCompleteSemaphores;
-	std::vector<vk::raii::Semaphore> _renderFinishedSemaphores;
 	std::vector<vk::raii::Fence> _inFlightFences;
+	std::vector<vk::raii::Semaphore> _renderFinishedSemaphores;
+	std::vector<vk::raii::Semaphore> _presentCompleteSemaphores;
 
+	vkBuffer _indexBuffer;
 	vkBuffer _vertexBuffer;
+
+	std::vector<vkBuffer> _uniformBuffers;
+	std::vector<void*> _uniformsBuffersMapped;
 
 	bool IsDeviceSuitable(vk::raii::PhysicalDevice const& pPhysicalDevice);
 	void CleanupSwapchain();
@@ -138,6 +152,7 @@ class ImgnVulkan
 	void TransitionImageLayout(uint32_t pImageIdx, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::AccessFlags2 pSrcAccessMask, vk::AccessFlags2 pDstAccessMask, vk::PipelineStageFlags2 pSrcStageMask, vk::PipelineStageFlags2 pDstStageMask);
 	[[nodiscard]] vk::raii::ShaderModule CreateShaderModule(const std::vector<uint32_t>& pCode) const;
 
+	void UpdateUniformBuffer(uint32_t pCurrImage);
 	void CopyBuffer(vk::raii::Buffer& pSrc, vk::raii::Buffer& pDst, vk::DeviceSize pSize);
 	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, vkBuffer& pBuffer);
 
@@ -148,11 +163,14 @@ class ImgnVulkan
 	void CreateImageViews();
 	void CreateCommandPool();
 	void CreateSyncObjects();
+	void CreateIndexBuffer();
 	void CreateVertexBuffer();
 	void CreateCommandBuffer();
+	void CreateUniformBuffers();
+	void CreateDescriptorPool();
+	void CreateDescriptorSets();
 	void CreateGraphicsPipeline();
-
-
+	void CreateDescriptorSetLayout();
 public:
 	ImgnVulkan() /*Constructor*/
 	{
