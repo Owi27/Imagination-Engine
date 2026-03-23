@@ -13,6 +13,7 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnWindow.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Component.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\HLSL.h">
@@ -42,6 +43,7 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="Component.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\CMakeLists.txt" />

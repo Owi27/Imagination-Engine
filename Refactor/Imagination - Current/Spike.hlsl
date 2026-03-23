@@ -15,6 +15,7 @@ struct VIn
 {
     float2 pos : POSITION;
     float3 col : COLOR;
+    float2 uv : TEXCOORD0
 };
 
 struct VOut

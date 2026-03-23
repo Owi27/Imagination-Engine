@@ -95,11 +95,11 @@ namespace Math
 	constexpr T Angle(vec3<T> lhs, vec3<T> rhs) { return std::acos(Dot(lhs, rhs) / (lhs.Length() * rhs.Length())); }
 
 	template<typename T>
-	constexpr vec3<T> Cross(vec3<T> lhs, vec3<T> rhs) { return vec3<T>{.x = (lhs.y * rhs.z) - (rhs.z * lhs.y), .y = (lhs.z * rhs.x) - (lhs.x * rhs.z), .z = (lhs.x * rhs.y) - (lhs.y = rhs.x) }; }
+	constexpr vec3<T> Cross(vec3<T> lhs, vec3<T> rhs) { return vec3<T>{.x = (lhs.y * rhs.z) - (lhs.z * rhs.y), .y = (lhs.z * rhs.x) - (lhs.x * rhs.z), .z = (lhs.x * rhs.y) - (lhs.y * rhs.x) }; }
 
 
 	template<typename T>
-	struct vec4
+	struct alignas(16) vec4
 	{
 		union
 		{
@@ -133,7 +133,7 @@ namespace Math
 	};
 
 	template<typename T>
-	constexpr vec4<T> Cross(vec4<T> lhs, vec4<T> rhs) { return vec4<T>{.x = (lhs.y * rhs.z) - (rhs.z * lhs.y), .y = (lhs.z * rhs.x) - (lhs.x * rhs.z), .z = (lhs.x * rhs.y) - (lhs.y = rhs.x), .w = lhs.w * rhs.w }; }
+	constexpr vec4<T> Cross(vec4<T> lhs, vec4<T> rhs) { return vec4<T>{.x = (lhs.y * rhs.z) - (lhs.z * rhs.y), .y = (lhs.z * rhs.x) - (lhs.x * rhs.z), .z = (lhs.x * rhs.y) - (lhs.y * rhs.x), .w = lhs.w * rhs.w }; }
 
 	template<typename T>
 	struct mat2
@@ -195,7 +195,7 @@ namespace Math
 	};
 
 	template<typename T>
-	struct mat4
+	struct alignas(16) mat4
 	{
 		union
 		{
@@ -226,28 +226,39 @@ namespace Math
 
 		constexpr mat4<T>& operator*=(const mat4<T>& rhs)
 		{
-			row1.x = row1.x * rhs.row1.x + row1.y * rhs.row2.x + row1.z * rhs.row3.x + row1.w * rhs.row4.x;
-			row1.y = row1.x * rhs.row1.y + row1.y * rhs.row2.y + row1.z * rhs.row3.y + row1.w * rhs.row4.y;
-			row1.z = row1.x * rhs.row1.z + row1.y * rhs.row2.z + row1.z * rhs.row3.z + row1.w * rhs.row4.z;
-			row1.w = row1.x * rhs.row1.w + row1.y * rhs.row2.w + row1.z * rhs.row3.w + row1.w * rhs.row4.y;
+			mat4<T> lhs = *this;
+			
+			row1.x = lhs.row1.x * rhs.row1.x + lhs.row1.y * rhs.row2.x + lhs.row1.z * rhs.row3.x + lhs.row1.w * rhs.row4.x;
+			row1.y = lhs.row1.x * rhs.row1.y + lhs.row1.y * rhs.row2.y + lhs.row1.z * rhs.row3.y + lhs.row1.w * rhs.row4.y;
+			row1.z = lhs.row1.x * rhs.row1.z + lhs.row1.y * rhs.row2.z + lhs.row1.z * rhs.row3.z + lhs.row1.w * rhs.row4.z;
+			row1.w = lhs.row1.x * rhs.row1.w + lhs.row1.y * rhs.row2.w + lhs.row1.z * rhs.row3.w + lhs.row1.w * rhs.row4.w;
 
-			row2.x = row2.x * rhs.row1.x + row2.y * rhs.row2.x + row2.z * rhs.row3.x + row2.w * rhs.row4.x;
-			row2.y = row2.x * rhs.row1.y + row2.y * rhs.row2.y + row2.z * rhs.row3.y + row2.w * rhs.row4.y;
-			row2.z = row2.x * rhs.row1.z + row2.y * rhs.row2.z + row2.z * rhs.row3.z + row2.w * rhs.row4.z;
-			row2.w = row2.x * rhs.row1.w + row2.y * rhs.row2.w + row2.z * rhs.row3.w + row2.w * rhs.row4.y;
+			row2.x = lhs.row2.x * rhs.row1.x + lhs.row2.y * rhs.row2.x + lhs.row2.z * rhs.row3.x + lhs.row2.w * rhs.row4.x;
+			row2.y = lhs.row2.x * rhs.row1.y + lhs.row2.y * rhs.row2.y + lhs.row2.z * rhs.row3.y + lhs.row2.w * rhs.row4.y;
+			row2.z = lhs.row2.x * rhs.row1.z + lhs.row2.y * rhs.row2.z + lhs.row2.z * rhs.row3.z + lhs.row2.w * rhs.row4.z;
+			row2.w = lhs.row2.x * rhs.row1.w + lhs.row2.y * rhs.row2.w + lhs.row2.z * rhs.row3.w + lhs.row2.w * rhs.row4.w;
 
-			row3.x = row3.x * rhs.row1.x + row3.y * rhs.row2.x + row3.z * rhs.row3.x + row3.w * rhs.row4.x;
-			row3.y = row3.x * rhs.row1.y + row3.y * rhs.row2.y + row3.z * rhs.row3.y + row3.w * rhs.row4.y;
-			row3.z = row3.x * rhs.row1.z + row3.y * rhs.row2.z + row3.z * rhs.row3.z + row3.w * rhs.row4.z;
-			row3.w = row3.x * rhs.row1.w + row3.y * rhs.row2.w + row3.z * rhs.row3.w + row3.w * rhs.row4.y;
+			row3.x = lhs.row3.x * rhs.row1.x + lhs.row3.y * rhs.row2.x + lhs.row3.z * rhs.row3.x + lhs.row3.w * rhs.row4.x;
+			row3.y = lhs.row3.x * rhs.row1.y + lhs.row3.y * rhs.row2.y + lhs.row3.z * rhs.row3.y + lhs.row3.w * rhs.row4.y;
+			row3.z = lhs.row3.x * rhs.row1.z + lhs.row3.y * rhs.row2.z + lhs.row3.z * rhs.row3.z + lhs.row3.w * rhs.row4.z;
+			row3.w = lhs.row3.x * rhs.row1.w + lhs.row3.y * rhs.row2.w + lhs.row3.z * rhs.row3.w + lhs.row3.w * rhs.row4.w;
 
-			row4.x = row4.x * rhs.row1.x + row4.y * rhs.row2.x + row4.z * rhs.row3.x + row4.w * rhs.row4.x;
-			row4.y = row4.x * rhs.row1.y + row4.y * rhs.row2.y + row4.z * rhs.row3.y + row4.w * rhs.row4.y;
-			row4.z = row4.x * rhs.row1.z + row4.y * rhs.row2.z + row4.z * rhs.row3.z + row4.w * rhs.row4.z;
-			row4.w = row4.x * rhs.row1.w + row4.y * rhs.row2.w + row4.z * rhs.row3.w + row4.w * rhs.row4.y;
+			row4.x = lhs.row4.x * rhs.row1.x + lhs.row4.y * rhs.row2.x + lhs.row4.z * rhs.row3.x + lhs.row4.w * rhs.row4.x;
+			row4.y = lhs.row4.x * rhs.row1.y + lhs.row4.y * rhs.row2.y + lhs.row4.z * rhs.row3.y + lhs.row4.w * rhs.row4.y;
+			row4.z = lhs.row4.x * rhs.row1.z + lhs.row4.y * rhs.row2.z + lhs.row4.z * rhs.row3.z + lhs.row4.w * rhs.row4.z;
+			row4.w = lhs.row4.x * rhs.row1.w + lhs.row4.y * rhs.row2.w + lhs.row4.z * rhs.row3.w + lhs.row4.w * rhs.row4.w;
 
 			return *this;
 		}
+
+		constexpr mat4<T> operator*(const mat4<T>& rhs) const
+		{
+			mat4<T> out = *this;
+			out *= rhs;
+
+			return out;
+		}
+
 	};
 
 	/* Functions */
@@ -286,35 +297,37 @@ namespace Math
 		T c = std::cos(pRadian);
 		T s = std::sin(pRadian);
 
-		mat4<T> rot = Identity<T>();
+		mat4<T> rotX = Identity<T>();
+		mat4<T> rotY = Identity<T>();
+		mat4<T> rotZ = Identity<T>();
 
 		if (pAxis.x)
 		{
-			rot.data[5] = c;
-			rot.data[6] = s;
-			rot.data[9] = -s;
-			rot.data[10] = c;
+			rotX.data[5] = c;
+			rotX.data[6] = s;
+			rotX.data[9] = -s;
+			rotX.data[10] = c;
 		}
 
 		if (pAxis.y)
 		{
-			rot.data[0] = c;
-			rot.data[2] = -s;
-			rot.data[8] = s;
-			rot.data[10] = c;
+			rotY.data[0] = c;
+			rotY.data[2] = -s;
+			rotY.data[8] = s;
+			rotY.data[10] = c;
 		}
 
 		if (pAxis.z)
 		{
-			rot.data[0] = c;
-			rot.data[1] = s;
-			rot.data[4] = -s;
-			rot.data[5] = c;
+			rotZ.data[0] = c;
+			rotZ.data[1] = s;
+			rotZ.data[4] = -s;
+			rotZ.data[5] = c;
 		}
 
 		vec4<T> trans = pMat.row4;
 
-		pMat *= rot;
+		pMat *= (rotX * rotY * rotZ);
 		pMat.row4 = trans;
 
 		return pMat;
@@ -323,7 +336,7 @@ namespace Math
 	template<typename T>
 	constexpr mat4<T> LookAtL(vec4<T> pEye, vec4<T> pAt, vec4<T> pUp)
 	{
-		mat4<T> out;
+		mat4<T> out = Identity<T>();
 		vec4<T> camR, camU;
 		vec4<T> camF
 		{
@@ -363,18 +376,18 @@ namespace Math
 	}
 
 	template<typename T>
-	constexpr mat4<T> Projection(float pFOV, float pAspect, float pNear, float pFar)
+	constexpr mat4<T> Projection(T pFOV, T pAspect, T pNear, T pFar)
 	{
 		mat4<T> out = {};
 
-		float yScale = 1.f / std::tanf(pFOV * .5f);
+		const T yScale = static_cast<T>(1) / std::tan(pFOV / static_cast<T>(2));
 		float z = pFar / (pFar - pNear);
 
 		out.row1.x = yScale / pAspect;
 		out.row2.y = -yScale;
 		out.row3.z = z;
-		out.row3.w = 1.f;
-		out.row4.z = -pNear * z;
+		out.row3.w = static_cast<T>(1);
+		out.row4.z = -(pNear * pFar) / (pFar - pNear);;
 
 		return out;
 	}
