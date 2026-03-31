@@ -9,6 +9,7 @@ class ImgnWindow
 {
 	HINSTANCE _hInstance;
 	HWND _hWindow;
+	std::wstring _className;
 
 public:
 	int width = 0, height = 0;
@@ -17,13 +18,30 @@ public:
 	{
 		_hInstance = GetModuleHandle(nullptr);
 
-		const wchar_t className[] = L"Imagination Window";
+		auto RandomString = [](uint64_t length) -> std::string
+			{
+				auto Randchar = []() -> char
+					{
+						const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+						const uint64_t max_index = (sizeof(charset) - 1);
+						return charset[rand() % max_index];
+					};
+
+				std::string str(length, 0);
+				std::generate_n(str.begin(), length, Randchar);
+			
+				return str;
+			};
+
+		std::string rngName = RandomString(9);
+		_className = L"Imagination Window:" + std::wstring(rngName.begin(), rngName.end());
+		//const wchar_t className[] = L"Imagination Window:";
 		WNDCLASS windowClass = {};
 		windowClass.lpfnWndProc = WindowProc;
 		windowClass.hInstance = _hInstance;
 		windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
 		windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-		windowClass.lpszClassName = className;
+		windowClass.lpszClassName = _className.c_str();
 
 		RegisterClass(&windowClass);
 
@@ -39,7 +57,7 @@ public:
 
 		AdjustWindowRect(&rect, style, false);
 
-		_hWindow = CreateWindowEx(0, className, pWindowTitle, style, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, _hInstance, nullptr);
+		_hWindow = CreateWindowEx(0, _className.c_str(), pWindowTitle, style, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, _hInstance, nullptr);
 
 		if (_hWindow == nullptr) return;
 
@@ -48,8 +66,7 @@ public:
 
 	~ImgnWindow() /*Destructor*/
 	{
-		const wchar_t className[] = L"Imagination Window";
-		UnregisterClass(className, _hInstance);
+		UnregisterClass(_className.c_str(), _hInstance);
 	}
 
 	HINSTANCE GetInstance() { return _hInstance; }

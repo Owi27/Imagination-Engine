@@ -7,7 +7,7 @@ static const float2 positions[3] =
 static const float3 colors[3] =
 {
     float3(204.f/255.f, 180.f/255.f, 184.f/255.f),
-    float3(1.f, 184f/255f, 198f/255f),
+    float3(1.f, 184.f/255f, 198f/255f),
     float3(51f/255f, 49f/255f, 60f/255f)
 };
 

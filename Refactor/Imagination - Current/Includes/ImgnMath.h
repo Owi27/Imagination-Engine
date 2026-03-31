@@ -15,6 +15,11 @@ namespace Math
 			T data[2];
 		};
 
+		constexpr bool operator==(const vec2<T>& rhs) const
+		{
+			return x == rhs.x && y == rhs.y;
+		}
+
 		constexpr vec2<T>& operator+=(const vec2<T>& rhs)
 		{
 			for (int i = 0; i < 2; i++) data[i] += rhs.data[i];
@@ -67,6 +72,11 @@ namespace Math
 			T data[3];
 		};
 
+		constexpr bool operator==(const vec3<T>& rhs) const
+		{
+			return x == rhs.x && y == rhs.y && z == rhs.z;
+		}
+
 		constexpr vec3<T>& operator+=(const vec3<T>& rhs)
 		{
 			for (int i = 0; i < 3; i++) data[i] += rhs.data[i];
@@ -111,6 +121,11 @@ namespace Math
 			T data[4];
 		};
 
+		constexpr bool operator==(const vec4<T>& rhs) const
+		{
+			return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
+		}
+
 		constexpr vec4<T>& operator+=(const vec4<T>& rhs)
 		{
 			for (int i = 0; i < 4; i++) data[i] += rhs.data[i];
@@ -149,6 +164,11 @@ namespace Math
 			T data[4];
 		};
 
+		constexpr bool operator==(const mat2<T>& rhs) const
+		{
+			return row1 == rhs.row1 && row2 == rhs.row2;
+		}
+
 		constexpr mat2<T>& operator+=(const mat2<T>& rhs)
 		{
 			for (int i = 0; i < 4; i++) data[i] += rhs.data[i];
@@ -178,6 +198,11 @@ namespace Math
 
 			T data[9];
 		};
+
+		constexpr bool operator==(const mat3<T>& rhs) const
+		{
+			return row1 == rhs.row1 && row2 == rhs.row2 && row3 == rhs.row3;
+		}
 
 		constexpr mat3<T>& operator+=(const mat3<T>& rhs)
 		{
@@ -209,6 +234,11 @@ namespace Math
 
 			T data[16];
 		};
+
+		constexpr bool operator==(const mat4<T>& rhs) const
+		{
+			return row1 == rhs.row1 && row2 == rhs.row2 && row3 == rhs.row3 && row4 == rhs.row4;
+		}
 
 		constexpr mat4<T>& operator+=(const mat4<T>& rhs)
 		{
