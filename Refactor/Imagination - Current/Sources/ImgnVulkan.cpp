@@ -1035,15 +1035,15 @@ void ImgnVulkan::SetupDeferredRenderer()
 
 			commandBuffer.beginRendering(renderingInfo);
 
-			//commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
-			//commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
-			//commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
+			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
+			commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
+			commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
 
 			//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[_frameIdx], nullptr);
-			//commandBuffer.bindVertexBuffers(0, sponza->GetVertexBuffer(), {0});
-			//commandBuffer.bindIndexBuffer(sponza->GetIndexBuffer(), 0, vk::IndexType::eUint16);
+			commandBuffer.bindVertexBuffers(0, sponza->GetVertexBuffer(), {0});
+			commandBuffer.bindIndexBuffer(sponza->GetIndexBuffer(), 0, vk::IndexType::eUint16);
 
-			//commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+			commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
 
 			commandBuffer.endRendering();
 		});
