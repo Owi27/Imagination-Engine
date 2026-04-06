@@ -249,7 +249,7 @@ struct Image
 	vk::raii::DeviceMemory memory = nullptr;
 };
 
-
+static constexpr uint32_t NumDescriptorsStreaming = 2048;
 
 class ImgnVulkan
 {
@@ -276,7 +276,8 @@ class ImgnVulkan
 
 	std::vector<const char*> _deviceExtensions =
 	{
-		vk::KHRSwapchainExtensionName
+		vk::KHRSwapchainExtensionName,
+		vk::EXTDescriptorIndexingExtensionName
 		//VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		//VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 		//VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME,
@@ -311,6 +312,13 @@ class ImgnVulkan
 		{{-.5f, .5f, -.5f}, {1.f, 1.f, 1.f}, {1.f, 1.f}}
 	};
 
+	enum class RenderPassIdx : uint32_t
+	{
+		GBuffer = 0,
+		Lighting = 1,
+		Count
+	};
+
 	ImgnWindow* _win;
 
 	//dxc
@@ -338,6 +346,7 @@ class ImgnVulkan
 	vk::raii::DescriptorPool _descriptorPool = nullptr;
 	std::vector<vk::raii::DescriptorSet> _descriptorSets;
 	vk::raii::DescriptorSetLayout _descriptorSetLayout = nullptr;
+	uint32_t _totalSets = MAXFRAMESINFLIGHT * 8;
 
 	vk::raii::CommandPool _commandPool = nullptr;
 	std::vector<vk::raii::CommandBuffer> _commandBuffers;
@@ -355,6 +364,13 @@ class ImgnVulkan
 	Image _depth;
 	Image _texture;
 	std::optional<vk::raii::Sampler> _textureSampler;
+
+	ResourceHandle<Mesh> _sponza;
+
+	static constexpr uint32_t DescriptorSetIndex(uint32_t pFrameIdx, RenderPassIdx pPass)
+	{
+		return pFrameIdx * static_cast<uint32_t>(RenderPassIdx::Count) + static_cast<uint32_t>(pPass);
+	}
 
 	bool IsDeviceSuitable(vk::raii::PhysicalDevice const& pPhysicalDevice);
 	void CleanupSwapchain();
@@ -386,6 +402,7 @@ class ImgnVulkan
 	void CopyBufferToImage(const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage, uint32_t pWidth, uint32_t pHeight);
 	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer);
 	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
+	void UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler);
 
 	void CreateDevice();
 	void CreateSurface();

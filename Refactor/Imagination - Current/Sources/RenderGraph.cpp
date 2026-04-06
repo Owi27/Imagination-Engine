@@ -70,9 +70,9 @@ void RenderGraph::Compile()
             inStack[node] = true;   // Mark as currently being processed
 
             // Recursively process all dependent passes first (post-order traversal)
-            for (auto dependent : dependents[node])
+            for (auto dependency : dependencies[node])
             {
-                visit(dependent);
+                visit(dependency);
             }
 
             inStack[node] = false;  // Remove from current path
@@ -142,7 +142,7 @@ void RenderGraph::Compile()
             .format = resource.format,
             .subresourceRange
             {
-                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .aspectMask = resource.aspect,
                 .baseMipLevel = 0,
                 .levelCount = 1,
                 .baseArrayLayer = 0,
@@ -209,7 +209,7 @@ void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQu
                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)                // No queue family transfer
                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .setImage(resource.image)                                      // Target image
-                .setSubresourceRange({ vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 })  // Full image range
+                .setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })  // Full image range
                 .setSrcAccessMask(vk::AccessFlagBits::eMemoryWrite)             // Previous write access
                 .setDstAccessMask(vk::AccessFlagBits::eShaderRead);             // Required read access
 
@@ -235,7 +235,7 @@ void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQu
                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .setImage(resource.image)
-                .setSubresourceRange({ vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 })
+                .setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
                 .setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)              // Previous read access
                 .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);   // Required write access
 
@@ -259,7 +259,7 @@ void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQu
                 .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                 .setImage(resource.image)
-                .setSubresourceRange({ vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 })
+                .setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
                 .setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)    // Previous write operations
                 .setDstAccessMask(vk::AccessFlagBits::eMemoryRead);             // Enable subsequent reads
 
@@ -299,19 +299,21 @@ void RenderGraph::RenderFrame(vk::Queue pGraphicsQueue, vk::Queue pPresentQueue)
    // device.resetFences(1, &*inFlightFence);
 }
 
-void RenderGraph::AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout)
+void RenderGraph::AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
 {
-	ImageResource imageResource
-	{
-		.name = pName,
-		.format = pFormat,
-		.extent = pExtent,
-		.usage = pUsage,
-		.initLayout = pInitialLayout,
-		.finalLayout = pFinalLayout
-	};
+    ImageResource imageResource
+    {
+        .name = pName,
+        .format = pFormat,
+        .extent = pExtent,
+        .usage = pUsage,
+        .initLayout = pInitialLayout,
+        .finalLayout = pFinalLayout,
+        .aspect = pAspect
+    };
 
-	_resources[pName] = std::move(imageResource);
+    _resources[pName] = std::move(imageResource);
+
 }
 
 void RenderGraph::AddPass(const std::string& pName, const std::vector<std::string>& pInputs, const std::vector<std::string>& pOutputs, std::function<void(vk::raii::CommandBuffer&)> pExecute)

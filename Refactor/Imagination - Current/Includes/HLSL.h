@@ -16,7 +16,7 @@ struct UniformBuffer
     matrix view;
     matrix proj;
 };
-ConstantBuffer<UniformBuffer> ubo;
+ConstantBuffer<UniformBuffer> ubo : register(b0, space0);
 
 struct VOut
 {
@@ -43,12 +43,53 @@ VOut main(VIn input)
     float2 uv  : TEXCOORD0;
 };
 
-Texture2D _texure : register(t1, space0);
-SamplerState _sampler : register(s1, space0);
+Texture2D _texure : register(t2, space0);
+SamplerState _sampler : register(s2, space0);
 
 float4 main(VOut input) : SV_Target
 {
     return float4(input.col * _texure.Sample(_sampler, input.uv).rgb, 1.0);
     //return _texure.Sample(_sampler, input.uv);
 })";
+
+    std::string GBufferVertexShader = R"(struct VIn
+{
+    float3 pos : POSITION0;
+    float3 nrm : NORMAL0;
+    float2 uv : TEXCOORD0;
+    float4 tan : TANGENT;
+    float3 col : COLOR;
+};
+
+struct VOut
+{
+    float4 pos : SV_Position;
+    float3 nrm : NORMAL0;
+    float2 uv : TEXCOORD0;
+    float3 tan : TANGENT;
+    float3 col : COLOR;
+    float3x3 TBN : TEXCOORD1;
+    int idx : INDEX;
+};
+
+struct UniformBuffer
+{
+    matrix model;
+    matrix view;
+    matrix proj;
+};
+ConstantBuffer<UniformBuffer> ubo : register(b0, space0);
+
+VOut main(VIn input, uint id : SV_InstanceID)
+{
+    VOut output;
+    output.pos = mul(ubo.proj, mul(ubo.view, mul(ubo.model, float4(input.pos, 1))));
+    output.uv = input.uv;
+    output.nrm = normalize(input.nrm);
+    output.tan = input.tan;
+    
+    return output;
+})";
+
+    std::string GBufferFragmentShader = R"()";
 }

@@ -90,6 +90,8 @@ void ImgnVulkan::PickPhysicalDevice()
 	// Check if the best candidate is suitable at all
 	if (!candidates.empty() && candidates.rbegin()->first > 0) _physicalDevice = candidates.rbegin()->second;
 	else throw std::runtime_error("failed to find a suitable GPU!");
+
+	Device::Inst().SetPhysicalDevice(std::move(_physicalDevice));
 }
 
 void ImgnVulkan::RecordCommandBuffer(uint32_t pImageIdx)
@@ -160,7 +162,7 @@ bool ImgnVulkan::HasStencilComponent(vk::Format pFormat)
 
 uint32_t ImgnVulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
 {
-	vk::PhysicalDeviceMemoryProperties memProperties = _physicalDevice.getMemoryProperties();
+	vk::PhysicalDeviceMemoryProperties memProperties = Device::Inst().GetPhysicalDevice().getMemoryProperties();
 
 	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 	{
@@ -253,7 +255,7 @@ vk::Format ImgnVulkan::FindSupportedFormat(const std::vector<vk::Format>& pCandi
 {
 	for (const auto format : pCandidates)
 	{
-		vk::FormatProperties props = _physicalDevice.getFormatProperties(format);
+		vk::FormatProperties props = Device::Inst().GetPhysicalDevice().getFormatProperties(format);
 
 		if (pTiling == vk::ImageTiling::eLinear && (props.linearTilingFeatures & pFeatures) == pFeatures)
 		{
@@ -391,7 +393,7 @@ vk::raii::CommandBuffer ImgnVulkan::BeginSingleCommand()
 {
 	vk::CommandBufferAllocateInfo allocInfo
 	{
-		.commandPool = _commandPool,
+		.commandPool = Device::Inst().GetCommandPool(),
 		.level = vk::CommandBufferLevel::ePrimary,
 		.commandBufferCount = 1
 	};
@@ -418,8 +420,8 @@ void ImgnVulkan::EndSingleCommand(vk::raii::CommandBuffer& pCommandBuffer)
 		.pCommandBuffers = &*pCommandBuffer
 	};
 
-	_queue->submit(submitInfo, nullptr);
-	_queue->waitIdle();
+	Device::Inst().GetQueue().submit(submitInfo, nullptr);
+	Device::Inst().GetQueue().waitIdle();
 }
 
 vk::PresentModeKHR ImgnVulkan::ChooseSwapPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes)
@@ -434,11 +436,11 @@ vk::PresentModeKHR ImgnVulkan::ChooseSwapPresentMode(std::vector<vk::PresentMode
 
 void ImgnVulkan::CreateDevice()
 {
-	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = _physicalDevice.getQueueFamilyProperties();
+	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = Device::Inst().GetPhysicalDevice().getQueueFamilyProperties();
 
 	for (uint32_t qfpIndex = 0; qfpIndex < queueFamilyProperties.size(); qfpIndex++)
 	{
-		if ((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) && _physicalDevice.getSurfaceSupportKHR(qfpIndex, *_surface))
+		if ((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) && Device::Inst().GetPhysicalDevice().getSurfaceSupportKHR(qfpIndex, *_surface))
 		{
 			// found a queue family that supports both graphics and present
 			_queueIdx = qfpIndex;
@@ -448,11 +450,12 @@ void ImgnVulkan::CreateDevice()
 
 	if (_queueIdx == ~0) throw std::runtime_error("Could not find a queue for graphics and present -> terminating");
 
-	vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT> featureChain =
+	vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT, vk::PhysicalDeviceDescriptorIndexingFeatures> featureChain =
 	{
 		{.features = {.samplerAnisotropy = true} },                               // vk::PhysicalDeviceFeatures2 (empty for now)
 		{.synchronization2 = true, .dynamicRendering = true },      // Enable dynamic rendering from Vulkan 1.3
-		{.extendedDynamicState = true }   // Enable extended dynamic state from the extension
+		{.extendedDynamicState = true },   // Enable extended dynamic state from the extension
+		{.shaderSampledImageArrayNonUniformIndexing = true, .descriptorBindingSampledImageUpdateAfterBind = true, .descriptorBindingUpdateUnusedWhilePending = true, .descriptorBindingPartiallyBound = true, .descriptorBindingVariableDescriptorCount = true, .runtimeDescriptorArray = true}
 	};
 
 	float queuePriority = 0.5f;
@@ -472,10 +475,11 @@ void ImgnVulkan::CreateDevice()
 		.ppEnabledExtensionNames = _deviceExtensions.data()
 	};
 
-	_device = vk::raii::Device(_physicalDevice, deviceCreateInfo);
+	_device = vk::raii::Device(Device::Inst().GetPhysicalDevice(), deviceCreateInfo);
 	_queue = vk::raii::Queue(_device, _queueIdx, 0);
 
 	Device::Inst().SetDevice(std::move(_device));
+	Device::Inst().SetQueue(std::move(*_queue));
 }
 
 void ImgnVulkan::CreateSurface()
@@ -545,15 +549,15 @@ void ImgnVulkan::CreateInstance()
 
 void ImgnVulkan::CreateSwapchain()
 {
-	vk::SurfaceCapabilitiesKHR surfaceCapabilities = _physicalDevice.getSurfaceCapabilitiesKHR(*_surface);
+	vk::SurfaceCapabilitiesKHR surfaceCapabilities = Device::Inst().GetPhysicalDevice().getSurfaceCapabilitiesKHR(*_surface);
 	_swapchainExtent = ChooseSwapExtent(surfaceCapabilities);
 
 	uint32_t minImageCount = ChooseSwapMinImageCount(surfaceCapabilities);
 
-	std::vector<vk::SurfaceFormatKHR> availableFormats = _physicalDevice.getSurfaceFormatsKHR(*_surface);
+	std::vector<vk::SurfaceFormatKHR> availableFormats = Device::Inst().GetPhysicalDevice().getSurfaceFormatsKHR(*_surface);
 	_swapchainSurfaceFormat = ChooseSwapSurfaceFormat(availableFormats);
 
-	std::vector<vk::PresentModeKHR> availablePresentModes = _physicalDevice.getSurfacePresentModesKHR(*_surface);
+	std::vector<vk::PresentModeKHR> availablePresentModes = Device::Inst().GetPhysicalDevice().getSurfacePresentModesKHR(*_surface);
 	vk::PresentModeKHR presentMode = ChooseSwapPresentMode(availablePresentModes);
 
 	vk::SwapchainCreateInfoKHR swapchainCreateInfo
@@ -595,6 +599,8 @@ void ImgnVulkan::CreateCommandPool()
 	};
 
 	_commandPool = vk::raii::CommandPool(Device::Inst().GetDevice(), poolInfo);
+
+	Device::Inst().SetCommandPool(std::move(_commandPool));
 }
 
 void ImgnVulkan::CreateSyncObjects()
@@ -703,7 +709,7 @@ void ImgnVulkan::CreateCommandBuffer()
 
 	vk::CommandBufferAllocateInfo allocInfo
 	{
-		.commandPool = _commandPool,
+		.commandPool = Device::Inst().GetCommandPool(),
 		.level = vk::CommandBufferLevel::ePrimary,
 		.commandBufferCount = MAXFRAMESINFLIGHT
 	};
@@ -740,15 +746,16 @@ void ImgnVulkan::CreateDescriptorPool()
 {
 	std::array poolSize =
 	{
-		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, MAXFRAMESINFLIGHT),
-		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, MAXFRAMESINFLIGHT)
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, _totalSets),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, _totalSets),
+		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, _totalSets * NumDescriptorsStreaming)
 	};
 
 	vk::DescriptorPoolCreateInfo poolInfo
 	{
-		.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-		.maxSets = MAXFRAMESINFLIGHT,
-		.poolSizeCount = poolSize.size(),
+		.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
+		.maxSets = _totalSets,
+		.poolSizeCount = static_cast<uint32_t>(poolSize.size()),
 		.pPoolSizes = poolSize.data()
 	};
 
@@ -757,10 +764,18 @@ void ImgnVulkan::CreateDescriptorPool()
 
 void ImgnVulkan::CreateDescriptorSets()
 {
-	std::vector<vk::DescriptorSetLayout> layouts(MAXFRAMESINFLIGHT, *_descriptorSetLayout);
+	std::vector<uint32_t> variableCounts(_totalSets, NumDescriptorsStreaming);
+	std::vector<vk::DescriptorSetLayout> layouts(_totalSets, *_descriptorSetLayout);
+
+	vk::DescriptorSetVariableDescriptorCountAllocateInfo variableInfo
+	{
+		.descriptorSetCount = static_cast<uint32_t>(variableCounts.size()),
+		.pDescriptorCounts = variableCounts.data()
+	};
 
 	vk::DescriptorSetAllocateInfo allocInfo
 	{
+		.pNext = &variableInfo,
 		.descriptorPool = _descriptorPool,
 		.descriptorSetCount = static_cast<uint32_t>(layouts.size()),
 		.pSetLayouts = layouts.data()
@@ -771,49 +786,53 @@ void ImgnVulkan::CreateDescriptorSets()
 
 	for (size_t i = 0; i < MAXFRAMESINFLIGHT; i++)
 	{
-		vk::DescriptorBufferInfo bufferInfo
-		{
-			.buffer = _uniformBuffers[i].buffer,
-			.offset = 0,
-			.range = sizeof(UniformBufferObject)
-		};
-
-		vk::DescriptorImageInfo imageInfo
-		{
-			.sampler = *_textureSampler,
-			.imageView = _texture.imageView,
-			.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
-		};
-
-		std::array descriptorWrites =
-		{
-			vk::WriteDescriptorSet
-			{
-				.dstSet = _descriptorSets[i],
-				.dstBinding = 0,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = vk::DescriptorType::eUniformBuffer,
-				.pBufferInfo = &bufferInfo
-			},
-			vk::WriteDescriptorSet
-			{
-				.dstSet = _descriptorSets[i],
-				.dstBinding = 1,
-				.dstArrayElement = 0,
-				.descriptorCount = 1,
-				.descriptorType = vk::DescriptorType::eCombinedImageSampler,
-				.pImageInfo = &imageInfo
-			}
-		};
-
-		Device::Inst().GetDevice().updateDescriptorSets(descriptorWrites, {});
+		UpdateDescriptorSet(i, RenderPassIdx::GBuffer, _uniformBuffers[i].buffer, sizeof(UniformBufferObject), nullptr, 0, {*_texture.imageView}, *_textureSampler);
 	}
+	//for (size_t i = 0; i < MAXFRAMESINFLIGHT; i++)
+	//{
+	//	vk::DescriptorBufferInfo bufferInfo
+	//	{
+	//		.buffer = _uniformBuffers[i].buffer,
+	//		.offset = 0,
+	//		.range = sizeof(UniformBufferObject)
+	//	};
+
+	//	vk::DescriptorImageInfo imageInfo
+	//	{
+	//		.sampler = *_textureSampler,
+	//		.imageView = _texture.imageView,
+	//		.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
+	//	};
+
+	//	std::array descriptorWrites =
+	//	{
+	//		vk::WriteDescriptorSet
+	//		{
+	//			.dstSet = _descriptorSets[DescriptorSetIndex],
+	//			.dstBinding = 0,
+	//			.dstArrayElement = 0,
+	//			.descriptorCount = 1,
+	//			.descriptorType = vk::DescriptorType::eUniformBuffer,
+	//			.pBufferInfo = &bufferInfo
+	//		},
+	//		vk::WriteDescriptorSet
+	//		{
+	//			.dstSet = _descriptorSets[i],
+	//			.dstBinding = 2,
+	//			.dstArrayElement = 0,
+	//			.descriptorCount = NumDescriptorsStreaming,
+	//			.descriptorType = vk::DescriptorType::eCombinedImageSampler,
+	//			.pImageInfo = &imageInfo
+	//		}
+	//	};
+
+	//	Device::Inst().GetDevice().updateDescriptorSets(descriptorWrites, {});
+	//}
 }
 
 void ImgnVulkan::CreateTextureSampler()
 {
-	vk::PhysicalDeviceProperties properties = _physicalDevice.getProperties();
+	vk::PhysicalDeviceProperties properties = Device::Inst().GetPhysicalDevice().getProperties();
 
 	vk::SamplerCreateInfo samplerInfo
 	{
@@ -980,13 +999,28 @@ void ImgnVulkan::CreateDescriptorSetLayout()
 {
 	std::array bindings =
 	{
-		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, nullptr),
-		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eCombinedImageSampler, NumDescriptorsStreaming, vk::ShaderStageFlagBits::eFragment, nullptr)
+	};
+
+	std::array<vk::DescriptorBindingFlags, 3> flags =
+	{
+		vk::DescriptorBindingFlags{}, vk::DescriptorBindingFlags{},
+		vk::DescriptorBindingFlagBits::eVariableDescriptorCount | vk::DescriptorBindingFlagBits::ePartiallyBound | vk::DescriptorBindingFlagBits::eUpdateAfterBind | vk::DescriptorBindingFlagBits::eUpdateUnusedWhilePending
+	};
+
+	vk::DescriptorSetLayoutBindingFlagsCreateInfo bindingFlags
+	{
+		.bindingCount = static_cast<uint32_t>(flags.size()),
+		.pBindingFlags = flags.data(),
 	};
 
 	vk::DescriptorSetLayoutCreateInfo layoutInfo
 	{
-		.bindingCount = bindings.size(),
+		.pNext = &bindingFlags,
+		.flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool,
+		.bindingCount = static_cast<uint32_t>(bindings.size()),
 		.pBindings = bindings.data()
 	};
 
@@ -997,7 +1031,9 @@ void ImgnVulkan::SetupDeferredRenderer()
 {
 	uint32_t width = _swapchainExtent.width, height = _swapchainExtent.height;
 
-	auto sponza = _manager.Load<Mesh>("Sponza");
+	_sponza = _manager.Load<Mesh>("Sponza");
+	//auto gBufferVertex = _manager.Load<Shader>("GBufferVertex", Shaders::);
+	//auto gBufferFrag = _manager.Load<Shader>("GBufferFragment", Shaders::);
 
 	//gbuffer image creation
 	CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[0]);
@@ -1013,11 +1049,11 @@ void ImgnVulkan::SetupDeferredRenderer()
 	CreateImageView(_finalImage.image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
 
 
-	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal);
-	_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal);
-	_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal);
-	_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eInputAttachment,  vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-	_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal);
+	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eInputAttachment,  vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
+	_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
 
 	_graph.AddPass("GeometryPass", {}, { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, [&](vk::raii::CommandBuffer& commandBuffer)
 		{
@@ -1033,17 +1069,19 @@ void ImgnVulkan::SetupDeferredRenderer()
 
 			renderingInfo.setRenderArea({ {0, 0}, {width, height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
+
 			commandBuffer.beginRendering(renderingInfo);
 
 			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
 			commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
 			commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
 
-			//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[_frameIdx], nullptr);
-			commandBuffer.bindVertexBuffers(0, sponza->GetVertexBuffer(), {0});
-			commandBuffer.bindIndexBuffer(sponza->GetIndexBuffer(), 0, vk::IndexType::eUint16);
 
-			commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+			commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[DescriptorSetIndex(_frameIdx, RenderPassIdx::GBuffer)], nullptr);
+			commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
+			commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+
+			commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
 
 			commandBuffer.endRendering();
 		});
@@ -1221,6 +1259,93 @@ void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pForm
 	pImage.image.bindMemory(pImage.memory, 0);
 }
 
+void ImgnVulkan::UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler)
+{
+	vk::DescriptorBufferInfo uniformBufferInfo
+	{
+		.buffer = pUniformBuffer,
+		.offset = 0,
+		.range = pUniformBufferSize
+	};
+
+	vk::DescriptorBufferInfo storageBufferInfo
+	{
+		.buffer = pStorageBuffer,
+		.offset = 0,
+		.range = pStorageBufferSize
+	};
+
+	std::vector<vk::DescriptorImageInfo> imageInfos;
+	imageInfos.reserve(pTextures.size());
+
+	for (auto& texture : pTextures)
+	{
+		imageInfos.push_back(vk::DescriptorImageInfo
+			{
+				.sampler = pSampler,
+				.imageView = texture,
+				.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
+			});
+	}
+
+	std::vector<vk::WriteDescriptorSet> writes;
+
+	int writeSize = 0;
+	if (pUniformBuffer) writeSize++;
+	if (pStorageBuffer) writeSize++;
+	if (pTextures.size() > 0) writeSize++;
+
+	writes.resize(writeSize);
+
+	if (pUniformBuffer)
+	{
+		writes[--writeSize] = vk::WriteDescriptorSet
+		{
+			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+			.dstBinding = 2,
+			.dstArrayElement = 0,
+			.descriptorCount = static_cast<uint32_t>(imageInfos.size()),
+			.descriptorType = vk::DescriptorType::eCombinedImageSampler,
+			.pImageInfo = imageInfos.data()
+		};
+	}
+
+	if (pStorageBuffer)
+	{
+		writes[--writeSize] = vk::WriteDescriptorSet
+		{
+			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+			.dstBinding = 1,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = vk::DescriptorType::eStorageBuffer,
+			.pBufferInfo = &storageBufferInfo
+		};
+	}
+
+	if (pTextures.size() > 0)
+	{
+		writes[--writeSize] = vk::WriteDescriptorSet
+		{
+			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+			.dstBinding = 0,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = vk::DescriptorType::eUniformBuffer,
+			.pBufferInfo = &uniformBufferInfo
+		};
+	}
+
+	//std::array writes =
+	//{
+	//	pUniformBuffer ? ,
+	//	,
+	//	
+	//};
+
+	Device::Inst().GetDevice().updateDescriptorSets(writes, {});
+}
+
 void ImgnVulkan::Cleanup()
 {
 	CleanupSwapchain();
@@ -1255,6 +1380,8 @@ void ImgnVulkan::InitVulkan(ImgnWindow* pWindow)
 	CreateDescriptorSets();
 	CreateCommandBuffer();
 	CreateSyncObjects();
+
+	SetupDeferredRenderer();
 }
 
 void ImgnVulkan::DrawFrame()
@@ -1273,25 +1400,27 @@ void ImgnVulkan::DrawFrame()
 	}
 
 	_commandBuffers[_frameIdx].reset();
-
-	RecordCommandBuffer(imageIndex);
-
-	vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
-
-	const vk::SubmitInfo submitInfo
-	{
-		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = &*_presentCompleteSemaphores[_frameIdx],
-		.pWaitDstStageMask = &waitDestinationStageMask,
-		.commandBufferCount = 1,
-		.pCommandBuffers = &*_commandBuffers[_frameIdx],
-		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = &*_renderFinishedSemaphores[imageIndex]
-	};
-
+	
 	UpdateUniformBuffer(_frameIdx);
 
-	_queue->submit(submitInfo, *_inFlightFences[_frameIdx]);
+	_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
+	//RecordCommandBuffer(imageIndex);
+
+	//vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+
+	//const vk::SubmitInfo submitInfo
+	//{
+	//	.waitSemaphoreCount = 1,
+	//	.pWaitSemaphores = &*_presentCompleteSemaphores[_frameIdx],
+	//	.pWaitDstStageMask = &waitDestinationStageMask,
+	//	.commandBufferCount = 1,
+	//	.pCommandBuffers = &*_commandBuffers[_frameIdx],
+	//	.signalSemaphoreCount = 1,
+	//	.pSignalSemaphores = &*_renderFinishedSemaphores[imageIndex]
+	//};
+
+
+	//Device::Inst().GetQueue()->submit(submitInfo, *_inFlightFences[_frameIdx]);
 
 	const vk::PresentInfoKHR presentInfoKHR
 	{
@@ -1302,7 +1431,8 @@ void ImgnVulkan::DrawFrame()
 		.pImageIndices = &imageIndex
 	};
 
-	result = _queue->presentKHR(presentInfoKHR);
+	result = Device::Inst().GetQueue().presentKHR(presentInfoKHR);
+
 	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || _framebufferResized)
 	{
 		_framebufferResized = false;

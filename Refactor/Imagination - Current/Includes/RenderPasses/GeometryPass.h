@@ -1,21 +1,28 @@
 #pragma once
 #include "RenderPass.h"
+
+struct UBO
+{
+	Math::mat4<float> model, view, proj;
+};
+
 class GeometryPass : public RenderPass
 {
 	RenderTarget* gBuffer;
+
+	
 	//std::array<RenderTarget*, 3> gBufferTargets;
 
 public:
 	GeometryPass(const std::string& pName) /*Constructor*/ : RenderPass(pName)
 	{
 		gBuffer = new RenderTarget(1920, 1080);
-
-		//for (auto& target : gBufferTargets)
-		//{
-		//	target = new RenderTarget(1920, 1080);
-		//}
-
 		SetRenderTarget(gBuffer);
+
+		//descriptor set layout
+		{
+
+		}
 	}
 
 	~GeometryPass() override/*Destructor*/

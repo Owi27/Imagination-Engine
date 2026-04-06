@@ -54,7 +54,7 @@ public:
         _queue.emplace(std::move(queue));
     }
 
-	vk::CommandBuffer BeginSingleTimeCommand()
+	vk::raii::CommandBuffer BeginSingleTimeCommand()
 	{
 		vk::CommandBufferAllocateInfo allocInfo
 		{
@@ -63,7 +63,7 @@ public:
 			.commandBufferCount = 1
 		};
 
-		auto commandBuffer = std::move(_device->allocateCommandBuffers(allocInfo).front());
+		auto commandBuffer= std::move(_device->allocateCommandBuffers(allocInfo).front());
 
 		vk::CommandBufferBeginInfo beginInfo
 		{
@@ -75,14 +75,14 @@ public:
 		return commandBuffer;
 	}
 
-	void EndSingleTimeCommand(vk::CommandBuffer& pCommandBuffer)
+	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer)
 	{
 		pCommandBuffer.end();
 
 		vk::SubmitInfo submitInfo
 		{
 			.commandBufferCount = 1,
-			.pCommandBuffers = &pCommandBuffer
+			.pCommandBuffers = &*pCommandBuffer
 		};
 
 		_queue->submit(submitInfo, nullptr);

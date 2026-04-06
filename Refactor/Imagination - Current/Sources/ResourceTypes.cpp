@@ -150,7 +150,7 @@ uint32_t Texture::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags p
 
 void Texture::TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout)
 {
-	vk::CommandBuffer commandBuffer = Device::Inst().BeginSingleTimeCommand();
+	vk::raii::CommandBuffer commandBuffer = Device::Inst().BeginSingleTimeCommand();
 
 	vk::ImageMemoryBarrier barrier
 	{
@@ -359,13 +359,13 @@ void Mesh::CreateBuffers(std::vector<Vertex>& pVertices, std::vector<uint32_t>& 
 		_vertexBuffer = device.createBuffer(bufferCreateInfo);
 
 		vk::MemoryRequirements memReqs = device.getBufferMemoryRequirements(_vertexBuffer);
-		vk::MemoryAllocateInfo stagingAllocateInfo
+		vk::MemoryAllocateInfo bufferAllocateInfo
 		{
 			.allocationSize = memReqs.size,
 			.memoryTypeIndex = FindMemoryType(memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal)
 		};
 
-		_vertexBufferMemory = device.allocateMemory(stagingAllocateInfo);
+		_vertexBufferMemory = device.allocateMemory(bufferAllocateInfo);
 		device.bindBufferMemory(_vertexBuffer, _vertexBufferMemory, _vertexBufferOffset);
 
 		CopyBuffer(stagingBuffer, _vertexBuffer, size);

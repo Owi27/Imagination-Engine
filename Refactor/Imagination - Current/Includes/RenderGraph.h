@@ -9,6 +9,7 @@ class RenderGraph
 		vk::ImageUsageFlags usage;
 		vk::ImageLayout initLayout;
 		vk::ImageLayout finalLayout;
+		vk::ImageAspectFlags aspect;
 
 		// Actual GPU resources - populated during compilation
 		vk::raii::Image image = nullptr;      // The GPU image object
@@ -51,7 +52,7 @@ public:
 		return (it != _resources.end()) ? &it->second : nullptr;
 	}
 
-	void AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout);
+	void AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
 	void AddPass(const std::string& pName, const std::vector<std::string>& pInputs, const std::vector<std::string>& pOutputs, std::function<void(vk::raii::CommandBuffer&)> pExecute);
 };
 

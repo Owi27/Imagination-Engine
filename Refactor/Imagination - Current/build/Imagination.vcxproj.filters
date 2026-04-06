@@ -14,6 +14,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ComponentTypes.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\CullingSystem.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\Event.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -53,6 +56,9 @@
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ComponentTypes.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\CullingSystem.h">
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Device.h">

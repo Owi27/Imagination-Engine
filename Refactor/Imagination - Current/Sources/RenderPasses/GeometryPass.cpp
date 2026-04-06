@@ -35,6 +35,19 @@ void GeometryPass::BeginPass(vk::raii::CommandBuffer& pCommandBuffer)
 
 void GeometryPass::Render(vk::raii::CommandBuffer& pCommandBuffer)
 {
+	//pCommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
+	//pCommandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
+	//pCommandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
+
+
+	//pCommandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[DescriptorSetIndex(_frameIdx, RenderPassIdx::GBuffer)], nullptr);
+	//pCommandBuffer.bindVertexBuffers(0, sponza->GetVertexBuffer(), { 0 });
+	//pCommandBuffer.bindIndexBuffer(sponza->GetIndexBuffer(), 0, vk::IndexType::eUint16);
+
+	//pCommandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+
+	//pCommandBuffer.endRendering();
+
 }
 
 void GeometryPass::EndPass(vk::raii::CommandBuffer& pCommandBuffer)

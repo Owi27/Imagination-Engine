@@ -2,6 +2,13 @@
 class RenderPass;
 class RenderTarget;
 
+//enum class RenderPassIdx : uint32_t
+//{
+//    GBuffer = 0,
+//    Lighting = 1,
+//    Count
+//};
+
 class RenderPassManager
 {
 	std::unordered_map<std::string, std::unique_ptr<RenderPass>> _renderPasses;

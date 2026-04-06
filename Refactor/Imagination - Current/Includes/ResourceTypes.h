@@ -121,11 +121,11 @@ class Mesh : public Resource
 
 	vk::Buffer _vertexBuffer;
 	vk::DeviceMemory _vertexBufferMemory;
-	vk::DeviceSize _vertexBufferOffset;
+	vk::DeviceSize _vertexBufferOffset = 0;
 
 	vk::Buffer _indexBuffer;
 	vk::DeviceMemory _indexBufferMemory;
-	vk::DeviceSize _indexBufferOffset;
+	vk::DeviceSize _indexBufferOffset = 0;
 
 	uint32_t _vertexCount = 0, _indexCount = 0;
 
@@ -150,7 +150,7 @@ public:
 
 	bool Load() override
 	{
-		std::string filepath = "../Models/" + GetID() + "glTF" + GetID() + ".gltf";
+		std::string filepath = "../Models/" + GetID() + "/glTF/" + GetID() + ".gltf";
 
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
