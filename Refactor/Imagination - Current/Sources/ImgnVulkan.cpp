@@ -235,6 +235,7 @@ std::vector<uint32_t> ImgnVulkan::GetSPV(const std::string& pShader, const std::
 	{
 		std::stringstream ss;
 		ss << "Shader compilation errors : " << errors->GetStringPointer();
+		std::cout << ss.str() << '\n';
 		throw std::runtime_error(ss.str());
 	}
 
@@ -873,6 +874,18 @@ void ImgnVulkan::CreateGraphicsPipelines()
 		.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
 	};
 
+	std::vector dynamicStates =
+	{
+		vk::DynamicState::eViewport,
+		vk::DynamicState::eScissor
+	};
+
+	vk::PipelineDynamicStateCreateInfo dynamicState
+	{
+		.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
+		.pDynamicStates = dynamicStates.data()
+	};
+
 	vk::GraphicsPipelineCreateInfo pipelineInfo;
 
 	/* GBuffer*/
@@ -953,18 +966,6 @@ void ImgnVulkan::CreateGraphicsPipelines()
 			.logicOp = vk::LogicOp::eCopy,
 			.attachmentCount = blendStates.size(),
 			.pAttachments = blendStates.data()
-		};
-
-		std::vector dynamicStates =
-		{
-			vk::DynamicState::eViewport,
-			vk::DynamicState::eScissor
-		};
-
-		vk::PipelineDynamicStateCreateInfo dynamicState
-		{
-			.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
-			.pDynamicStates = dynamicStates.data()
 		};
 
 		vk::Format depthFormat = FindDepthFormat();

@@ -64,11 +64,11 @@ float4 main(VOut input) : SV_Target
 struct VOut
 {
     float4 pos : SV_Position;
-    float3 nrm : NORMAL0;
+    float3 nrm : NORMAL;
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
     float3 col : COLOR;
-    float3x3 TBN : TEXCOORD1;
+    //float3x3 TBN : TEXCOORD1;
     int idx : INDEX;
 };
 
@@ -87,6 +87,9 @@ VOut main(VIn input, uint id : SV_InstanceID)
     output.uv = input.uv;
     output.nrm = normalize(input.nrm);
     output.tan = input.tan.rgb;
+    output.col = input.col;
+    
+    output.idx = id;
     
     return output;
 })";
@@ -94,14 +97,31 @@ VOut main(VIn input, uint id : SV_InstanceID)
     std::string GBufferFragmentShader = R"(struct VOut
 {
     float4 pos : SV_Position;
-    float3 nrm : NORMAL0;
+    float3 nrm : NORMAL;
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
     float3 col : COLOR;
-    float3x3 TBN : TEXCOORD1;
+    //float3x3 TBN : TEXCOORD1;
     int idx : INDEX;
 };
-)";
+
+struct FOut
+{
+    float4 Position : SV_TARGET0;
+    float4 Normal : SV_TARGET1;
+    float4 Albedo : SV_TARGET2;
+    //float4 MProperties : SV_TARGET3;
+};
+
+FOut main(VOut input)
+{
+    FOut output;
+    output.Position = float4(1.f, 0.f, 0.f, 1.f);
+    output.Normal = float4(0.f, 1.f, 0.f, 1.f);
+    output.Albedo = float4(0.f, 0.f, 1.f, 1.f);
+
+    return output;
+})";
 
     std::string LightingVertexShader = R"(struct VOut
 {
@@ -118,6 +138,9 @@ VOut main(uint VertexIndex : SV_VertexID)
     return output;
 })";
 
-    std::string LightingFragmentShader = R"()";
+    std::string LightingFragmentShader = R"(float4 main() : SV_TARGET
+{
+    return float4(1.f, 0.f, 0.f, 1.f);
+})";
 
 }

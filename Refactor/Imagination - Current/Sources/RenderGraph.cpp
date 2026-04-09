@@ -341,131 +341,131 @@ void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQu
 
 
 
-	// Ordered Pass Execution with Automatic Dependency Management
-	   // Execute each pass in the computed dependency-safe order
-	for (auto passIdx : _executionOrder)
-	{
-		const auto& pass = _passes[passIdx];
+	//// Ordered Pass Execution with Automatic Dependency Management
+	//   // Execute each pass in the computed dependency-safe order
+	//for (auto passIdx : _executionOrder)
+	//{
+	//	const auto& pass = _passes[passIdx];
 
-		// Synchronization Setup - Collect Dependencies for Current Pass
-		// Determine what this pass must wait for before executing
-		waitSemaphores.clear();
-		waitStages.clear();
+	//	// Synchronization Setup - Collect Dependencies for Current Pass
+	//	// Determine what this pass must wait for before executing
+	//	waitSemaphores.clear();
+	//	waitStages.clear();
 
-		for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
-		{
-			if (_semaphoreSignalWaitPairs[i].second == passIdx)
-			{
-				// This pass depends on the completion of another pass
-				waitSemaphores.push_back(_semaphores[i]);                           // Wait for dependency completion
-				waitStages.push_back(vk::PipelineStageFlagBits::eColorAttachmentOutput);  // Wait at output stage
-			}
-		}
+	//	for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
+	//	{
+	//		if (_semaphoreSignalWaitPairs[i].second == passIdx)
+	//		{
+	//			// This pass depends on the completion of another pass
+	//			waitSemaphores.push_back(_semaphores[i]);                           // Wait for dependency completion
+	//			waitStages.push_back(vk::PipelineStageFlagBits::eColorAttachmentOutput);  // Wait at output stage
+	//		}
+	//	}
 
-		// Collect semaphores that this pass will signal for dependent passes
-		signalSemaphores.clear();
-		for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
-		{
-			if (_semaphoreSignalWaitPairs[i].first == passIdx)
-			{
-				// Other passes depend on this pass's completion
-				signalSemaphores.push_back(_semaphores[i]);                         // Signal completion for dependents
-			}
-		}
+	//	// Collect semaphores that this pass will signal for dependent passes
+	//	signalSemaphores.clear();
+	//	for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
+	//	{
+	//		if (_semaphoreSignalWaitPairs[i].first == passIdx)
+	//		{
+	//			// Other passes depend on this pass's completion
+	//			signalSemaphores.push_back(_semaphores[i]);                         // Signal completion for dependents
+	//		}
+	//	}
 
-		// Command Buffer Preparation and Resource Layout Transitions
-		// Set up command recording and transition resources to appropriate layouts
-		pCommandBuffer.begin({});                                                   // Begin command recording
+	//	// Command Buffer Preparation and Resource Layout Transitions
+	//	// Set up command recording and transition resources to appropriate layouts
+	//	pCommandBuffer.begin({});                                                   // Begin command recording
 
-		// Transition input resources to shader-readable layouts
-		for (const auto& input : pass.inputs)
-		{
-			auto& resource = _resources[input];
+	//	// Transition input resources to shader-readable layouts
+	//	for (const auto& input : pass.inputs)
+	//	{
+	//		auto& resource = _resources[input];
 
-			vk::ImageMemoryBarrier barrier;
-			barrier.setOldLayout(resource.initLayout)                           // Current resource layout
-				.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)          // Target layout for reading
-				.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)                // No queue family transfer
-				.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-				.setImage(resource.image)                                      // Target image
-				.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })  // Full image range
-				.setSrcAccessMask(vk::AccessFlagBits::eMemoryWrite)             // Previous write access
-				.setDstAccessMask(vk::AccessFlagBits::eShaderRead);             // Required read access
+	//		vk::ImageMemoryBarrier barrier;
+	//		barrier.setOldLayout(resource.initLayout)                           // Current resource layout
+	//			.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)          // Target layout for reading
+	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)                // No queue family transfer
+	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+	//			.setImage(resource.image)                                      // Target image
+	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })  // Full image range
+	//			.setSrcAccessMask(vk::AccessFlagBits::eMemoryWrite)             // Previous write access
+	//			.setDstAccessMask(vk::AccessFlagBits::eShaderRead);             // Required read access
 
-			pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
+	//		pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
 
-			// Insert pipeline barrier for safe layout transition
-			//pCommandBuffer.pipelineBarrier(
-			//    vk::PipelineStageFlagBits::eAllCommands,                           // Wait for all previous work
-			//    vk::PipelineStageFlagBits::eFragmentShader,                        // Enable fragment shader access
-			//    vk::DependencyFlagBits::eByRegion,                                 // Region-local dependency
-			//    0, nullptr, 0, nullptr, 1, &barrier                               // Image barrier only
-			//);
-		}
+	//		// Insert pipeline barrier for safe layout transition
+	//		//pCommandBuffer.pipelineBarrier(
+	//		//    vk::PipelineStageFlagBits::eAllCommands,                           // Wait for all previous work
+	//		//    vk::PipelineStageFlagBits::eFragmentShader,                        // Enable fragment shader access
+	//		//    vk::DependencyFlagBits::eByRegion,                                 // Region-local dependency
+	//		//    0, nullptr, 0, nullptr, 1, &barrier                               // Image barrier only
+	//		//);
+	//	}
 
-		// Transition output resources to render target layouts
-		for (const auto& output : pass.outputs)
-		{
-			auto& resource = _resources[output];
+	//	// Transition output resources to render target layouts
+	//	for (const auto& output : pass.outputs)
+	//	{
+	//		auto& resource = _resources[output];
 
-			vk::ImageMemoryBarrier barrier;
-			barrier.setOldLayout(resource.initLayout)                           // Current layout state
-				.setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Optimal for color output
-				.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-				.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-				.setImage(resource.image)
-				.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
-				.setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)              // Previous read access
-				.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);   // Required write access
+	//		vk::ImageMemoryBarrier barrier;
+	//		barrier.setOldLayout(resource.initLayout)                           // Current layout state
+	//			.setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Optimal for color output
+	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+	//			.setImage(resource.image)
+	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
+	//			.setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)              // Previous read access
+	//			.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);   // Required write access
 
-			// Insert barrier for safe transition to writable state
-			pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
-		}
+	//		// Insert barrier for safe transition to writable state
+	//		pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
+	//	}
 
-		// Pass Execution - Execute the Actual Rendering Logic
-		// Call the user-provided rendering function with prepared command buffer
-		pass.Execute(pCommandBuffer);                                           // Execute pass-specific rendering
+	//	// Pass Execution - Execute the Actual Rendering Logic
+	//	// Call the user-provided rendering function with prepared command buffer
+	//	pass.Execute(pCommandBuffer);                                           // Execute pass-specific rendering
 
-		// Final Layout Transitions - Prepare Resources for Subsequent Use
-		// Transition output resources to their final required layouts
-		for (const auto& output : pass.outputs)
-		{
-			auto& resource = _resources[output];
+	//	// Final Layout Transitions - Prepare Resources for Subsequent Use
+	//	// Transition output resources to their final required layouts
+	//	for (const auto& output : pass.outputs)
+	//	{
+	//		auto& resource = _resources[output];
 
-			vk::ImageMemoryBarrier barrier;
-			barrier.setOldLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Current writable layout
-				.setNewLayout(resource.finalLayout)                             // Required final layout
-				.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-				.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-				.setImage(resource.image)
-				.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
-				.setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)    // Previous write operations
-				.setDstAccessMask(vk::AccessFlagBits::eMemoryRead);             // Enable subsequent reads
+	//		vk::ImageMemoryBarrier barrier;
+	//		barrier.setOldLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Current writable layout
+	//			.setNewLayout(resource.finalLayout)                             // Required final layout
+	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+	//			.setImage(resource.image)
+	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
+	//			.setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)    // Previous write operations
+	//			.setDstAccessMask(vk::AccessFlagBits::eMemoryRead);             // Enable subsequent reads
 
-			// Insert final barrier for layout transition
-			pCommandBuffer.pipelineBarrier(
-				vk::PipelineStageFlagBits::eColorAttachmentOutput,                 // After color writes complete
-				vk::PipelineStageFlagBits::eAllCommands,                           // Before any subsequent work
-				vk::DependencyFlagBits::eByRegion,
-				nullptr, nullptr, barrier
-			);
-		}
+	//		// Insert final barrier for layout transition
+	//		pCommandBuffer.pipelineBarrier(
+	//			vk::PipelineStageFlagBits::eColorAttachmentOutput,                 // After color writes complete
+	//			vk::PipelineStageFlagBits::eAllCommands,                           // Before any subsequent work
+	//			vk::DependencyFlagBits::eByRegion,
+	//			nullptr, nullptr, barrier
+	//		);
+	//	}
 
-		// Command Submission with Synchronization
-		// Submit command buffer with appropriate dependency and signaling semaphores
-		pCommandBuffer.end();                                                       // Finalize command recording
+	//	// Command Submission with Synchronization
+	//	// Submit command buffer with appropriate dependency and signaling semaphores
+	//	pCommandBuffer.end();                                                       // Finalize command recording
 
-		vk::SubmitInfo submitInfo;
-		submitInfo.setWaitSemaphoreCount(static_cast<uint32_t>(waitSemaphores.size()))      // Dependencies to wait for
-			.setPWaitSemaphores(waitSemaphores.data())                                 // Dependency semaphores
-			.setPWaitDstStageMask(waitStages.data())                                   // Pipeline stages to wait at
-			.setCommandBufferCount(1)                                                  // Single command buffer
-			.setPCommandBuffers(&*pCommandBuffer)                                      // Command buffer to execute
-			.setSignalSemaphoreCount(static_cast<uint32_t>(signalSemaphores.size()))  // Semaphores to signal
-			.setPSignalSemaphores(signalSemaphores.data());                           // Signal semaphores
+	//	vk::SubmitInfo submitInfo;
+	//	submitInfo.setWaitSemaphoreCount(static_cast<uint32_t>(waitSemaphores.size()))      // Dependencies to wait for
+	//		.setPWaitSemaphores(waitSemaphores.data())                                 // Dependency semaphores
+	//		.setPWaitDstStageMask(waitStages.data())                                   // Pipeline stages to wait at
+	//		.setCommandBufferCount(1)                                                  // Single command buffer
+	//		.setPCommandBuffers(&*pCommandBuffer)                                      // Command buffer to execute
+	//		.setSignalSemaphoreCount(static_cast<uint32_t>(signalSemaphores.size()))  // Semaphores to signal
+	//		.setPSignalSemaphores(signalSemaphores.data());                           // Signal semaphores
 
-		pQueue.submit(1, &submitInfo, nullptr);                                              // Submit to GPU queue
-	}
+	//	pQueue.submit(1, &submitInfo, nullptr);                                              // Submit to GPU queue
+	//}
 }
 
 void RenderGraph::RenderFrame(vk::Queue pGraphicsQueue, vk::Queue pPresentQueue)
