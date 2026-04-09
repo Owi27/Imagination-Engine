@@ -250,6 +250,10 @@ struct Image
 };
 
 static constexpr uint32_t NumDescriptorsStreaming = 2048;
+constexpr const wchar_t* VertexTarget = L"vs_6_6";
+constexpr const wchar_t* FragmentTarget = L"ps_6_6";
+constexpr const wchar_t* ComputeTarget = L"cs_6_6";
+
 
 class ImgnVulkan
 {
@@ -341,8 +345,8 @@ class ImgnVulkan
 	std::vector<vk::raii::ImageView> _swapchainImageViews;
 	vk::raii::DebugUtilsMessengerEXT _debugMessenger = nullptr;
 
-	vk::raii::Pipeline _pipeline = nullptr;
-	vk::raii::PipelineLayout _pipelineLayout = nullptr;
+	//vk::raii::Pipeline _pipeline = nullptr;
+	//vk::raii::PipelineLayout _pipelineLayout = nullptr;
 	vk::raii::DescriptorPool _descriptorPool = nullptr;
 	std::vector<vk::raii::DescriptorSet> _descriptorSets;
 	vk::raii::DescriptorSetLayout _descriptorSetLayout = nullptr;
@@ -354,6 +358,8 @@ class ImgnVulkan
 	std::vector<vk::raii::Fence> _inFlightFences;
 	std::vector<vk::raii::Semaphore> _renderFinishedSemaphores;
 	std::vector<vk::raii::Semaphore> _presentCompleteSemaphores;
+
+	Pipelines _pipelines;
 
 	Buffer _indexBuffer;
 	Buffer _vertexBuffer;
@@ -420,7 +426,7 @@ class ImgnVulkan
 	void CreateDescriptorPool();
 	void CreateDescriptorSets();
 	void CreateTextureSampler();
-	void CreateGraphicsPipeline();
+	void CreateGraphicsPipelines();
 	void CreateTextureImageView();
 	void CreateDescriptorSetLayout();
 	

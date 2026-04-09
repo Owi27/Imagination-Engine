@@ -86,10 +86,38 @@ VOut main(VIn input, uint id : SV_InstanceID)
     output.pos = mul(ubo.proj, mul(ubo.view, mul(ubo.model, float4(input.pos, 1))));
     output.uv = input.uv;
     output.nrm = normalize(input.nrm);
-    output.tan = input.tan;
+    output.tan = input.tan.rgb;
     
     return output;
 })";
 
-    std::string GBufferFragmentShader = R"()";
+    std::string GBufferFragmentShader = R"(struct VOut
+{
+    float4 pos : SV_Position;
+    float3 nrm : NORMAL0;
+    float2 uv : TEXCOORD0;
+    float3 tan : TANGENT;
+    float3 col : COLOR;
+    float3x3 TBN : TEXCOORD1;
+    int idx : INDEX;
+};
+)";
+
+    std::string LightingVertexShader = R"(struct VOut
+{
+    float4 Pos : SV_POSITION;
+    float2 UV : TEXCOORD0;
+};
+
+VOut main(uint VertexIndex : SV_VertexID)
+{
+    VOut output;
+    output.UV = float2((VertexIndex << 1) & 2, VertexIndex & 2);
+    output.Pos = float4(output.UV * 2.0f - 1.0f, 0.0f, 1.0f);
+    
+    return output;
+})";
+
+    std::string LightingFragmentShader = R"()";
+
 }
