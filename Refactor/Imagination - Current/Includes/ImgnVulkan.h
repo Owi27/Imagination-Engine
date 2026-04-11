@@ -1,4 +1,4 @@
-#include "ImgnWindow.h"
+//#include "ImgnWindow.h"
 //#include <Windows.h>
 #include <wrl/client.h>
 #include <dxcapi.h>
@@ -8,6 +8,8 @@ using namespace Microsoft::WRL;
 #include "gltf/tiny_gltf.h"
 #include "ResourceTypes.h"
 #include "RenderGraph.h"
+#include "ImgnGui.h"
+#include "Input.h"
 
 constexpr int MAXFRAMESINFLIGHT = 3;
 
@@ -33,7 +35,7 @@ constexpr int MAXFRAMESINFLIGHT = 3;
 
 struct alignas(16) UniformBufferObject
 {
-	Math::mat4<float> model, view, proj;
+	mat4 model, view, proj;
 };
 
 //struct ModelLoader
@@ -236,18 +238,18 @@ struct alignas(16) UniformBufferObject
 //	}
 //};
 
-struct Buffer
-{
-	vk::raii::Buffer buffer = nullptr;
-	vk::raii::DeviceMemory memory = nullptr;
-};
-
-struct Image
-{
-	vk::raii::Image image = nullptr;
-	vk::raii::ImageView imageView = nullptr;
-	vk::raii::DeviceMemory memory = nullptr;
-};
+//struct Buffer
+//{
+//	vk::raii::Buffer buffer = nullptr;
+//	vk::raii::DeviceMemory memory = nullptr;
+//};
+//
+//struct Image
+//{
+//	vk::raii::Image image = nullptr;
+//	vk::raii::ImageView imageView = nullptr;
+//	vk::raii::DeviceMemory memory = nullptr;
+//};
 
 static constexpr uint32_t NumDescriptorsStreaming = 2048;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
@@ -324,6 +326,9 @@ class ImgnVulkan
 	};
 
 	ImgnWindow* _win;
+	GWindow* _gWin;
+	uint32_t _gWinW, _gWinH;
+	ImgnInput _input;// = (*_gWin);
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
@@ -436,6 +441,8 @@ class ImgnVulkan
 	std::array<Image, 3> _gBufferImages;
 	Image _finalImage;
 
+	ImgnGui _gui;
+
 	void SetupDeferredRenderer();
 
 public:
@@ -449,6 +456,7 @@ public:
 
 	void Cleanup();
 	void InitVulkan(ImgnWindow* pWindow);
+	void InitVulkan(GWindow* pWindow);
 	void DrawFrame();
 	void DeviceWaitIdle() { _device.waitIdle(); }
 

@@ -1,7 +1,7 @@
 #include "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
 #include "ImgnVulkan.h"
 #include "HLSL.h"
-using namespace Math;
+//using namespace Math;
 
 #include "gltf/stb_image.h"
 
@@ -53,7 +53,7 @@ void ImgnVulkan::SetupDebugMessenger()
 		.pfnUserCallback = &DebugCallback
 	};
 
-	_debugMessenger = _instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
+	_debugMessenger = Device::Inst().GetVkInstance().createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
 }
 
 vk::Format ImgnVulkan::FindDepthFormat()
@@ -63,7 +63,7 @@ vk::Format ImgnVulkan::FindDepthFormat()
 
 void ImgnVulkan::PickPhysicalDevice()
 {
-	auto physicalDevices = vk::raii::PhysicalDevices(_instance);
+	auto physicalDevices = vk::raii::PhysicalDevices(Device::Inst().GetVkInstance());
 	if (physicalDevices.empty()) throw std::runtime_error("failed to find GPUs with Vulkan support!");
 
 	// Use an ordered map to automatically sort candidates by increasing score
@@ -138,15 +138,17 @@ void ImgnVulkan::RecordCommandBuffer(uint32_t pImageIdx)
 
 	commandBuffer.beginRendering(renderingInfo);
 
-	//commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
+	////commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
 	commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(_swapchainExtent.width), static_cast<float>(_swapchainExtent.height), 0.0f, 1.0f));
 	commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
 
-	//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[_frameIdx], nullptr);
-	commandBuffer.bindVertexBuffers(0, *_vertexBuffer.buffer, { 0 });
-	commandBuffer.bindIndexBuffer(*_indexBuffer.buffer, 0, vk::IndexType::eUint16);
+	////commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *_descriptorSets[_frameIdx], nullptr);
+	//commandBuffer.bindVertexBuffers(0, *_vertexBuffer.buffer, { 0 });
+	//commandBuffer.bindIndexBuffer(*_indexBuffer.buffer, 0, vk::IndexType::eUint16);
 
-	commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+	//commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+
+	_gui.DrawFrame(commandBuffer);
 
 	commandBuffer.endRendering();
 
@@ -181,8 +183,8 @@ vk::Extent2D ImgnVulkan::ChooseSwapExtent(vk::SurfaceCapabilitiesKHR const& pCap
 
 	return
 	{
-		std::clamp<uint32_t>(_win->width, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
-		std::clamp<uint32_t>(_win->height, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
+		std::clamp<uint32_t>(_gWinW, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
+		std::clamp<uint32_t>(_gWinH, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
 	};
 }
 
@@ -487,13 +489,25 @@ void ImgnVulkan::CreateSurface()
 {
 	VkSurfaceKHR surface;
 
+	//vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo
+	//{
+	//	.hinstance = _win->GetInstance(),
+	//	.hwnd = _win->GetHandle()
+	//};
+	
+	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
+	_gWin->GetWindowHandle(handle);
+
+	HWND hwnd = static_cast<HWND>(handle.window);
+	HINSTANCE* hInst = reinterpret_cast<HINSTANCE*>(GetWindowLongPtr(static_cast<HWND>(hwnd), GWLP_HINSTANCE));
+
 	vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo
 	{
-		.hinstance = _win->GetInstance(),
-		.hwnd = _win->GetHandle()
+		.hinstance = *hInst ? *hInst : nullptr,
+		.hwnd = hwnd
 	};
 
-	_surface = vk::raii::SurfaceKHR(_instance, surfaceCreateInfo);
+	_surface = vk::raii::SurfaceKHR(Device::Inst().GetVkInstance(), surfaceCreateInfo);
 }
 
 void ImgnVulkan::CreateInstance()
@@ -546,6 +560,7 @@ void ImgnVulkan::CreateInstance()
 	};
 
 	_instance = vk::raii::Instance(_ctx, instanceCreateInfo);
+	Device::Inst().SetInstance(std::move(_instance));
 }
 
 void ImgnVulkan::CreateSwapchain()
@@ -1225,14 +1240,14 @@ void ImgnVulkan::UpdateUniformBuffer(uint32_t pCurrImage)
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-	UniformBufferObject ubo
-	{
-		.model = RotateG(Identity<float>(), time * Radians(90.f), vec3<float>{ 0, 0, 1 }),
-		.view = LookAtL(vec4<float>{2.f, 2.f, 2.f}, vec4<float>{0.f, 0.f, 0.f}, vec4<float>{0.f, 0.f, 1.f}),
-		.proj = Projection<float>(Radians(45.f), static_cast<float>(_swapchainExtent.width) / static_cast<float>(_swapchainExtent.height), 0.1, 10.f)
-	};
+	//UniformBufferObject ubo
+	//{
+	//	.model = RotateG(Identity<float>(), time * Radians(90.f), vec3<float>{ 0, 0, 1 }),
+	//	.view = LookAtL(vec4<float>{2.f, 2.f, 2.f}, vec4<float>{0.f, 0.f, 0.f}, vec4<float>{0.f, 0.f, 1.f}),
+	//	.proj = Projection<float>(Radians(45.f), static_cast<float>(_swapchainExtent.width) / static_cast<float>(_swapchainExtent.height), 0.1, 10.f)
+	//};
 
-	memcpy(_uniformsBuffersMapped[pCurrImage], &ubo, sizeof(UniformBufferObject));
+	//memcpy(_uniformsBuffersMapped[pCurrImage], &ubo, sizeof(UniformBufferObject));
 }
 
 vk::raii::ImageView ImgnVulkan::CreateImageView(vk::Image& pImage, vk::Format pFormat, vk::ImageAspectFlags pAspectFlags)
@@ -1489,6 +1504,56 @@ void ImgnVulkan::InitVulkan(ImgnWindow* pWindow)
 	CreateSyncObjects();
 
 	SetupDeferredRenderer();
+
+	_gui.Init(*pWindow, pWindow->width, pWindow->height);
+}
+
+void ImgnVulkan::InitVulkan(GWindow* pWindow)
+{
+	_gWin = pWindow;
+	_gWin->GetClientWidth(_gWinW);
+	_gWin->GetClientHeight(_gWinH);
+
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
+	DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
+	_utils->CreateDefaultIncludeHandler(&_includeHandler);
+
+	Device::Inst().InitDXC();
+
+	CreateInstance();
+	SetupDebugMessenger();
+	CreateSurface();
+	PickPhysicalDevice();
+	CreateDevice();
+	CreateSwapchain();
+	CreateImageViews();
+	CreateDescriptorSetLayout();
+	CreateGraphicsPipelines();
+	CreateCommandPool();
+	CreateDepthResources();
+	CreateTextureImage();
+	CreateTextureImageView();
+	CreateTextureSampler();
+	CreateVertexBuffer();
+	CreateIndexBuffer();
+	CreateUniformBuffers();
+	CreateDescriptorPool();
+	CreateDescriptorSets();
+	CreateCommandBuffer();
+	CreateSyncObjects();
+
+	SetupDeferredRenderer();
+
+	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
+	_gWin->GetWindowHandle(handle);
+
+	//_gWin->Register()
+
+
+	_gui.Init(static_cast<HWND>(handle.window), _gWinW, _gWinH);
+	//ImgnInput input(*_gWin);
+	_input = (*_gWin);
+	_gui.SetInput(&_input.bufferedInput);
 }
 
 void ImgnVulkan::DrawFrame()
@@ -1507,11 +1572,13 @@ void ImgnVulkan::DrawFrame()
 	}
 
 	_commandBuffers[_frameIdx].reset();
+	//_commandBuffers[_frameIdx].begin({});
+	//UpdateUniformBuffer(_frameIdx);
 
-	UpdateUniformBuffer(_frameIdx);
-
-	_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
-	//RecordCommandBuffer(imageIndex);
+	//_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
+	//_gui.DrawFrame(_commandBuffers[_frameIdx]);
+	RecordCommandBuffer(imageIndex);
+	//_commandBuffers[_frameIdx].end();
 
 	vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 
@@ -1525,7 +1592,6 @@ void ImgnVulkan::DrawFrame()
 		.signalSemaphoreCount = 1,
 		.pSignalSemaphores = &*_renderFinishedSemaphores[imageIndex]
 	};
-
 
 	Device::Inst().GetQueue().submit(submitInfo, *_inFlightFences[_frameIdx]);
 

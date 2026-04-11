@@ -6,11 +6,19 @@
 
 int main()
 {
-	std::cout << "Creating Window\n";
+	GWindow win;
+	if (-win.Create(0, 0, 1280, 70, GWindowStyle::FULLSCREENBORDERED)) std::cout << "__FILE__ __LINE__: Window failed to be created\n";
 
-	std::unique_ptr<ImgnWindow> window = std::make_unique<ImgnWindow>(250, 250, 800, 600, L"Imagination Engine");
 	ImgnVulkan imgnVulkan;
-	imgnVulkan.InitVulkan(window.get());
+	imgnVulkan.InitVulkan(&win);
+
+	while (+win.ProcessWindowEvents())
+	{
+		imgnVulkan.DrawFrame();
+	}
+	
+	//std::unique_ptr<ImgnWindow> window = std::make_unique<ImgnWindow>(250, 250, 800, 600, L"Imagination Engine");
+	//imgnVulkan.InitVulkan(window.get());
 
 	//vec3<float> x = { 1, 0, 1 };
 	//vec3<float> y = { 2, 0, 0 };
@@ -18,12 +26,12 @@ int main()
 	//float z = Angle(x, y);
 	//std::cout << z;
 
-	while (window->ProcessMessages())
+	/*while (window->ProcessMessages())
 	{
 		imgnVulkan.DrawFrame();
 	}
 
-	imgnVulkan.DeviceWaitIdle();
+	imgnVulkan.DeviceWaitIdle();*/
 
 	return 0;
 }

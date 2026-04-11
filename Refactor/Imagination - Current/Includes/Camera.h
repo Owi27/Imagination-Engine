@@ -5,47 +5,47 @@
 
 class Camera : public Component, public EventListener
 {
-	CameraComponent* _camera;
+	//CameraComponent* _camera;
 
 	float _moveSpeed = 5.f, _rotateSpeed = 0.1f;
 
 	bool _moveForward = false, _moveBackward = false, _moveLeft = false, _moveRight = false;
 
-	EventBus& _eventBus = Device::Inst().GetEventBus();
+	//EventBus& _eventBus = Device::Inst().GetEventBus();
 
 public:
 	void Init() override
 	{
-		_camera = GetOwner()->GetComponent<CameraComponent>();
+		//_camera = GetOwner()->GetComponent<CameraComponent>();
 
 		// Register as event listener
-		_eventBus.AddListener(this);
+		//_eventBus.AddListener(this);
 	}
 
 	void Update(float pDeltaTime) override
 	{
-		if (!_camera) return;
+		//if (!_camera) return;
 
-		// Handle movement
-		Math::vec3<float> movement = {};
+		//// Handle movement
+		//Math::vec3<float> movement = {};
 
-		if (_moveForward) movement.z -= 1.0f;
-		if (_moveBackward) movement.z += 1.0f;
-		if (_moveLeft) movement.x -= 1.0f;
-		if (_moveRight) movement.x += 1.0f;
+		//if (_moveForward) movement.z -= 1.0f;
+		//if (_moveBackward) movement.z += 1.0f;
+		//if (_moveLeft) movement.x -= 1.0f;
+		//if (_moveRight) movement.x += 1.0f;
 
-		if (movement.Length() > 0.0f)
-		{
-			//movement = movement.Normalize() * _moveSpeed * pDeltaTime;
+		//if (movement.Length() > 0.0f)
+		//{
+		//	//movement = movement.Normalize() * _moveSpeed * pDeltaTime;
 
-			auto transform = GetOwner()->GetComponent<TransformComponent>();
-			if (transform)
-			{
-				Math::vec3 position = transform->GetPosition();
-				position += movement;
-				transform->SetPosition(position);
-			}
-		}
+		//	auto transform = GetOwner()->GetComponent<TransformComponent>();
+		//	if (transform)
+		//	{
+		//		Math::vec3 position = transform->GetPosition();
+		//		position += movement;
+		//		transform->SetPosition(position);
+		//	}
+		//}
 	}
 
 	void OnEvent(Event& event) override
@@ -83,11 +83,11 @@ public:
 		// Handle window resize events
 		dispatcher.Dispatch<WindowResizedEvent>([this](const WindowResizedEvent& e)
 			{
-				if (_camera)
-				{
-					float aspectRatio = static_cast<float>(e.GetWidth()) / static_cast<float>(e.GetHeight());
-					// _camera->SetAspectRatio(aspectRatio);
-				}
+				//if (_camera)
+				//{
+				//	float aspectRatio = static_cast<float>(e.GetWidth()) / static_cast<float>(e.GetHeight());
+				//	// _camera->SetAspectRatio(aspectRatio);
+				//}
 
 				return false;
 			});
@@ -96,7 +96,7 @@ public:
 	~Camera() override
 	{
 		// Unregister as event listener
-		_eventBus.RemoveListener(this);
+		//_eventBus.RemoveListener(this);
 	}
 };
 

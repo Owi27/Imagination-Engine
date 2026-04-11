@@ -20,6 +20,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\Event.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnGui.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnVulkan.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -46,6 +49,27 @@
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\tiny.cpp">
       <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_impl_vulkan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_impl_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,7 +103,37 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Events\MouseEvent.h">
       <Filter>Includes\Events</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Gateware\Gateware.h">
+      <Filter>Includes\Gateware</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\HLSL.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imconfig.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_impl_vulkan.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_impl_win32.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_internal.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imstb_rectpack.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imstb_textedit.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imstb_truetype.h">
+      <Filter>Includes\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnGui.h">
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnMath.h">
@@ -89,6 +143,9 @@
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnWindow.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Input.h">
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\RenderGraph.h">
@@ -242,6 +299,12 @@
     </Filter>
     <Filter Include="Includes\Events">
       <UniqueIdentifier>{7FBC4926-02FC-3546-9ABF-FE8485AFEDA5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Includes\Gateware">
+      <UniqueIdentifier>{B7C5196C-CEA1-31B5-980C-074D839AA993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Includes\ImGui">
+      <UniqueIdentifier>{DBA4E147-7B82-3F2D-89B4-931B3CA4D817}</UniqueIdentifier>
     </Filter>
     <Filter Include="Includes\RenderPasses">
       <UniqueIdentifier>{25F6D3CF-F61C-35F1-BF4A-5C238BAF2128}</UniqueIdentifier>

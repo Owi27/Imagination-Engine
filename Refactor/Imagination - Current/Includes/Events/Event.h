@@ -18,6 +18,7 @@ enum class EventType
 	AppRender,
 	KeyPressed,
 	KeyReleased,
+	KeyTyped,
 	MouseButtonPressed,
 	MouseButtonReleased,
 	MouseMoved,
@@ -34,7 +35,7 @@ enum EventCategory
 	EventCategoryMouseButton = BIT(4)
 };
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; } virtual EventType GetEventType() const override { return GetStaticType(); } virtual const char* GetName() const override { return #type; } virtual Event* Clone() const override { return new type##Event(*this); }
+#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::##type; } virtual EventType GetEventType() const override { return GetStaticType(); } virtual const char* GetName() const override { return #type; }
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
 class Event
@@ -45,7 +46,6 @@ protected:
 	bool _handled = false;
 
 public:
-	virtual Event* Clone() const = 0;
 	virtual const char* GetName() const = 0;
 	virtual int GetCategoryFlags() const = 0;
 	virtual EventType GetEventType() const = 0;
@@ -86,73 +86,6 @@ public:
 		}
 
 		return false;
-	}
-};
-
-class EventBus
-{
-	std::vector<EventListener*> _listeners;
-	std::queue<std::unique_ptr<Event>> _eventQueue;
-	std::mutex _queueMutex;
-	bool _immediateMode = true;
-
-public:
-	void SetImmediateMode(bool pImmediate)
-	{
-		_immediateMode = pImmediate;
-	}
-
-	void AddListener(EventListener* pListener)
-	{
-		_listeners.push_back(pListener);
-	}
-
-	void RemoveListener(EventListener* pListener)
-	{
-		auto it = std::find(_listeners.begin(), _listeners.end(), pListener);
-		if (it != _listeners.end()) _listeners.erase(it);
-	}
-
-	void PublishEvent(Event& pEvent)
-	{
-		if (_immediateMode)
-		{
-			// Dispatch event immediately
-			for (auto listener : _listeners)
-			{
-				listener->OnEvent(pEvent);
-			}
-		}
-		else
-		{
-			// Queue event for later processing
-			std::lock_guard<std::mutex> lock(_queueMutex);
-			_eventQueue.push(std::unique_ptr<Event>(pEvent.Clone()));
-		}
-	}
-
-	void ProcessEvents()
-	{
-		if (_immediateMode) return;
-
-		std::queue<std::unique_ptr<Event>> currentEvents;
-
-		{
-			std::lock_guard<std::mutex> lock(_queueMutex);
-			std::swap(currentEvents, _eventQueue);
-		}
-
-		while (!currentEvents.empty())
-		{
-			auto& event = *currentEvents.front();
-
-			for (auto listener : _listeners)
-			{
-				listener->OnEvent(event);
-			}
-
-			currentEvents.pop();
-		}
 	}
 };
 

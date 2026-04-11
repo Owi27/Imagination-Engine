@@ -3,7 +3,7 @@
 
 struct UBO
 {
-	Math::mat4<float> model, view, proj;
+	mat4 model, view, proj;
 };
 
 class GeometryPass : public RenderPass

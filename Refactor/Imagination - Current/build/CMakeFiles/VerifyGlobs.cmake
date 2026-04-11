@@ -14,10 +14,21 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Events/Event.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Events/KeyEvent.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Events/MouseEvent.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Gateware/Gateware.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/HLSL.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imconfig.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_impl_vulkan.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_impl_win32.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_internal.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imstb_rectpack.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imstb_textedit.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imstb_truetype.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImgnGui.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImgnMath.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImgnVulkan.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImgnWindow.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Input.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/RenderGraph.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/RenderPass.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/RenderPasses/GeometryPass.h"
@@ -82,6 +93,38 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/cmake.verify_globs")
 endif()
 
+# IMGUI_SOURCES at CMakeLists.txt:17 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/*.cpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_demo.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_draw.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_impl_vulkan.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_impl_win32.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_tables.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ImGui/imgui_widgets.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/cmake.verify_globs")
+endif()
+
 # SOURCES at CMakeLists.txt:16 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/*.cpp")
 set(OLD_GLOB
@@ -90,6 +133,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/ComponentTypes.cpp"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/CullingSystem.cpp"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/Event.cpp"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/ImgnGui.cpp"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/ImgnVulkan.cpp"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/ImgnWindow.cpp"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Sources/RenderGraph.cpp"

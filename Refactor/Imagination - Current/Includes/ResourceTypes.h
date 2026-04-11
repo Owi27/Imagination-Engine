@@ -12,11 +12,11 @@ using namespace Microsoft::WRL;
 
 struct Vertex
 {
-	Math::vec3<float> pos;
-	Math::vec3<float> nrm;
-	Math::vec2<float> uv0;
-	Math::vec4<float> tan;
-	Math::vec3<float> col;
+	vec3 pos;
+	vec3 nrm;
+	vec2 uv0;
+	vec4 tan;
+	vec3 col;
 
 	static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }
 	static std::array<vk::VertexInputAttributeDescription, 5> GetAttributeDescriptions()
@@ -33,7 +33,7 @@ struct Vertex
 
 	bool operator==(const Vertex& other) const
 	{
-		return pos == other.pos && nrm == other.nrm && uv0 == other.uv0 && tan == other.tan && col == other.col;
+		return false;// pos == other.pos && nrm == other.nrm && uv0 == other.uv0 && tan == other.tan && col == other.col;
 	}
 };
 
