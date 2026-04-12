@@ -64,6 +64,8 @@ using GBufferedInput = GW::INPUT::GBufferedInput;
 #include "Events/Event.h"
 
 #include "Input.h"
+#include "ImgnKeyMouseCodes.h"
+
 #include "Device.h"
 
 //#include "ImgnMath.h"

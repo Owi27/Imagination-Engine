@@ -67,7 +67,7 @@ public:
 						break;
 					case GBufferedInput::Events::KEYPRESSED:
 						{
-							KeyPressedEvent kpe(data.keyMask, 1);
+							KeyPressedEvent kpe(IMGN_KEY(data.data), 1);
 							EventDispatcher dispatcher(kpe);
 							dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& e)
 								{
@@ -85,7 +85,7 @@ public:
 						break;
 					case GBufferedInput::Events::KEYRELEASED:
 						{
-							KeyReleasedEvent kpe(data.keyMask);
+							KeyReleasedEvent kpe(IMGN_KEY(data.data));
 							EventDispatcher dispatcher(kpe);
 							dispatcher.Dispatch<KeyReleasedEvent>([&](KeyReleasedEvent& e)
 								{
@@ -99,7 +99,7 @@ public:
 						break;
 					case GBufferedInput::Events::BUTTONPRESSED:
 						{
-							MouseButtonPressedEvent mme(data.data);
+							MouseButtonPressedEvent mme(IMGN_MOUSE(data.data));
 							EventDispatcher dispatcher(mme);
 							dispatcher.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
 								{
@@ -112,7 +112,7 @@ public:
 						break;
 					case GBufferedInput::Events::BUTTONRELEASED:
 						{
-							MouseButtonReleasedEvent mme(data.data);
+							MouseButtonReleasedEvent mme(IMGN_MOUSE(data.data));
 							EventDispatcher dispatcher(mme);
 							dispatcher.Dispatch<MouseButtonReleasedEvent>([&](MouseButtonReleasedEvent& e)
 								{
@@ -168,7 +168,7 @@ public:
 	void Init(ImgnWindow& pWin, float pWidth, float pHeight);
 	void Init(HWND pWin, float pWidth, float pHeight);
 
-	void SetInput(GBufferedInput* pBufferedInput) { _bufferedInput = pBufferedInput; _bufferedInput->Register(responder); }
+	void SetInput(GBufferedInput* pBufferedInput) { _bufferedInput = pBufferedInput; _bufferedInput->Register(responder); uint32_t o;  _bufferedInput->Observers(o); std::cout << o << '\n'; }
 	//bool NewFrame();
 	//void UpdateBuffers();
 	void DrawFrame(vk::raii::CommandBuffer& pCommandBuffer);

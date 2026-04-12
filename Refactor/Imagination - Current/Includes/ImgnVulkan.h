@@ -328,7 +328,7 @@ class ImgnVulkan
 	ImgnWindow* _win;
 	GWindow* _gWin;
 	uint32_t _gWinW, _gWinH;
-	ImgnInput _input;// = (*_gWin);
+	ImgnInput* _input = nullptr;// = (*_gWin);
 
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;

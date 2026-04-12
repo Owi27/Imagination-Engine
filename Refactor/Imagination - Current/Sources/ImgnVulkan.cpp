@@ -1552,8 +1552,18 @@ void ImgnVulkan::InitVulkan(GWindow* pWindow)
 
 	_gui.Init(static_cast<HWND>(handle.window), _gWinW, _gWinH);
 	//ImgnInput input(*_gWin);
-	_input = (*_gWin);
-	_gui.SetInput(&_input.bufferedInput);
+	_input = new ImgnInput(*_gWin);
+	uint32_t o;
+	_input->bufferedInput.Observers(o);
+
+	std::cout << "Observers before push " << o << '\n';
+
+	_gui.SetInput(&_input->bufferedInput);
+
+	_input->bufferedInput.Observers(o);
+
+	std::cout << "Observers after push " << o << '\n';
+
 }
 
 void ImgnVulkan::DrawFrame()
