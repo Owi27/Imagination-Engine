@@ -51,6 +51,8 @@ class ImgnGui : public EventListener
 	void OnKeyTypedEvent(KeyTypedEvent& e);
 	void OnWindowResizeEvent(WindowResizedEvent& e);
 
+	static void AddImGuiSpecialKeyEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed);
+	static int ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* pViewport, ImU64 pVkInstance, const void* pVkAllocator, ImU64* pOutSurface);
 public:
 	ImgnGui()
 	{
@@ -72,12 +74,7 @@ public:
 							dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& e)
 								{
 									ImGuiIO& io = ImGui::GetIO();
-									io.KeysData[e.GetKeyCode()].Down = true;
-
-									io.KeyCtrl = io.KeysData[G_KEY_LEFTCONTROL].Down || io.KeysData[G_KEY_RIGHTCONTROL].Down;
-									io.KeyShift = io.KeysData[G_KEY_LEFTSHIFT].Down || io.KeysData[G_KEY_RIGHTSHIFT].Down;
-									io.KeyAlt = io.KeysData[G_KEY_LEFTALT].Down || io.KeysData[G_KEY_RIGHTALT].Down;
-									io.KeySuper = io.KeysData[G_KEY_COMMAND].Down;
+									AddImGuiSpecialKeyEvent(io, e.GetKeyCode(), true);
 
 									return false;
 								});
@@ -90,8 +87,22 @@ public:
 							dispatcher.Dispatch<KeyReleasedEvent>([&](KeyReleasedEvent& e)
 								{
 									ImGuiIO& io = ImGui::GetIO();
-									io.KeysData[e.GetKeyCode()].Down = false;
+									AddImGuiSpecialKeyEvent(io, e.GetKeyCode(), false);
 
+									return false;
+								});
+						}
+						break;
+					case GBufferedInput::Events::KEYTYPED:
+						{
+							KeyTypedEvent kte(data.data);
+							EventDispatcher dispatcher(kte);
+							dispatcher.Dispatch<KeyTypedEvent>([&](KeyTypedEvent& e)
+								{
+									ImGuiIO& io = ImGui::GetIO();
+									int keyCode = e.GetKeyCode();
+
+									if (keyCode > 0 && keyCode < 0x10000) io.AddInputCharacter(keyCode);
 
 									return false;
 								});

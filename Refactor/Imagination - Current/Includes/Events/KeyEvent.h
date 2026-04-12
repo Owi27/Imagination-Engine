@@ -60,8 +60,6 @@ public:
 
 class KeyTypedEvent : public KeyEvent
 {
-	int _repeatCount;
-
 public:
 	KeyTypedEvent(int pKeyCode) : KeyEvent(pKeyCode)
 	{
