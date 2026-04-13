@@ -23,6 +23,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnGui.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnRenderer.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Sources\ImgnVulkan.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -140,6 +143,9 @@
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnMath.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnRenderer.h">
       <Filter>Includes</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImgnVulkan.h">
@@ -292,9 +298,6 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <FXCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Spike.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Includes">

@@ -73,6 +73,7 @@ class RenderGraph
 
 	std::unordered_map<std::string, ImageResource> _resources;
 	std::vector<Pass> _passes;
+	std::vector<RenderPass> _renderPasses;
 	std::vector<uint64_t> _executionOrder;
 
 	std::vector<vk::raii::Semaphore> _semaphores;
@@ -101,5 +102,6 @@ public:
 
 	void AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
 	void AddPass(const std::string& pName, const std::vector<std::string>& pInputs, const std::vector<std::string>& pOutputs, std::function<void(vk::raii::CommandBuffer&)> pExecute);
+	void AddPass(RenderPass& pRenderPass) { _renderPasses.emplace_back(std::move(pRenderPass)); }
 };
 

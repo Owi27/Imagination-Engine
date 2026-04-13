@@ -333,6 +333,7 @@ void ImgnGui::Init(ImgnWindow& pWin, float pWidth, float pHeight)
 	io.DisplayFramebufferScale = ImVec2(1.f, 1.f);
 	ImGui::StyleColorsDark();
 
+
 	/*  Make our own style later
 	vulkanStyle = ImGui::GetStyle();
 	vulkanStyle.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
@@ -367,7 +368,8 @@ void ImgnGui::Init(ImgnWindow& pWin, float pWidth, float pHeight)
 				.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
 				.colorAttachmentCount = 1,
 				.pColorAttachmentFormats = &format,
-				.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT
+				.depthAttachmentFormat = VK_FORMAT_UNDEFINED,
+				.stencilAttachmentFormat = VK_FORMAT_UNDEFINED
 			}
 		},
 		.UseDynamicRendering = true,
@@ -383,6 +385,7 @@ void ImgnGui::Init(HWND pWin, float pWidth, float pHeight)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF("../Fonts/Raleway-Regular.ttf", 18.0f);
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

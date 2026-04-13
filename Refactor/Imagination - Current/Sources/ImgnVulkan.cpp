@@ -1,4 +1,4 @@
-#include "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
+#include "pch.h"
 #include "ImgnVulkan.h"
 #include "HLSL.h"
 //using namespace Math;
@@ -148,8 +148,22 @@ void ImgnVulkan::RecordCommandBuffer(uint32_t pImageIdx)
 
 	//commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
 
-	_gui.DrawFrame(commandBuffer);
+	commandBuffer.endRendering();
 
+	vk::RenderingInfo guiRenderingInfo
+	{
+		.renderArea
+		{
+			.offset = { 0, 0 },
+			.extent = _swapchainExtent
+		},
+		.layerCount = 1,
+		.colorAttachmentCount = 1,
+		.pColorAttachments = &attachmentInfo,
+	};
+
+	commandBuffer.beginRendering(guiRenderingInfo);
+	_gui.DrawFrame(commandBuffer);
 	commandBuffer.endRendering();
 
 	TransitionImageLayout(_swapchainImages[pImageIdx], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, vk::AccessFlagBits2::eColorAttachmentWrite, {}, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eBottomOfPipe, vk::ImageAspectFlagBits::eColor);
@@ -1166,7 +1180,6 @@ void ImgnVulkan::SetupDeferredRenderer()
 
 			renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
-
 			commandBuffer.beginRendering(renderingInfo);
 
 			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
@@ -1184,6 +1197,8 @@ void ImgnVulkan::SetupDeferredRenderer()
 		}
 	};
 
+	_graph.AddPass(gBufferPass);
+
 	_graph.AddPass("GeometryPass", {}, { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, [&](vk::raii::CommandBuffer& commandBuffer)
 		{
 			std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
@@ -1198,7 +1213,7 @@ void ImgnVulkan::SetupDeferredRenderer()
 
 			renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
-
+			commandBuffer.begin({});
 			commandBuffer.beginRendering(renderingInfo);
 
 			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
@@ -1213,6 +1228,7 @@ void ImgnVulkan::SetupDeferredRenderer()
 			commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
 
 			commandBuffer.endRendering();
+			commandBuffer.end();
 		});
 
 	//_graph.AddPass("LightingPass", { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, {"FinalColor"}, [&](vk::raii::CommandBuffer& commandBuffer)
