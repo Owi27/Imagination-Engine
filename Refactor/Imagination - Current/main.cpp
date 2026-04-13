@@ -15,6 +15,7 @@ int main()
 
 	while (+win.ProcessWindowEvents())
 	{
+		imgnVulkan.UpdateCamera();
 		imgnVulkan.DrawFrame();
 	}
 	

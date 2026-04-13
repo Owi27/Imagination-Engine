@@ -36,6 +36,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/RenderPasses/GeometryPass.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ResourceManager.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/ResourceTypes.h"
+  "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/Structs.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/glfw/deps/getopt.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/glfw/deps/glad/gl.h"
   "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/Includes/glfw/deps/glad/gles2.h"

@@ -488,6 +488,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\RenderPasses\GeometryPass.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ResourceManager.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ResourceTypes.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Structs.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\glfw\deps\getopt.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\glfw\deps\glad\gl.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\glfw\deps\glad\gles2.h" />

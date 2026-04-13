@@ -1,6 +1,81 @@
 #include "D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
 #include "RenderGraph.h"
 
+void RenderGraph::CreateImageResource(ImageResource& pResource)
+{
+	vk::ImageCreateInfo imageCreateInfo
+	{
+		.imageType = vk::ImageType::e2D,
+		.format = pResource.format,
+		.extent = {pResource.extent.width, pResource.extent.height, 1},
+		.mipLevels = 1,
+		.arrayLayers = 1,
+		.samples = vk::SampleCountFlagBits::e1,
+		.tiling = vk::ImageTiling::eOptimal,
+		.usage = pResource.usage,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	pResource.image = vk::raii::Image(Device::Inst().GetDevice(), imageCreateInfo);
+
+	vk::MemoryRequirements memRequirements = pResource.image.getMemoryRequirements();
+	vk::MemoryAllocateInfo allocInfo
+	{
+		.allocationSize = memRequirements.size,
+		.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal)
+	};
+
+	pResource.memory = vk::raii::DeviceMemory(Device::Inst().GetDevice(), allocInfo);
+	pResource.image.bindMemory(pResource.memory, 0);
+
+	vk::ImageViewCreateInfo imageViewCreateInfo
+	{
+		.image = pResource.image,
+		.viewType = vk::ImageViewType::e2D,
+		.format = pResource.format,
+		.components
+		{
+			.r = vk::ComponentSwizzle::eIdentity,
+			.g = vk::ComponentSwizzle::eIdentity,
+			.b = vk::ComponentSwizzle::eIdentity,
+			.a = vk::ComponentSwizzle::eIdentity
+		},
+		.subresourceRange
+		{
+			.aspectMask = pResource.aspect,
+			.baseMipLevel = 0,
+			.levelCount = 1,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		}
+	};
+
+	pResource.view = vk::raii::ImageView(Device::Inst().GetDevice(), imageViewCreateInfo);
+}
+
+void RenderGraph::CreateBufferResource(BufferResource& pResource)
+{
+	vk::BufferCreateInfo bufferInfo
+	{
+		.size = pResource.size,
+		.usage = pResource.usage | vk::BufferUsageFlagBits::eTransferDst,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	pResource.buffer = vk::raii::Buffer(Device::Inst().GetDevice(), bufferInfo);
+
+	vk::MemoryRequirements memReqs = pResource.buffer.getMemoryRequirements();
+	vk::MemoryAllocateInfo memoryAllocateInfo{ .allocationSize = memReqs.size, .memoryTypeIndex = FindMemoryType(memReqs.memoryTypeBits, (pResource.usage & vk::BufferUsageFlagBits::eUniformBuffer) ? vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent : vk::MemoryPropertyFlagBits::eDeviceLocal)};
+
+	pResource.memory = vk::raii::DeviceMemory(Device::Inst().GetDevice(), memoryAllocateInfo);
+
+	pResource.buffer.bindMemory(*pResource.memory, 0);
+
+	// Initialize sync state
+	pResource.currentAccess = vk::AccessFlagBits2::eNone;
+	pResource.currentStage = vk::PipelineStageFlagBits2::eTopOfPipe;
+}
+
 uint32_t RenderGraph::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
 {
 	vk::PhysicalDeviceMemoryProperties memProperties = Device::Inst().GetPhysicalDevice().getMemoryProperties();
@@ -51,18 +126,22 @@ void RenderGraph::TransitionImageLayout(vk::raii::CommandBuffer& pCommandBuffer,
 
 void RenderGraph::Compile()
 {
-	std::vector<std::vector<size_t>> dependencies(_passes.size());  // What each pass depends on
-	std::vector<std::vector<size_t>> dependents(_passes.size());    // What depends on each pass
+	std::vector<std::vector<size_t>> dependencies(_renderPasses.size());  // What each pass depends on
+	std::vector<std::vector<size_t>> dependents(_renderPasses.size());    // What depends on each pass
 
 	// Track which pass produces each resource (write-after-write dependencies)
 	std::unordered_map<std::string, size_t> resourceWriters;
 
 	// Dependency Discovery Through Resource Usage Analysis
 	// Analyze each pass to determine data flow relationships
-
-	for (int i = 0; auto& pass : _passes)
+	for (int i = 0; auto& pass : _renderPasses)
 	{
 		for (const auto& output : pass.outputs)
+		{
+			resourceWriters[output] = i; //set the idx of the pass that writes the output
+		}
+		
+		for (const auto& output : pass.bufferOutputs)
 		{
 			resourceWriters[output] = i; //set the idx of the pass that writes the output
 		}
@@ -70,9 +149,20 @@ void RenderGraph::Compile()
 		i++;
 	}
 
-	for (int i = 0; auto& pass : _passes)
+	for (int i = 0; auto& pass : _renderPasses)
 	{
 		for (const auto& input : pass.inputs)
+		{
+			auto it = resourceWriters.find(input);
+			if (it != resourceWriters.end())
+			{
+				// Found the pass that produces this input - create dependency link
+				dependencies[i].push_back(it->second);      // This pass depends on the producer
+				dependents[it->second].push_back(i);        // Producer has this as dependent
+			}
+		}
+
+		for (const auto& input : pass.bufferInputs)
 		{
 			auto it = resourceWriters.find(input);
 			if (it != resourceWriters.end())
@@ -86,52 +176,10 @@ void RenderGraph::Compile()
 		i++;
 	}
 
-	//for (int8_t i = 0; auto& pass : _passes)
-	//{
-	//    for (const auto& output : pass.outputs)
-	//    {
-	//        resourceWriters[output] = i++; //set the idx of the pass that writes the output
-	//    }
-	//}
-
-
-	//for (size_t i = 0; i < _passes.size(); i++)
-	//{
-	//    const auto& pass = _passes[i];
-
-	//    for (const auto& output : pass.outputs)
-	//    {
-	//        resourceWriters[output] = i; //set the idx of the pass that writes the output
-	//    }
-	//}
-
-	//for (size_t i = 0; i < _passes.size(); ++i)
-	//{
-	//    const auto& pass = _passes[i];
-
-	//    // Process input dependencies - this pass must wait for producers
-	//    for (const auto& input : pass.inputs)
-	//    {
-	//        auto it = resourceWriters.find(input);
-	//        if (it != resourceWriters.end())
-	//        {
-	//            // Found the pass that produces this input - create dependency link
-	//            dependencies[i].push_back(it->second);      // This pass depends on the producer
-	//            dependents[it->second].push_back(i);        // Producer has this as dependent
-	//        }
-	//    }
-
-	//    // Register output production - subsequent passes may depend on these
-	//    for (const auto& output : pass.outputs)
-	//    {
-	//        resourceWriters[output] = i;                    // Record this pass as producer
-	//    }
-	//}
-
 	// Topological Sort for Optimal Execution Order
 	// Use depth-first search to compute valid execution sequence while detecting cycles
-	std::vector<bool> visited(_passes.size(), false);       // Track completed nodes
-	std::vector<bool> inStack(_passes.size(), false);       // Track current recursion path
+	std::vector<bool> visited(_renderPasses.size(), false);       // Track completed nodes
+	std::vector<bool> inStack(_renderPasses.size(), false);       // Track current recursion path
 
 	std::function<void(size_t)> visit = [&](size_t node)
 		{
@@ -160,7 +208,7 @@ void RenderGraph::Compile()
 		};
 
 	// Process all unvisited nodes to handle disconnected graph components
-	for (size_t i = 0; i < _passes.size(); ++i)
+	for (size_t i = 0; i < _renderPasses.size(); ++i)
 	{
 		if (!visited[i])
 		{
@@ -171,7 +219,7 @@ void RenderGraph::Compile()
 	auto& device = Device::Inst().GetDevice();
 	// Automatic Synchronization Object Creation
 	   // Generate semaphores for all dependencies identified during analysis
-	for (size_t i = 0; i < _passes.size(); ++i)
+	for (size_t i = 0; i < _renderPasses.size(); ++i)
 	{
 		for (auto dep : dependencies[i])
 		{
@@ -231,6 +279,11 @@ void RenderGraph::Compile()
 
 		resource.view = device.createImageView(imageViewCreateInfo);
 	}
+
+	for (auto& [name, resource] : _bufferResources)
+	{
+		if (!*resource.buffer) CreateBufferResource(resource);
+	}
 }
 
 void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQueue)
@@ -241,231 +294,86 @@ void RenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQu
 	std::vector<vk::PipelineStageFlags> waitStages;      // Pipeline stages to wait on
 	std::vector<vk::Semaphore> signalSemaphores;         // Semaphores to signal after current pass
 
-	std::unordered_map<std::string, vk::ImageLayout> currentLayouts;
-	for (auto& [handle, resource] : _resources)
-	{
-		currentLayouts[handle] = resource.initLayout;
-	}
-
-	pCommandBuffer.reset();
-	pCommandBuffer.begin({});
-
 	for (auto passIdx : _executionOrder)
 	{
-		const auto& pass = _passes[passIdx];
+		const auto& pass = _renderPasses[passIdx];
+
+		for (auto& input : pass.bufferInputs)
+		{
+			BufferResource& resource = _bufferResources[input];
+
+			vk::BufferMemoryBarrier2 barrier
+			{
+				.srcStageMask = resource.currentStage,
+				.srcAccessMask = resource.currentAccess,
+				.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
+				.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
+				.buffer = *resource.buffer,
+				.offset = 0,
+				.size = VK_WHOLE_SIZE
+			};
+
+			pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
+
+			resource.currentStage = vk::PipelineStageFlagBits2::eAllGraphics;
+			resource.currentAccess = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead;
+		}
+
 
 		for (auto& input : pass.inputs)
 		{
 			auto& resource = _resources[input];
-			auto oldLayout = currentLayouts[input];
-			auto newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-			if (oldLayout != newLayout)
+			if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
 			{
-				TransitionImageLayout(pCommandBuffer, resource.image, oldLayout, newLayout, vk::AccessFlagBits2::eMemoryWrite, vk::AccessFlagBits2::eShaderRead, vk::PipelineStageFlagBits2::eAllCommands, vk::PipelineStageFlagBits2::eFragmentShader, resource.aspect);
-				currentLayouts[input] = newLayout;
+				TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eShaderRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eFragmentShader, resource.aspect);
+				resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 			}
 		}
 
 		for (auto& output : pass.outputs)
 		{
 			auto& resource = _resources[output];
-			const vk::ImageLayout oldLayout = currentLayouts[output];
-			const vk::ImageLayout newLayout = (resource.aspect & vk::ImageAspectFlagBits::eColor) == vk::ImageAspectFlagBits::eColor ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
+			vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eColor) ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
 
-			if (oldLayout != newLayout)
+			if (resource.currentLayout != target)
 			{
-				TransitionImageLayout(pCommandBuffer, resource.image, oldLayout, newLayout, vk::AccessFlagBits2::eMemoryRead, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eAllCommands, vk::PipelineStageFlagBits2::eColorAttachmentOutput, resource.aspect);
-				currentLayouts[output] = newLayout;
+				TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, target, vk::AccessFlagBits2::eNone, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eTopOfPipe, vk::PipelineStageFlagBits2::eColorAttachmentOutput, resource.aspect);
+				resource.currentLayout = target;
 			}
 		}
 
 		pass.Execute(pCommandBuffer);
 
-		for (auto& output : pass.outputs)
+		for (auto& output : pass.bufferOutputs)
 		{
-			auto& resource = _resources[output];
-			const vk::ImageLayout oldLayout = currentLayouts[output];
-			const vk::ImageLayout newLayout = resource.finalLayout;
+			BufferResource& resource = _bufferResources[output];
 
-			if (oldLayout != newLayout)
+			vk::BufferMemoryBarrier2 barrier
 			{
-				TransitionImageLayout(pCommandBuffer, resource.image, oldLayout, newLayout, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eMemoryRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eAllCommands, resource.aspect);
-				currentLayouts[output] = newLayout;
-			}
+				.srcStageMask = resource.currentStage,
+				.srcAccessMask = resource.currentAccess,
+				.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
+				.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
+				.buffer = *resource.buffer,
+				.offset = 0,
+				.size = VK_WHOLE_SIZE
+			};
 
+			pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
+
+			resource.currentStage = vk::PipelineStageFlagBits2::eComputeShader;
+			resource.currentAccess = vk::AccessFlagBits2::eShaderWrite;
 		}
-
 	}
 
-	pCommandBuffer.end();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//// Ordered Pass Execution with Automatic Dependency Management
-	//   // Execute each pass in the computed dependency-safe order
-	//for (auto passIdx : _executionOrder)
-	//{
-	//	const auto& pass = _passes[passIdx];
-
-	//	// Synchronization Setup - Collect Dependencies for Current Pass
-	//	// Determine what this pass must wait for before executing
-	//	waitSemaphores.clear();
-	//	waitStages.clear();
-
-	//	for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
-	//	{
-	//		if (_semaphoreSignalWaitPairs[i].second == passIdx)
-	//		{
-	//			// This pass depends on the completion of another pass
-	//			waitSemaphores.push_back(_semaphores[i]);                           // Wait for dependency completion
-	//			waitStages.push_back(vk::PipelineStageFlagBits::eColorAttachmentOutput);  // Wait at output stage
-	//		}
-	//	}
-
-	//	// Collect semaphores that this pass will signal for dependent passes
-	//	signalSemaphores.clear();
-	//	for (size_t i = 0; i < _semaphoreSignalWaitPairs.size(); ++i)
-	//	{
-	//		if (_semaphoreSignalWaitPairs[i].first == passIdx)
-	//		{
-	//			// Other passes depend on this pass's completion
-	//			signalSemaphores.push_back(_semaphores[i]);                         // Signal completion for dependents
-	//		}
-	//	}
-
-	//	// Command Buffer Preparation and Resource Layout Transitions
-	//	// Set up command recording and transition resources to appropriate layouts
-	//	pCommandBuffer.begin({});                                                   // Begin command recording
-
-	//	// Transition input resources to shader-readable layouts
-	//	for (const auto& input : pass.inputs)
-	//	{
-	//		auto& resource = _resources[input];
-
-	//		vk::ImageMemoryBarrier barrier;
-	//		barrier.setOldLayout(resource.initLayout)                           // Current resource layout
-	//			.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)          // Target layout for reading
-	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)                // No queue family transfer
-	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-	//			.setImage(resource.image)                                      // Target image
-	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })  // Full image range
-	//			.setSrcAccessMask(vk::AccessFlagBits::eMemoryWrite)             // Previous write access
-	//			.setDstAccessMask(vk::AccessFlagBits::eShaderRead);             // Required read access
-
-	//		pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
-
-	//		// Insert pipeline barrier for safe layout transition
-	//		//pCommandBuffer.pipelineBarrier(
-	//		//    vk::PipelineStageFlagBits::eAllCommands,                           // Wait for all previous work
-	//		//    vk::PipelineStageFlagBits::eFragmentShader,                        // Enable fragment shader access
-	//		//    vk::DependencyFlagBits::eByRegion,                                 // Region-local dependency
-	//		//    0, nullptr, 0, nullptr, 1, &barrier                               // Image barrier only
-	//		//);
-	//	}
-
-	//	// Transition output resources to render target layouts
-	//	for (const auto& output : pass.outputs)
-	//	{
-	//		auto& resource = _resources[output];
-
-	//		vk::ImageMemoryBarrier barrier;
-	//		barrier.setOldLayout(resource.initLayout)                           // Current layout state
-	//			.setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Optimal for color output
-	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-	//			.setImage(resource.image)
-	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
-	//			.setSrcAccessMask(vk::AccessFlagBits::eMemoryRead)              // Previous read access
-	//			.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);   // Required write access
-
-	//		// Insert barrier for safe transition to writable state
-	//		pCommandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::DependencyFlagBits::eByRegion, nullptr, nullptr, barrier);
-	//	}
-
-	//	// Pass Execution - Execute the Actual Rendering Logic
-	//	// Call the user-provided rendering function with prepared command buffer
-	//	pass.Execute(pCommandBuffer);                                           // Execute pass-specific rendering
-
-	//	// Final Layout Transitions - Prepare Resources for Subsequent Use
-	//	// Transition output resources to their final required layouts
-	//	for (const auto& output : pass.outputs)
-	//	{
-	//		auto& resource = _resources[output];
-
-	//		vk::ImageMemoryBarrier barrier;
-	//		barrier.setOldLayout(vk::ImageLayout::eColorAttachmentOptimal)         // Current writable layout
-	//			.setNewLayout(resource.finalLayout)                             // Required final layout
-	//			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-	//			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-	//			.setImage(resource.image)
-	//			.setSubresourceRange({ resource.aspect, 0, 1, 0, 1 })
-	//			.setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)    // Previous write operations
-	//			.setDstAccessMask(vk::AccessFlagBits::eMemoryRead);             // Enable subsequent reads
-
-	//		// Insert final barrier for layout transition
-	//		pCommandBuffer.pipelineBarrier(
-	//			vk::PipelineStageFlagBits::eColorAttachmentOutput,                 // After color writes complete
-	//			vk::PipelineStageFlagBits::eAllCommands,                           // Before any subsequent work
-	//			vk::DependencyFlagBits::eByRegion,
-	//			nullptr, nullptr, barrier
-	//		);
-	//	}
-
-	//	// Command Submission with Synchronization
-	//	// Submit command buffer with appropriate dependency and signaling semaphores
-	//	pCommandBuffer.end();                                                       // Finalize command recording
-
-	//	vk::SubmitInfo submitInfo;
-	//	submitInfo.setWaitSemaphoreCount(static_cast<uint32_t>(waitSemaphores.size()))      // Dependencies to wait for
-	//		.setPWaitSemaphores(waitSemaphores.data())                                 // Dependency semaphores
-	//		.setPWaitDstStageMask(waitStages.data())                                   // Pipeline stages to wait at
-	//		.setCommandBufferCount(1)                                                  // Single command buffer
-	//		.setPCommandBuffers(&*pCommandBuffer)                                      // Command buffer to execute
-	//		.setSignalSemaphoreCount(static_cast<uint32_t>(signalSemaphores.size()))  // Semaphores to signal
-	//		.setPSignalSemaphores(signalSemaphores.data());                           // Signal semaphores
-
-	//	pQueue.submit(1, &submitInfo, nullptr);                                              // Submit to GPU queue
-	//}
+	for (auto& [name, resource] : _resources)
+	{
+		if (resource.currentLayout != resource.finalLayout)
+		{
+			TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, resource.finalLayout, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eMemoryRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eAllCommands, resource.aspect);
+			resource.currentLayout = resource.finalLayout;
+		}
+	}
 }
 
 void RenderGraph::RenderFrame(vk::Queue pGraphicsQueue, vk::Queue pPresentQueue)
@@ -491,19 +399,66 @@ void RenderGraph::AddResource(const std::string& pName, vk::Format pFormat, vk::
 		.aspect = pAspect
 	};
 
+	CreateImageResource(imageResource);
+
 	_resources[pName] = std::move(imageResource);
 
 }
 
+void RenderGraph::AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, void* pData)
+{
+	BufferResource bufferResource
+	{
+		.name = pName,
+		.size = pSize,
+		.usage = pUsage
+	};
+
+	vk::BufferCreateInfo stagingInfo
+	{
+		.size = pSize,
+		.usage = vk::BufferUsageFlagBits::eTransferSrc,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	vk::raii::Buffer stagingBuffer(Device::Inst().GetDevice(), stagingInfo);
+	vk::MemoryRequirements memRequirementsStaging = stagingBuffer.getMemoryRequirements();
+	vk::MemoryAllocateInfo memoryAllocateInfoStaging
+	{
+		.allocationSize = memRequirementsStaging.size,
+		.memoryTypeIndex = FindMemoryType(memRequirementsStaging.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent)
+	};
+
+	vk::raii::DeviceMemory stagingBufferMemory(Device::Inst().GetDevice(), memoryAllocateInfoStaging);
+
+	stagingBuffer.bindMemory(stagingBufferMemory, 0);
+	void* dataStaging = stagingBufferMemory.mapMemory(0, stagingInfo.size);
+	memcpy(dataStaging, pData, stagingInfo.size);
+	stagingBufferMemory.unmapMemory();
+
+	CreateBufferResource(bufferResource);
+
+	vk::raii::CommandBuffer commandCopyBuffer = Device::Inst().BeginSingleTimeCommand();
+
+	commandCopyBuffer.copyBuffer(stagingBuffer, bufferResource.buffer, vk::BufferCopy(0, 0, pSize));
+
+	Device::Inst().EndSingleTimeCommand(commandCopyBuffer);
+
+	bufferResource.currentStage = vk::PipelineStageFlagBits2::eTransfer;
+	bufferResource.currentAccess = vk::AccessFlagBits2::eTransferWrite;
+
+	_bufferResources[pName] = std::move(bufferResource);
+}
+
 void RenderGraph::AddPass(const std::string& pName, const std::vector<std::string>& pInputs, const std::vector<std::string>& pOutputs, std::function<void(vk::raii::CommandBuffer&)> pExecute)
 {
-	_passes.push_back(Pass
-		{
-			.name = pName,
-			.inputs = pInputs,
-			.outputs = pOutputs,
-			.Execute = pExecute
-		});
+	//_passes.push_back(Pass
+	//	{
+	//		.name = pName,
+	//		.inputs = pInputs,
+	//		.outputs = pOutputs,
+	//		.Execute = pExecute
+	//	});
 }
 
 //void RenderPass::BuildPipeline(const std::string& pVertex, const std::string& pFragment)

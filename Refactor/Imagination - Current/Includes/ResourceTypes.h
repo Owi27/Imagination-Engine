@@ -33,7 +33,11 @@ struct Vertex
 
 	bool operator==(const Vertex& other) const
 	{
-		return false;// pos == other.pos && nrm == other.nrm && uv0 == other.uv0 && tan == other.tan && col == other.col;
+		return pos.x == other.pos.x && pos.y == other.pos.y && pos.z == other.pos.z &&
+			nrm.x == other.nrm.x && nrm.y == other.nrm.y && nrm.z == other.nrm.z &&
+			uv0.x == other.uv0.x && uv0.y == other.uv0.y &&
+			tan.x == other.tan.x && tan.y == other.tan.y && tan.z == other.tan.z && tan.w == other.tan.w &&
+			col.x == other.col.x && col.y == other.col.y && col.z == other.col.z;
 	}
 };
 

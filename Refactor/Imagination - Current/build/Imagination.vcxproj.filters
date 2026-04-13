@@ -172,6 +172,9 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ResourceTypes.h">
       <Filter>Includes</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Structs.h">
+      <Filter>Includes</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\glfw\deps\getopt.h">
       <Filter>Includes\glfw\deps</Filter>
     </ClInclude>

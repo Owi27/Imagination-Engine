@@ -385,7 +385,7 @@ void ImgnGui::Init(HWND pWin, float pWidth, float pHeight)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("../Fonts/Raleway-Regular.ttf", 18.0f);
+	io.Fonts->AddFontFromFileTTF("../Fonts/Raleway-Regular.ttf", 16.f);
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -395,6 +395,15 @@ void ImgnGui::Init(HWND pWin, float pWidth, float pHeight)
 	io.DisplayFramebufferScale = ImVec2(1.f, 1.f);
 	ImGui::StyleColorsDark();
 
+	/*styling*/
+	auto& imgnStyle = ImGui::GetStyle();
+	imgnStyle.WindowTitleAlign = ImVec2(.5f, .5f);
+	imgnStyle.FrameRounding = 12.f;
+	imgnStyle.WindowBorderSize = 0.f;
+	imgnStyle.Colors[ImGuiCol_TitleBg] = ImVec4(0.f, 0.f, 0.f, 1.f);
+	imgnStyle.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.f, 0.f, 0.f, 1.f);
+	imgnStyle.Colors[ImGuiCol_TitleBg] = ImVec4(0.f, 0.f, 0.f, 1.f);
+	
 	/*  Make our own style later
 	vulkanStyle = ImGui::GetStyle();
 	vulkanStyle.Colors[ImGuiCol_TitleBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.6f);
@@ -441,15 +450,21 @@ void ImgnGui::Init(HWND pWin, float pWidth, float pHeight)
 
 void ImgnGui::DrawFrame(vk::raii::CommandBuffer& pCommandBuffer)
 {
+	pCommandBuffer.beginRendering(renderingInfo);
+
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	ImGui::SetWindowPos(ImVec2(20, 360), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_FirstUseEver);
 	ImGui::ShowDemoWindow();
-
+	ImGui::Begin("Style");
+	ImGui::ShowStyleEditor();
+	ImGui::End();
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *pCommandBuffer);
+
+	pCommandBuffer.endRendering();
 }
 
 void ImgnGui::OnEvent(Event& event)

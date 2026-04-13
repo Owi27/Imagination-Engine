@@ -39,6 +39,7 @@ class ImgnGui : public EventListener
 	void CreateResources();
 	uint32_t FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps);
 
+
 	GEventResponder _responder;
 
 	//events
@@ -54,6 +55,8 @@ class ImgnGui : public EventListener
 	static void AddImGuiSpecialKeyEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed);
 	static int ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* pViewport, ImU64 pVkInstance, const void* pVkAllocator, ImU64* pOutSurface);
 public:
+	vk::RenderingInfo renderingInfo;
+
 	ImgnGui()
 	{
 		_responder.Create([&](const GEvent& e)

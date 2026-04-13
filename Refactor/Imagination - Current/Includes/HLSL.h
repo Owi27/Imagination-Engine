@@ -90,6 +90,12 @@ VOut main(VIn input, uint id : SV_InstanceID)
     output.col = input.col;
     
     //output.idx = id;
+
+//VOut output;
+//    output.pos = float4(input.pos.xy, 0.5, 1.0); // Bypass matrices
+//    output.uv = input.uv;
+//    output.nrm = input.nrm;
+//    return output;
     
     return output;
 })";
@@ -116,8 +122,8 @@ struct FOut
 FOut main(VOut input)
 {
     FOut output;
-    output.Position = float4(1.f, 0.f, 0.f, 1.f);
-    output.Normal = float4(0.f, 1.f, 0.f, 1.f);
+    output.Position = float4(input.pos.rgb, 1.f);
+    output.Normal = float4(input.nrm, 1.f);
     output.Albedo = float4(0.f, 0.f, 1.f, 1.f);
 
     return output;

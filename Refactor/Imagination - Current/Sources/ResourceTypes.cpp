@@ -210,104 +210,79 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 	{
 		for (auto& primitive : mesh.primitives)
 		{
-			//indices
-			const tinygltf::Accessor& indexAccessor = model.accessors[primitive.indices];
-			const tinygltf::BufferView& indexBufferView = model.bufferViews[indexAccessor.bufferView];
-			const tinygltf::Buffer& indexBuffer = model.buffers[indexBufferView.buffer];
-
 			//pos
 			const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
 			const tinygltf::BufferView& posBufferView = model.bufferViews[posAccessor.bufferView];
 			const tinygltf::Buffer& posBuffer = model.buffers[posBufferView.buffer];
+			const uint64_t posStride = posAccessor.ByteStride(posBufferView);
 
-			bool hasNrms = primitive.attributes.find("NORMAL") != primitive.attributes.end();
-			const tinygltf::Accessor* nrmAccessor = nullptr;
-			const tinygltf::BufferView* nrmBufferView = nullptr;
-			const tinygltf::Buffer* nrmBuffer = nullptr;
 
-			if (hasNrms)
-			{
-				nrmAccessor = &model.accessors[primitive.attributes.at("NORMAL")];
-				nrmBufferView = &model.bufferViews[nrmAccessor->bufferView];
-				nrmBuffer = &model.buffers[nrmBufferView->buffer];
-			}
+			const tinygltf::Accessor* nrmAcc = primitive.attributes.contains("NORMAL") ? &model.accessors[primitive.attributes.at("NORMAL")] : nullptr;
+			const tinygltf::Accessor* uvAcc = primitive.attributes.contains("TEXCOORD_0") ? &model.accessors[primitive.attributes.at("TEXCOORD_0")] : nullptr;
+			const tinygltf::Accessor* tanAcc = primitive.attributes.contains("TANGENT") ? &model.accessors[primitive.attributes.at("TANGENT")] : nullptr;
 
-			bool hasTexCoords = primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end();
-			const tinygltf::Accessor* texCoordAccessor = nullptr;
-			const tinygltf::BufferView* texCoordBufferView = nullptr;
-			const tinygltf::Buffer* texCoordBuffer = nullptr;
-
-			if (hasTexCoords)
-			{
-				texCoordAccessor = &model.accessors[primitive.attributes.at("TEXCOORD_0")];
-				texCoordBufferView = &model.bufferViews[texCoordAccessor->bufferView];
-				texCoordBuffer = &model.buffers[texCoordBufferView->buffer];
-			}
-
-			bool hasTans = primitive.attributes.find("TANGENT") != primitive.attributes.end();
-			const tinygltf::Accessor* tanAccessor = nullptr;
-			const tinygltf::BufferView* tanBufferView = nullptr;
-			const tinygltf::Buffer* tanBuffer = nullptr;
-
-			if (hasTans)
-			{
-				tanAccessor = &model.accessors[primitive.attributes.at("TANGENT")];
-				tanBufferView = &model.bufferViews[tanAccessor->bufferView];
-				tanBuffer = &model.buffers[tanBufferView->buffer];
-			}
+			std::vector<uint32_t> primitiveToIndexMap;
 
 			for (size_t i = 0; i < posAccessor.count; i++)
 			{
-				Vertex v;
+				Vertex v{};
 
-				const float* pos = reinterpret_cast<const float*>(&posBuffer.data[posBufferView.byteOffset + posAccessor.byteOffset + i * 12]);
-				const float* nrm = hasNrms ? reinterpret_cast<const float*>(&nrmBuffer->data[nrmBufferView->byteOffset + nrmAccessor->byteOffset + i * 12]) : new float[3] { 0.f, 0.f, 0.f };
-				const float* uv0 = hasTexCoords ? reinterpret_cast<const float*>(&texCoordBuffer->data[texCoordBufferView->byteOffset + texCoordAccessor->byteOffset + i * 8]) : new float[2] { 0.f, 0.f };
-				const float* tan = hasTans ? reinterpret_cast<const float*>(&tanBuffer->data[tanBufferView->byteOffset + tanAccessor->byteOffset + i * 16]) : new float[4] { 0.f, 0.f, 0.f, 0.f };
+				// Position
+				const float* p = reinterpret_cast<const float*>(&posBuffer.data[posBufferView.byteOffset + posAccessor.byteOffset + (i * posStride)]);
+				v.pos = { p[0], p[1], p[2] };
 
-				v.pos = { pos[0], pos[1], pos[2] };
-				v.nrm = { nrm[0], nrm[1], nrm[2] };
-				v.uv0 = { uv0[0], uv0[1] };
-				v.tan = { tan[0], tan[1], tan[2], tan[3] };
+				// Normals
+				if (nrmAcc)
+				{
+					const auto& view = model.bufferViews[nrmAcc->bufferView];
+					const float* n = reinterpret_cast<const float*>(&model.buffers[view.buffer].data[view.byteOffset + nrmAcc->byteOffset + (i * nrmAcc->ByteStride(view))]);
+					v.nrm = { n[0], n[1], n[2] };
+				}
+
+				// UVs
+				if (uvAcc)
+				{
+					const auto& view = model.bufferViews[uvAcc->bufferView];
+					const float* u = reinterpret_cast<const float*>(&model.buffers[view.buffer].data[view.byteOffset + uvAcc->byteOffset + (i * uvAcc->ByteStride(view))]);
+					v.uv0 = { u[0], u[1] };
+				}
+
+				if (tanAcc)
+				{
+					const auto& view = model.bufferViews[tanAcc->bufferView];
+					const float* t = reinterpret_cast<const float*>(&model.buffers[view.buffer].data[view.byteOffset + tanAcc->byteOffset + (i * tanAcc->ByteStride(view))]);
+					v.tan = { t[0], t[1], t[2], t[3]};
+				}
+
 				v.col = { 1.f, 1.f, 1.f };
 
+				// Deduplication
 				if (!uniqueVertices.contains(v))
 				{
 					uniqueVertices[v] = static_cast<uint32_t>(pVertices.size());
 					pVertices.push_back(v);
 				}
+				primitiveToIndexMap.push_back(uniqueVertices[v]);
 			}
 
 			// Process indices
-			const unsigned char* indexData = &indexBuffer.data[indexBufferView.byteOffset + indexAccessor.byteOffset];
+			const auto& idxAcc = model.accessors[primitive.indices];
+			const auto& idxView = model.bufferViews[idxAcc.bufferView];
+			const auto& idxBuf = model.buffers[idxView.buffer];
+			const unsigned char* data = &idxBuf.data[idxView.byteOffset + idxAcc.byteOffset];
 
-			// Handle different index component types
-			if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+			for (size_t i = 0; i < idxAcc.count; i++)
 			{
-				const uint16_t* indices16 = reinterpret_cast<const uint16_t*>(indexData);
-				for (size_t i = 0; i < indexAccessor.count; i++)
-				{
-					Vertex vertex = pVertices[indices16[i]];
-					pIndices.push_back(uniqueVertices[vertex]);
-				}
-			}
-			else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
-			{
-				const uint32_t* indices32 = reinterpret_cast<const uint32_t*>(indexData);
-				for (size_t i = 0; i < indexAccessor.count; i++)
-				{
-					Vertex vertex = pVertices[indices32[i]];
-					pIndices.push_back(uniqueVertices[vertex]);
-				}
-			}
-			else if (indexAccessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
-			{
-				const uint8_t* indices8 = reinterpret_cast<const uint8_t*>(indexData);
-				for (size_t i = 0; i < indexAccessor.count; i++)
-				{
-					Vertex vertex = pVertices[indices8[i]];
-					pIndices.push_back(uniqueVertices[vertex]);
-				}
+				uint32_t localIdx = 0;
+				if (idxAcc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+					localIdx = reinterpret_cast<const uint16_t*>(data)[i];
+				else if (idxAcc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+					localIdx = reinterpret_cast<const uint32_t*>(data)[i];
+				else if (idxAcc.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+					localIdx = reinterpret_cast<const uint8_t*>(data)[i];
+
+				// The Magic Fix: Map the local index to the global vertex array
+				pIndices.push_back(primitiveToIndexMap[localIdx]);
 			}
 		}
 	}
@@ -402,7 +377,7 @@ void Mesh::CreateBuffers(std::vector<Vertex>& pVertices, std::vector<uint32_t>& 
 			device.bindBufferMemory(stagingBuffer, stagingMemory, 0);
 
 			void* data = device.mapMemory(stagingMemory, 0, size);
-			memcpy(data, pVertices.data(), size);
+			memcpy(data, pIndices.data(), size);
 			device.unmapMemory(stagingMemory);
 		}
 

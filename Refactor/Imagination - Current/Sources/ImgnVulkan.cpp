@@ -327,6 +327,149 @@ void ImgnVulkan::TransitionImageLayout(const vk::raii::Image& pImage, vk::ImageL
 	EndSingleCommand(commandBuffer);
 }
 
+void ImgnVulkan::TransitionImageLayout(const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout)
+{
+	vk::raii::CommandBuffer commandBuffer = BeginSingleCommand();
+
+	vk::ImageMemoryBarrier barrier
+	{
+		.oldLayout = pOldLayout,
+		.newLayout = pNewLayout,
+		.image = pImage,
+		.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }
+	};
+
+	vk::PipelineStageFlags sourceStage;
+	vk::PipelineStageFlags destinationStage;
+
+	if (pOldLayout == vk::ImageLayout::eUndefined && pNewLayout == vk::ImageLayout::eTransferDstOptimal)
+	{
+		barrier.srcAccessMask = {};
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+	}
+	// 3. Color Attachment -> Transfer Source (Preparing your Lighting-Output for the Blit)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::eTransferSrcOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+		sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	// 4. Undefined/Present -> Color Attachment (Preparing Swapchain for rendering)
+	else if ((pOldLayout == vk::ImageLayout::eUndefined || pOldLayout == vk::ImageLayout::ePresentSrcKHR) &&
+		pNewLayout == vk::ImageLayout::eColorAttachmentOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+		barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	}
+	// 5. Color Attachment -> Present (Sending Swapchain to monitor)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		destinationStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	// 6. Transfer Dest -> Present (After Blit to Swapchain)
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		destinationStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	else
+	{
+		throw std::invalid_argument("unsupported layout transition!");
+	}
+
+	commandBuffer.pipelineBarrier(sourceStage, destinationStage, {}, {}, nullptr, barrier);
+	EndSingleCommand(commandBuffer);
+}
+
+void ImgnVulkan::TransitionImageLayout(vk::raii::CommandBuffer& pCommandBuffer, const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout)
+{
+	vk::ImageMemoryBarrier barrier
+	{
+		.oldLayout = pOldLayout,
+		.newLayout = pNewLayout,
+		.image = pImage,
+		.subresourceRange = { vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 }
+	};
+
+	vk::PipelineStageFlags sourceStage;
+	vk::PipelineStageFlags destinationStage;
+
+	if (pOldLayout == vk::ImageLayout::eUndefined && pNewLayout == vk::ImageLayout::eTransferDstOptimal)
+	{
+		barrier.srcAccessMask = {};
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+	}
+	// 3. Color Attachment -> Transfer Source (Preparing your Lighting-Output for the Blit)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::eTransferSrcOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+		sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		destinationStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	// 4. Undefined/Present -> Color Attachment (Preparing Swapchain for rendering)
+	else if ((pOldLayout == vk::ImageLayout::eUndefined || pOldLayout == vk::ImageLayout::ePresentSrcKHR) &&
+		pNewLayout == vk::ImageLayout::eColorAttachmentOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+		barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	}
+	// 5. Color Attachment -> Present (Sending Swapchain to monitor)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		sourceStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		destinationStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	// 6. Transfer Dest -> Present (After Blit to Swapchain)
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		sourceStage = vk::PipelineStageFlagBits::eTransfer;
+		destinationStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	else
+	{
+		throw std::invalid_argument("unsupported layout transition!");
+	}
+
+	pCommandBuffer.pipelineBarrier(sourceStage, destinationStage, {}, {}, nullptr, barrier);
+}
+
 void ImgnVulkan::TransitionImageLayout(const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::AccessFlags2 pSrcAccessMask, vk::AccessFlags2 pDstAccessMask, vk::PipelineStageFlags2 pSrcStageMask, vk::PipelineStageFlags2 pDstStageMask, vk::ImageAspectFlags pImageAspectFlags)
 {
 	vk::ImageMemoryBarrier2 barrier
@@ -508,7 +651,7 @@ void ImgnVulkan::CreateSurface()
 	//	.hinstance = _win->GetInstance(),
 	//	.hwnd = _win->GetHandle()
 	//};
-	
+
 	//GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
 
 	HWND hwnd = static_cast<HWND>(_handle.window);
@@ -929,7 +1072,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 	/* GBuffer*/
 	{
 		vk::raii::ShaderModule vertexSM = CreateShaderModule(GetSPV(Shaders::GBufferVertexShader, VertexTarget));
-		vk::raii::ShaderModule fragmentSM = CreateShaderModule(GetSPV(Shaders::TriangleFragmentShader, FragmentTarget));
+		vk::raii::ShaderModule fragmentSM = CreateShaderModule(GetSPV(Shaders::GBufferFragmentShader, FragmentTarget));
 
 		vk::PipelineShaderStageCreateInfo vertShaderStageInfo
 		{
@@ -974,8 +1117,8 @@ void ImgnVulkan::CreateGraphicsPipelines()
 			.depthClampEnable = vk::False,
 			.rasterizerDiscardEnable = vk::False,
 			.polygonMode = vk::PolygonMode::eFill,
-			.cullMode = vk::CullModeFlagBits::eBack,
-			.frontFace = vk::FrontFace::eClockwise,
+			.cullMode = vk::CullModeFlagBits::eNone,
+			.frontFace = vk::FrontFace::eCounterClockwise,
 			.depthBiasEnable = vk::False,
 			.depthBiasSlopeFactor = 1.0f,
 			.lineWidth = 1.0f
@@ -989,8 +1132,8 @@ void ImgnVulkan::CreateGraphicsPipelines()
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil
 		{
-			.depthTestEnable = vk::True,
-			.depthWriteEnable = vk::True,
+			.depthTestEnable = vk::False,
+			.depthWriteEnable = vk::False,
 			.depthCompareOp = vk::CompareOp::eLess,
 			.depthBoundsTestEnable = vk::False,
 			.stencilTestEnable = vk::False
@@ -1068,6 +1211,18 @@ void ImgnVulkan::CreateGraphicsPipelines()
 			.pVertexAttributeDescriptions = nullptr
 		};
 
+		vk::PipelineRasterizationStateCreateInfo rasterizer
+		{
+			.depthClampEnable = vk::False,
+			.rasterizerDiscardEnable = vk::False,
+			.polygonMode = vk::PolygonMode::eFill,
+			.cullMode = vk::CullModeFlagBits::eNone,
+			.frontFace = vk::FrontFace::eCounterClockwise,
+			.depthBiasEnable = vk::False,
+			.depthBiasSlopeFactor = 1.0f,
+			.lineWidth = 1.0f
+		};
+
 		vk::PipelineColorBlendStateCreateInfo colorBlending
 		{
 			.logicOpEnable = vk::False,
@@ -1089,6 +1244,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 		pipelineInfo.pNext = &pipelineRenderingCreateInfo;
 		pipelineInfo.pStages = shaderStages.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pRasterizationState = &rasterizer;
 		pipelineInfo.pColorBlendState = &colorBlending;
 
 		_pipelines.lightingPipeline = vk::raii::Pipeline(Device::Inst().GetDevice(), nullptr, pipelineInfo);
@@ -1132,6 +1288,126 @@ void ImgnVulkan::CreateDescriptorSetLayout()
 	_descriptorSetLayout = vk::raii::DescriptorSetLayout(Device::Inst().GetDevice(), layoutInfo);
 }
 
+void ImgnVulkan::UpdateCamera()
+{
+	bool focused;
+	_gWin->IsFocus(focused);
+
+	if (!focused) return;
+
+	mat4 cam = GW::MATH::GIdentityMatrixF;
+
+	auto ubo = _graph.GetBufferResource("GBuffer-UBO");
+
+	GBufferUBO gBufferUBO;
+	{
+		void* data = ubo->memory.mapMemory(0, sizeof(GBufferUBO));
+		memcpy(&gBufferUBO, data, sizeof(GBufferUBO));
+		ubo->memory.unmapMemory();
+	}
+
+	//auto& deltaTime = static_cast<UniformBufferOffscreen*>(_graph._blackboard.Get<void*>("offscreen uniform"))->deltaTime;
+
+	auto now = std::chrono::steady_clock::now();
+	std::chrono::duration<float> dt = _lastUpdate - now;
+	gBufferUBO.deltaTime = -dt.count();
+	_lastUpdate = now;
+
+	GMatrix::InverseF(gBufferUBO.view, cam);
+
+	float y = 0.0f;
+
+	float totalY = 0.0f;
+	float totalZ = 0.0f;
+	float totalX = 0.0f;
+
+	const float cameraSpeed = 75.f;
+	float spaceKeyState = 0.0f;
+	float leftShiftState = 0.0f;
+	float rightTriggerState = 0.0f;
+	float leftTriggerState = 0.0f;
+
+	float arrowRight = 0.0f;
+	float arrowLeft = 0.0f;
+
+	float wKeyState = 0.0f;
+	float sKeyState = 0.0f;
+	float aKeyState = 0.0f;
+	float dKeyState = 0.0f;
+	float leftStickX = 0.0f;
+	float leftStickY = 0.0f;
+	unsigned int screenHeight = 0.0f;
+	_gWin->GetHeight(screenHeight);
+	unsigned int screenWidth = 0.0f;
+	_gWin->GetWidth(screenWidth);
+	float mouseDeltaX = 0.0f;
+	float mouseDeltaY = 0.0f;
+	//GW::GReturn result = ;
+	float rightStickYaxis = 0.0f;
+	//_gController.GetState(0, G_RY_AXIS, rightStickYaxis);
+	float rightStickXaxis = 0.0f;
+	//_gController.GetState(0, G_RX_AXIS, rightStickXaxis);
+
+	float perFrameSpeed = 0.0f;
+
+	_gInput.GetState(G_KEY_RIGHT, arrowRight);
+	_gInput.GetState(G_KEY_LEFT, arrowLeft);
+
+	if (arrowRight != 0)
+	{
+		cam.row4 = { 0.0f, 50.0f, 0.0f, 1 };
+
+	}
+	if (arrowLeft != 0)
+	{
+		cam.row4 = { 5.75f, 5.25f, -30.5f, 1 };
+	}
+
+	if (+_gInput.GetState(G_KEY_SPACE, spaceKeyState) && spaceKeyState != 0 || +_gInput.GetState(G_KEY_LEFTSHIFT, leftShiftState) && leftShiftState != 0)// || +_gController.GetState(0, G_RIGHT_TRIGGER_AXIS, rightTriggerState) && rightTriggerState != 0 || +_gController.GetState(0, G_LEFT_TRIGGER_AXIS, leftTriggerState) && leftTriggerState != 0)
+	{
+		totalY = spaceKeyState - leftShiftState + rightTriggerState - leftTriggerState;
+	}
+
+	cam.row4.y += totalY * cameraSpeed * gBufferUBO.deltaTime;
+
+	perFrameSpeed = cameraSpeed * gBufferUBO.deltaTime;
+
+	if (+_gInput.GetState(G_KEY_W, wKeyState) && wKeyState != 0 || +_gInput.GetState(G_KEY_A, aKeyState) && aKeyState != 0 || +_gInput.GetState(G_KEY_S, sKeyState) && sKeyState != 0 || +_gInput.GetState(G_KEY_D, dKeyState) && dKeyState != 0)// || +_gController.GetState(0, G_LX_AXIS, leftStickX) && leftStickX != 0 || +_gController.GetState(0, G_LY_AXIS, leftStickY) && leftStickY != 0)
+	{
+		totalZ = wKeyState - sKeyState + leftStickY;
+		totalX = dKeyState - aKeyState + leftStickX;
+	}
+
+	mat4 translation = GW::MATH::GIdentityMatrixF;
+	vec4 vec = { totalX * perFrameSpeed, 0, totalZ * perFrameSpeed };
+	GMatrix::TranslateLocalF(translation, vec, translation);
+	GMatrix::MultiplyMatrixF(translation, cam, cam);
+
+	float thumbSpeed = 3.14 * perFrameSpeed;
+	auto r = _gInput.GetMouseDelta(mouseDeltaX, mouseDeltaY);
+	if (G_PASS(r) && r != GW::GReturn::REDUNDANT)
+	{
+		float totalPitch = G_DEGREE_TO_RADIAN(65) * mouseDeltaY / screenHeight + rightStickYaxis * -thumbSpeed;
+		GMatrix::RotateXLocalF(cam, totalPitch, cam);
+		float totalYaw = G_DEGREE_TO_RADIAN(65) * 16/9 * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
+		mat4 yawMatrix = GW::MATH::GIdentityMatrixF;
+		vec4 camSave = cam.row4;
+		cam.row4 = { 0,0,0,1 };
+		GMatrix::RotateYGlobalF(cam, totalYaw, cam);
+		cam.row4 = camSave;
+	}
+
+	//vec4 camPos = cam.row4;
+	GMatrix::InverseF(cam, gBufferUBO.view);
+
+	{
+		void* data = ubo->memory.mapMemory(0, sizeof(GBufferUBO));
+		memcpy(data, &gBufferUBO, sizeof(GBufferUBO));
+		ubo->memory.unmapMemory();
+	}
+
+}
+
 void ImgnVulkan::SetupDeferredRenderer()
 {
 	uint32_t width = _swapchainExtent.width, height = _swapchainExtent.height;
@@ -1141,17 +1417,17 @@ void ImgnVulkan::SetupDeferredRenderer()
 	//auto gBufferFrag = _manager.Load<Shader>("GBufferFragment", Shaders::);
 
 	//gbuffer image creation
-	CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[0]);
-	_gBufferImages[0].imageView = CreateImageView(_gBufferImages[0].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
+	//CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[0]);
+	//_gBufferImages[0].imageView = CreateImageView(_gBufferImages[0].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
 
-	CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[1]);
-	_gBufferImages[1].imageView = CreateImageView(_gBufferImages[1].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
+	//CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[1]);
+	//_gBufferImages[1].imageView = CreateImageView(_gBufferImages[1].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
 
-	CreateImage(width, height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[2]);
-	_gBufferImages[2].imageView = CreateImageView(_gBufferImages[2].image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+	//CreateImage(width, height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[2]);
+	//_gBufferImages[2].imageView = CreateImageView(_gBufferImages[2].image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
 
-	CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _finalImage);
-	_finalImage.imageView = CreateImageView(_finalImage.image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
+	//CreateImage(width, height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _finalImage);
+	//_finalImage.imageView = CreateImageView(_finalImage.image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
 
 
 	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
@@ -1160,23 +1436,39 @@ void ImgnVulkan::SetupDeferredRenderer()
 	_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
 	_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
 
+	GBufferUBO gBufferUBO
+	{
+		.world = GW::MATH::GIdentityMatrixF,
+		.view = GW::MATH::GIdentityMatrixF,
+		.proj = GW::MATH::GIdentityMatrixF,
+	};
+
+	GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, 1.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
+	GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 100.f, gBufferUBO.proj);
+
+	_graph.AddResource("GBuffer-UBO", sizeof(GBufferUBO), vk::BufferUsageFlagBits::eUniformBuffer, &gBufferUBO);
+
 	RenderPass gBufferPass
 	{
 		.name = "GeometryPass",
 		.inputs = {},
 		.outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		.bufferInputs = {"GBuffer-UBO"},
 		.descriptorSetLayout = _descriptorSetLayout,
 		.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		{
+			auto ubo = _graph.GetBufferResource("GBuffer-UBO");
+			UpdateDescriptorSet(_frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
+
 			std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
 			vk::RenderingAttachmentInfoKHR depthAttachment;
 			vk::RenderingInfoKHR renderingInfo;
 
-			colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+			colorAttachments[0].setImageView(_graph.GetResource("GBuffer-Position")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+			colorAttachments[1].setImageView(_graph.GetResource("GBuffer-Normal")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+			colorAttachments[2].setImageView(_graph.GetResource("GBuffer-Albedo")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
 
-			depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
+			depthAttachment.setImageView(_graph.GetResource("Depth")->view).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
 
 			renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
@@ -1197,39 +1489,90 @@ void ImgnVulkan::SetupDeferredRenderer()
 		}
 	};
 
-	_graph.AddPass(gBufferPass);
-
-	_graph.AddPass("GeometryPass", {}, { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, [&](vk::raii::CommandBuffer& commandBuffer)
+	RenderPass lightingPass
+	{
+		.name = "LightingPass",
+		.inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		.outputs = {"FinalColor"},
+		.descriptorSetLayout = _descriptorSetLayout,
+		.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		{
-			std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
-			vk::RenderingAttachmentInfoKHR depthAttachment;
-			vk::RenderingInfoKHR renderingInfo;
+			vk::RenderingAttachmentInfo colorAttachment
+			{
+				.imageView = _graph.GetResource("FinalColor")->view,
+				.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+				.loadOp = vk::AttachmentLoadOp::eClear,
+				.storeOp = vk::AttachmentStoreOp::eStore,
+				.clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
+			};
 
-			colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+			vk::RenderingInfoKHR renderingInfo
+			{
+				.renderArea = { {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} },
+				.layerCount = 1,
+				.colorAttachmentCount = 1,
+				.pColorAttachments = &colorAttachment,
+			};
 
-			depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
+			//colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+			//colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+			//colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
 
-			renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
+			//depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
 
-			commandBuffer.begin({});
+			//renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
+
 			commandBuffer.beginRendering(renderingInfo);
 
-			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
+			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
 			commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(_swapchainExtent.width), static_cast<float>(_swapchainExtent.height), 0.0f, 1.0f));
 			commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
 
 
-			commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *_descriptorSets[DescriptorSetIndex(_frameIdx, RenderPassIdx::GBuffer)], nullptr);
-			commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), { 0 });
-			commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+			commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *_descriptorSets[DescriptorSetIndex(_frameIdx, RenderPassIdx::Lighting)], nullptr);
+			//commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
+			//commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
-			commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
+			commandBuffer.draw(3, 1, 0, 0);
 
 			commandBuffer.endRendering();
-			commandBuffer.end();
-		});
+		}
+	};
+
+	_graph.AddPass(gBufferPass);
+	_graph.AddPass(lightingPass);
+
+	//_graph.AddPass("GeometryPass", {}, { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, [&](vk::raii::CommandBuffer& commandBuffer)
+	//	{
+	//		std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
+	//		vk::RenderingAttachmentInfoKHR depthAttachment;
+	//		vk::RenderingInfoKHR renderingInfo;
+
+	//		colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+	//		colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+	//		colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+
+	//		depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
+
+	//		renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
+
+	//		commandBuffer.begin({});
+	//		commandBuffer.beginRendering(renderingInfo);
+
+	//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
+	//		commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(_swapchainExtent.width), static_cast<float>(_swapchainExtent.height), 0.0f, 1.0f));
+	//		commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), _swapchainExtent));
+
+
+	//		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *_descriptorSets[DescriptorSetIndex(_frameIdx, RenderPassIdx::GBuffer)], nullptr);
+	//		commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), { 0 });
+	//		commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+
+	//		commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
+
+	//		commandBuffer.endRendering();
+	//		commandBuffer.end();
+	//	});
 
 	//_graph.AddPass("LightingPass", { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, {"FinalColor"}, [&](vk::raii::CommandBuffer& commandBuffer)
 	//	{
@@ -1406,6 +1749,8 @@ void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pForm
 
 void ImgnVulkan::UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler)
 {
+	std::vector<vk::WriteDescriptorSet> writes;
+
 	vk::DescriptorBufferInfo uniformBufferInfo
 	{
 		.buffer = pUniformBuffer,
@@ -1433,60 +1778,44 @@ void ImgnVulkan::UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk:
 			});
 	}
 
-	std::vector<vk::WriteDescriptorSet> writes;
-
-	int writeSize = 0;
-	if (pUniformBuffer) writeSize++;
-	if (pStorageBuffer) writeSize++;
-	if (pTextures.size() > 0) writeSize++;
-
-	writes.resize(writeSize);
-
 	if (pUniformBuffer)
 	{
-		writes[--writeSize] = vk::WriteDescriptorSet
-		{
-			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
-			.dstBinding = 2,
-			.dstArrayElement = 0,
-			.descriptorCount = static_cast<uint32_t>(imageInfos.size()),
-			.descriptorType = vk::DescriptorType::eCombinedImageSampler,
-			.pImageInfo = imageInfos.data()
-		};
+		writes.push_back(vk::WriteDescriptorSet
+			{
+				.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+				.dstBinding = 0,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = vk::DescriptorType::eUniformBuffer,
+				.pBufferInfo = &uniformBufferInfo
+			});
 	}
 
 	if (pStorageBuffer)
 	{
-		writes[--writeSize] = vk::WriteDescriptorSet
-		{
-			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
-			.dstBinding = 1,
-			.dstArrayElement = 0,
-			.descriptorCount = 1,
-			.descriptorType = vk::DescriptorType::eStorageBuffer,
-			.pBufferInfo = &storageBufferInfo
-		};
+		writes.push_back(vk::WriteDescriptorSet
+			{
+				.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+				.dstBinding = 1,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = vk::DescriptorType::eStorageBuffer,
+				.pBufferInfo = &storageBufferInfo
+			});
 	}
 
-	if (pTextures.size() > 0)
+	if (!imageInfos.empty())
 	{
-		writes[--writeSize] = vk::WriteDescriptorSet
-		{
-			.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
-			.dstBinding = 0,
-			.dstArrayElement = 0,
-			.descriptorCount = 1,
-			.descriptorType = vk::DescriptorType::eUniformBuffer,
-			.pBufferInfo = &uniformBufferInfo
-		};
+		writes.push_back(vk::WriteDescriptorSet
+			{
+				.dstSet = _descriptorSets[DescriptorSetIndex(pFrameIdx, pIdx)],
+				.dstBinding = 2,
+				.dstArrayElement = 0,
+				.descriptorCount = static_cast<uint32_t>(imageInfos.size()),
+				.descriptorType = vk::DescriptorType::eCombinedImageSampler,
+				.pImageInfo = imageInfos.data()
+			});
 	}
-
-	//std::array writes =
-	//{
-	//	pUniformBuffer ? ,
-	//	,
-	//	
-	//};
 
 	Device::Inst().GetDevice().updateDescriptorSets(writes, {});
 }
@@ -1539,6 +1868,7 @@ void ImgnVulkan::InitVulkan(GWindow* pWindow)
 	_gWin->GetClientWidth(_gWinW);
 	_gWin->GetClientHeight(_gWinH);
 	_gWin->GetWindowHandle(_handle);
+	_gInput.Create(*_gWin);
 
 	_responder.Create([&](const GEvent& e)
 		{
@@ -1580,7 +1910,7 @@ void ImgnVulkan::InitVulkan(GWindow* pWindow)
 
 	_gWin->Register(_responder);
 
-	
+
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
 	DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
 	_utils->CreateDefaultIncludeHandler(&_includeHandler);
@@ -1647,10 +1977,72 @@ void ImgnVulkan::DrawFrame()
 	//_commandBuffers[_frameIdx].begin({});
 	//UpdateUniformBuffer(_frameIdx);
 
-	//_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
-	//_gui.DrawFrame(_commandBuffers[_frameIdx]);
-	RecordCommandBuffer(imageIndex);
-	//_commandBuffers[_frameIdx].end();
+	//pCommandBuffer.reset();
+	_commandBuffers[_frameIdx].begin({});
+
+
+	_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
+	
+	TransitionImageLayout(_commandBuffers[_frameIdx], _swapchainImages[imageIndex], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+
+	//blit final color for now
+	{
+		vk::ImageSubresourceLayers subresource
+		{
+			.aspectMask = vk::ImageAspectFlagBits::eColor,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		};
+
+		vk::ImageBlit blit
+		{
+			.srcSubresource = subresource,
+			.dstSubresource = subresource,
+		};
+
+		vk::Offset3D blitOffset0{ 0, 0, 0 };
+		//vk::Offset3D blitOffsetSrc1{ (int32_t)renderWidth, (int32_t)renderHeight, 1 };
+		vk::Offset3D blitOffsetDst1{ (int32_t)_swapchainExtent.width, (int32_t)_swapchainExtent.height, 1 };
+		blit.srcOffsets[0] = blitOffset0;
+		blit.srcOffsets[1] = blitOffsetDst1;
+		blit.dstOffsets[0] = blitOffset0;
+		blit.dstOffsets[1] = blitOffsetDst1;
+
+		auto finalColor = _graph.GetResource("FinalColor");
+		_commandBuffers[_frameIdx].blitImage(finalColor->image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
+	
+		TransitionImageLayout(_commandBuffers[_frameIdx], _swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR);
+	}
+
+	//ui
+	{
+		vk::RenderingAttachmentInfo attachmentInfo
+		{
+			.imageView = _swapchainImageViews[_frameIdx],
+			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+			.loadOp = vk::AttachmentLoadOp::eLoad,
+			.storeOp = vk::AttachmentStoreOp::eStore,
+			.clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
+		};
+
+		vk::RenderingInfo guiRenderingInfo
+		{
+			.renderArea
+			{
+				.offset = { 0, 0 },
+				.extent = _swapchainExtent
+			},
+			.layerCount = 1,
+			.colorAttachmentCount = 1,
+			.pColorAttachments = &attachmentInfo,
+		};
+
+		_gui.renderingInfo = guiRenderingInfo;
+		_gui.DrawFrame(_commandBuffers[_frameIdx]);
+	}
+	//RecordCommandBuffer(imageIndex);
+	_commandBuffers[_frameIdx].end();
 
 	vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 

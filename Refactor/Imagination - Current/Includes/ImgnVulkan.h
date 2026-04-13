@@ -400,6 +400,8 @@ class ImgnVulkan
 	std::vector<uint32_t> GetSPV(const std::string& pShader, const std::wstring& pTarget, const std::wstring& pEntryPoint = L"main");
 	vk::Format FindSupportedFormat(const std::vector<vk::Format>& pCandidates, vk::ImageTiling pTiling, vk::FormatFeatureFlags pFeatures);
 	void TransitionImageLayout(const vk::raii::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout);
+	void TransitionImageLayout(const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout);
+	void TransitionImageLayout(vk::raii::CommandBuffer&pCommandBuffer, const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout);
 	void TransitionImageLayout(const vk::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::AccessFlags2 pSrcAccessMask, vk::AccessFlags2 pDstAccessMask, vk::PipelineStageFlags2 pSrcStageMask, vk::PipelineStageFlags2 pDstStageMask, vk::ImageAspectFlags pImageAspectFlags);
 	void TransitionImageLayout(const vk::raii::Image& pImage, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::AccessFlags2 pSrcAccessMask, vk::AccessFlags2 pDstAccessMask, vk::PipelineStageFlags2 pSrcStageMask, vk::PipelineStageFlags2 pDstStageMask, vk::ImageAspectFlags pImageAspectFlags);
 
@@ -434,12 +436,17 @@ class ImgnVulkan
 	void CreateGraphicsPipelines();
 	void CreateTextureImageView();
 	void CreateDescriptorSetLayout();
+
 	
+	std::chrono::steady_clock::time_point _lastUpdate;
+
+	GInput _gInput;
+
 	RenderGraph _graph;
 	ResourceManager _manager;
 
-	std::array<Image, 3> _gBufferImages;
-	Image _finalImage;
+	//std::array<Image, 3> _gBufferImages;
+	//Image _finalImage;
 
 	ImgnGui _gui;
 
@@ -463,6 +470,7 @@ public:
 	void InitVulkan(GWindow* pWindow);
 	void DrawFrame();
 	void DeviceWaitIdle() { _device.waitIdle(); }
+	void UpdateCamera();
 
 	/*Copy Constructor*/
 	ImgnVulkan(const ImgnVulkan& pOther) = delete;
