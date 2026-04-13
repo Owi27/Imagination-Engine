@@ -443,7 +443,11 @@ class ImgnVulkan
 
 	ImgnGui _gui;
 
+	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _handle;
+
 	void SetupDeferredRenderer();
+
+	GEventResponder _responder;
 
 public:
 	ImgnVulkan() /*Constructor*/

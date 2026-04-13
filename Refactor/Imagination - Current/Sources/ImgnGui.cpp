@@ -185,38 +185,6 @@ uint32_t ImgnGui::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags p
 	throw std::runtime_error("failed to find suitable memory type!");
 }
 
-void ImgnGui::OnMouseButtonPressedEvent(MouseButtonPressedEvent& e)
-{
-}
-
-void ImgnGui::OnMouseButtonReleasedEvent(MouseButtonReleasedEvent& e)
-{
-}
-
-void ImgnGui::OnMouseMovedEvent(MouseMovedEvent& e)
-{
-}
-
-void ImgnGui::OnMouseScrolledEvent(MouseScrolledEvent& e)
-{
-}
-
-void ImgnGui::OnKeyPressedEvent(KeyPressedEvent& e)
-{
-}
-
-void ImgnGui::OnKeyReleasedEvent(KeyReleasedEvent& e)
-{
-}
-
-void ImgnGui::OnKeyTypedEvent(KeyTypedEvent& e)
-{
-}
-
-void ImgnGui::OnWindowResizeEvent(WindowResizedEvent& e)
-{
-}
-
 void ImgnGui::AddImGuiSpecialKeyEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed)
 {
 	switch (pKeyCode)
@@ -399,6 +367,7 @@ void ImgnGui::Init(ImgnWindow& pWin, float pWidth, float pHeight)
 				.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
 				.colorAttachmentCount = 1,
 				.pColorAttachmentFormats = &format,
+				.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT
 			}
 		},
 		.UseDynamicRendering = true,
@@ -436,7 +405,7 @@ void ImgnGui::Init(HWND pWin, float pWidth, float pHeight)
 	ImGui_ImplWin32_Init(pWin);
 	ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
 
-	VkFormat format = VK_FORMAT_B8G8R8A8_UNORM;
+	VkFormat format = VK_FORMAT_B8G8R8A8_SRGB;
 
 	ImGui_ImplVulkan_InitInfo initInfo
 	{
@@ -483,70 +452,12 @@ void ImgnGui::DrawFrame(vk::raii::CommandBuffer& pCommandBuffer)
 void ImgnGui::OnEvent(Event& event)
 {
 	EventDispatcher dispatcher(event);
-	dispatcher.Dispatch<MouseButtonPressedEvent>([&](MouseButtonPressedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			io.MouseDown[e.GetMouseButton()] = true;
-
-			return false;
-		});
-
-	dispatcher.Dispatch<MouseButtonReleasedEvent>([&](MouseButtonReleasedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			io.MouseDown[e.GetMouseButton()] = false;
-
-
-			return false;
-		});
-
-	dispatcher.Dispatch<MouseMovedEvent>([&](MouseMovedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			io.MousePos = ImVec2(e.GetX(), e.GetY());
-
-			return false;
-		});
 
 	dispatcher.Dispatch<MouseScrolledEvent>([&](MouseScrolledEvent& e)
 		{
 			ImGuiIO& io = ImGui::GetIO();
 			io.MouseWheelH += e.GetXOffset();
 			io.MouseWheel += e.GetYOffset();
-
-			return false;
-		});
-
-	dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			io.KeysData[e.GetKeyCode()].Down = true;
-
-			io.KeyCtrl = io.KeysData[G_KEY_LEFTCONTROL].Down || io.KeysData[G_KEY_RIGHTCONTROL].Down;
-			io.KeyShift = io.KeysData[G_KEY_LEFTSHIFT].Down || io.KeysData[G_KEY_RIGHTSHIFT].Down;
-			io.KeyAlt = io.KeysData[G_KEY_LEFTALT].Down || io.KeysData[G_KEY_RIGHTALT].Down;
-			io.KeySuper = io.KeysData[G_KEY_COMMAND].Down;
-
-			return false;
-		});
-
-	dispatcher.Dispatch<KeyReleasedEvent>([&](KeyReleasedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-			io.KeysData[e.GetKeyCode()].Down = false;
-
-
-			return false;
-		});
-
-	dispatcher.Dispatch<KeyTypedEvent>([&](KeyTypedEvent& e)
-		{
-			ImGuiIO& io = ImGui::GetIO();
-
-			/*if (e > 0 && e < 0x10000)
-			{
-
-			}*/
 
 			return false;
 		});

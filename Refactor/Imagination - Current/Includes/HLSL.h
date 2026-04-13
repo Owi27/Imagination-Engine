@@ -69,7 +69,7 @@ struct VOut
     float3 tan : TANGENT;
     float3 col : COLOR;
     //float3x3 TBN : TEXCOORD1;
-    int idx : INDEX;
+    //int idx : INDEX;
 };
 
 struct UniformBuffer
@@ -89,7 +89,7 @@ VOut main(VIn input, uint id : SV_InstanceID)
     output.tan = input.tan.rgb;
     output.col = input.col;
     
-    output.idx = id;
+    //output.idx = id;
     
     return output;
 })";
@@ -102,7 +102,7 @@ VOut main(VIn input, uint id : SV_InstanceID)
     float3 tan : TANGENT;
     float3 col : COLOR;
     //float3x3 TBN : TEXCOORD1;
-    int idx : INDEX;
+    //int idx : INDEX;
 };
 
 struct FOut

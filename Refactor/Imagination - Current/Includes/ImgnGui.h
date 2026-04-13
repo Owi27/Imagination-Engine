@@ -39,7 +39,7 @@ class ImgnGui : public EventListener
 	void CreateResources();
 	uint32_t FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps);
 
-	GEventResponder responder;
+	GEventResponder _responder;
 
 	//events
 	void OnMouseButtonPressedEvent(MouseButtonPressedEvent& e);
@@ -56,7 +56,7 @@ class ImgnGui : public EventListener
 public:
 	ImgnGui()
 	{
-		responder.Create([&](const GEvent& e)
+		_responder.Create([&](const GEvent& e)
 			{
 				GBufferedInput::Events event;
 				GBufferedInput::EVENT_DATA data;
@@ -179,7 +179,7 @@ public:
 	void Init(ImgnWindow& pWin, float pWidth, float pHeight);
 	void Init(HWND pWin, float pWidth, float pHeight);
 
-	void SetInput(GBufferedInput* pBufferedInput) { _bufferedInput = pBufferedInput; _bufferedInput->Register(responder); uint32_t o;  _bufferedInput->Observers(o); std::cout << o << '\n'; }
+	void SetInput(GBufferedInput* pBufferedInput) { _bufferedInput = pBufferedInput; _bufferedInput->Register(_responder);}
 	//bool NewFrame();
 	//void UpdateBuffers();
 	void DrawFrame(vk::raii::CommandBuffer& pCommandBuffer);

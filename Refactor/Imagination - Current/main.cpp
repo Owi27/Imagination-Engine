@@ -8,6 +8,7 @@ int main()
 {
 	GWindow win;
 	if (-win.Create(0, 0, 1280, 70, GWindowStyle::FULLSCREENBORDERED)) std::cout << "__FILE__ __LINE__: Window failed to be created\n";
+	win.SetWindowName("Imagination Engine");
 
 	ImgnVulkan imgnVulkan;
 	imgnVulkan.InitVulkan(&win);

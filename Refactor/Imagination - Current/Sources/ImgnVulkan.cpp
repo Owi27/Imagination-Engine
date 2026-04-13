@@ -29,7 +29,7 @@ void ImgnVulkan::CleanupSwapchain()
 
 void ImgnVulkan::RecreateSwapchain()
 {
-	_device.waitIdle();
+	Device::Inst().GetDevice().waitIdle();
 
 	CleanupSwapchain();
 	CreateSwapchain();
@@ -495,10 +495,9 @@ void ImgnVulkan::CreateSurface()
 	//	.hwnd = _win->GetHandle()
 	//};
 	
-	GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
-	_gWin->GetWindowHandle(handle);
+	//GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
 
-	HWND hwnd = static_cast<HWND>(handle.window);
+	HWND hwnd = static_cast<HWND>(_handle.window);
 	HINSTANCE* hInst = reinterpret_cast<HINSTANCE*>(GetWindowLongPtr(static_cast<HWND>(hwnd), GWLP_HINSTANCE));
 
 	vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo
@@ -565,7 +564,17 @@ void ImgnVulkan::CreateInstance()
 
 void ImgnVulkan::CreateSwapchain()
 {
-	vk::SurfaceCapabilitiesKHR surfaceCapabilities = Device::Inst().GetPhysicalDevice().getSurfaceCapabilitiesKHR(*_surface);
+	vk::SurfaceCapabilitiesKHR surfaceCapabilities;
+	try
+	{
+		surfaceCapabilities = Device::Inst().GetPhysicalDevice().getSurfaceCapabilitiesKHR(*_surface);
+	}
+	catch (const vk::SurfaceLostKHRError&)
+	{
+		CreateSurface();
+	}
+
+	//vk::SurfaceCapabilitiesKHR surfaceCapabilities = Device::Inst().GetPhysicalDevice().getSurfaceCapabilitiesKHR(*_surface);
 	_swapchainExtent = ChooseSwapExtent(surfaceCapabilities);
 
 	uint32_t minImageCount = ChooseSwapMinImageCount(surfaceCapabilities);
@@ -1513,7 +1522,49 @@ void ImgnVulkan::InitVulkan(GWindow* pWindow)
 	_gWin = pWindow;
 	_gWin->GetClientWidth(_gWinW);
 	_gWin->GetClientHeight(_gWinH);
+	_gWin->GetWindowHandle(_handle);
 
+	_responder.Create([&](const GEvent& e)
+		{
+			GWindow::Events event;
+			GWindow::EVENT_DATA data;
+
+			if (+e.Read(event, data))
+			{
+				switch (event)
+				{
+				case GWindow::Events::RESIZE:
+					{
+						WindowResizedEvent wre(data.clientWidth, data.clientHeight);
+						EventDispatcher dispatcher(wre);
+						dispatcher.Dispatch<WindowResizedEvent>([&](WindowResizedEvent& e)
+							{
+								RecreateSwapchain();
+
+								return true;
+							});
+					}
+					break;
+				case GWindow::Events::DISPLAY_CLOSED:
+					{
+						WindowClosedEvent wce;
+						EventDispatcher dispatcher(wce);
+						dispatcher.Dispatch<WindowClosedEvent>([&](WindowClosedEvent& e)
+							{
+								Device::Inst().GetDevice().waitIdle();
+
+								return true;
+							});
+
+					}
+					break;
+				}
+			}
+		});
+
+	_gWin->Register(_responder);
+
+	
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
 	DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
 	_utils->CreateDefaultIncludeHandler(&_includeHandler);
@@ -1556,14 +1607,9 @@ void ImgnVulkan::InitVulkan(GWindow* pWindow)
 	uint32_t o;
 	_input->bufferedInput.Observers(o);
 
-	std::cout << "Observers before push " << o << '\n';
-
 	_gui.SetInput(&_input->bufferedInput);
 
 	_input->bufferedInput.Observers(o);
-
-	std::cout << "Observers after push " << o << '\n';
-
 }
 
 void ImgnVulkan::DrawFrame()
@@ -1614,13 +1660,30 @@ void ImgnVulkan::DrawFrame()
 		.pImageIndices = &imageIndex
 	};
 
-	result = Device::Inst().GetQueue().presentKHR(presentInfoKHR);
+	//result = Device::Inst().GetQueue().presentKHR(presentInfoKHR);
 
-	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || _framebufferResized)
+	try
+	{
+		result = Device::Inst().GetQueue().presentKHR(presentInfoKHR);
+
+		if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || _framebufferResized)
+		{
+			_framebufferResized = false;
+			RecreateSwapchain();
+		}
+	}
+	catch (const vk::OutOfDateKHRError&)
 	{
 		_framebufferResized = false;
 		RecreateSwapchain();
+		return;
 	}
+
+	//if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || _framebufferResized)
+	//{
+	//	_framebufferResized = false;
+	//	RecreateSwapchain();
+	//}
 
 	_frameIdx = (_frameIdx + 1) % MAXFRAMESINFLIGHT;
 }

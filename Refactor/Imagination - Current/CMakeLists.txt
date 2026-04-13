@@ -44,3 +44,20 @@ set_source_files_properties(
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/VulkanDispatcher.cpp
     PROPERTIES SKIP_PRECOMPILE_HEADERS ON
 )
+
+#DLL Renderbackends
+add_library(ImgnVulkan SHARED 
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/main.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/framework.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.hpp 
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
+
+target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
+
+target_compile_definitions(ImgnVulkan PUBLIC VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
+
+target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
+
+target_precompile_headers(ImgnVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp)

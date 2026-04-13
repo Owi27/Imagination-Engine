@@ -10,9 +10,13 @@
 	<Project Path="Imagination.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="1cc9993c-19cf-3d14-a832-1329b9010089" DefaultStartup="true">
 		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 	</Project>
+	<Project Path="ImgnVulkan.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="cef85574-9022-30b6-a919-5e4350c19439">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
 	<Folder Name="/CMakePredefinedTargets/">
 		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ec8a3197-9d45-3812-a410-86a0874543b5">
 			<BuildDependency Project="Imagination.vcxproj"/>
+			<BuildDependency Project="ImgnVulkan.vcxproj"/>
 			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 			<Build Solution="Debug|*" Project="false"/>
 			<Build Solution="Release|*" Project="false"/>

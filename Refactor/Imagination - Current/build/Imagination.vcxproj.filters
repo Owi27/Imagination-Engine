@@ -294,6 +294,9 @@
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <FXCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Spike.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
     <Filter Include="Includes">
       <UniqueIdentifier>{24E2607D-8D4D-358B-AAE8-10C0F172DBD0}</UniqueIdentifier>
     </Filter>
