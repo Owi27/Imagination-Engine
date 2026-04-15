@@ -10,3 +10,8 @@ struct LightingUBO
 {
 
 };
+
+struct Material
+{
+
+};

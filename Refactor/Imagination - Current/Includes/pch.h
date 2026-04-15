@@ -61,7 +61,13 @@ using vec2 = GW::MATH2D::GVECTOR2F;
 using GEvent = GW::GEvent;
 using GBufferedInput = GW::INPUT::GBufferedInput;
 
+template <typename T>
+using unique = std::unique_ptr<T>;
+template <typename T>
+using shared = std::shared_ptr<T>;
 #include "Events/Event.h"
+
+#include "ImgnBase.h"
 
 #include "Input.h"
 #include "ImgnKeyMouseCodes.h"

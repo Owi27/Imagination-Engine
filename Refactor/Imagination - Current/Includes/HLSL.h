@@ -43,12 +43,12 @@ VOut main(VIn input)
     float2 uv  : TEXCOORD0;
 };
 
-Texture2D _texure : register(t2, space0);
+Texture2D _texture : register(t2, space0);
 SamplerState _sampler : register(s2, space0);
 
 float4 main(VOut input) : SV_Target
 {
-    return float4(input.col * _texure.Sample(_sampler, input.uv).rgb, 1.0);
+    return float4(input.col * _texture.Sample(_sampler, input.uv).rgb, 1.0);
     //return _texure.Sample(_sampler, input.uv);
 })";
 
@@ -144,9 +144,21 @@ VOut main(uint VertexIndex : SV_VertexID)
     return output;
 })";
 
-    std::string LightingFragmentShader = R"(float4 main() : SV_TARGET
+    std::string LightingFragmentShader = R"(struct VOut
 {
-    return float4(1.f, 0.f, 0.f, 1.f);
+    float4 Pos : SV_POSITION;
+    float2 UV : TEXCOORD0;
+};
+
+//[[vk::input_attachment_index(0)]][[vk::binding(1)]] SubpassInput posAttachment;
+
+Texture2D _textures[] : register(t2, space0);
+SamplerState _sampler : register(s2, space0);
+
+float4 main(VOut input) : SV_TARGET
+{
+    return _textures[0].Sample(_sampler, input.UV);
+    //return float4(1.f, 0.f, 0.f, 1.f);
 })";
 
 }

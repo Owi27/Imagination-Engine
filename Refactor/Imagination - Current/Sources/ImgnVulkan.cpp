@@ -1413,27 +1413,11 @@ void ImgnVulkan::SetupDeferredRenderer()
 	uint32_t width = _swapchainExtent.width, height = _swapchainExtent.height;
 
 	_sponza = _manager.Load<Mesh>("Sponza");
-	//auto gBufferVertex = _manager.Load<Shader>("GBufferVertex", Shaders::);
-	//auto gBufferFrag = _manager.Load<Shader>("GBufferFragment", Shaders::);
 
-	//gbuffer image creation
-	//CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[0]);
-	//_gBufferImages[0].imageView = CreateImageView(_gBufferImages[0].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
-
-	//CreateImage(width, height, vk::Format::eR16G16B16A16Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[1]);
-	//_gBufferImages[1].imageView = CreateImageView(_gBufferImages[1].image, vk::Format::eR16G16B16A16Sfloat, vk::ImageAspectFlagBits::eColor);
-
-	//CreateImage(width, height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _gBufferImages[2]);
-	//_gBufferImages[2].imageView = CreateImageView(_gBufferImages[2].image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
-
-	//CreateImage(width, height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _finalImage);
-	//_finalImage.imageView = CreateImageView(_finalImage.image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
-
-
-	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-	_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-	_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-	_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
+	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+	_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
 	_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
 
 	GBufferUBO gBufferUBO
@@ -1514,14 +1498,15 @@ void ImgnVulkan::SetupDeferredRenderer()
 				.pColorAttachments = &colorAttachment,
 			};
 
-			//colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			//colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-			//colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-
-			//depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
-
-			//renderingInfo.setRenderArea({ {0, 0}, {_swapchainExtent.width, _swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
-
+			std::vector<vk::ImageView> imageViews =
+			{
+				_graph.GetResource("GBuffer-Position")->view,
+				_graph.GetResource("GBuffer-Normal")->view,
+				_graph.GetResource("GBuffer-Albedo")->view,
+				_graph.GetResource("Depth")->view,
+			};
+			UpdateDescriptorSet(_frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
+			
 			commandBuffer.beginRendering(renderingInfo);
 
 			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);

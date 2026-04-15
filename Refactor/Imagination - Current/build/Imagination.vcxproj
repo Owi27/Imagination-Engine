@@ -428,6 +428,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Sources\ImgnApp.cpp" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\build\CMakeFiles\Imagination.dir\cmake_pch.cxx">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -456,6 +457,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/Refactor/Imagination - Current/build/CMakeFiles/Imagination.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
+    <ClInclude Include="..\Includes\ImgnApp.h" />
+    <ClInclude Include="..\Includes\ImgnBase.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Camera.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Component.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ComponentTypes.h" />

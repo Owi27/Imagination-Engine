@@ -74,6 +74,7 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\ImGui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sources\ImgnApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\Includes\Camera.h">
@@ -298,6 +299,8 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\build\CMakeFiles\Imagination.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="..\Includes\ImgnBase.h" />
+    <ClInclude Include="..\Includes\ImgnApp.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Refactor\Imagination - Current\CMakeLists.txt" />
