@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\Imagination.dir\\Includes\\ImGui\\imgui_demo.cpp.obj",
+            "outputs": [
+                "D:\\GitHub\\Imagination-Engine\\out\\build\\x64-Debug\\vc140.pdb",
+                "CMakeFiles\\Imagination.dir\\Includes\\ImGui\\imgui_demo.cpp.obj.ddi",
+                "D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/Imagination.dir/.//cmake_pch.cxx.pch"
+            ],
+            "requires": []
+        }
+    ]
+}

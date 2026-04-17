@@ -1,5 +1,7 @@
-D:/GitHub/Imagination-Engine/build/CMakeFiles/Imagination.dir
+D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir
 D:/GitHub/Imagination-Engine/build/CMakeFiles/ALL_BUILD.dir
 D:/GitHub/Imagination-Engine/build/CMakeFiles/ZERO_CHECK.dir
-D:/GitHub/Imagination-Engine/build/imaginations/CMakeFiles/pbr.dir
-D:/GitHub/Imagination-Engine/build/ImaginaryMathLibrary/CMakeFiles/ImaginaryMathLibrary.dir
+D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir
+D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir
+D:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/ALL_BUILD.dir

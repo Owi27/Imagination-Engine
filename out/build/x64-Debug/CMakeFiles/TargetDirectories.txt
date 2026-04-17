@@ -1,0 +1,10 @@
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/Imagination.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/ImgnVulkan.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Imagination/CMakeFiles/Imgn.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Imagination/CMakeFiles/edit_cache.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Imagination/CMakeFiles/rebuild_cache.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Daydream/CMakeFiles/DAYDREAM.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Daydream/CMakeFiles/edit_cache.dir
+D:/GitHub/Imagination-Engine/out/build/x64-Debug/Daydream/CMakeFiles/rebuild_cache.dir

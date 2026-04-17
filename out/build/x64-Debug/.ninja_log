@@ -1,0 +1,15 @@
+# ninja log v6
+10274	14785	7979930753569411	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_draw.cpp.obj.ddi	d6a64a01da03acbc
+29	50	7979930959310279	D:/GitHub/Imagination-Engine/out/build/x64-Debug/CMakeFiles/cmake.verify_globs	707847e2998d6bf3
+10285	14575	7979930753684435	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_tables.cpp.obj.ddi	e9b6c374bfc80e42
+58	10189	7979930651410533	CMakeFiles/Imagination.dir/cmake_pch.cxx.obj	f2a24c5dc91a85d9
+10192	14213	7979930752758847	CMakeFiles/Imagination.dir/main.cpp.obj.ddi	cf993c32e448278c
+10222	14397	7979930753054144	CMakeFiles/Imagination.dir/Sources/ImgnRenderer.cpp.obj.ddi	50e8d301bb93d268
+10256	14402	7979930753394312	CMakeFiles/Imagination.dir/Sources/pch.cpp.obj.ddi	8b0e1ec5dc4cec45
+10269	14620	7979930753524378	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_demo.cpp.obj.ddi	67ff4ff7a6c5136b
+10226	14580	7979930753089146	CMakeFiles/Imagination.dir/Sources/ImgnVulkan.cpp.obj.ddi	2e1c80bc80669da6
+10289	14688	7979930753724436	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_widgets.cpp.obj.ddi	9944110e70b7c2ea
+10260	14705	7979930753439315	CMakeFiles/Imagination.dir/Sources/tiny.cpp.obj.ddi	8dbc12f24643c7f9
+10278	14710	7979930753609400	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_impl_vulkan.cpp.obj.ddi	47a8e7dd81c564
+10265	14732	7979930753479380	CMakeFiles/Imagination.dir/Includes/ImGui/imgui.cpp.obj.ddi	4c4dc6c3af969641
+10281	14754	7979930753649400	CMakeFiles/Imagination.dir/Includes/ImGui/imgui_impl_win32.cpp.obj.ddi	8d7dc87e34f1a7c3

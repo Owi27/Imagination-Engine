@@ -1,0 +1,192 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Vulkan::Headers::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Vulkan__Headers-Debug-de0fcbf1c4da452d1dae.json",
+					"name" : "Vulkan::Headers",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Vulkan::Vulkan::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Vulkan__Vulkan-Debug-b5655b56566ac257923f.json",
+					"name" : "Vulkan::Vulkan",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Vulkan::glslangValidator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Vulkan__glslangValidator-Debug-74c22e2bcaebd628db95.json",
+					"name" : "Vulkan::glslangValidator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Vulkan::glslc::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Vulkan__glslc-Debug-6d67afd983cdda0bc4f0.json",
+					"name" : "Vulkan::glslc",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.28"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						1,
+						3
+					]
+				},
+				{
+					"build" : "Imagination",
+					"jsonFile" : "directory-Imagination-Debug-976d91e11fc7ff620155.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "Imagination",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "Daydream",
+					"jsonFile" : "directory-Daydream-Debug-8dc72ee4d7e2f171437f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "Daydream",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					],
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "Imagination",
+					"targetIndexes" : 
+					[
+						1,
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "Imgn",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "Daydream",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee",
+					"jsonFile" : "target-DAYDREAM-Debug-2e9b3ca240f0a736787f.json",
+					"name" : "DAYDREAM",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Imagination::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Imagination-Debug-dddfd78cfa79fa01d337.json",
+					"name" : "Imagination",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "Imgn::@4a12ee01f2b1794c9d00",
+					"jsonFile" : "target-Imgn-Debug-4e8593db13d7da8b2ac1.json",
+					"name" : "Imgn",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ImgnVulkan::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ImgnVulkan-Debug-cf0ebe21d50a50c6206b.json",
+					"name" : "ImgnVulkan",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/GitHub/Imagination-Engine/out/build/x64-Debug",
+		"source" : "D:/GitHub/Imagination-Engine"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

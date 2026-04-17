@@ -33,10 +33,13 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for each subdirectory.
-  include("D:/GitHub/Imagination-Engine/build/imaginations/cmake_install.cmake")
-  include("D:/GitHub/Imagination-Engine/build/ImaginaryMathLibrary/cmake_install.cmake")
+  # Include the install script for the subdirectory.
+  include("D:/GitHub/Imagination-Engine/build/Imagination/cmake_install.cmake")
+endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("D:/GitHub/Imagination-Engine/build/Daydream/cmake_install.cmake")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
