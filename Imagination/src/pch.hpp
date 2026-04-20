@@ -9,6 +9,8 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <format>
+#include <chrono>
 
 #ifdef IMGN_PLATFORM_WINDOWS
 #include <Windows.h>

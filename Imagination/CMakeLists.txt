@@ -5,7 +5,7 @@ file(GLOB_RECURSE IMGN_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c
 
 add_library(IMGN SHARED ${IMGN_HEADERS} ${IMGN_SOURCES})
 
-target_precompile_headers(IMGN PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp)
+target_precompile_headers(IMGN PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.hpp)
 
 target_include_directories(IMGN PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(IMGN PUBLIC IMGN_BUILD_DLL IMGN_PLATFORM_WINDOWS)
