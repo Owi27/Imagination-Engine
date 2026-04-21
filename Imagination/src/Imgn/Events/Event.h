@@ -1,6 +1,6 @@
 #pragma once
-#include "pch.h"
-//#include "Imagination/Core.h"
+//#include "pch.h"
+#include "ImgnCore.hpp"
 //#include <spdlog/fmt/fmt.h>
 
 #define BIT(x) (1 << x)
@@ -50,6 +50,7 @@ public:
 	virtual int GetCategoryFlags() const = 0;
 	virtual EventType GetEventType() const = 0;
 	virtual std::string ToString() const { return GetName(); }
+	virtual bool Handled() const { return _handled; }
 
 	inline bool IsInCategory(EventCategory category)
 	{

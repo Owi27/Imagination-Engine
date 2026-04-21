@@ -81,8 +81,11 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.cpp")
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/pch.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -108,11 +111,14 @@ endif()
 # IMGN_HEADERS at Imagination/CMakeLists.txt:3 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.h")
 set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Imagination/src/Gateware/Gateware.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/Event.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
