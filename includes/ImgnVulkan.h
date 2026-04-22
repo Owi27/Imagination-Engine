@@ -251,7 +251,6 @@ struct alignas(16) UniformBufferObject
 //	vk::raii::DeviceMemory memory = nullptr;
 //};
 
-static constexpr uint32_t NumDescriptorsStreaming = 2048;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 constexpr const wchar_t* ComputeTarget = L"cs_6_6";
@@ -335,13 +334,13 @@ class ImgnVulkan
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
-	vk::raii::Context _ctx;
-	vk::Extent2D _swapchainExtent;
-	bool _framebufferResized = false;
-	vk::raii::Device _device = nullptr;
-	std::optional<vk::raii::Queue> _queue;
-	uint32_t _queueIdx = 0, _frameIdx = 0;
-	vk::raii::Instance _instance = nullptr;
+	//vk::raii::Context _ctx;
+	//vk::Extent2D _swapchainExtent;
+	//bool _framebufferResized = false;
+	//vk::raii::Device _device = nullptr;
+	//std::optional<vk::raii::Queue> _queue;
+	//uint32_t _queueIdx = 0, _frameIdx = 0;
+	//vk::raii::Instance _instance = nullptr;
 	vk::raii::SurfaceKHR _surface = nullptr;
 	vk::raii::SwapchainKHR _swapchain = nullptr;
 	vk::SurfaceFormatKHR _swapchainSurfaceFormat;

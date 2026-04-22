@@ -18,7 +18,7 @@ add_subdirectory(Daydream)
 # file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Includes/*.h)
 # file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.cpp)
 # file(GLOB_RECURSE IMGUI_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Includes/ImGui/*.cpp)
-
+#
 # add_executable(Imagination
 #     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
 #     ${CMAKE_CURRENT_SOURCE_DIR}/Spike.hlsl
@@ -26,7 +26,7 @@ add_subdirectory(Daydream)
 #     ${SOURCES}
 #     ${IMGUI_SOURCES}
 # )
-
+#
 # source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Spike.hlsl ${HEADERS} ${SOURCES})
 
 # target_include_directories(Imagination PUBLIC
@@ -62,7 +62,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
 
 target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
 
-target_compile_definitions(ImgnVulkan PUBLIC VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
+target_compile_definitions(ImgnVulkan PUBLIC IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
 
 target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
 

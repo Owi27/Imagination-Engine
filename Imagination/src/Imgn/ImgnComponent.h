@@ -27,8 +27,9 @@ class IMGN_API ImgnComponent
 	virtual void OnInit() {}
 	virtual void Dream(float pDeltaTime) {}
 	virtual void OnEvent(Event& pEvent) {}
-	virtual void Render() {}
 	virtual void OnDestroy() {}
+	
+	virtual void Render() {}
 
 protected:
 	std::string _debugName;

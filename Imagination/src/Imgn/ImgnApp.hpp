@@ -6,6 +6,8 @@
 
 class IMGN_API ImgnApp
 {
+	static inline unique<ImgnApp> _instance;
+
 	bool _running = true;
 	unique<ImgnWindow> _window;
 	ImgnEntity _entity;
@@ -13,6 +15,8 @@ class IMGN_API ImgnApp
 public:
 	ImgnApp()
 	{
+		//if (!_instance) _instance.reset(new ImgnApp());
+
 		_window = std::make_unique<ImgnWindow>();
 	}
 
@@ -20,6 +24,13 @@ public:
 	{
 
 	}
+
+	inline static ImgnApp& Get() 
+	{ 
+		if (!_instance) _instance.reset(new ImgnApp()); 
+		return *_instance; 
+	}
+	inline ImgnWindow& GetWindow() { return *_window; }
 
 	void Run();
 	void OnEvent(Event& pEvent);

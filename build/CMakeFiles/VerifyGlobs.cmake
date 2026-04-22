@@ -80,8 +80,16 @@ endif()
 # IMGN_SOURCES at Imagination/CMakeLists.txt:4 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.cpp")
 set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnGui.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.cpp"
@@ -112,11 +120,20 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.h")
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Gateware/Gateware.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imconfig.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_internal.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imstb_rectpack.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imstb_textedit.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imstb_truetype.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/Event.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnGui.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h"
   )
