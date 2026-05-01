@@ -9,9 +9,14 @@
 	</Configurations>
 	<Project Path="DAYDREAM.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="5a3c2d86-d9d2-3c0b-98e7-6acb945ae531">
 		<BuildDependency Project="../Imagination/IMGN.vcxproj"/>
+		<BuildDependency Project="../ImgnVulkan.vcxproj"/>
 		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
 	</Project>
 	<Project Path="../Imagination/IMGN.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="d4c3ca30-a98c-357a-96c4-c3acfd0af936">
+		<BuildDependency Project="../ImgnVulkan.vcxproj"/>
+		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="../ImgnVulkan.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="c094a958-2859-35a8-a5f1-333669bfa0c3">
 		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
 	</Project>
 	<Folder Name="/CMakePredefinedTargets/">

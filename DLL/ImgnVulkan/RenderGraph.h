@@ -89,6 +89,11 @@ namespace ImgnVulkan
 
 	public:
 		explicit RenderGraph() = default;
+		RenderGraph(const RenderGraph&) = delete;
+		RenderGraph& operator=(const RenderGraph&) = delete;
+
+		RenderGraph(RenderGraph&&) noexcept = default;
+		RenderGraph& operator=(RenderGraph&&) noexcept = default;
 
 		void Compile();
 		void Execute(vk::raii::CommandBuffer& pCommandBuffer, vk::Queue pQueue);
@@ -112,8 +117,8 @@ namespace ImgnVulkan
 		}
 
 		void AddResource(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
-		void AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, void* pData);
+		void AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData);
 		void AddPass(const std::string& pName, const std::vector<std::string>& pInputs, const std::vector<std::string>& pOutputs, std::function<void(vk::raii::CommandBuffer&)> pExecute);
-		void AddPass(RenderPass& pRenderPass) { _renderPasses.emplace_back(std::move(pRenderPass)); }
+		void AddPass(RenderPass pRenderPass) { _renderPasses.emplace_back(std::move(pRenderPass)); }
 	};
 }

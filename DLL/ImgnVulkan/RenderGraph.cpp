@@ -1,4 +1,5 @@
-#include "D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx"
+#include "pch.hpp"
+#include "CTX.h"
 #include "RenderGraph.h"
 
 namespace ImgnVulkan
@@ -88,6 +89,7 @@ namespace ImgnVulkan
 
 	void RenderGraph::CreateImageResource(ImageResource& pResource)
 	{
+		//image
 		vk::ImageCreateInfo imageCreateInfo
 		{
 			.imageType = vk::ImageType::e2D,
@@ -112,7 +114,8 @@ namespace ImgnVulkan
 
 		pResource.memory = vk::raii::DeviceMemory(ImgnVulkan::device, allocInfo);
 		pResource.image.bindMemory(pResource.memory, 0);
-
+		
+		//view
 		vk::ImageViewCreateInfo imageViewCreateInfo
 		{
 			.image = pResource.image,
@@ -435,7 +438,7 @@ namespace ImgnVulkan
 
 	}
 
-	void RenderGraph::AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, void* pData)
+	void RenderGraph::AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
 	{
 		BufferResource bufferResource
 		{

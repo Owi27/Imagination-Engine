@@ -8,44 +8,7 @@ using namespace Microsoft::WRL;
 
 namespace ImgnVulkan
 {
-	//constexpr int MAXFRAMESINFLIGHT = 3;
-	//constexpr const wchar_t* VertexTarget = L"vs_6_6";
-	//constexpr const wchar_t* FragmentTarget = L"ps_6_6";
-	//constexpr const wchar_t* ComputeTarget = L"cs_6_6";
-
-	//vk::raii::Context ctx;
-	//vk::raii::Instance instance = nullptr;
-	//vk::raii::Device device = nullptr;
-	//vk::raii::PhysicalDevice physicalDevice = nullptr;
-	//vk::raii::CommandPool commandPool = nullptr;
-	//std::vector<vk::raii::CommandBuffer> commandBuffers;
-	//vk::raii::Queue queue = nullptr;
-	//uint32_t queueIdx = 0, frameIdx = 0;
-	//vk::Extent2D swapchainExtent;
-	//vk::raii::SurfaceKHR surface = nullptr;
-	//vk::raii::SwapchainKHR swapchain = nullptr;
-	//vk::SurfaceFormatKHR swapchainSurfaceFormat;
-	//std::vector<vk::Image> swapchainImages;
-	//std::vector<vk::raii::ImageView> swapchainImageViews;
-	//vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
-	//vk::raii::DescriptorPool _descriptorPool = nullptr;
-	//std::vector<vk::raii::DescriptorSet> _descriptorSets;
-	//vk::raii::DescriptorSetLayout _descriptorSetLayout = nullptr;
-	//uint32_t totalSets = MAXFRAMESINFLIGHT * 12;
-	//std::vector<vk::raii::Fence> inFlightFences;
-	//std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
-	//std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
-	//vk::raii::Sampler defaultSampler = nullptr;
-	////dxc
-	//ComPtr<IDxcCompiler3> compiler;
-	//ComPtr<IDxcUtils> utils;
-	//ComPtr<IDxcIncludeHandler> includeHandler;
-
-
-
-
-
-	class Ctx
+	class IMGN_VULKAN_API Ctx
 	{
 #ifdef NDEBUG
 		const bool _enableValidationLayers = false;
@@ -86,12 +49,11 @@ namespace ImgnVulkan
 			return pFrameIdx * static_cast<uint32_t>(RenderPassIdx::Count) + static_cast<uint32_t>(pPass);
 		}
 
-		Pipelines _pipelines;
+		//Pipelines _pipelines;
 
 		RenderGraph _graph;
 
-
-		uint32_t width, height;
+		uint32_t _width, _height;
 
 		bool IsDeviceSuitable(vk::raii::PhysicalDevice const& pPhysicalDevice);
 		void CleanupSwapchain();
@@ -128,7 +90,7 @@ namespace ImgnVulkan
 		void UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler);
 
 		void CreateDevice();
-		void CreateSurface();
+		void CreateSurface(HWND pHWND);
 		void CreateInstance();
 		void CreateSwapchain();
 		void CreateImageViews();
@@ -142,7 +104,7 @@ namespace ImgnVulkan
 		void CreateUniformBuffers();
 		void CreateDescriptorPool();
 		void CreateDescriptorSets();
-		void CreateTextureSampler();
+		void CreateDefaultSampler();
 		void CreateGraphicsPipelines();
 		void CreateTextureImageView();
 		void CreateDescriptorSetLayout();
@@ -152,17 +114,23 @@ namespace ImgnVulkan
 
 	public:
 		/* Class Defaults */
-		ImgnVulkan()
+		Ctx()
 		{
 
 		}
 
-		~ImgnVulkan()
+		~Ctx()
 		{
 
 		}
 
 		/* Class Functions */
+		void InitVulkanCtx(HWND pHWND, uint32_t pWidth, uint32_t pHeight);
+		void UploadMesh(const Vertex* pVertices, uint64_t pVertexCount);
+		void UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount);
+		void CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
+		void CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData);
+		void CompileGraph();
 		void DrawFrame();
 	};
 }

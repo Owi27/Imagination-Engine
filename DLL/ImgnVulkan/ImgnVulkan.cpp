@@ -1,5 +1,7 @@
 #include "pch.hpp"
+#include "CTX.h"
 #include "ImgnVulkan.hpp"
+#include "Shaders.h"
 
 namespace ImgnVulkan
 {
@@ -95,7 +97,7 @@ namespace ImgnVulkan
 		commandBuffer.begin({});
 
 		TransitionImageLayout(ImgnVulkan::swapchainImages[pImageIdx], vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, {}, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::ImageAspectFlagBits::eColor);
-		TransitionImageLayout(_depth.image, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::ImageAspectFlagBits::eDepth);
+		TransitionImageLayout(_graph.GetImageResource("Depth")->image, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::ImageAspectFlagBits::eDepth);
 
 		vk::ClearValue clearColor = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
 		vk::ClearValue clearDepth = vk::ClearDepthStencilValue(1.f, 0);
@@ -111,7 +113,7 @@ namespace ImgnVulkan
 
 		vk::RenderingAttachmentInfo depthAttachmentInfo
 		{
-			.imageView = _depth.imageView,
+			.imageView = _graph.GetImageResource("Depth")->view,
 			.imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
 			.loadOp = vk::AttachmentLoadOp::eClear,
 			.storeOp = vk::AttachmentStoreOp::eDontCare,
@@ -158,7 +160,7 @@ namespace ImgnVulkan
 		};
 
 		commandBuffer.beginRendering(guiRenderingInfo);
-		_gui.DrawFrame(commandBuffer);
+		//_gui.DrawFrame(commandBuffer);
 		commandBuffer.endRendering();
 
 		TransitionImageLayout(ImgnVulkan::swapchainImages[pImageIdx], vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, vk::AccessFlagBits2::eColorAttachmentWrite, {}, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eBottomOfPipe, vk::ImageAspectFlagBits::eColor);
@@ -192,8 +194,8 @@ namespace ImgnVulkan
 
 		return
 		{
-			std::clamp<uint32_t>(_gWinW, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
-			std::clamp<uint32_t>(_gWinH, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
+			std::clamp<uint32_t>(_width, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
+			std::clamp<uint32_t>(_height, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
 		};
 	}
 
@@ -634,7 +636,7 @@ namespace ImgnVulkan
 		ImgnVulkan::queue = vk::raii::Queue(ImgnVulkan::device, ImgnVulkan::queueIdx, 0);
 	}
 
-	void Ctx::CreateSurface()
+	void Ctx::CreateSurface(HWND pHWND)
 	{
 		VkSurfaceKHR surface;
 
@@ -646,13 +648,13 @@ namespace ImgnVulkan
 
 		//GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
 
-		HWND hwnd = static_cast<HWND>(_handle.window);
-		HINSTANCE* hInst = reinterpret_cast<HINSTANCE*>(GetWindowLongPtr(static_cast<HWND>(hwnd), GWLP_HINSTANCE));
+		//HWND hwnd = static_cast<HWND>(_handle.window);
+		HINSTANCE* hInst = reinterpret_cast<HINSTANCE*>(GetWindowLongPtr(static_cast<HWND>(pHWND), GWLP_HINSTANCE));
 
 		vk::Win32SurfaceCreateInfoKHR surfaceCreateInfo
 		{
 			.hinstance = *hInst ? *hInst : nullptr,
-			.hwnd = hwnd
+			.hwnd = pHWND
 		};
 
 		ImgnVulkan::surface = vk::raii::SurfaceKHR(ImgnVulkan::instance, surfaceCreateInfo);
@@ -712,15 +714,7 @@ namespace ImgnVulkan
 
 	void Ctx::CreateSwapchain()
 	{
-		vk::SurfaceCapabilitiesKHR surfaceCapabilities;
-		try
-		{
-			surfaceCapabilities = ImgnVulkan::physicalDevice.getSurfaceCapabilitiesKHR(*ImgnVulkan::surface);
-		}
-		catch (const vk::SurfaceLostKHRError&)
-		{
-			CreateSurface();
-		}
+		vk::SurfaceCapabilitiesKHR surfaceCapabilities = ImgnVulkan::physicalDevice.getSurfaceCapabilitiesKHR(*ImgnVulkan::surface);
 
 		//vk::SurfaceCapabilitiesKHR surfaceCapabilities = ImgnVulkan::physicalDevice.getSurfaceCapabilitiesKHR(*ImgnVulkan::surface);
 		ImgnVulkan::swapchainExtent = ChooseSwapExtent(surfaceCapabilities);
@@ -890,6 +884,7 @@ namespace ImgnVulkan
 
 	void Ctx::CreateDepthResources()
 	{
+		_graph.AddResource("Depth", FindDepthFormat(), { ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
 		//vk::Format depthFormat = FindDepthFormat();
 
 		//CreateImage(ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height, depthFormat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, _depth);
@@ -1001,7 +996,7 @@ namespace ImgnVulkan
 		//}
 	}
 
-	void Ctx::CreateTextureSampler()
+	void Ctx::CreateDefaultSampler()
 	{
 		vk::PhysicalDeviceProperties properties = ImgnVulkan::physicalDevice.getProperties();
 
@@ -1029,19 +1024,88 @@ namespace ImgnVulkan
 
 	void Ctx::CreateGraphicsPipelines()
 	{
-		vk::PipelineLayoutCreateInfo pipelineLayoutInfo
+		vk::GraphicsPipelineCreateInfo pipelineInfo;
+
+		vk::raii::ShaderModule vertexSM = CreateShaderModule(GetSPV(Shaders::TriangleVertexShader, VertexTarget));
+		vk::raii::ShaderModule fragmentSM = CreateShaderModule(GetSPV(Shaders::TriangleFragmentShader, FragmentTarget));
+
+		vk::PipelineShaderStageCreateInfo vertShaderStageInfo
 		{
-			.setLayoutCount = 1,
-			.pSetLayouts = &*ImgnVulkan::descriptorSetLayout,
-			.pushConstantRangeCount = 0
+			.stage = vk::ShaderStageFlagBits::eVertex,
+			.module = vertexSM,
+			.pName = "main"
 		};
 
-		_pipelines.pipelineLayout = vk::raii::PipelineLayout(ImgnVulkan::device, pipelineLayoutInfo);
+		vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+		{
+			.stage = vk::ShaderStageFlagBits::eFragment,
+			.module = fragmentSM,
+			.pName = "main"
+		};
+
+		std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
+
+		auto bindingDesc = Vertex::GetBindingDescription();
+		auto attributeDesc = Vertex::GetAttributeDescriptions();
+
+		vk::PipelineVertexInputStateCreateInfo vertexInputInfo
+		{
+			.vertexBindingDescriptionCount = 1,
+			.pVertexBindingDescriptions = &bindingDesc,
+			.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size()),
+			.pVertexAttributeDescriptions = attributeDesc.data()
+		};
+
+		vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+		{
+			.topology = vk::PrimitiveTopology::eTriangleList
+		};
+
+		vk::PipelineViewportStateCreateInfo viewportState
+		{
+			.viewportCount = 1,
+			.scissorCount = 1
+		};
+
+		vk::PipelineRasterizationStateCreateInfo rasterizer
+		{
+			.depthClampEnable = vk::False,
+			.rasterizerDiscardEnable = vk::False,
+			.polygonMode = vk::PolygonMode::eFill,
+			.cullMode = vk::CullModeFlagBits::eBack,
+			.frontFace = vk::FrontFace::eClockwise,
+			.depthBiasEnable = vk::False,
+			.depthBiasSlopeFactor = 1.0f,
+			.lineWidth = 1.0f
+		};
+
+		vk::PipelineMultisampleStateCreateInfo multisampling
+		{
+			.rasterizationSamples = vk::SampleCountFlagBits::e1,
+			.sampleShadingEnable = vk::False
+		};
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil
+		{
+			.depthTestEnable = vk::True,
+			.depthWriteEnable = vk::True,
+			.depthCompareOp = vk::CompareOp::eLess,
+			.depthBoundsTestEnable = vk::False,
+			.stencilTestEnable = vk::False
+		};
 
 		vk::PipelineColorBlendAttachmentState colorBlendAttachment
 		{
 			.blendEnable = vk::False,
 			.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+		};
+
+		vk::PipelineColorBlendStateCreateInfo colorBlending
+		{
+			.logicOpEnable = vk::False,
+			.logicOp = vk::LogicOp::eCopy,
+			.attachmentCount = 1,
+			.pAttachments = &colorBlendAttachment
 		};
 
 		std::vector dynamicStates =
@@ -1056,7 +1120,48 @@ namespace ImgnVulkan
 			.pDynamicStates = dynamicStates.data()
 		};
 
-		vk::GraphicsPipelineCreateInfo pipelineInfo;
+		vk::PipelineLayoutCreateInfo pipelineLayoutInfo
+		{
+			.setLayoutCount = 1,
+			.pSetLayouts = &*ImgnVulkan::descriptorSetLayout,
+			.pushConstantRangeCount = 0
+		};
+
+		ImgnVulkan::pipelines.pipelineLayout = vk::raii::PipelineLayout(ImgnVulkan::device, pipelineLayoutInfo);
+
+		vk::Format depthFormat = FindDepthFormat();
+
+		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
+		{
+			.colorAttachmentCount = 1,
+			.pColorAttachmentFormats = &ImgnVulkan::swapchainSurfaceFormat.format,
+			.depthAttachmentFormat = depthFormat
+		};
+
+		pipelineInfo.pNext = &pipelineRenderingCreateInfo;
+		pipelineInfo.stageCount = 2;
+		pipelineInfo.pStages = shaderStages.data();
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pInputAssemblyState = &inputAssembly;
+		pipelineInfo.pViewportState = &viewportState;
+		pipelineInfo.pRasterizationState = &rasterizer;
+		pipelineInfo.pMultisampleState = &multisampling;
+		pipelineInfo.pDepthStencilState = &depthStencil;
+		pipelineInfo.pColorBlendState = &colorBlending;
+		pipelineInfo.pDynamicState = &dynamicState;
+		pipelineInfo.layout = ImgnVulkan::pipelines.pipelineLayout;
+		pipelineInfo.renderPass = nullptr;
+
+		ImgnVulkan::pipelines.generalPipeline = vk::raii::Pipeline(ImgnVulkan::device, nullptr, pipelineInfo);
+
+		//vk::PipelineLayoutCreateInfo pipelineLayoutInfo
+		//{
+		//	.setLayoutCount = 1,
+		//	.pSetLayouts = &*ImgnVulkan::descriptorSetLayout,
+		//	.pushConstantRangeCount = 0
+		//};
+
+		//_pipelines.pipelineLayout = vk::raii::PipelineLayout(ImgnVulkan::device, pipelineLayoutInfo);
 
 		/* GBuffer*/
 		{
@@ -1079,8 +1184,8 @@ namespace ImgnVulkan
 
 			std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
-			auto bindingDesc = Vertex::GetBindingDescription();
-			auto attributeDesc = Vertex::GetAttributeDescriptions();
+			auto bindingDesc = ImgnVulkan::Vertex::GetBindingDescription();
+			auto attributeDesc = ImgnVulkan::Vertex::GetAttributeDescriptions();
 
 			vk::PipelineVertexInputStateCreateInfo vertexInputInfo
 			{
@@ -1090,7 +1195,7 @@ namespace ImgnVulkan
 				.pVertexAttributeDescriptions = attributeDesc.data()
 			};
 
-			vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+		/*	vk::PipelineInputAssemblyStateCreateInfo inputAssembly
 			{
 				.topology = vk::PrimitiveTopology::eTriangleList
 			};
@@ -1111,22 +1216,22 @@ namespace ImgnVulkan
 				.depthBiasEnable = vk::False,
 				.depthBiasSlopeFactor = 1.0f,
 				.lineWidth = 1.0f
-			};
+			};*/
 
-			vk::PipelineMultisampleStateCreateInfo multisampling
-			{
-				.rasterizationSamples = vk::SampleCountFlagBits::e1,
-				.sampleShadingEnable = vk::False
-			};
+			//vk::PipelineMultisampleStateCreateInfo multisampling
+			//{
+			//	.rasterizationSamples = vk::SampleCountFlagBits::e1,
+			//	.sampleShadingEnable = vk::False
+			//};
 
-			vk::PipelineDepthStencilStateCreateInfo depthStencil
-			{
-				.depthTestEnable = vk::False,
-				.depthWriteEnable = vk::False,
-				.depthCompareOp = vk::CompareOp::eLess,
-				.depthBoundsTestEnable = vk::False,
-				.stencilTestEnable = vk::False
-			};
+			//vk::PipelineDepthStencilStateCreateInfo depthStencil
+			//{
+			//	.depthTestEnable = vk::False,
+			//	.depthWriteEnable = vk::False,
+			//	.depthCompareOp = vk::CompareOp::eLess,
+			//	.depthBoundsTestEnable = vk::False,
+			//	.stencilTestEnable = vk::False
+			//};
 
 			std::array blendStates = { colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
 
@@ -1138,8 +1243,6 @@ namespace ImgnVulkan
 				.pAttachments = blendStates.data()
 			};
 
-			vk::Format depthFormat = FindDepthFormat();
-
 			std::array colorAttachmentFormats = { vk::Format::eR16G16B16A16Sfloat, vk::Format::eR16G16B16A16Sfloat, vk::Format::eR8G8B8A8Unorm };
 
 			vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -1149,26 +1252,13 @@ namespace ImgnVulkan
 				.depthAttachmentFormat = depthFormat
 			};
 
-			vk::GraphicsPipelineCreateInfo gBufferPipelineInfo
-			{
-				.pNext = &pipelineRenderingCreateInfo,
-				.stageCount = 2,
-				.pStages = shaderStages.data(),
-				.pVertexInputState = &vertexInputInfo,
-				.pInputAssemblyState = &inputAssembly,
-				.pViewportState = &viewportState,
-				.pRasterizationState = &rasterizer,
-				.pMultisampleState = &multisampling,
-				.pDepthStencilState = &depthStencil,
-				.pColorBlendState = &colorBlending,
-				.pDynamicState = &dynamicState,
-				.layout = _pipelines.pipelineLayout,
-				.renderPass = nullptr
-			};
+			pipelineInfo.pNext = &pipelineRenderingCreateInfo;
+			pipelineInfo.pVertexInputState = &vertexInputInfo;
+			pipelineInfo.pColorBlendState = &colorBlending;
 
-			_pipelines.gBufferPipeline = vk::raii::Pipeline(ImgnVulkan::device, nullptr, gBufferPipelineInfo);
+			ImgnVulkan::pipelines.gBufferPipeline = vk::raii::Pipeline(ImgnVulkan::device, nullptr, pipelineInfo);
 
-			pipelineInfo = gBufferPipelineInfo;
+			//pipelineInfo = gBufferPipelineInfo;
 		}
 
 		/* Lighting */
@@ -1221,7 +1311,7 @@ namespace ImgnVulkan
 			};
 
 			std::array colorAttachment = { vk::Format::eR8G8B8A8Unorm };
-			vk::Format depthFormat = vk::Format::eD32Sfloat;
+			//vk::Format depthFormat = FindDepthFormat();
 
 			vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
 			{
@@ -1236,7 +1326,7 @@ namespace ImgnVulkan
 			pipelineInfo.pRasterizationState = &rasterizer;
 			pipelineInfo.pColorBlendState = &colorBlending;
 
-			_pipelines.lightingPipeline = vk::raii::Pipeline(ImgnVulkan::device, nullptr, pipelineInfo);
+			ImgnVulkan::pipelines.lightingPipeline = vk::raii::Pipeline(ImgnVulkan::device, nullptr, pipelineInfo);
 		}
 	}
 
@@ -1277,8 +1367,8 @@ namespace ImgnVulkan
 		ImgnVulkan::descriptorSetLayout = vk::raii::DescriptorSetLayout(ImgnVulkan::device, layoutInfo);
 	}
 
-	void Ctx::UpdateCamera()
-	{
+	/*void Ctx::UpdateCamera()
+	{*/
 		//bool focused;
 		//_gWin->IsFocus(focused);
 
@@ -1395,142 +1485,56 @@ namespace ImgnVulkan
 		//	ubo->memory.unmapMemory();
 		//}
 
-	}
+	//}
 
 	void Ctx::SetupDeferredRenderer()
 	{
-		uint32_t width = ImgnVulkan::swapchainExtent.width, height = ImgnVulkan::swapchainExtent.height;
+		//uint32_t width = ImgnVulkan::swapchainExtent.width, height = ImgnVulkan::swapchainExtent.height;
 
-		_sponza = _manager.Load<Mesh>("Sponza");
+		////_sponza = _manager.Load<Mesh>("Sponza");
 
-		_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-		_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-		_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
-		_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
-		_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
+		//_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+		//_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+		//_graph.AddResource("GBuffer-Albedo", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+		////_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
+		//_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
 
-		GBufferUBO gBufferUBO
-		{
-			.world = GW::MATH::GIdentityMatrixF,
-			.view = GW::MATH::GIdentityMatrixF,
-			.proj = GW::MATH::GIdentityMatrixF,
-		};
+		//GBufferUBO gBufferUBO
+		//{
+		//	.world = GW::MATH::GIdentityMatrixF,
+		//	.view = GW::MATH::GIdentityMatrixF,
+		//	.proj = GW::MATH::GIdentityMatrixF,
+		//};
 
-		GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, 1.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
-		GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 100.f, gBufferUBO.proj);
+		//GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, 1.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
+		//GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 100.f, gBufferUBO.proj);
 
-		_graph.AddResource("GBuffer-UBO", sizeof(GBufferUBO), vk::BufferUsageFlagBits::eUniformBuffer, &gBufferUBO);
+		//_graph.AddResource("GBuffer-UBO", sizeof(GBufferUBO), vk::BufferUsageFlagBits::eUniformBuffer, &gBufferUBO);
 
-		RenderPass gBufferPass
-		{
-			.name = "GeometryPass",
-			.inputs = {},
-			.outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
-			.bufferInputs = {"GBuffer-UBO"},
-			.descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
-			.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
-			{
-				auto ubo = _graph.GetBufferResource("GBuffer-UBO");
-				UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
-
-				std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
-				vk::RenderingAttachmentInfoKHR depthAttachment;
-				vk::RenderingInfoKHR renderingInfo;
-
-				colorAttachments[0].setImageView(_graph.GetImageResource("GBuffer-Position")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
-				colorAttachments[1].setImageView(_graph.GetImageResource("GBuffer-Normal")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
-				colorAttachments[2].setImageView(_graph.GetImageResource("GBuffer-Albedo")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
-
-				depthAttachment.setImageView(_graph.GetImageResource("Depth")->view).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
-
-				renderingInfo.setRenderArea({ {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
-
-				commandBuffer.beginRendering(renderingInfo);
-
-				commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
-				commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(ImgnVulkan::swapchainExtent.width), static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.0f, 1.0f));
-				commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
-
-
-				commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer)], nullptr);
-				commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
-				commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
-
-				commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
-
-				commandBuffer.endRendering();
-			}
-		};
-
-		RenderPass lightingPass
-		{
-			.name = "LightingPass",
-			.inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
-			.outputs = {"FinalColor"},
-			.descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
-			.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
-			{
-				vk::RenderingAttachmentInfo colorAttachment
-				{
-					.imageView = _graph.GetImageResource("FinalColor")->view,
-					.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-					.loadOp = vk::AttachmentLoadOp::eClear,
-					.storeOp = vk::AttachmentStoreOp::eStore,
-					.clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
-				};
-
-				vk::RenderingInfoKHR renderingInfo
-				{
-					.renderArea = { {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} },
-					.layerCount = 1,
-					.colorAttachmentCount = 1,
-					.pColorAttachments = &colorAttachment,
-				};
-
-				std::vector<vk::ImageView> imageViews =
-				{
-					_graph.GetImageResource("GBuffer-Position")->view,
-					_graph.GetImageResource("GBuffer-Normal")->view,
-					_graph.GetImageResource("GBuffer-Albedo")->view,
-					_graph.GetImageResource("Depth")->view,
-				};
-				UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
-
-				commandBuffer.beginRendering(renderingInfo);
-
-				commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
-				commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(ImgnVulkan::swapchainExtent.width), static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.0f, 1.0f));
-				commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
-
-
-				commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::Lighting)], nullptr);
-				//commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
-				//commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
-
-				commandBuffer.draw(3, 1, 0, 0);
-
-				commandBuffer.endRendering();
-			}
-		};
-
-		_graph.AddPass(gBufferPass);
-		_graph.AddPass(lightingPass);
-
-		//_graph.AddPass("GeometryPass", {}, { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, [&](vk::raii::CommandBuffer& commandBuffer)
+		//RenderPass gBufferPass
+		//{
+		//	.name = "GeometryPass",
+		//	.inputs = {},
+		//	.outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		//	.bufferInputs = {"GBuffer-UBO"},
+		//	.descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
+		//	.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		//	{
+		//		auto ubo = _graph.GetBufferResource("GBuffer-UBO");
+		//		UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
+
 		//		std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
 		//		vk::RenderingAttachmentInfoKHR depthAttachment;
 		//		vk::RenderingInfoKHR renderingInfo;
 
-		//		colorAttachments[0].setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-		//		colorAttachments[1].setImageView(_gBufferImages[1].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
-		//		colorAttachments[2].setImageView(_gBufferImages[2].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+		//		colorAttachments[0].setImageView(_graph.GetImageResource("GBuffer-Position")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+		//		colorAttachments[1].setImageView(_graph.GetImageResource("GBuffer-Normal")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+		//		colorAttachments[2].setImageView(_graph.GetImageResource("GBuffer-Albedo")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
 
-		//		depthAttachment.setImageView(_depth.imageView).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
+		//		depthAttachment.setImageView(_graph.GetImageResource("Depth")->view).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
 
 		//		renderingInfo.setRenderArea({ {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
-		//		commandBuffer.begin({});
 		//		commandBuffer.beginRendering(renderingInfo);
 
 		//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
@@ -1539,58 +1543,88 @@ namespace ImgnVulkan
 
 
 		//		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer)], nullptr);
-		//		commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), { 0 });
+		//		commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
 		//		commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
 		//		commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
 
 		//		commandBuffer.endRendering();
-		//		commandBuffer.end();
-		//	});
+		//	}
+		//};
 
-		//_graph.AddPass("LightingPass", { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" }, {"FinalColor"}, [&](vk::raii::CommandBuffer& commandBuffer)
+		//RenderPass lightingPass
+		//{
+		//	.name = "LightingPass",
+		//	.inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		//	.outputs = {"FinalColor"},
+		//	.descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
+		//	.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		//	{
-		//		vk::RenderingAttachmentInfo colorAttachment;
-		//		vk::RenderingInfoKHR renderingInfo;
+		//		vk::RenderingAttachmentInfo colorAttachment
+		//		{
+		//			.imageView = _graph.GetImageResource("FinalColor")->view,
+		//			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+		//			.loadOp = vk::AttachmentLoadOp::eClear,
+		//			.storeOp = vk::AttachmentStoreOp::eStore,
+		//			.clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
+		//		};
 
-		//		colorAttachment.setImageView(_gBufferImages[0].imageView).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore);
+		//		vk::RenderingInfoKHR renderingInfo
+		//		{
+		//			.renderArea = { {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} },
+		//			.layerCount = 1,
+		//			.colorAttachmentCount = 1,
+		//			.pColorAttachments = &colorAttachment,
+		//		};
 
-		//		renderingInfo.setRenderArea({ {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} }).setLayerCount(1).setColorAttachmentCount(1).setPColorAttachments(&colorAttachment);
+		//		std::vector<vk::ImageView> imageViews =
+		//		{
+		//			_graph.GetImageResource("GBuffer-Position")->view,
+		//			_graph.GetImageResource("GBuffer-Normal")->view,
+		//			_graph.GetImageResource("GBuffer-Albedo")->view,
+		//			_graph.GetImageResource("Depth")->view,
+		//		};
+		//		UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
 
 		//		commandBuffer.beginRendering(renderingInfo);
 
-		//		//commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
-		//		//commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f));
-		//		//commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
+		//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
+		//		commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(ImgnVulkan::swapchainExtent.width), static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.0f, 1.0f));
+		//		commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
 
-		//		//commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelineLayout, 0, *ImgnVulkan::descriptorSets[ImgnVulkan::frameIdx], nullptr);
-		//		//commandBuffer.bindVertexBuffers(0, sponza->GetVertexBuffer(), {0});
-		//		//commandBuffer.bindIndexBuffer(sponza->GetIndexBuffer(), 0, vk::IndexType::eUint16);
 
-		//		//commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+		//		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::Lighting)], nullptr);
+		//		//commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
+		//		//commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+
+		//		commandBuffer.draw(3, 1, 0, 0);
 
 		//		commandBuffer.endRendering();
-		//	});
-
-		_graph.Compile();
-	}
-
-	void Ctx::UpdateUniformBuffer(uint32_t pCurrImage)
-	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-		//UniformBufferObject ubo
-		//{
-		//	.model = RotateG(Identity<float>(), time * Radians(90.f), vec3<float>{ 0, 0, 1 }),
-		//	.view = LookAtL(vec4<float>{2.f, 2.f, 2.f}, vec4<float>{0.f, 0.f, 0.f}, vec4<float>{0.f, 0.f, 1.f}),
-		//	.proj = Projection<float>(Radians(45.f), static_cast<float>(ImgnVulkan::swapchainExtent.width) / static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.1, 10.f)
+		//	}
 		//};
 
-		//memcpy(_uniformsBuffersMapped[pCurrImage], &ubo, sizeof(UniformBufferObject));
+		//_graph.AddPass(gBufferPass);
+		//_graph.AddPass(lightingPass);
+
+		//_graph.Compile();
 	}
+
+	//void Ctx::UpdateUniformBuffer(uint32_t pCurrImage)
+	//{
+	//	static auto startTime = std::chrono::high_resolution_clock::now();
+
+	//	auto currentTime = std::chrono::high_resolution_clock::now();
+	//	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+	//	//UniformBufferObject ubo
+	//	//{
+	//	//	.model = RotateG(Identity<float>(), time * Radians(90.f), vec3<float>{ 0, 0, 1 }),
+	//	//	.view = LookAtL(vec4<float>{2.f, 2.f, 2.f}, vec4<float>{0.f, 0.f, 0.f}, vec4<float>{0.f, 0.f, 1.f}),
+	//	//	.proj = Projection<float>(Radians(45.f), static_cast<float>(ImgnVulkan::swapchainExtent.width) / static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.1, 10.f)
+	//	//};
+
+	//	//memcpy(_uniformsBuffersMapped[pCurrImage], &ubo, sizeof(UniformBufferObject));
+	//}
 
 	vk::raii::ImageView Ctx::CreateImageView(vk::Image& pImage, vk::Format pFormat, vk::ImageAspectFlags pAspectFlags)
 	{
@@ -1794,13 +1828,13 @@ namespace ImgnVulkan
 		ImgnVulkan::device.updateDescriptorSets(writes, {});
 	}
 
-	void Ctx::Cleanup()
-	{
-		CleanupSwapchain();
-	}
+	//void Ctx::Cleanup()
+	//{
+	//	CleanupSwapchain();
+	//}
 
-	void Ctx::InitVulkan(ImgnWindow* pWindow)
-	{
+	//void Ctx::InitVulkanCtx(ImgnWindow* pWindow)
+	//{
 		/*_win = pWindow;
 
 		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&ImgnVulkan::compiler));
@@ -1834,55 +1868,56 @@ namespace ImgnVulkan
 		SetupDeferredRenderer();
 
 		_gui.Init(*pWindow, pWindow->width, pWindow->height);*/
-	}
+	//}
 
-	void Ctx::InitVulkan(GWindow* pWindow)
+	void Ctx::InitVulkanCtx(HWND pHWND, uint32_t pWidth, uint32_t pHeight)
 	{
-		_gWin = pWindow;
-		_gWin->GetClientWidth(_gWinW);
-		_gWin->GetClientHeight(_gWinH);
-		_gWin->GetWindowHandle(_handle);
-		_gInput.Create(*_gWin);
+		_width = pWidth; _height = pHeight;
+		//_gWin = pWindow;
+		//_gWin->GetClientWidth(_gWinW);
+		//_gWin->GetClientHeight(_gWinH);
+		//_gWin->GetWindowHandle(_handle);
+		//_gInput.Create(*_gWin);
 
-		_responder.Create([&](const GEvent& e)
-			{
-				GWindow::Events event;
-				GWindow::EVENT_DATA data;
+		//_responder.Create([&](const GEvent& e)
+		//	{
+		//		GWindow::Events event;
+		//		GWindow::EVENT_DATA data;
 
-				if (+e.Read(event, data))
-				{
-					switch (event)
-					{
-					case GWindow::Events::RESIZE:
-						{
-							WindowResizedEvent wre(data.clientWidth, data.clientHeight);
-							EventDispatcher dispatcher(wre);
-							dispatcher.Dispatch<WindowResizedEvent>([&](WindowResizedEvent& e)
-								{
-									RecreateSwapchain();
+		//		if (+e.Read(event, data))
+		//		{
+		//			switch (event)
+		//			{
+		//			case GWindow::Events::RESIZE:
+		//				{
+		//					WindowResizedEvent wre(data.clientWidth, data.clientHeight);
+		//					EventDispatcher dispatcher(wre);
+		//					dispatcher.Dispatch<WindowResizedEvent>([&](WindowResizedEvent& e)
+		//						{
+		//							RecreateSwapchain();
 
-									return true;
-								});
-						}
-						break;
-					case GWindow::Events::DISPLAY_CLOSED:
-						{
-							WindowClosedEvent wce;
-							EventDispatcher dispatcher(wce);
-							dispatcher.Dispatch<WindowClosedEvent>([&](WindowClosedEvent& e)
-								{
-									ImgnVulkan::device.waitIdle();
+		//							return true;
+		//						});
+		//				}
+		//				break;
+		//			case GWindow::Events::DISPLAY_CLOSED:
+		//				{
+		//					WindowClosedEvent wce;
+		//					EventDispatcher dispatcher(wce);
+		//					dispatcher.Dispatch<WindowClosedEvent>([&](WindowClosedEvent& e)
+		//						{
+		//							ImgnVulkan::device.waitIdle();
 
-									return true;
-								});
+		//							return true;
+		//						});
 
-						}
-						break;
-					}
-				}
-			});
+		//				}
+		//				break;
+		//			}
+		//		}
+		//	});
 
-		_gWin->Register(_responder);
+		//_gWin->Register(_responder);
 
 
 		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&ImgnVulkan::compiler));
@@ -1891,7 +1926,7 @@ namespace ImgnVulkan
 
 		CreateInstance();
 		SetupDebugMessenger();
-		CreateSurface();
+		CreateSurface(pHWND);
 		PickPhysicalDevice();
 		CreateDevice();
 		CreateSwapchain();
@@ -1902,7 +1937,7 @@ namespace ImgnVulkan
 		CreateDepthResources();
 		CreateTextureImage();
 		CreateTextureImageView();
-		CreateTextureSampler();
+		CreateDefaultSampler();
 		CreateVertexBuffer();
 		CreateIndexBuffer();
 		CreateUniformBuffers();
@@ -1913,31 +1948,56 @@ namespace ImgnVulkan
 
 		SetupDeferredRenderer();
 
-		GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
-		_gWin->GetWindowHandle(handle);
+		//GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE handle;
+		//_gWin->GetWindowHandle(handle);
 
 		//_gWin->Register()
 
 
-		_gui.Init(static_cast<HWND>(handle.window), _gWinW, _gWinH);
-		//ImgnInput input(*_gWin);
-		_input = new ImgnInput(*_gWin);
-		uint32_t o;
-		_input->bufferedInput.Observers(o);
+		//_gui.Init(static_cast<HWND>(handle.window), _gWinW, _gWinH);
+		////ImgnInput input(*_gWin);
+		//_input = new ImgnInput(*_gWin);
+		//uint32_t o;
+		//_input->bufferedInput.Observers(o);
 
-		_gui.SetInput(&_input->bufferedInput);
+		//_gui.SetInput(&_input->bufferedInput);
 
-		_input->bufferedInput.Observers(o);
+		//_input->bufferedInput.Observers(o);
+	}
+
+	void Ctx::UploadMesh(const Vertex* pVertices, uint64_t pVertexCount)
+	{
+		_graph.AddResource("VertexBuffer", sizeof(Vertex) * pVertexCount, vk::BufferUsageFlagBits::eVertexBuffer, pVertices);
+	}
+
+	void Ctx::UploadIndices(const uint32_t * pIndices, uint64_t pIndexCount)
+	{
+		_graph.AddResource("IndexBuffer", sizeof(uint32_t) * pIndexCount, vk::BufferUsageFlagBits::eIndexBuffer, pIndices);
+	}
+
+	void Ctx::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
+	{
+		_graph.AddResource(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
+	}
+
+	void Ctx::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
+	{
+		_graph.AddResource(pName, pSize, pUsage, pData);
+	}
+
+	void Ctx::CompileGraph()
+	{
+		_graph.Compile();
 	}
 
 	void Ctx::DrawFrame()
 	{
-		auto fenceResult = ImgnVulkan::device.waitForFences(*_inFlightFences[ImgnVulkan::frameIdx], vk::True, UINT64_MAX);
+		auto fenceResult = ImgnVulkan::device.waitForFences(*ImgnVulkan::inFlightFences[ImgnVulkan::frameIdx], vk::True, UINT64_MAX);
 		if (fenceResult != vk::Result::eSuccess) throw std::runtime_error("failed to wait for fence!");
 
-		ImgnVulkan::device.resetFences(*_inFlightFences[ImgnVulkan::frameIdx]);
+		ImgnVulkan::device.resetFences(*ImgnVulkan::inFlightFences[ImgnVulkan::frameIdx]);
 
-		auto [result, imageIndex] = ImgnVulkan::swapchain.acquireNextImage(UINT64_MAX, *_presentCompleteSemaphores[ImgnVulkan::frameIdx], nullptr);
+		auto [result, imageIndex] = ImgnVulkan::swapchain.acquireNextImage(UINT64_MAX, *ImgnVulkan::presentCompleteSemaphores[ImgnVulkan::frameIdx], nullptr);
 
 		if (result == vk::Result::eErrorOutOfDateKHR)
 		{
@@ -1953,7 +2013,7 @@ namespace ImgnVulkan
 		ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx].begin({});
 
 
-		_graph.Execute(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx], *Ctx::queue);
+		_graph.Execute(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx], *ImgnVulkan::queue);
 
 		TransitionImageLayout(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx], ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
@@ -1981,14 +2041,14 @@ namespace ImgnVulkan
 			blit.dstOffsets[0] = blitOffset0;
 			blit.dstOffsets[1] = blitOffsetDst1;
 
-			auto finalColor = _graph.GetResource("FinalColor");
+			auto finalColor = _graph.GetImageResource("FinalColor");
 			ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx].blitImage(finalColor->image, vk::ImageLayout::eTransferSrcOptimal, ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
 
 			TransitionImageLayout(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx], ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR);
 		}
 
 		//ui
-		{
+	/*	{
 			vk::RenderingAttachmentInfo attachmentInfo
 			{
 				.imageView = ImgnVulkan::swapchainImageViews[ImgnVulkan::frameIdx],
@@ -2012,7 +2072,7 @@ namespace ImgnVulkan
 
 			_gui.renderingInfo = guiRenderingInfo;
 			_gui.DrawFrame(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx]);
-		}
+		}*/
 		//RecordCommandBuffer(imageIndex);
 		ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx].end();
 
@@ -2021,20 +2081,20 @@ namespace ImgnVulkan
 		const vk::SubmitInfo submitInfo
 		{
 			.waitSemaphoreCount = 1,
-			.pWaitSemaphores = &*_presentCompleteSemaphores[ImgnVulkan::frameIdx],
+			.pWaitSemaphores = &*ImgnVulkan::presentCompleteSemaphores[ImgnVulkan::frameIdx],
 			.pWaitDstStageMask = &waitDestinationStageMask,
 			.commandBufferCount = 1,
 			.pCommandBuffers = &*ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx],
 			.signalSemaphoreCount = 1,
-			.pSignalSemaphores = &*_renderFinishedSemaphores[imageIndex]
+			.pSignalSemaphores = &*ImgnVulkan::renderFinishedSemaphores[imageIndex]
 		};
 
-		ImgnVulkan::queue.submit(submitInfo, *_inFlightFences[ImgnVulkan::frameIdx]);
+		ImgnVulkan::queue.submit(submitInfo, *ImgnVulkan::inFlightFences[ImgnVulkan::frameIdx]);
 
 		const vk::PresentInfoKHR presentInfoKHR
 		{
 			.waitSemaphoreCount = 1,
-			.pWaitSemaphores = &*_renderFinishedSemaphores[imageIndex],
+			.pWaitSemaphores = &*ImgnVulkan::renderFinishedSemaphores[imageIndex],
 			.swapchainCount = 1,
 			.pSwapchains = &*ImgnVulkan::swapchain,
 			.pImageIndices = &imageIndex
@@ -2044,17 +2104,17 @@ namespace ImgnVulkan
 
 		try
 		{
-			result = Ctx::queue.presentKHR(presentInfoKHR);
+			result = ImgnVulkan::queue.presentKHR(presentInfoKHR);
 
-			if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || _framebufferResized)
+			if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)// || _framebufferResized)
 			{
-				_framebufferResized = false;
+				//_framebufferResized = false;
 				RecreateSwapchain();
 			}
 		}
 		catch (const vk::OutOfDateKHRError&)
 		{
-			_framebufferResized = false;
+			//_framebufferResized = false;
 			RecreateSwapchain();
 			return;
 		}

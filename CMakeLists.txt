@@ -12,6 +12,26 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 find_package(Vulkan REQUIRED)
 
+file(GLOB_RECURSE ImgnVulkanFiles CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.h ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.cpp)
+# file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.cpp)
+add_library(ImgnVulkan SHARED ${ImgnVulkanFiles}
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/main.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/framework.hpp
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.hpp 
+${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
+
+target_include_directories(ImgnVulkan PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan)
+target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
+
+target_compile_definitions(ImgnVulkan PUBLIC IMGN_VULKAN_BUILD_DLL IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
+
+target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
+
+target_precompile_headers(ImgnVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp)
+
+
 add_subdirectory(Imagination)
 add_subdirectory(Daydream)
 
@@ -52,18 +72,3 @@ add_subdirectory(Daydream)
 
 
 #DLL Renderbackends
-add_library(ImgnVulkan SHARED 
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/main.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/framework.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.hpp 
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
-
-target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
-
-target_compile_definitions(ImgnVulkan PUBLIC IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
-
-target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
-
-target_precompile_headers(ImgnVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp)

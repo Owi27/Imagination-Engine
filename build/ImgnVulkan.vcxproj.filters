@@ -4,24 +4,48 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\ImgnVulkan.dir\cmake_pch.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\CTX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.hpp">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\CTX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Structs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\framework.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\ImgnVulkan.dir\Debug\cmake_pch.hxx">

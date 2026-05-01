@@ -87,6 +87,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -109,16 +110,16 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Debug";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Debug";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"Debug\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"Debug\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -145,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -166,18 +168,18 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Release";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Release";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"Release\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"Release\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -204,6 +206,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -225,18 +228,18 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="MinSizeRel";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="MinSizeRel";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"MinSizeRel\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"MinSizeRel\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -263,6 +266,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -285,16 +289,16 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="RelWithDebInfo";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="RelWithDebInfo";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"RelWithDebInfo\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_VULKAN_BUILD_DLL;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR=\"RelWithDebInfo\";ImgnVulkan_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\GitHub\Imagination-Engine\DLL\ImgnVulkan;C:\VulkanSDK\1.4.335.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -399,27 +403,50 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/ImgnVulkan.dir/RelWithDebInfo//cmake_pch.pch</PrecompiledHeaderOutputFile>
       <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</ScanSourceForModuleDependencies>
     </ClCompile>
-    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\main.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\CTX.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.hpp" />
-    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.cpp">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\CTX.h" />
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Device.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
-    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\framework.hpp" />
-    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Device.h" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp" />
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Shaders.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\Structs.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\framework.hpp" />
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\main.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\pch.hpp" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\ImgnVulkan.dir\Debug\cmake_pch.hxx" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\ImgnVulkan.dir\Release\cmake_pch.hxx" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\CMakeFiles\ImgnVulkan.dir\MinSizeRel\cmake_pch.hxx" />

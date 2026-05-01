@@ -9,8 +9,8 @@
 // add headers that you want to pre-compile here
 #include "framework.hpp"
 
-#ifdef IMGN_VULKAN_PLATFORM_WINDOWS
-#define VK_USE_PLATFORM_WIN32_KHR //add an ifdef for platform
+#ifdef IMGN_VULKAN_PLATFORM_WINDOWS //add an ifdef for platform
+#define VK_USE_PLATFORM_WIN32_KHR 
 #ifdef IMGN_VULKAN_BUILD_DLL
 #define IMGN_VULKAN_API __declspec(dllexport)
 #else
@@ -25,6 +25,7 @@ import vulkan_hpp;
 #endif
 
 #include <vector>
+#include <array>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -32,5 +33,4 @@ import vulkan_hpp;
 #include <map>
 #include <cstdint>
 #include <limits>
-#include "CTX.h"
 #include "Structs.h"
