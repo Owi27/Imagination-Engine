@@ -8,7 +8,7 @@ struct TestComp : public ImgnComponent
 	}
 	void Dream(float pDeltaTime) override
 	{
-		IMGN_INFO("{} Test Comp Update", GetName());
+		//IMGN_INFO("{} Test Comp Update", GetName());
 	}
 
 	/* Class Functions */

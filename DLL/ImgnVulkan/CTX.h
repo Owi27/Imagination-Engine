@@ -3,6 +3,7 @@
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 using namespace Microsoft::WRL;
+#include "Structs.h"
 
 namespace ImgnVulkan
 {

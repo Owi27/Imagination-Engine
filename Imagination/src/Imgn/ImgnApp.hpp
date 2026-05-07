@@ -3,6 +3,7 @@
 #include "ImgnWindow.h"
 #include "Events/Event.h"
 #include "ImgnComponent.h"
+#include "ImgnGLTF.h"
 
 class IMGN_API ImgnApp
 {
@@ -18,6 +19,11 @@ public:
 		//if (!_instance) _instance.reset(new ImgnApp());
 
 		_window = std::make_unique<ImgnWindow>();
+
+		ImgnRenderer r;
+
+		ImgnGLTF gl;
+		gl.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", r);
 	}
 
 	~ImgnApp()

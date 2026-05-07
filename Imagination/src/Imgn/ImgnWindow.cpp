@@ -4,6 +4,7 @@
 void ImgnWindow::Dream()
 {
 	_window.ProcessWindowEvents();
+	_ctx->DrawFrame();
 }
 
 uint32_t ImgnWindow::GetWidth()
@@ -16,14 +17,4 @@ uint32_t ImgnWindow::GetHeight()
 {
 	_window.GetClientWidth(_height);
 	return _height;
-}
-
-uint32_t ImgnWindow::GetWidth() const
-{
-	return GetWidth();
-}
-
-uint32_t ImgnWindow::GetHeight() const
-{
-	return GetHeight();
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "ImgnVulkanAPI.h"
 
 namespace ImgnVulkan
 {
@@ -18,55 +19,40 @@ namespace ImgnVulkan
 		std::function<void(vk::raii::CommandBuffer&)> Execute;
 	};
 
+	struct IMGN_VULKAN_API ImageResource
+	{
+		std::string name;
+		vk::Format format;
+		vk::Extent2D extent;
+		vk::ImageUsageFlags usage;
+		vk::ImageLayout initLayout;
+		vk::ImageLayout currentLayout;
+		vk::ImageLayout finalLayout;
+		vk::ImageAspectFlags aspect;
+
+		// Actual GPU resources - populated during compilation
+		Image image;
+	};
+
+	struct IMGN_VULKAN_API BufferResource
+	{
+		std::string name;
+		vk::DeviceSize size;
+		vk::BufferUsageFlags usage;
+
+		// Tracking for automatic barriers
+		vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
+		vk::PipelineStageFlags2 currentStage = vk::PipelineStageFlagBits2::eTopOfPipe;
+
+		Buffer buffer;
+
+		// Optional: Keep track if this resource needs an initial data upload
+		bool requiresUpload = false;
+		const void* initialData = nullptr;
+	};
+
 	class IMGN_VULKAN_API RenderGraph
 	{
-		struct ImageResource
-		{
-			std::string name;
-			vk::Format format;
-			vk::Extent2D extent;
-			vk::ImageUsageFlags usage;
-			vk::ImageLayout initLayout;
-			vk::ImageLayout currentLayout;
-			vk::ImageLayout finalLayout;
-			vk::ImageAspectFlags aspect;
-
-			// Actual GPU resources - populated during compilation
-			vk::raii::Image image = nullptr;      // The GPU image object
-			vk::raii::DeviceMemory memory = nullptr;  // Backing memory allocation
-			vk::raii::ImageView view = nullptr;   // Shader-accessible view of the image
-		};
-
-		struct BufferResource
-		{
-			std::string name;
-			vk::DeviceSize size;
-			vk::BufferUsageFlags usage;
-
-			// Tracking for automatic barriers
-			vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
-			vk::PipelineStageFlags2 currentStage = vk::PipelineStageFlagBits2::eTopOfPipe;
-
-			vk::raii::Buffer buffer = nullptr;
-			vk::raii::DeviceMemory memory = nullptr;
-
-			// Optional: Keep track if this resource needs an initial data upload
-			bool requiresUpload = false;
-			const void* initialData = nullptr;
-		};
-
-		struct Pass
-		{
-			std::string name;
-			std::vector<std::string> inputs;
-			std::vector<std::string> outputs;
-
-			//vk::raii::Pipeline pipeline;
-			//vk::raii::PipelineLayout pipelineLayout;
-
-			std::function<void(vk::raii::CommandBuffer&)> Execute;
-		};
-
 		std::unordered_map<std::string, ImageResource> _resources;
 		std::unordered_map<std::string, BufferResource> _bufferResources;
 		//std::vector<Pass> _passes;

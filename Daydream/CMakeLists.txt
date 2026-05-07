@@ -8,7 +8,7 @@ add_executable(DAYDREAM ${DAYDREAM_HEADERS} ${DAYDREAM_SOURCES})
 target_precompile_headers(DAYDREAM PRIVATE ../Imagination/src/pch.hpp)
 target_include_directories(DAYDREAM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Imagination/src)
 
-target_link_libraries(DAYDREAM PUBLIC IMGN)
+target_link_libraries(DAYDREAM PRIVATE IMGN)
 
 target_compile_definitions(DAYDREAM PRIVATE IMGN_PLATFORM_WINDOWS)
 

@@ -227,11 +227,11 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 			{
 				Vertex v{};
 
-				// Position
+				//pos
 				const float* p = reinterpret_cast<const float*>(&posBuffer.data[posBufferView.byteOffset + posAccessor.byteOffset + (i * posStride)]);
 				v.pos = { p[0], p[1], p[2] };
 
-				// Normals
+				//nrm
 				if (nrmAcc)
 				{
 					const auto& view = model.bufferViews[nrmAcc->bufferView];
@@ -239,7 +239,7 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 					v.nrm = { n[0], n[1], n[2] };
 				}
 
-				// UVs
+				//uv
 				if (uvAcc)
 				{
 					const auto& view = model.bufferViews[uvAcc->bufferView];
@@ -247,6 +247,7 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 					v.uv0 = { u[0], u[1] };
 				}
 
+				//tan
 				if (tanAcc)
 				{
 					const auto& view = model.bufferViews[tanAcc->bufferView];

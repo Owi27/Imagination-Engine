@@ -97,7 +97,7 @@ namespace ImgnVulkan
 		commandBuffer.begin({});
 
 		TransitionImageLayout(ImgnVulkan::swapchainImages[pImageIdx], vk::ImageLayout::eUndefined, vk::ImageLayout::eColorAttachmentOptimal, {}, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::ImageAspectFlagBits::eColor);
-		TransitionImageLayout(_graph.GetImageResource("Depth")->image, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::ImageAspectFlagBits::eDepth);
+		TransitionImageLayout(_graph.GetImageResource("Depth")->image.image, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthAttachmentOptimal, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::AccessFlagBits2::eDepthStencilAttachmentWrite, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::ImageAspectFlagBits::eDepth);
 
 		vk::ClearValue clearColor = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
 		vk::ClearValue clearDepth = vk::ClearDepthStencilValue(1.f, 0);
@@ -113,7 +113,7 @@ namespace ImgnVulkan
 
 		vk::RenderingAttachmentInfo depthAttachmentInfo
 		{
-			.imageView = _graph.GetImageResource("Depth")->view,
+			.imageView = _graph.GetImageResource("Depth")->image.view,
 			.imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
 			.loadOp = vk::AttachmentLoadOp::eClear,
 			.storeOp = vk::AttachmentStoreOp::eDontCare,
@@ -1975,14 +1975,16 @@ namespace ImgnVulkan
 		_graph.AddResource("IndexBuffer", sizeof(uint32_t) * pIndexCount, vk::BufferUsageFlagBits::eIndexBuffer, pIndices);
 	}
 
-	void Ctx::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
+	Image& Ctx::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
 	{
 		_graph.AddResource(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
+		return _graph.GetImageResource(pName)->image;
 	}
 
-	void Ctx::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
+	Buffer& Ctx::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
 	{
 		_graph.AddResource(pName, pSize, pUsage, pData);
+		return _graph.GetBufferResource(pName)->buffer;
 	}
 
 	void Ctx::CompileGraph()
@@ -2042,7 +2044,7 @@ namespace ImgnVulkan
 			blit.dstOffsets[1] = blitOffsetDst1;
 
 			auto finalColor = _graph.GetImageResource("FinalColor");
-			ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx].blitImage(finalColor->image, vk::ImageLayout::eTransferSrcOptimal, ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
+			ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx].blitImage(finalColor->image.image, vk::ImageLayout::eTransferSrcOptimal, ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
 
 			TransitionImageLayout(ImgnVulkan::commandBuffers[ImgnVulkan::frameIdx], ImgnVulkan::swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR);
 		}

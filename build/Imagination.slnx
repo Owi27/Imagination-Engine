@@ -7,9 +7,12 @@
 		<BuildType Name="RelWithDebInfo"/>
 		<Platform Name="x64"/>
 	</Configurations>
-	<Project Path="Daydream/DAYDREAM.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="5a3c2d86-d9d2-3c0b-98e7-6acb945ae531" DefaultStartup="true">
+	<Project Path="Daydream/DAYDREAM.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="5a3c2d86-d9d2-3c0b-98e7-6acb945ae531">
 		<BuildDependency Project="Imagination/IMGN.vcxproj"/>
 		<BuildDependency Project="ImgnVulkan.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="Extract.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2a1ab54c-4756-369a-afb0-b50bc5fbb813" DefaultStartup="true">
 		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 	</Project>
 	<Project Path="Imagination/IMGN.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="d4c3ca30-a98c-357a-96c4-c3acfd0af936">
@@ -22,6 +25,7 @@
 	<Folder Name="/CMakePredefinedTargets/">
 		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="125f7eee-499d-3e89-8787-98da2016d14a">
 			<BuildDependency Project="Daydream/DAYDREAM.vcxproj"/>
+			<BuildDependency Project="Extract.vcxproj"/>
 			<BuildDependency Project="Imagination/IMGN.vcxproj"/>
 			<BuildDependency Project="ImgnVulkan.vcxproj"/>
 			<BuildDependency Project="ZERO_CHECK.vcxproj"/>

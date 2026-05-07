@@ -1,9 +1,7 @@
 #pragma once
-#include <wrl/client.h>
-#include <dxcapi.h>
-#pragma comment(lib, "dxcompiler.lib")
-using namespace Microsoft::WRL;
+#include "ImgnVulkanAPI.h"
 
+#include "Structs.h"
 #include "RenderGraph.h"
 
 namespace ImgnVulkan
@@ -128,9 +126,19 @@ namespace ImgnVulkan
 		void InitVulkanCtx(HWND pHWND, uint32_t pWidth, uint32_t pHeight);
 		void UploadMesh(const Vertex* pVertices, uint64_t pVertexCount);
 		void UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount);
-		void CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
-		void CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData);
+		Image& CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect);
+		Buffer& CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData);
 		void CompileGraph();
 		void DrawFrame();
+
+		ImageResource* GetImageResource(const std::string& pName)
+		{
+			return _graph.GetImageResource(pName);
+		}
+
+		BufferResource* GetBufferResource(const std::string& pName)
+		{
+			return _graph.GetBufferResource(pName);
+		}
 	};
 }

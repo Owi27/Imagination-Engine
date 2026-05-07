@@ -122,7 +122,7 @@ struct FOut
 FOut main(VOut input)
 {
     FOut output;
-    output.Position = float4(input.pos.rgb, 1.f);
+    output.Position = float4(normalize(input.pos.rgb), 1.f);
     output.Normal = float4(input.nrm, 1.f);
     output.Albedo = float4(0.f, 0.f, 1.f, 1.f);
 

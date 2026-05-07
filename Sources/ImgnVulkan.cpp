@@ -1427,8 +1427,8 @@ void ImgnVulkan::SetupDeferredRenderer()
 		.proj = GW::MATH::GIdentityMatrixF,
 	};
 
-	GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, 1.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
-	GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 100.f, gBufferUBO.proj);
+	GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, -10.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
+	GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 1000.f, gBufferUBO.proj);
 
 	_graph.AddResource("GBuffer-UBO", sizeof(GBufferUBO), vk::BufferUsageFlagBits::eUniformBuffer, &gBufferUBO);
 
@@ -1438,7 +1438,7 @@ void ImgnVulkan::SetupDeferredRenderer()
 		.inputs = {},
 		.outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
 		.bufferInputs = {"GBuffer-UBO"},
-		.descriptorSetLayout = _descriptorSetLayout,
+		//.descriptorSetLayout = _descriptorSetLayout,
 		.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		{
 			auto ubo = _graph.GetBufferResource("GBuffer-UBO");
@@ -1478,7 +1478,7 @@ void ImgnVulkan::SetupDeferredRenderer()
 		.name = "LightingPass",
 		.inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
 		.outputs = {"FinalColor"},
-		.descriptorSetLayout = _descriptorSetLayout,
+		//.descriptorSetLayout = _descriptorSetLayout,
 		.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		{
 			vk::RenderingAttachmentInfo colorAttachment

@@ -33,6 +33,9 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkanAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>

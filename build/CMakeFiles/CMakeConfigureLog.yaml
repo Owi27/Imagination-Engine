@@ -90,7 +90,7 @@ events:
       The output was:
       0
       MSBuild version 18.5.4+cb4e32d21 for .NET Framework
-      Build started 5/1/2026 4:38:50 PM.
+      Build started 5/5/2026 10:48:25 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.2.0\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -119,7 +119,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:04.07
+      Time Elapsed 00:00:00.35
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -1101,8 +1101,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0v9ghn"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0v9ghn"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-mgmzkf"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-mgmzkf"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -1112,39 +1112,39 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0v9ghn'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-mgmzkf'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_3265e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_d6284.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.5.4+cb4e32d21 for .NET Framework
-        Build started 5/1/2026 4:38:56 PM.
+        Build started 5/5/2026 10:48:25 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0v9ghn\\cmTC_3265e.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-mgmzkf\\cmTC_d6284.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0v9ghn\\Debug\\".
-          Creating directory "cmTC_3265e.dir\\Debug\\cmTC_3265e.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-mgmzkf\\Debug\\".
+          Creating directory "cmTC_d6284.dir\\Debug\\cmTC_d6284.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_3265e.dir\\Debug\\cmTC_3265e.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_3265e.dir\\Debug\\cmTC_3265e.tlog\\unsuccessfulbuild".
+          Creating "cmTC_d6284.dir\\Debug\\cmTC_d6284.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_d6284.dir\\Debug\\cmTC_d6284.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_3265e.dir\\Debug\\\\" /Fd"cmTC_3265e.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_d6284.dir\\Debug\\\\" /Fd"cmTC_d6284.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.50.35729 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_3265e.dir\\Debug\\\\" /Fd"cmTC_3265e.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_d6284.dir\\Debug\\\\" /Fd"cmTC_d6284.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0v9ghn\\Debug\\cmTC_3265e.exe" /INCREMENTAL /ILK:"cmTC_3265e.dir\\Debug\\cmTC_3265e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0v9ghn/Debug/cmTC_3265e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0v9ghn/Debug/cmTC_3265e.lib" /MACHINE:X64  /machine:x64 cmTC_3265e.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_3265e.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0v9ghn\\Debug\\cmTC_3265e.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-mgmzkf\\Debug\\cmTC_d6284.exe" /INCREMENTAL /ILK:"cmTC_d6284.dir\\Debug\\cmTC_d6284.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-mgmzkf/Debug/cmTC_d6284.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-mgmzkf/Debug/cmTC_d6284.lib" /MACHINE:X64  /machine:x64 cmTC_d6284.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_d6284.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-mgmzkf\\Debug\\cmTC_d6284.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_3265e.dir\\Debug\\cmTC_3265e.tlog\\unsuccessfulbuild".
-          Touching "cmTC_3265e.dir\\Debug\\cmTC_3265e.tlog\\cmTC_3265e.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0v9ghn\\cmTC_3265e.vcxproj" (default targets).
+          Deleting file "cmTC_d6284.dir\\Debug\\cmTC_d6284.tlog\\unsuccessfulbuild".
+          Touching "cmTC_d6284.dir\\Debug\\cmTC_d6284.tlog\\cmTC_d6284.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-mgmzkf\\cmTC_d6284.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:03.79
+        Time Elapsed 00:00:00.33
         
       exitCode: 0
   -
@@ -1634,6 +1634,10 @@ events:
         - "C:/Program Files (x86)"
         - "C:/Program Files/CMake"
         - "C:/Program Files (x86)/Imagination"
+...
+
+---
+events:
   -
     kind: "find-v1"
     backtrace:
@@ -1661,6 +1665,19 @@ events:
     found: "C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeCCompilerId.c.in"
     search_context:
       ENV{PATH}:
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x86"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\ide"
+        - "C:\\Program Files (x86)\\HTML Help Workshop"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
         - "C:\\VulkanSDK\\1.4.335.0\\Bin"
         - "C:\\VulkanSDK\\1.3.290.0\\Bin"
         - "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath"
@@ -1706,6 +1723,17 @@ events:
         - "C:/Program Files (x86)"
         - "C:/Program Files/CMake"
         - "C:/Program Files (x86)/Imagination"
+      ENV{INCLUDE}:
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\include"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\atlmfc\\include"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Auxiliary\\VS\\include"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Auxiliary\\VS\\UnitTest\\include"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\winrt"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\cppwinrt"
+        - "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8.1\\Include\\um"
   -
     kind: "message-v1"
     backtrace:
@@ -1722,7 +1750,7 @@ events:
       The output was:
       0
       MSBuild version 18.5.4+cb4e32d21 for .NET Framework
-      Build started 5/1/2026 4:39:01 PM.
+      Build started 5/6/2026 11:44:18 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.2.0\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -1751,7 +1779,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:04.41
+      Time Elapsed 00:00:00.47
       
       
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
@@ -1784,6 +1812,17 @@ events:
       - "lld-link"
     candidate_directories:
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/x64/"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/Tools/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/"
+      - "C:/Program Files (x86)/HTML Help Workshop/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/"
+      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
+      - "C:/Windows/Microsoft.NET/Framework/v4.0.30319/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/"
       - "C:/VulkanSDK/1.4.335.0/Bin/"
       - "C:/VulkanSDK/1.3.290.0/Bin/"
       - "C:/Program Files/Common Files/Oracle/Java/javapath/"
@@ -1834,6 +1873,39 @@ events:
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/lld-link.com"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/lld-link.exe"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/lld-link"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/x64/lld-link.com"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/x64/lld-link.exe"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/x64/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/lld-link"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/lld-link.com"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/lld-link.exe"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/Tools/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/Tools/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/Tools/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/lld-link"
+      - "C:/Program Files (x86)/HTML Help Workshop/lld-link.com"
+      - "C:/Program Files (x86)/HTML Help Workshop/lld-link.exe"
+      - "C:/Program Files (x86)/HTML Help Workshop/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/lld-link"
+      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link.com"
+      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link.exe"
+      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link"
+      - "C:/Windows/Microsoft.NET/Framework/v4.0.30319/lld-link.com"
+      - "C:/Windows/Microsoft.NET/Framework/v4.0.30319/lld-link.exe"
+      - "C:/Windows/Microsoft.NET/Framework/v4.0.30319/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/lld-link"
       - "C:/VulkanSDK/1.4.335.0/Bin/lld-link.com"
       - "C:/VulkanSDK/1.4.335.0/Bin/lld-link.exe"
       - "C:/VulkanSDK/1.4.335.0/Bin/lld-link"
@@ -1975,6 +2047,163 @@ events:
     found: false
     search_context:
       ENV{PATH}:
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x86"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\ide"
+        - "C:\\Program Files (x86)\\HTML Help Workshop"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
+        - "C:\\VulkanSDK\\1.4.335.0\\Bin"
+        - "C:\\VulkanSDK\\1.3.290.0\\Bin"
+        - "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\java8path"
+        - "C:\\Program Files (x86)\\Common Files\\Oracle\\Java\\javapath"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\NVIDIA Corporation\\NVIDIA app\\NvDLISR"
+        - "C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common"
+        - "C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\"
+        - "C:\\Program Files\\Git LFS"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\Program Files\\TortoiseGit\\bin"
+        - "C:\\WINDOWS\\system32"
+        - "C:\\WINDOWS"
+        - "C:\\WINDOWS\\System32\\Wbem"
+        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\WINDOWS\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\dotnet\\"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Perforce\\"
+        - "C:\\Program Files\\Microsoft SQL Server\\170\\Tools\\Binn\\"
+        - "D:\\Program Files (x86)\\IncrediBuild"
+        - "C:\\Program Files\\CMake\\bin"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
+        - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
+        - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
+        - "C:\\Users\\Owi\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Owi\\AppData\\Local\\GitHubDesktop\\bin"
+        - "C:\\Users\\Owi\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Owi\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Microsoft.NuGet_Microsoft.Winget.Source_8wekyb3d8bbwe"
+        - "C:\\Users\\Owi\\.dotnet\\tools"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/Imagination"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/CMake"
+        - "C:/Program Files (x86)/Imagination"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/CMake/share/cmake-4.2/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "Imagination/CMakeLists.txt:1 (project)"
+    mode: "program"
+    variable: "CMAKE_MT"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "mt"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/x64/"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/"
+      - "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.8.1 Tools/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/Tools/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/"
+      - "C:/Program Files (x86)/HTML Help Workshop/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/"
+      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
+      - "C:/Windows/Microsoft.NET/Framework/v4.0.30319/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/"
+      - "C:/VulkanSDK/1.4.335.0/Bin/"
+      - "C:/VulkanSDK/1.3.290.0/Bin/"
+      - "C:/Program Files/Common Files/Oracle/Java/javapath/"
+      - "C:/Program Files (x86)/Common Files/Oracle/Java/java8path/"
+      - "C:/Program Files (x86)/Common Files/Oracle/Java/javapath/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/NVIDIA Corporation/NVIDIA app/NvDLISR/"
+      - "C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common/"
+      - "C:/Program Files/Microsoft SQL Server/150/Tools/Binn/"
+      - "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/"
+      - "C:/Program Files/Git LFS/"
+      - "C:/Program Files/nodejs/"
+      - "C:/Program Files/TortoiseGit/bin/"
+      - "C:/Program Files/dotnet/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Perforce/"
+      - "C:/Program Files/Microsoft SQL Server/170/Tools/Binn/"
+      - "D:/Program Files (x86)/IncrediBuild/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
+      - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
+      - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
+      - "C:/Users/Owi/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Owi/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Owi/AppData/Local/GitHubDesktop/bin/"
+      - "C:/Users/Owi/AppData/Roaming/npm/"
+      - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Packages/Microsoft.NuGet_Microsoft.Winget.Source_8wekyb3d8bbwe/"
+      - "C:/Users/Owi/.dotnet/tools/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/CMake/bin/"
+      - "C:/Program Files/CMake/sbin/"
+      - "C:/Program Files/CMake/"
+      - "C:/Program Files (x86)/Imagination/bin/"
+      - "C:/Program Files (x86)/Imagination/sbin/"
+      - "C:/Program Files (x86)/Imagination/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/mt.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/mt.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/mt"
+      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/mt.com"
+    found: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/mt.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools\\x64"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x86"
+        - "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\tools"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\ide"
+        - "C:\\Program Files (x86)\\HTML Help Workshop"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin\\amd64"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
+        - "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\Bin"
+        - "C:\\WINDOWS\\Microsoft.NET\\Framework\\v4.0.30319\\"
         - "C:\\VulkanSDK\\1.4.335.0\\Bin"
         - "C:\\VulkanSDK\\1.3.290.0\\Bin"
         - "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath"
@@ -2029,8 +2258,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-oleqb9"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-oleqb9"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-z2palu"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-z2palu"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -2039,39 +2268,39 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-oleqb9'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-z2palu'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_08a02.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_dd4a9.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.5.4+cb4e32d21 for .NET Framework
-        Build started 5/1/2026 4:39:07 PM.
+        Build started 5/6/2026 11:44:19 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-oleqb9\\cmTC_08a02.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-z2palu\\cmTC_dd4a9.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-oleqb9\\Debug\\".
-          Creating directory "cmTC_08a02.dir\\Debug\\cmTC_08a02.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-z2palu\\Debug\\".
+          Creating directory "cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_08a02.dir\\Debug\\cmTC_08a02.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_08a02.dir\\Debug\\cmTC_08a02.tlog\\unsuccessfulbuild".
+          Creating "cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_08a02.dir\\Debug\\\\" /Fd"cmTC_08a02.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCCompilerABI.c"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_dd4a9.dir\\Debug\\\\" /Fd"cmTC_dd4a9.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCCompilerABI.c"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.50.35729 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_08a02.dir\\Debug\\\\" /Fd"cmTC_08a02.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCCompilerABI.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_dd4a9.dir\\Debug\\\\" /Fd"cmTC_dd4a9.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.2\\Modules\\CMakeCCompilerABI.c"
           CMakeCCompilerABI.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-oleqb9\\Debug\\cmTC_08a02.exe" /INCREMENTAL /ILK:"cmTC_08a02.dir\\Debug\\cmTC_08a02.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-oleqb9/Debug/cmTC_08a02.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-oleqb9/Debug/cmTC_08a02.lib" /MACHINE:X64  /machine:x64 cmTC_08a02.dir\\Debug\\CMakeCCompilerABI.obj
-          cmTC_08a02.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-oleqb9\\Debug\\cmTC_08a02.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.50.35717\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-z2palu\\Debug\\cmTC_dd4a9.exe" /INCREMENTAL /ILK:"cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-z2palu/Debug/cmTC_dd4a9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-z2palu/Debug/cmTC_dd4a9.lib" /MACHINE:X64  /machine:x64 cmTC_dd4a9.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_dd4a9.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-z2palu\\Debug\\cmTC_dd4a9.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_08a02.dir\\Debug\\cmTC_08a02.tlog\\unsuccessfulbuild".
-          Touching "cmTC_08a02.dir\\Debug\\cmTC_08a02.tlog\\cmTC_08a02.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-oleqb9\\cmTC_08a02.vcxproj" (default targets).
+          Deleting file "cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.tlog\\unsuccessfulbuild".
+          Touching "cmTC_dd4a9.dir\\Debug\\cmTC_dd4a9.tlog\\cmTC_dd4a9.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-z2palu\\cmTC_dd4a9.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:03.59
+        Time Elapsed 00:00:00.44
         
       exitCode: 0
   -

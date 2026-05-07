@@ -103,22 +103,22 @@ namespace ImgnVulkan
 			.sharingMode = vk::SharingMode::eExclusive
 		};
 
-		pResource.image = vk::raii::Image(ImgnVulkan::device, imageCreateInfo);
+		pResource.image.image = vk::raii::Image(ImgnVulkan::device, imageCreateInfo);
 
-		vk::MemoryRequirements memRequirements = pResource.image.getMemoryRequirements();
+		vk::MemoryRequirements memRequirements = pResource.image.image.getMemoryRequirements();
 		vk::MemoryAllocateInfo allocInfo
 		{
 			.allocationSize = memRequirements.size,
 			.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal)
 		};
 
-		pResource.memory = vk::raii::DeviceMemory(ImgnVulkan::device, allocInfo);
-		pResource.image.bindMemory(pResource.memory, 0);
+		pResource.image.memory = vk::raii::DeviceMemory(ImgnVulkan::device, allocInfo);
+		pResource.image.image.bindMemory(pResource.image.memory, 0);
 		
 		//view
 		vk::ImageViewCreateInfo imageViewCreateInfo
 		{
-			.image = pResource.image,
+			.image = pResource.image.image,
 			.viewType = vk::ImageViewType::e2D,
 			.format = pResource.format,
 			.components
@@ -138,7 +138,7 @@ namespace ImgnVulkan
 			}
 		};
 
-		pResource.view = vk::raii::ImageView(ImgnVulkan::device, imageViewCreateInfo);
+		pResource.image.view = vk::raii::ImageView(ImgnVulkan::device, imageViewCreateInfo);
 	}
 
 	void RenderGraph::CreateBufferResource(BufferResource& pResource)
@@ -150,14 +150,14 @@ namespace ImgnVulkan
 			.sharingMode = vk::SharingMode::eExclusive
 		};
 
-		pResource.buffer = vk::raii::Buffer(ImgnVulkan::device, bufferInfo);
+		pResource.buffer.buffer = vk::raii::Buffer(ImgnVulkan::device, bufferInfo);
 
-		vk::MemoryRequirements memReqs = pResource.buffer.getMemoryRequirements();
+		vk::MemoryRequirements memReqs = pResource.buffer.buffer.getMemoryRequirements();
 		vk::MemoryAllocateInfo memoryAllocateInfo{ .allocationSize = memReqs.size, .memoryTypeIndex = FindMemoryType(memReqs.memoryTypeBits, (pResource.usage & vk::BufferUsageFlagBits::eUniformBuffer) ? vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent : vk::MemoryPropertyFlagBits::eDeviceLocal) };
 
-		pResource.memory = vk::raii::DeviceMemory(ImgnVulkan::device, memoryAllocateInfo);
+		pResource.buffer.memory = vk::raii::DeviceMemory(ImgnVulkan::device, memoryAllocateInfo);
 
-		pResource.buffer.bindMemory(*pResource.memory, 0);
+		pResource.buffer.buffer.bindMemory(*pResource.buffer.memory, 0);
 
 		// Initialize sync state
 		pResource.currentAccess = vk::AccessFlagBits2::eNone;
@@ -289,22 +289,22 @@ namespace ImgnVulkan
 				.initialLayout = vk::ImageLayout::eUndefined
 			};
 
-			resource.image = device.createImage(imageCreateInfo);
+			resource.image.image = device.createImage(imageCreateInfo);
 
-			vk::MemoryRequirements memRequirements = resource.image.getMemoryRequirements();
+			vk::MemoryRequirements memRequirements = resource.image.image.getMemoryRequirements();
 			vk::MemoryAllocateInfo allocInfo
 			{
 				.allocationSize = memRequirements.size,
 				.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal)
 			};
 
-			resource.memory = vk::raii::DeviceMemory(device, allocInfo);
-			resource.image.bindMemory(resource.memory, 0);
+			resource.image.memory = vk::raii::DeviceMemory(device, allocInfo);
+			resource.image.image.bindMemory(resource.image.memory, 0);
 
 			//image view
 			vk::ImageViewCreateInfo imageViewCreateInfo
 			{
-				.image = resource.image,
+				.image = resource.image.image,
 				.viewType = vk::ImageViewType::e2D,
 				.format = resource.format,
 				.subresourceRange
@@ -317,12 +317,12 @@ namespace ImgnVulkan
 				}
 			};
 
-			resource.view = device.createImageView(imageViewCreateInfo);
+			resource.image.view = device.createImageView(imageViewCreateInfo);
 		}
 
 		for (auto& [name, resource] : _bufferResources)
 		{
-			if (!*resource.buffer) CreateBufferResource(resource);
+			if (!*resource.buffer.buffer) CreateBufferResource(resource);
 		}
 	}
 
@@ -348,7 +348,7 @@ namespace ImgnVulkan
 					.srcAccessMask = resource.currentAccess,
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
-					.buffer = *resource.buffer,
+					.buffer = *resource.buffer.buffer,
 					.offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
@@ -365,7 +365,7 @@ namespace ImgnVulkan
 				auto& resource = _resources[input];
 				if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
 				{
-					TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eShaderRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eFragmentShader, resource.aspect);
+					TransitionImageLayout(pCommandBuffer, resource.image.image, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eShaderRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eFragmentShader, resource.aspect);
 					resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 				}
 			}
@@ -377,7 +377,7 @@ namespace ImgnVulkan
 
 				if (resource.currentLayout != target)
 				{
-					TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, target, vk::AccessFlagBits2::eNone, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eTopOfPipe, vk::PipelineStageFlagBits2::eColorAttachmentOutput, resource.aspect);
+					TransitionImageLayout(pCommandBuffer, resource.image.image, resource.currentLayout, target, vk::AccessFlagBits2::eNone, vk::AccessFlagBits2::eColorAttachmentWrite, vk::PipelineStageFlagBits2::eTopOfPipe, vk::PipelineStageFlagBits2::eColorAttachmentOutput, resource.aspect);
 					resource.currentLayout = target;
 				}
 			}
@@ -394,7 +394,7 @@ namespace ImgnVulkan
 					.srcAccessMask = resource.currentAccess,
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
-					.buffer = *resource.buffer,
+					.buffer = *resource.buffer.buffer,
 					.offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
@@ -410,7 +410,7 @@ namespace ImgnVulkan
 		{
 			if (resource.currentLayout != resource.finalLayout)
 			{
-				TransitionImageLayout(pCommandBuffer, resource.image, resource.currentLayout, resource.finalLayout, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eMemoryRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eAllCommands, resource.aspect);
+				TransitionImageLayout(pCommandBuffer, resource.image.image, resource.currentLayout, resource.finalLayout, vk::AccessFlagBits2::eColorAttachmentWrite, vk::AccessFlagBits2::eMemoryRead, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::PipelineStageFlagBits2::eAllCommands, resource.aspect);
 				resource.currentLayout = resource.finalLayout;
 			}
 		}
@@ -473,7 +473,7 @@ namespace ImgnVulkan
 
 		vk::raii::CommandBuffer commandCopyBuffer = BeginSingleCommand();
 
-		commandCopyBuffer.copyBuffer(stagingBuffer, bufferResource.buffer, vk::BufferCopy(0, 0, pSize));
+		commandCopyBuffer.copyBuffer(stagingBuffer, bufferResource.buffer.buffer, vk::BufferCopy(0, 0, pSize));
 
 		EndSingleCommand(commandCopyBuffer);
 

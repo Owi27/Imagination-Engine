@@ -424,6 +424,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkan.hpp" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\ImgnVulkanAPI.h" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\DLL\ImgnVulkan\RenderGraph.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/CMakeFiles/ImgnVulkan.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

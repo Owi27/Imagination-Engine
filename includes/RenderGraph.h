@@ -25,9 +25,9 @@ struct RenderPass
 	std::vector<std::string> bufferInputs;
 	std::vector<std::string> bufferOutputs;
 
-	vk::Pipeline pipeline;
-	vk::PipelineLayout pipelineLayout;
-	vk::DescriptorSetLayout descriptorSetLayout;
+	//vk::Pipeline pipeline;
+	//vk::PipelineLayout pipelineLayout;
+	//vk::DescriptorSetLayout descriptorSetLayout;
 	std::vector<vk::Format> colorAttachments;
 
 	std::function<void(vk::raii::CommandBuffer&)> Execute;

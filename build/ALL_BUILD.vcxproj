@@ -178,6 +178,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{5A3C2D86-D9D2-3C0B-98E7-6ACB945AE531}</Project>
       <Name>DAYDREAM</Name>
     </ProjectReference>
+    <ProjectReference Include="D:\GitHub\Imagination-Engine\build\Extract.vcxproj">
+      <Project>{2A1AB54C-4756-369A-AFB0-B50BC5FBB813}</Project>
+      <Name>Extract</Name>
+    </ProjectReference>
     <ProjectReference Include="D:\GitHub\Imagination-Engine\build\Imagination\IMGN.vcxproj">
       <Project>{D4C3CA30-A98C-357A-96C4-C3ACFD0AF936}</Project>
       <Name>IMGN</Name>

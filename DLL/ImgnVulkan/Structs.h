@@ -1,4 +1,5 @@
 #pragma once
+#include "ImgnVulkanAPI.h"
 
 namespace ImgnVulkan
 {
@@ -11,7 +12,7 @@ namespace ImgnVulkan
 	struct IMGN_VULKAN_API Image
 	{
 		vk::raii::Image image = nullptr;
-		vk::raii::ImageView imageView = nullptr;
+		vk::raii::ImageView view = nullptr;
 		vk::raii::DeviceMemory memory = nullptr;
 	};
 

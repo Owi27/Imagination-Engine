@@ -2,6 +2,7 @@
 #include "ImgnCore.hpp"
 #include "ImgnLog.h"
 #include "Events/Event.h"
+#include "ImgnRenderer.h"
 
 struct WindowProperties
 {
@@ -22,6 +23,7 @@ class IMGN_API ImgnWindow
     GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _windowHandle;
     uint32_t _width = 1280, _height = 720;
     GEventResponder _responder;
+    unique<ImgnRenderer> _ctx;
 
 public:
     using EventCallbackFn = std::function<void(Event&)>;
@@ -29,8 +31,6 @@ public:
     /*virtual*/ void Dream();
     /*virtual*/ uint32_t GetWidth();
     /*virtual*/ uint32_t GetHeight();
-    /*virtual*/ uint32_t GetWidth() const;
-    /*virtual*/ uint32_t GetHeight() const;
     void AddGEventResponder(GEventResponder& pEventResponder) { _window.Register(pEventResponder); }
     /*virtual*/ void SetEventCallback(const EventCallbackFn& pCallback);
     /*virtual void SetVSync(bool pEnabled);*/
@@ -42,6 +42,13 @@ public:
     ImgnWindow()
     {
         if (-_window.Create(0, 0, _width, _height, GWindowStyle::FULLSCREENBORDERED)) IMGN_CORE_ERROR("GWindow failed to create | {}:{}", __FILE__, __LINE__);
+
+        _window.GetWindowHandle(_windowHandle);
+
+        _ctx = std::make_unique<ImgnRenderer>();
+        _ctx->Init(static_cast<HWND>(_windowHandle.window), _width, _height);
+        IMGN_CORE_INFO("Graphics ctx initialized");
+
     }
 
     /*virtual*/ ~ImgnWindow()
