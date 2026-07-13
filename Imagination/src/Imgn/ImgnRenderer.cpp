@@ -9,6 +9,31 @@ void ImgnRenderer::SetupDeferedRenderer()
 	////_graph.AddResource("Depth", vk::Format::eD32Sfloat, { width, height }, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth);
 	////_graph.AddResource("FinalColor", vk::Format::eR8G8B8A8Unorm, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferSrcOptimal, vk::ImageAspectFlagBits::eColor);
 
+	CreateImage(ImgnImageDesc
+		{
+			.name = "GBuffer-Albedo",
+			.format = ImgnFormat::RGBA8_UNorm,
+			.usage = ImgnImageUsage::ColorAttachment,
+			.extent = {_info.width, _info.height, 1},
+		});
+	CreateImage(ImgnImageDesc
+		{
+			.name = "GBuffer-Normal",
+			.format = ImgnFormat::RGBA8_UNorm,
+			.usage = ImgnImageUsage::ColorAttachment,
+			.extent = {_info.width, _info.height, 1},
+		});
+	CreateImage(ImgnImageDesc
+		{
+			.name = "GBuffer-Material",
+			.format = ImgnFormat::RGBA8_UNorm,
+			.usage = ImgnImageUsage::ColorAttachment,
+			.extent = {_info.width, _info.height, 1},
+		});
+
+	//_renderGraph.AddResource();
+	// 
+	//CreateImage()
 	//GBufferUBO gBufferUBO
 	//{
 	//	.world = GW::MATH::GIdentityMatrixF,
@@ -200,12 +225,37 @@ vk::Format ImgnRenderer::ToVkFormat(ImgnFormat pFormat)
 void ImgnRenderer::Init(RendererCreateInfo pCreateInfo)
 {
 	_info = pCreateInfo;
-	_vkCtx.InitVulkanCtx(static_cast<HWND>(_info.windowHandle), _info.width, _info.height);
+	switch (_info.backend)
+	{
+	case RendererBackend::Vulkan:
+		_vkCtx.InitVulkanCtx(static_cast<HWND>(_info.windowHandle), _info.width, _info.height);
+		break;
+	case RendererBackend::D3D12:
+		break;
+	case RendererBackend::Metal:
+		break;
+	default:
+		//todo write failed to init graphics device
+		break;
+	}
 }
 
 void ImgnRenderer::DrawFrame()
 {
-	_vkCtx.DrawFrame();
+	switch (_info.backend)
+	{
+	case RendererBackend::Vulkan:
+		_vkCtx.DrawFrame();
+		break;
+	case RendererBackend::D3D12:
+		break;
+	case RendererBackend::Metal:
+		break;
+	default:
+		//todo write failed to init graphics device
+		break;
+	}
+
 }
 
 void ImgnRenderer::CompileGraph()
@@ -264,7 +314,7 @@ uint32_t ImgnRenderer::CreateBuffer(const ImgnBufferDesc& pDesc)
 	return 0;
 }
 
-uint32_t ImgnRenderer::CreateImage(ImgnImageDesc& pDesc)
+uint32_t ImgnRenderer::CreateImage(ImgnImageDesc pDesc)
 {
 	switch (_info.backend)
 	{
@@ -272,12 +322,22 @@ uint32_t ImgnRenderer::CreateImage(ImgnImageDesc& pDesc)
 		{
 			vk::ImageUsageFlags usage;
 
-			if (HasFlag(pDesc.usage, ImgnImageUsage::ShaderResource)) usage |= vk::ImageUsageFlagBits::eColorAttachment;
+			if (HasFlag(pDesc.usage, ImgnImageUsage::ColorAttachment)) usage |= vk::ImageUsageFlagBits::eColorAttachment;
 			if (HasFlag(pDesc.usage, ImgnImageUsage::Storage)) usage |= vk::ImageUsageFlagBits::eStorage;
 			if (HasFlag(pDesc.usage, ImgnImageUsage::TransferSrc)) usage |= vk::ImageUsageFlagBits::eTransferSrc;
 			if (HasFlag(pDesc.usage, ImgnImageUsage::TransferDst)) usage |= vk::ImageUsageFlagBits::eTransferDst;
 
-			_vkCtx.CreateImage(pDesc.name, ToVkFormat(pDesc.format), pDesc.extent.VkExtent2D(), usage, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+			ImgnImage image
+			{
+				.name = pDesc.name,
+				.handle = static_cast<uint32_t>(_images.size()),
+				.vkImage = _vkCtx.CreateImage(pDesc.name, ToVkFormat(pDesc.format), pDesc.extent.VkExtent2D(), usage, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor)
+			};
+
+			_images.push_back(std::move(image));
+
+			_renderGraph.AddResource(pDesc.name, pDesc.format, pDesc.extent, pDesc.usage, ImgnImageLayout::Undefined_ImageLayout, ImgnImageLayout::ShaderReadOnly_ImageLayout, ImgnAspect::Color_Aspect);
+			return static_cast<uint32_t>(_images.size() - 1);
 		}
 		break;
 	case RendererBackend::D3D12:
@@ -306,6 +366,30 @@ uint32_t ImgnRenderer::AddMaterial(const ImgnMaterial& pMaterial)
 	_materials.push_back(pMaterial);
 
 	return static_cast<uint32_t>(_materials.size() - 1);
+}
+
+uint32_t ImgnRenderer::CreateImage(const uint8_t* pImageData, uint32_t pWidth, uint32_t pHeight)
+{
+	ImgnImage image
+	{
+		.handle = static_cast<uint32_t>(_images.size())
+	};
+
+	switch (_info.backend)
+	{
+	case RendererBackend::Vulkan:
+		image .vkImage = _vkCtx.CreateImage(pImageData, pWidth, pHeight);
+		break;
+	case RendererBackend::D3D12:
+		break;
+	case RendererBackend::Metal:
+		break;
+	default:
+		break;
+	}
+
+	_images.push_back(std::move(image));
+	return static_cast<uint32_t>(_images.size() - 1);
 }
 
 //void ImgnRenderer::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)

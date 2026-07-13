@@ -7,7 +7,7 @@ add_library(IMGN SHARED ${IMGN_HEADERS} ${IMGN_SOURCES})
 
 target_precompile_headers(IMGN PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.hpp)
 
-target_include_directories(IMGN PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(IMGN PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_definitions(IMGN PRIVATE IMGN_BUILD_DLL PUBLIC IMGN_PLATFORM_WINDOWS IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
 target_link_libraries(IMGN PUBLIC Vulkan::Vulkan ImgnVulkan)
 

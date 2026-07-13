@@ -93,7 +93,7 @@ std::vector<uint32_t> ImgnGLTF::LoadGLTFTextures(const tinygltf::Model& pModel, 
 
 	for (const tinygltf::Image& image : pModel.images)
 	{
-		//textures.push_back(pRenderer.CreateImage(image.image.data(), image.width * image.height * 4));
+		textures.push_back(pRenderer.CreateImage(image.image.data(), image.width, image.height));
 	}
 
 	return textures;
@@ -183,7 +183,7 @@ std::vector<uint32_t> ImgnGLTF::LoadGLTFMeshes(const tinygltf::Model& pModel, Im
 		m.vertexBuffer = pRenderer.CreateBuffer(vertexBufferDesc);
 		m.indexBuffer = pRenderer.CreateBuffer(indexBufferDesc);
 
-		//meshes.push_back(pRenderer.CreateMesh(m));
+		meshes.push_back(pRenderer.AddMesh(m));
 	}
 
 	return meshes;

@@ -252,10 +252,17 @@ struct alignas(16) UniformBufferObject
 //};
 
 //inline constexpr int MAXFRAMESINFLIGHT = 3;
-inline constexpr uint32_t NumDescriptorsStreaming = 2048;
+constexpr uint32_t NumDescriptorsStreaming = 2048;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 constexpr const wchar_t* ComputeTarget = L"cs_6_6";
+
+enum class ImgnAlphaMode : int
+{
+	Opaque,
+	Mask,
+	Blend
+};
 
 
 class ImgnVulkan
@@ -331,6 +338,8 @@ class ImgnVulkan
 	uint32_t _gWinW, _gWinH;
 	ImgnInput* _input = nullptr;// = (*_gWin);
 
+	std::unique_ptr<vk::raii::Instance> _tInst;
+
 	//dxc
 	ComPtr<IDxcCompiler3> _compiler;
 	ComPtr<IDxcUtils> _utils;
@@ -377,6 +386,10 @@ class ImgnVulkan
 	Image _texture;
 	std::optional<vk::raii::Sampler> _textureSampler;
 
+	std::vector<Image> _sponzaTexs;
+	std::vector<Mat> _sponzaMats;
+	std::vector<vk::ImageView> _sponzaViews;
+
 	ResourceHandle<Mesh> _sponza;
 
 	static constexpr uint32_t DescriptorSetIndex(uint32_t pFrameIdx, RenderPassIdx pPass)
@@ -416,6 +429,8 @@ class ImgnVulkan
 	void CopyBufferToImage(const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage, uint32_t pWidth, uint32_t pHeight);
 	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer);
 	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
+	void CreateSponzaImages();
+	void CreateSponzaMats();
 	void UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler);
 
 	void CreateDevice();

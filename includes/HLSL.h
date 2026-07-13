@@ -69,7 +69,7 @@ struct VOut
     float3 tan : TANGENT;
     float3 col : COLOR;
     //float3x3 TBN : TEXCOORD1;
-    //int idx : INDEX;
+    int idx : INDEX;
 };
 
 struct UniformBuffer
@@ -89,7 +89,7 @@ VOut main(VIn input, uint id : SV_InstanceID)
     output.tan = input.tan.rgb;
     output.col = input.col;
     
-    //output.idx = id;
+    output.idx = id;
 
 //VOut output;
 //    output.pos = float4(input.pos.xy, 0.5, 1.0); // Bypass matrices
@@ -107,24 +107,78 @@ VOut main(VIn input, uint id : SV_InstanceID)
     float2 uv : TEXCOORD0;
     float3 tan : TANGENT;
     float3 col : COLOR;
-    //float3x3 TBN : TEXCOORD1;
-    //int idx : INDEX;
 };
 
 struct FOut
 {
     float4 Position : SV_TARGET0;
-    float4 Normal : SV_TARGET1;
-    float4 Albedo : SV_TARGET2;
-    //float4 MProperties : SV_TARGET3;
+    float4 Normal   : SV_TARGET1;
+    float4 Albedo   : SV_TARGET2;
 };
+
+[[vk::push_constant]]
+struct GBufferPC
+{
+    uint materialIndex;
+} pc;
+
+#define ALPHA_OPAQUE 0
+#define ALPHA_MASK   1
+#define ALPHA_BLEND  2
+
+struct Material
+{
+    float4 baseColorFactor;
+    int baseColorTexture;
+    float metallicFactor;
+    float roughnessFactor;
+    int metallicRoughnessTexture;
+    int emissiveTexture;
+    float3 emissiveFactor;
+    int alphaMode;
+    float alphaCutoff;
+    int doubleSided;
+    int normalTexture;
+    float normalTextureScale;
+    int occlusionTexture;
+    float occlusionTextureStrength;
+    int _pad;
+};
+
+StructuredBuffer<Material> materialInfo : register(t1, space0);
+
+Texture2D materialTextures[] : register(t2, space0);
+SamplerState materialSampler : register(s2, space0);
 
 FOut main(VOut input)
 {
     FOut output;
-    output.Position = float4(normalize(input.pos.rgb), 1.f);
-    output.Normal = float4(input.nrm, 1.f);
-    output.Albedo = float4(0.f, 0.f, 1.f, 1.f);
+
+    Material m = materialInfo[pc.materialIndex];
+
+    float4 albedo = m.baseColorFactor;
+
+    if (m.baseColorTexture > -1)
+    {
+        albedo *= materialTextures[m.baseColorTexture].Sample(materialSampler, input.uv);
+    }
+
+    if (m.alphaMode == ALPHA_MASK)
+    {
+        if (albedo.a < m.alphaCutoff)
+            discard;
+    }
+
+    if (m.alphaMode == ALPHA_BLEND)
+    {
+        // temporary: discard low-alpha pixels in deferred pass
+        if (albedo.a < 0.5f)
+            discard;
+    }
+
+    output.Position = input.pos;
+    output.Normal = float4(normalize(input.nrm), 1.0f);
+    output.Albedo = float4(albedo.rgb, 1.0f);
 
     return output;
 })";
@@ -157,7 +211,7 @@ SamplerState _sampler : register(s2, space0);
 
 float4 main(VOut input) : SV_TARGET
 {
-    return _textures[0].Sample(_sampler, input.UV);
+    return _textures[2].Sample(_sampler, input.UV);
     //return float4(1.f, 0.f, 0.f, 1.f);
 })";
 

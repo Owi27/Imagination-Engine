@@ -21,6 +21,10 @@
 
 template<typename T>
 using unique = std::unique_ptr<T>;
+template<typename T>
+using Unique = std::make_unique<T>;
 
 template<typename T>
 using shared = std::shared_ptr<T>;
+template<typename T>
+using Shared = std::make_shared<T>;

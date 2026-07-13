@@ -46,9 +46,14 @@ public:
         _window.GetWindowHandle(_windowHandle);
 
         _ctx = std::make_unique<ImgnRenderer>();
-        _ctx->Init(static_cast<HWND>(_windowHandle.window), _width, _height);
-        IMGN_CORE_INFO("Graphics ctx initialized");
+        RendererCreateInfo createInfo
+        {
+            .windowHandle = _windowHandle.window,
+        };
 
+        _ctx->Init(createInfo);
+        IMGN_CORE_INFO("Graphics ctx initialized");
+        
     }
 
     /*virtual*/ ~ImgnWindow()

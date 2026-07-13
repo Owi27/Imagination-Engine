@@ -312,9 +312,6 @@
     <CustomBuild Include="D:\GitHub\Imagination-Engine\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <FXCompile Include="D:\GitHub\Imagination-Engine\Spike.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Includes">
       <UniqueIdentifier>{D27FCE7C-D1CF-33A9-8449-C1CA2030F260}</UniqueIdentifier>
     </Filter>

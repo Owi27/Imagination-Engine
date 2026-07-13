@@ -210,12 +210,15 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 	{
 		for (auto& primitive : mesh.primitives)
 		{
+			ImgnPrim prim;
+			prim.firstIndex = static_cast<uint32_t>(pIndices.size());
+			prim.material = primitive.material;
+
 			//pos
 			const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
 			const tinygltf::BufferView& posBufferView = model.bufferViews[posAccessor.bufferView];
 			const tinygltf::Buffer& posBuffer = model.buffers[posBufferView.buffer];
 			const uint64_t posStride = posAccessor.ByteStride(posBufferView);
-
 
 			const tinygltf::Accessor* nrmAcc = primitive.attributes.contains("NORMAL") ? &model.accessors[primitive.attributes.at("NORMAL")] : nullptr;
 			const tinygltf::Accessor* uvAcc = primitive.attributes.contains("TEXCOORD_0") ? &model.accessors[primitive.attributes.at("TEXCOORD_0")] : nullptr;
@@ -285,6 +288,9 @@ void Mesh::LoadModel(const std::string& pFile, std::vector<Vertex>& pVertices, s
 				// The Magic Fix: Map the local index to the global vertex array
 				pIndices.push_back(primitiveToIndexMap[localIdx]);
 			}
+
+			prim.indexCount = static_cast<uint32_t>(pIndices.size()) - prim.firstIndex;
+			prims.push_back(prim);
 		}
 	}
 }

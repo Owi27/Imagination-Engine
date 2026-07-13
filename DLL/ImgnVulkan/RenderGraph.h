@@ -51,6 +51,11 @@ namespace ImgnVulkan
 		const void* initialData = nullptr;
 	};
 
+	struct ImgnRenderHelpers
+	{
+		//uint32_t FindMemoryType
+	};
+
 	class IMGN_VULKAN_API RenderGraph
 	{
 		std::unordered_map<std::string, ImageResource> _resources;

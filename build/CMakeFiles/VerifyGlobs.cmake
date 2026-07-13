@@ -186,6 +186,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/ImgnVulkan.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/pch.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
@@ -265,6 +266,8 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.hpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/ImgnVulkan.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/gltf/json.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/pch.hpp"
   )

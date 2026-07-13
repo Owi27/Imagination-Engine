@@ -114,7 +114,7 @@ enum class ImgnFormat
 enum class ImgnImageUsage : uint32_t
 {
     None = 0,
-    ShaderResource = 1 << 0,
+    ColorAttachment = 1 << 0,
     Storage = 1 << 1,
     RenderTarget = 1 << 2,
     DepthStencil = 1 << 3,
@@ -135,13 +135,62 @@ inline bool HasFlag(ImgnImageUsage value, ImgnImageUsage flag)
     return (static_cast<uint32_t>(value) & static_cast<uint32_t>(flag)) != 0;
 }
 
+struct ImgnExtent2D
+{
+    uint32_t width = 0, height = 0;
+
+    vk::Extent2D VkExtent()
+    {
+        return vk::Extent2D
+        {
+            .width = width,
+            .height = height
+        };
+    }
+};
+
+struct ImgnExtent3D
+{
+    uint32_t width = 1, height = 1, depth = 1;
+
+    vk::Extent2D VkExtent2D()
+    {
+        return vk::Extent2D
+        {
+            .width = width,
+            .height = height
+        };
+    }
+
+    vk::Extent3D VkExtent()
+    {
+        return vk::Extent3D
+        {
+            .width = width,
+            .height = height,
+            .depth = depth
+        };
+    }
+};
+
+struct ImgnOffset2D
+{
+    int x = 0, y = 0;
+};
+
+struct ImgnRect2D
+{
+    ImgnOffset2D offset{};
+    ImgnExtent2D extent{};
+};
+
 struct ImgnImageDesc
 {
     std::string name;
 
     TextureType type = TextureType::Texture2D;
     ImgnFormat format = ImgnFormat::RGBA8_UNorm;
-    ImgnImageUsage usage = ImgnImageUsage::ShaderResource;
+    ImgnImageUsage usage = ImgnImageUsage::ColorAttachment;
 
     ImgnExtent3D extent;
 
@@ -221,58 +270,27 @@ struct ImgnMaterial
 
 };
 
-struct ImgnExtent2D
-{
-    uint32_t width = 0, height = 0;
-
-    vk::Extent2D VkExtent()
-    {
-        return vk::Extent2D
-        {
-            .width = width,
-            .height = height
-        };
-    }
-};
-
-struct ImgnExtent3D
-{
-    uint32_t width = 1, height = 1, depth = 1;
-
-    vk::Extent2D VkExtent2D()
-    {
-        return vk::Extent2D
-        {
-            .width = width,
-            .height = height
-        };
-    }
-
-    vk::Extent3D VkExtent()
-    {
-        return vk::Extent3D
-        {
-            .width = width,
-            .height = height,
-            .depth = depth
-        };
-    }
-};
-
-struct ImgnOffset2D
-{
-    int x = 0, y = 0;
-};
-
-struct ImgnRect2D
-{
-    ImgnOffset2D offset{};
-    ImgnExtent2D extent{};
-};
 
 struct ImgnViewport
 {
     float x = 0.0f, y = 0.0f;
     float width = 0.0f, height = 0.0f;
     float minDepth = 0.0f, maxDepth = 1.0f;
+};
+
+struct ImgnCommandBuffer
+{
+    vk::raii::CommandBuffer vkCommandBuffer;
+};
+
+enum class ImgnImageLayout
+{
+    Undefined_ImageLayout,
+    ShaderReadOnly_ImageLayout,
+};
+
+enum ImgnAspect
+{
+    Color_Aspect,
+    Depth_Aspect
 };

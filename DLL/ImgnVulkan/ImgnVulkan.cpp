@@ -1727,7 +1727,7 @@ namespace ImgnVulkan
 		pBuffer.buffer.bindMemory(*pBuffer.memory, 0);
 	}
 
-	void Ctx::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage)
+	void Ctx::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, vk::ImageAspectFlags pAspect, Image& pImage)
 	{
 		vk::ImageCreateInfo imageCreateInfo
 		{
@@ -1753,6 +1753,8 @@ namespace ImgnVulkan
 
 		pImage.memory = vk::raii::DeviceMemory(ImgnVulkan::device, allocInfo);
 		pImage.image.bindMemory(pImage.memory, 0);
+
+		pImage.view = CreateImageView(pImage.image, pFormat, pAspect);
 	}
 
 	void Ctx::UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler)
@@ -1975,10 +1977,29 @@ namespace ImgnVulkan
 		_graph.AddResource("IndexBuffer", sizeof(uint32_t) * pIndexCount, vk::BufferUsageFlagBits::eIndexBuffer, pIndices);
 	}
 
-	Image& Ctx::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
+	Image Ctx::CreateImage(const uint8_t* pImageData, uint32_t pWidth, uint32_t pHeight)
+	{
+		Buffer staging;
+
+		uint64_t size = pWidth * pHeight * 4;
+		CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+		
+		void* data = staging.memory.mapMemory(0, size);
+		memcpy(data, pImageData, size);
+		staging.memory.unmapMemory();
+
+		Image image;
+		CreateImage(pWidth, pHeight, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, vk::ImageAspectFlagBits::eColor, image);
+
+		CopyBufferToImage(staging.buffer, image.image, pWidth, pHeight);
+	
+		return image;
+	}
+
+	Image Ctx::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
 	{
 		_graph.AddResource(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
-		return _graph.GetImageResource(pName)->image;
+		return std::move(_graph.GetImageResource(pName)->image);
 	}
 
 	Buffer& Ctx::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)

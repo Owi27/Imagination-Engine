@@ -8,18 +8,13 @@ struct ImgnRenderPass
 
 	std::vector<std::string> textureInputs, textureOutputs, bufferInputs, bufferOutputs;
 
-	std::function<void(vk::raii::CommandBuffer&)> Execute;
+	std::function<void(ImgnCommandBuffer&)> Execute;
 };
 
 struct ImgnImage
 {
 	std::string name;
-
-	ImgnFormat format;
-	ImgnExtent2D extent;
-	ImgnImageUsage usage;
-	//ImgnImageLayout initialLayout, currentLayout, finalLayout;
-	//ImgnAspect aspect;
+	uint32_t handle;
 
 	//vulkan
 	ImgnVulkan::Image vkImage;
@@ -42,6 +37,12 @@ class ImgnRenderGraph
 
 	std::vector<ImgnRenderPass> _renderPasses;
 	std::vector<uint32_t> _executionOrder;
+	
+	ImgnCommandBuffer RecordSingleCommand();
+	void EndSingleCommand(ImgnCommandBuffer& pCommandBuffer);
+
+	void CreateImageResource(ImgnImageDesc& pImage);
+	void CreateBufferResource(ImgnBuffer& pBuffer);
 
 public:
 	/* Class Defaults */
@@ -56,4 +57,8 @@ public:
 	}
 
 	/* Class Functions */
+	uint32_t AddResource(const std::string& pName, ImgnFormat pFormat, ImgnExtent3D pExtent, ImgnImageUsage pUsage, ImgnImageLayout pInitialLayout, ImgnImageLayout pFinalLayout, ImgnAspect pAspect);
+	void AddResource(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData);
+	void AddPass(ImgnRenderPass pRenderPass) { _renderPasses.emplace_back(std::move(pRenderPass)); }
+
 };

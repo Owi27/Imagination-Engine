@@ -121,6 +121,32 @@ public:
 	vk::Sampler GetSampler() const { return _sampler; }
 };
 
+struct ImgnPrim
+{
+	int vertexOffset = 0;
+	uint32_t firstIndex = 0, indexCount = 0, firstVertex = 0, vertexCount = 0, material = 0xFFFFFFFF;
+};
+
+struct Mat
+{
+	vec4 baseColorFactor;
+	int baseColorTexture;
+	float metallicFactor;
+	float roughnessFactor;
+	int metallicRoughnessTexture;
+	int emissiveTexture;
+	vec3 emissiveFactor;
+	int alphaMode;
+	float alphaCutoff;
+	int doubleSided;
+	int normalTexture;
+	float normalTextureScale;
+	int occlusionTexture;
+	float occlusionTextureStrength;
+	int _pad;
+};
+
+
 class Mesh : public Resource
 {
 	tinygltf::Model model;
@@ -145,6 +171,8 @@ protected:
 	virtual bool DoUnload() override { return true; }
 
 public:
+	std::vector<ImgnPrim> prims;
+
 	explicit Mesh(const std::string& pID) : Resource(pID)
 	{
 	}
@@ -191,6 +219,9 @@ public:
 	vk::Buffer GetIndexBuffer() const { return _indexBuffer; }
 	uint32_t GetVertexCount() const { return _vertexCount; }
 	uint32_t GetIndexCount() const { return _indexCount; }
+	tinygltf::Model GetModel() { return model; }
+	//void LoadImages(std::vector<Image>& pImages);
+	//void LoadMats(std::vector<Mat>& pMats);
 };
 
 class Shader : public Resource

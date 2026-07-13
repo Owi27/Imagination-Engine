@@ -715,6 +715,7 @@ void ImgnVulkan::CreateInstance()
 		.ppEnabledExtensionNames = _instanceExtensions.data()
 	};
 
+	*_tInst = vk::raii::Instance(_ctx, instanceCreateInfo);
 	_instance = vk::raii::Instance(_ctx, instanceCreateInfo);
 	Device::Inst().SetInstance(std::move(_instance));
 }
@@ -1040,11 +1041,19 @@ void ImgnVulkan::CreateTextureSampler()
 
 void ImgnVulkan::CreateGraphicsPipelines()
 {
+	vk::PushConstantRange pcr
+	{
+		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+		.offset = 0,
+		.size = 128
+	};
+
 	vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 	{
 		.setLayoutCount = 1,
 		.pSetLayouts = &*_descriptorSetLayout,
-		.pushConstantRangeCount = 0
+		.pushConstantRangeCount = 1,
+		.pPushConstantRanges = &pcr
 	};
 
 	_pipelines.pipelineLayout = vk::raii::PipelineLayout(Device::Inst().GetDevice(), pipelineLayoutInfo);
@@ -1132,8 +1141,8 @@ void ImgnVulkan::CreateGraphicsPipelines()
 
 		vk::PipelineDepthStencilStateCreateInfo depthStencil
 		{
-			.depthTestEnable = vk::False,
-			.depthWriteEnable = vk::False,
+			.depthTestEnable = vk::True,
+			.depthWriteEnable = vk::True,
 			.depthCompareOp = vk::CompareOp::eLess,
 			.depthBoundsTestEnable = vk::False,
 			.stencilTestEnable = vk::False
@@ -1389,7 +1398,7 @@ void ImgnVulkan::UpdateCamera()
 	{
 		float totalPitch = G_DEGREE_TO_RADIAN(65) * mouseDeltaY / screenHeight + rightStickYaxis * -thumbSpeed;
 		GMatrix::RotateXLocalF(cam, totalPitch, cam);
-		float totalYaw = G_DEGREE_TO_RADIAN(65) * 16/9 * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
+		float totalYaw = G_DEGREE_TO_RADIAN(65) * 16 / 9 * mouseDeltaX / screenWidth + rightStickXaxis * thumbSpeed;
 		mat4 yawMatrix = GW::MATH::GIdentityMatrixF;
 		vec4 camSave = cam.row4;
 		cam.row4 = { 0,0,0,1 };
@@ -1413,6 +1422,15 @@ void ImgnVulkan::SetupDeferredRenderer()
 	uint32_t width = _swapchainExtent.width, height = _swapchainExtent.height;
 
 	_sponza = _manager.Load<Mesh>("Sponza");
+	CreateSponzaImages();
+	CreateSponzaMats();
+
+	_sponzaViews.reserve(_sponzaTexs.size());
+
+	for (auto& tex : _sponzaTexs)
+	{
+		_sponzaViews.push_back(tex.imageView);
+	}
 
 	_graph.AddResource("GBuffer-Position", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
 	_graph.AddResource("GBuffer-Normal", vk::Format::eR16G16B16A16Sfloat, { width, height }, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eInputAttachment, vk::ImageLayout::eUndefined, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
@@ -1427,10 +1445,13 @@ void ImgnVulkan::SetupDeferredRenderer()
 		.proj = GW::MATH::GIdentityMatrixF,
 	};
 
-	GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, -10.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
-	GMatrix::ProjectionVulkanLHF(45.f, 16 / 9, 0.01, 1000.f, gBufferUBO.proj);
+	float aspect;
+	
+	GMatrix::LookAtLHF({ 0.f, 0.f, 0 }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
+	GMatrix::ProjectionVulkanLHF(G_DEGREE_TO_RADIAN(90), static_cast<float>(width)/static_cast<float>(height), 0.1f, 5000.f, gBufferUBO.proj);
 
 	_graph.AddResource("GBuffer-UBO", sizeof(GBufferUBO), vk::BufferUsageFlagBits::eUniformBuffer, &gBufferUBO);
+	_graph.AddResource("GBuffer-SBO", sizeof(Mat) * _sponzaMats.size(), vk::BufferUsageFlagBits::eStorageBuffer, _sponzaMats.data());
 
 	RenderPass gBufferPass
 	{
@@ -1442,7 +1463,8 @@ void ImgnVulkan::SetupDeferredRenderer()
 		.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 		{
 			auto ubo = _graph.GetBufferResource("GBuffer-UBO");
-			UpdateDescriptorSet(_frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
+			auto sbo = _graph.GetBufferResource("GBuffer-SBO");
+			UpdateDescriptorSet(_frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, sbo->buffer, sbo->size, _sponzaViews, *_textureSampler);
 
 			std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
 			vk::RenderingAttachmentInfoKHR depthAttachment;
@@ -1467,7 +1489,15 @@ void ImgnVulkan::SetupDeferredRenderer()
 			commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
 			commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
 
-			commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
+			for (auto& prim : _sponza->prims)
+			{
+				GBufferPC pc;
+				pc.materialIndex = 0;
+				if (prim.material != 0xFFFFFFFF) pc.materialIndex = prim.material;
+
+				commandBuffer.pushConstants<GBufferPC>(*_pipelines.pipelineLayout, vk::ShaderStageFlagBits::eFragment, 0, pc);
+				commandBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, 0, 0);
+			}
 
 			commandBuffer.endRendering();
 		}
@@ -1506,7 +1536,7 @@ void ImgnVulkan::SetupDeferredRenderer()
 				_graph.GetResource("Depth")->view,
 			};
 			UpdateDescriptorSet(_frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
-			
+
 			commandBuffer.beginRendering(renderingInfo);
 
 			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
@@ -1730,6 +1760,65 @@ void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pForm
 
 	pImage.memory = vk::raii::DeviceMemory(Device::Inst().GetDevice(), allocInfo);
 	pImage.image.bindMemory(pImage.memory, 0);
+}
+
+void ImgnVulkan::CreateSponzaImages()
+{
+	_sponzaTexs.reserve(_sponza->GetModel().images.size());
+
+	for (auto& image : _sponza->GetModel().images)
+	{
+		uint64_t size = image.width * image.height * 4;
+		Buffer staging;
+		CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+
+		void* data = staging.memory.mapMemory(0, size);
+		memcpy(data, image.image.data(), size);
+		staging.memory.unmapMemory();
+
+		Image tex;
+		CreateImage(image.width, image.height, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, tex);
+
+
+		TransitionImageLayout(tex.image, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+
+		CopyBufferToImage(staging.buffer, tex.image, image.width, image.height);
+
+		TransitionImageLayout(tex.image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+		tex.imageView = CreateImageView(tex.image, vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+		_sponzaTexs.push_back(std::move(tex));
+	}
+}
+
+void ImgnVulkan::CreateSponzaMats()
+{
+	_sponzaMats.reserve(_sponza->GetModel().materials.size());
+
+	for (auto& material : _sponza->GetModel().materials)
+	{
+		const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
+
+		Mat m
+		{
+			.baseColorFactor = pbr.baseColorFactor.size() == 4 ? vec4{ static_cast<float>(pbr.baseColorFactor[0]), static_cast<float>(pbr.baseColorFactor[1]), static_cast<float>(pbr.baseColorFactor[2]), static_cast<float>(pbr.baseColorFactor[3]) } : vec4{1.f, 1.f, 1.f, 1.f},
+			.baseColorTexture = pbr.baseColorTexture.index > -1 ? _sponza->GetModel().textures[pbr.baseColorTexture.index].source : -1,
+			.metallicFactor = static_cast<float>(pbr.metallicFactor),
+			.roughnessFactor = static_cast<float>(pbr.roughnessFactor),
+			.metallicRoughnessTexture = pbr.metallicRoughnessTexture.index > -1 ? _sponza->GetModel().textures[pbr.metallicRoughnessTexture.index].source : -1,
+			.emissiveTexture = material.emissiveTexture.index > -1 ? _sponza->GetModel().textures[material.emissiveTexture.index].source : -1,
+			.emissiveFactor = material.emissiveFactor.size() == 3 ? vec3{ static_cast<float>(material.emissiveFactor[0]), static_cast<float>(material.emissiveFactor[1]), static_cast<float>(material.emissiveFactor[2]) } : vec3{1.f, 1.f, 1.f},
+			.alphaMode = material.alphaMode == "BLEND" ? static_cast<int>(ImgnAlphaMode::Blend) : material.alphaMode == "MASK" ? static_cast<int>(ImgnAlphaMode::Mask) : static_cast<int>(ImgnAlphaMode::Opaque),
+			.alphaCutoff = static_cast<float>(material.alphaCutoff),
+			.doubleSided = static_cast<int>(material.doubleSided),
+			.normalTexture = material.normalTexture.index > -1 ? _sponza->GetModel().textures[material.normalTexture.index].source : -1,
+			.normalTextureScale = static_cast<float>(material.normalTexture.scale),
+			.occlusionTexture = material.occlusionTexture.index > -1 ? _sponza->GetModel().textures[material.occlusionTexture.index].source : -1,
+			.occlusionTextureStrength = static_cast<float>(material.occlusionTexture.strength)
+		};
+
+		_sponzaMats.push_back(m);
+	}
 }
 
 void ImgnVulkan::UpdateDescriptorSet(uint32_t pFrameIdx, RenderPassIdx pIdx, vk::Buffer pUniformBuffer, vk::DeviceSize pUniformBufferSize, vk::Buffer pStorageBuffer, vk::DeviceSize pStorageBufferSize, const std::vector<vk::ImageView>& pTextures, vk::Sampler pSampler)
@@ -1967,7 +2056,7 @@ void ImgnVulkan::DrawFrame()
 
 
 	_graph.Execute(_commandBuffers[_frameIdx], *Device::Inst().GetQueue());
-	
+
 	TransitionImageLayout(_commandBuffers[_frameIdx], _swapchainImages[imageIndex], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
 
 	//blit final color for now
@@ -1996,7 +2085,7 @@ void ImgnVulkan::DrawFrame()
 
 		auto finalColor = _graph.GetResource("FinalColor");
 		_commandBuffers[_frameIdx].blitImage(finalColor->image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
-	
+
 		TransitionImageLayout(_commandBuffers[_frameIdx], _swapchainImages[imageIndex], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR);
 	}
 
