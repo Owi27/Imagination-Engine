@@ -4,6 +4,7 @@
 #pragma comment(lib, "dxcompiler.lib")
 using namespace Microsoft::WRL;
 
+constexpr int MaxFramesInFlight = 2;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 constexpr const wchar_t* ComputeTarget = L"cs_6_6";
@@ -72,6 +73,8 @@ class ImgnVulkan
 	ComPtr<IDxcUtils> _utils;
 	ComPtr<IDxcIncludeHandler> _includeHandler;
 
+	RendererCreateInfo _info;
+
 	unique<vk::raii::Context> _ctx;
 	unique<vk::raii::Instance> _instance;
 	unique<vk::raii::Device> _device;
@@ -81,13 +84,17 @@ class ImgnVulkan
 	unique<vk::raii::DebugUtilsMessengerEXT> _debugMessenger;
 	unique<vk::raii::SurfaceKHR> _surface;
 
+	std::vector<unique<vk::raii::CommandBuffer>> _commandBuffers;
+
 	/*Swapchain*/
+	vk::Extent2D _swapchainExtent;
 	unique<vk::raii::SwapchainKHR> _swapchain;
-	std::vector<vk::raii::Image> _swapchainImages;
-	std::vector<vk::raii::ImageView> _swapchainImageViews;
+	vk::SurfaceFormatKHR _swapchainSurfaceFormat;
+	std::vector<unique<vk::raii::Image>> _swapchainImages;
+	std::vector<unique<vk::raii::ImageView>> _swapchainImageViews;
 
 	/*Descriptors*/
-	unique<vk::raii::DescriptorPool> _descriptorPool;
+	//unique<vk::raii::DescriptorPool> _descriptorPool;
 	unique<vk::raii::DescriptorSetLayout> _descriptorSetLayout;
 
 	Pipelines _pipelines;
@@ -99,6 +106,13 @@ class ImgnVulkan
 	void PickPhysicalDevice();
 	void SetupDebugMessenger();
 
+
+	uint32_t FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps);
+	vk::Extent2D ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities);
+	uint32_t ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities);
+	vk::PresentModeKHR ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes);
+	vk::SurfaceFormatKHR ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats);
+
 	void CreateDevice();
 	void CreateSurface(void* pWindowHandle);
 	void CreateInstance();
@@ -108,16 +122,19 @@ class ImgnVulkan
 	void CreateSyncObjects();
 	void CreateIndexBuffer();
 	void CreateVertexBuffer();
-	void CreateCommandBuffer();
+	void CreateCommandBuffers();
 	void CreateDepthResources();
 	void CreateUniformBuffers();
-	void CreateDescriptorPool();
-	void CreateDescriptorSets();
+	//void CreateDescriptorPool();
+	//void CreateDescriptorSets();
 	void CreateTextureSampler();
 	void CreateTextureImageView();
 	void CreateGraphicsPipelines();
 	void CreateDescriptorSetLayout();
+
 	void CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage);
+	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer);
+	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
 
 public:
 	/* Class Defaults */

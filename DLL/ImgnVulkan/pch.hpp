@@ -28,6 +28,7 @@ import vulkan_hpp;
 #include <map>
 #include <cstdint>
 #include <limits>
+#include <algorithm>
 
 #pragma once
 #include <wrl/client.h>

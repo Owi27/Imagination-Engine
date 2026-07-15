@@ -236,7 +236,7 @@ std::pair<std::vector<Vertex>, std::vector<uint32_t>> ImgnGLTF::GetVertexData(co
 			v.tan = { t[0], t[1], t[2], t[3] };
 		}
 
-		v.col = { 1.f, 1.f, 1.f };
+		v.clr = { 1.f, 1.f, 1.f };
 
 		vertices.push_back(v);
 	}

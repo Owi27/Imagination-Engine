@@ -8,37 +8,37 @@ constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 constexpr const wchar_t* ComputeTarget = L"cs_6_6";
 
-enum class RendererBackend
-{
-	Vulkan, D3D12, Metal
-};
+//enum class RendererBackend
+//{
+//	Vulkan, D3D12, Metal
+//};
+//
+//struct RendererCreateInfo
+//{
+//	RendererBackend backend = RendererBackend::Vulkan;
+//
+//	void* windowHandle = nullptr, *displayHandle = nullptr;
+//
+//	uint32_t width = 1280, height = 720;
+//
+//	bool enableValidation = true;
+//};
 
-struct RendererCreateInfo
-{
-	RendererBackend backend = RendererBackend::Vulkan;
-
-	void* windowHandle = nullptr, *displayHandle = nullptr;
-
-	uint32_t width = 1280, height = 720;
-
-	bool enableValidation = true;
-};
-
-struct Vertex
-{
-	/*
-	* std::array<float, 3> position{};
-    std::array<float, 3> normal{};
-    std::array<float, 2> uv0{};
-    std::array<float, 4> tangent{};
-    std::array<float, 3> color{ 1.0f, 1.0f, 1.0f };
-	*/
-	vec3 pos;
-	vec3 nrm;
-	vec2 uv0;
-	vec4 tan;
-	vec3 col;
-};
+//struct Vertex
+//{
+//	/*
+//	* std::array<float, 3> position{};
+//    std::array<float, 3> normal{};
+//    std::array<float, 2> uv0{};
+//    std::array<float, 4> tangent{};
+//    std::array<float, 3> color{ 1.0f, 1.0f, 1.0f };
+//	*/
+//	vec3 pos;
+//	vec3 nrm;
+//	vec2 uv0;
+//	vec4 tan;
+//	vec3 col;
+//};
 
 //note to self, renderer only stores external images.
 class ImgnRenderer
@@ -88,4 +88,6 @@ public:
 	uint32_t CreateMaterial(const ImgnMaterialDesc& pDesc);
 	uint32_t AddMaterial(const ImgnMaterial& pMaterial);
 	uint32_t CreateImage(const uint8_t* pImageData, uint32_t pWidth, uint32_t pHeight);
+
+
 };

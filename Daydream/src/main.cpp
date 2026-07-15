@@ -6,6 +6,7 @@ struct TestComp : public ImgnComponent
 	{
 		
 	}
+
 	void Dream(float pDeltaTime) override
 	{
 		//IMGN_INFO("{} Test Comp Update", GetName());

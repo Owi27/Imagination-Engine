@@ -1,5 +1,18 @@
 #pragma once
 
+#define NOMINMAX
+
+#ifdef IMGN_PLATFORM_WINDOWS
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <Windows.h>
+#endif // IMGN_PLATFORM_WINDOWS
+
+#if defined(__INTELLISENSE__) || !defined(USE_CPP20_MODULES)
+#include <vulkan/vulkan_raii.hpp>
+#else
+import vulkan_hpp;
+#endif
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -13,16 +26,9 @@
 #include <chrono>
 
 #include "Imgn/ImgnLog.h"
+#include "Renderer/RenderStructs.h"
+#include "Renderer/EngineShaders.h"
 
-#ifdef IMGN_PLATFORM_WINDOWS
-#include <Windows.h>
-#endif // IMGN_PLATFORM_WINDOWS
-
-#if defined(__INTELLISENSE__) || !defined(USE_CPP20_MODULES)
-#include <vulkan/vulkan_raii.hpp>
-#else
-import vulkan_hpp;
-#endif
 
 //gateware enables
 #define GATEWARE_ENABLE_CORE // All libraries need this

@@ -899,7 +899,7 @@ void ImgnVulkan::CreateCommandBuffer()
 
 	_commandBuffers = vk::raii::CommandBuffers(Device::Inst().GetDevice(), allocInfo);
 }
-
+ 
 void ImgnVulkan::CreateDepthResources()
 {
 	vk::Format depthFormat = FindDepthFormat();

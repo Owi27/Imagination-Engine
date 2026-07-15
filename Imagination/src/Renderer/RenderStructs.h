@@ -1,0 +1,40 @@
+#pragma once
+
+struct Vertex
+{
+	std::array<float, 3> pos;
+	std::array<float, 3> nrm;
+	std::array<float, 2> uv0;
+	std::array<float, 4> tan;
+	std::array<float, 3> clr = { 1.0f, 1.0f, 1.0f };
+
+	//vk
+	static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }
+	static std::array<vk::VertexInputAttributeDescription, 5> GetAttributeDescriptions()
+	{
+		return
+		{
+			vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)),
+			vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, nrm)),
+			vk::VertexInputAttributeDescription(2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, uv0)),
+			vk::VertexInputAttributeDescription(3, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(Vertex, tan)),
+			vk::VertexInputAttributeDescription(4, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, clr)),
+		};
+	}
+};
+
+enum class RendererBackend
+{
+	Vulkan, D3D12, Metal
+};
+
+struct RendererCreateInfo
+{
+	RendererBackend backend = RendererBackend::Vulkan;
+
+	void* windowHandle = nullptr, * displayHandle = nullptr;
+
+	uint32_t width = 1280, height = 720;
+
+	bool enableValidation = true;
+};

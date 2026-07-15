@@ -14,11 +14,11 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSever
 
 void ImgnVulkan::CreateDevice()
 {
-	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = Device::Inst().GetPhysicalDevice().getQueueFamilyProperties();
+	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = _physicalDevice->getQueueFamilyProperties();
 
 	for (uint32_t qfpIndex = 0; qfpIndex < queueFamilyProperties.size(); qfpIndex++)
 	{
-		if ((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) && Device::Inst().GetPhysicalDevice().getSurfaceSupportKHR(qfpIndex, *_surface))
+		if ((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) && _physicalDevice->getSurfaceSupportKHR(qfpIndex, *_surface))
 		{
 			// found a queue family that supports both graphics and present
 			_queueIdx = qfpIndex;
@@ -53,8 +53,8 @@ void ImgnVulkan::CreateDevice()
 		.ppEnabledExtensionNames = _deviceExtensions.data()
 	};
 
-	_device = Unique<vk::raii::Device>(Device::Inst().GetPhysicalDevice(), deviceCreateInfo);
-	_queue = Unique<vk::raii::Queue>(_device, _queueIdx, 0);
+	_device = Unique<vk::raii::Device>(_physicalDevice->createDevice(deviceCreateInfo));
+	_queue = Unique<vk::raii::Queue>(_device->getQueue(_queueIdx, 0));
 }
 
 void ImgnVulkan::CreateSurface(void* pWindowHandle)
@@ -70,7 +70,7 @@ void ImgnVulkan::CreateSurface(void* pWindowHandle)
 		.hwnd = hwnd
 	};
 
-	_surface = Unique<vk::raii::SurfaceKHR>(_instance, surfaceCreateInfo);
+	_surface = Unique<vk::raii::SurfaceKHR>(_instance->createWin32SurfaceKHR(surfaceCreateInfo));
 }
 
 void ImgnVulkan::CreateInstance()
@@ -89,7 +89,7 @@ void ImgnVulkan::CreateInstance()
 	if (_enableValidationLayers) requiredLayers.assign(_instanceLayers.begin(), _instanceLayers.end());
 
 	// Check if the required layers are supported by the Vulkan implementation.
-	auto layerProperties = _ctx.enumerateInstanceLayerProperties();
+	auto layerProperties = _ctx->enumerateInstanceLayerProperties();
 	auto unsupportedLayerIt = std::ranges::find_if(_instanceLayers,
 		[&layerProperties](auto const& requiredLayer)
 		{
@@ -100,7 +100,7 @@ void ImgnVulkan::CreateInstance()
 	if (unsupportedLayerIt != _instanceLayers.end()) throw std::runtime_error("Required layer not supported: " + std::string(*unsupportedLayerIt));
 
 	// Check if the required extensions are supported by the Vulkan implementation.
-	auto extensionProperties = _ctx.enumerateInstanceExtensionProperties();
+	auto extensionProperties = _ctx->enumerateInstanceExtensionProperties();
 	auto unsupportedPropertyIt =
 		std::ranges::find_if(_instanceExtensions,
 			[&extensionProperties](auto const& requiredExtension)
@@ -122,21 +122,21 @@ void ImgnVulkan::CreateInstance()
 		.ppEnabledExtensionNames = _instanceExtensions.data()
 	};
 
-	_instance = Unique<vk::raii::Instance>(_ctx, instanceCreateInfo);
+	_instance = Unique<vk::raii::Instance>(_ctx->createInstance(instanceCreateInfo));
 }
 
 void ImgnVulkan::CreateSwapchain()
 {
-	vk::SurfaceCapabilitiesKHR surfaceCapabilities = Device::Inst().GetPhysicalDevice().getSurfaceCapabilitiesKHR(*_surface);
-	_swapchainExtent = ChooseSwapExtent(surfaceCapabilities);
+	vk::SurfaceCapabilitiesKHR surfaceCapabilities = _physicalDevice->getSurfaceCapabilitiesKHR(*_surface);
+	_swapchainExtent = ChooseSwapchainExtent(surfaceCapabilities);
 
-	uint32_t minImageCount = ChooseSwapMinImageCount(surfaceCapabilities);
+	uint32_t minImageCount = ChooseSwapchainMinImageCount(surfaceCapabilities);
 
-	std::vector<vk::SurfaceFormatKHR> availableFormats = Device::Inst().GetPhysicalDevice().getSurfaceFormatsKHR(*_surface);
-	_swapchainSurfaceFormat = ChooseSwapSurfaceFormat(availableFormats);
+	std::vector<vk::SurfaceFormatKHR> availableFormats = _physicalDevice->getSurfaceFormatsKHR(*_surface);
+	_swapchainSurfaceFormat = ChooseSwapchainSurfaceFormat(availableFormats);
 
-	std::vector<vk::PresentModeKHR> availablePresentModes = Device::Inst().GetPhysicalDevice().getSurfacePresentModesKHR(*_surface);
-	vk::PresentModeKHR presentMode = ChooseSwapPresentMode(availablePresentModes);
+	std::vector<vk::PresentModeKHR> availablePresentModes = _physicalDevice->getSurfacePresentModesKHR(*_surface);
+	vk::PresentModeKHR presentMode = ChooseSwapchainPresentMode(availablePresentModes);
 
 	vk::SwapchainCreateInfoKHR swapchainCreateInfo
 	{
@@ -150,12 +150,19 @@ void ImgnVulkan::CreateSwapchain()
 		.imageSharingMode = vk::SharingMode::eExclusive,
 		.preTransform = surfaceCapabilities.currentTransform,
 		.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-		.presentMode = ChooseSwapPresentMode(availablePresentModes),
+		.presentMode = ChooseSwapchainPresentMode(availablePresentModes),
 		.clipped = true
 	};
 
-	_swapchain = Unique<vk::raii::SwapchainKHR>(Device::Inst().GetDevice(), swapchainCreateInfo);
-	_swapchainImages = _swapchain.getImages();
+	_swapchain = Unique<vk::raii::SwapchainKHR>(_device->createSwapchainKHR(swapchainCreateInfo));
+	_swapchainImages.resize(_swapchain->getImages().size());
+
+	for (uint8_t i = 0; auto& image : _swapchain->getImages())
+	{
+		_swapchainImages[i] = Unique<vk::raii::Image>(image);
+		i++;
+	}
+	//_swapchainImages = _swapchain->getImages();
 }
 
 void ImgnVulkan::CreateSwapchainImageViews()
@@ -165,7 +172,31 @@ void ImgnVulkan::CreateSwapchainImageViews()
 
 	for (auto& image : _swapchainImages)
 	{
-		_swapchainImageViews.emplace_back(CreateImageView(image, _swapchainSurfaceFormat.format, vk::ImageAspectFlagBits::eColor));
+		vk::ImageViewCreateInfo imageViewCreateInfo
+		{
+			.image = *image,
+			.viewType = vk::ImageViewType::e2D,
+			.format = _swapchainSurfaceFormat.format,
+			.components
+			{
+				.r = vk::ComponentSwizzle::eIdentity,
+				.g = vk::ComponentSwizzle::eIdentity,
+				.b = vk::ComponentSwizzle::eIdentity,
+				.a = vk::ComponentSwizzle::eIdentity
+			},
+			.subresourceRange
+			{
+				.aspectMask = vk::ImageAspectFlagBits::eColor,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		//CreateImageView(image, _swapchainSurfaceFormat.format, vk::ImageAspectFlagBits::eColor)
+
+		_swapchainImageViews.emplace_back(Unique<vk::raii::ImageView>(_device->createImageView(imageViewCreateInfo)));
 	}
 }
 
@@ -180,9 +211,29 @@ void ImgnVulkan::CreateCommandPool()
 	_commandPool = Unique<vk::raii::CommandPool>(_device->createCommandPool(poolInfo));
 }
 
+void ImgnVulkan::CreateCommandBuffers()
+{
+	_commandBuffers.clear();
+
+	vk::CommandBufferAllocateInfo allocInfo
+	{
+		.commandPool = *_commandPool,
+		.level = vk::CommandBufferLevel::ePrimary,
+		.commandBufferCount = MaxFramesInFlight
+	};
+
+	_commandBuffers.resize(allocInfo.commandBufferCount);
+
+	for (uint8_t i = 0; auto& commandBuffer : _device->allocateCommandBuffers(allocInfo))
+	{
+		_commandBuffers[i] = Unique<vk::raii::CommandBuffer>(std::move(commandBuffer));
+		i++;
+	}
+}
+
 void ImgnVulkan::PickPhysicalDevice()
 {
-	auto physicalDevices = vk::raii::PhysicalDevices(Device::Inst().GetVkInstance());
+	auto physicalDevices = vk::raii::PhysicalDevices(*_instance);
 	if (physicalDevices.empty()) throw std::runtime_error("failed to find GPUs with Vulkan support!");
 
 	// Use an ordered map to automatically sort candidates by increasing score
@@ -230,69 +281,123 @@ void ImgnVulkan::SetupDebugMessenger()
 	_debugMessenger = Unique<vk::raii::DebugUtilsMessengerEXT>(_instance->createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT));
 }
 
+uint32_t ImgnVulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
+{
+	vk::PhysicalDeviceMemoryProperties memProperties = _physicalDevice->getMemoryProperties();
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+	{
+		if ((pTypeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & pProps) == pProps)
+		{
+			return i;
+		}
+	}
+
+	IMGN_FATAL("failed to find suitable memory type!");
+	throw std::runtime_error("failed to find suitable memory type!");
+}
+
+vk::Extent2D ImgnVulkan::ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+{
+	if (pCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) return pCapabilities.currentExtent;
+
+	return
+	{
+		std::clamp<uint32_t>(_info.width, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
+		std::clamp<uint32_t>(_info.height, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
+	};
+}
+
+uint32_t ImgnVulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+{
+	auto minImageCount = std::max(3u, pCapabilities.minImageCount);
+	if ((0 < pCapabilities.maxImageCount) && (pCapabilities.maxImageCount < minImageCount)) minImageCount = pCapabilities.maxImageCount;
+
+	return minImageCount;
+}
+
+vk::PresentModeKHR ImgnVulkan::ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes)
+{
+	assert(std::ranges::any_of(pAvailablePresentModes, [](auto presentMode) { return presentMode == vk::PresentModeKHR::eFifo; }));
+	return std::ranges::any_of(pAvailablePresentModes,
+		[](const vk::PresentModeKHR value)
+		{
+			return vk::PresentModeKHR::eMailbox == value;
+		}) ? vk::PresentModeKHR::eMailbox : vk::PresentModeKHR::eFifo;
+}
+
+vk::SurfaceFormatKHR ImgnVulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats)
+{
+	const auto formatIter = std::ranges::find_if(pAvailableFormats, [](const auto& format)
+		{
+			return format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+		});
+
+	return formatIter != pAvailableFormats.end() ? *formatIter : pAvailableFormats[0];
+}
+
 void ImgnVulkan::CreateGraphicsPipelines()
 {
 	auto CreateSPV = [this](const std::string& pShader, const std::wstring& pTarget, const std::wstring& pEntryPoint = L"main") -> std::vector<uint32_t>
-	{
-		std::vector<uint32_t> spv;
-
-		DxcBuffer sourceBuffer;
-		sourceBuffer.Ptr = pShader.c_str();
-		sourceBuffer.Size = pShader.size();
-		sourceBuffer.Encoding = DXC_CP_ACP;
-
-		std::vector<LPCWSTR> args
 		{
-			L"-spirv",
-			L"-T",
-			pTarget.c_str(),
-			L"-E",
-			pEntryPoint.c_str(),
-	#ifndef NDEBUG
-			L"-Zi",
-			L"-Qembed_debug"
-	#endif // NDEBUG
+			std::vector<uint32_t> spv;
+
+			DxcBuffer sourceBuffer;
+			sourceBuffer.Ptr = pShader.c_str();
+			sourceBuffer.Size = pShader.size();
+			sourceBuffer.Encoding = DXC_CP_ACP;
+
+			std::vector<LPCWSTR> args
+			{
+				L"-spirv",
+				L"-T",
+				pTarget.c_str(),
+				L"-E",
+				pEntryPoint.c_str(),
+		#ifndef NDEBUG
+				L"-Zi",
+				L"-Qembed_debug"
+		#endif // NDEBUG
+			};
+
+			ComPtr<IDxcResult> result;
+			_compiler->Compile(&sourceBuffer, args.data(), static_cast<uint32_t>(args.size()), _includeHandler.Get(), IID_PPV_ARGS(&result));
+
+			//check for compilation errors
+			ComPtr<IDxcBlobUtf8> errors;
+			if (SUCCEEDED(result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr)) && errors && errors->GetStringLength() > 0)
+			{
+				std::stringstream ss;
+				ss << "Shader compilation errors : " << errors->GetStringPointer();
+				IMGN_FATAL("Shader compilation errors : {}", errors->GetStringPointer());
+				throw std::runtime_error(ss.str());
+			}
+
+			//write compilation to spv
+			ComPtr<IDxcBlob> shaderBlob;
+			if (SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr)))
+			{
+				const uint64_t byteCount = shaderBlob->GetBufferSize();
+
+				spv.resize(byteCount * 0.25f);
+				std::memcpy(spv.data(), shaderBlob->GetBufferPointer(), byteCount);
+			};
+
+			return spv;
 		};
-
-		ComPtr<IDxcResult> result;
-		_compiler->Compile(&sourceBuffer, args.data(), static_cast<uint32_t>(args.size()), _includeHandler.Get(), IID_PPV_ARGS(&result));
-
-		//check for compilation errors
-		ComPtr<IDxcBlobUtf8> errors;
-		if (SUCCEEDED(result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr)) && errors && errors->GetStringLength() > 0)
-		{
-			std::stringstream ss;
-			ss << "Shader compilation errors : " << errors->GetStringPointer();
-			std::cout << ss.str() << '\n';
-			IMGN_FATAL(ss.str());
-			throw std::runtime_error(ss.str());
-		}
-
-		//write compilation to spv
-		ComPtr<IDxcBlob> shaderBlob;
-		if (SUCCEEDED(result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr)))
-		{
-			const uint64_t byteCount = shaderBlob->GetBufferSize();
-
-			spv.resize(byteCount * 0.25f);
-			std::memcpy(spv.data(), shaderBlob->GetBufferPointer(), byteCount);
-		};
-
-		return spv;
-	};
 
 	auto CreateShaderModule = [this](const std::vector<uint32_t>& pCode) -> vk::raii::ShaderModule
-	{
-		vk::ShaderModuleCreateInfo createInfo
 		{
-			.codeSize = pCode.size() * sizeof(uint32_t),
-			.pCode = pCode.data()
+			vk::ShaderModuleCreateInfo createInfo
+			{
+				.codeSize = pCode.size() * sizeof(uint32_t),
+				.pCode = pCode.data()
+			};
+
+			vk::raii::ShaderModule shaderModule(*_device, createInfo);
+
+			return shaderModule;
 		};
-
-		vk::raii::ShaderModule shaderModule(*_device, createInfo);
-
-		return shaderModule;
-	};
 
 	vk::PushConstantRange pcr
 	{
@@ -309,7 +414,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 		.pPushConstantRanges = &pcr
 	};
 
-	_pipelines.pipelineLayout = Unique<vk::raii::PipelineLayout>(_device, pipelineLayoutInfo);
+	_pipelines.pipelineLayout = Unique<vk::raii::PipelineLayout>(_device->createPipelineLayout(pipelineLayoutInfo));
 
 	vk::PipelineColorBlendAttachmentState colorBlendAttachment
 	{
@@ -411,7 +516,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 			.pAttachments = blendStates.data()
 		};
 
-		std::array colorAttachmentFormats = { vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm,  };
+		std::array colorAttachmentFormats = { vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, };
 
 		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
 		{
@@ -463,8 +568,8 @@ void ImgnVulkan::CreateGraphicsPipelines()
 
 		//delete
 		{
-			vk::raii::ShaderModule vertexSM = CreateShaderModule(GetSPV(Shaders::LightingVertexShader, VertexTarget));
-			vk::raii::ShaderModule fragmentSM = CreateShaderModule(GetSPV(Shaders::LightingFragmentShader, FragmentTarget));
+			vk::raii::ShaderModule vertexSM = CreateShaderModule(CreateSPV(Shaders::LightingVertexShader, VertexTarget));
+			vk::raii::ShaderModule fragmentSM = CreateShaderModule(CreateSPV(Shaders::LightingFragmentShader, FragmentTarget));
 
 			vk::PipelineShaderStageCreateInfo vertShaderStageInfo
 			{
@@ -531,6 +636,26 @@ void ImgnVulkan::CreateGraphicsPipelines()
 	}
 }
 
+//void ImgnVulkan::CreateDescriptorPool()
+//{
+//	/*std::array poolSize =
+//	{
+//		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, _totalSets),
+//		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, _totalSets),
+//		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, _totalSets * NumDescriptorsStreaming)
+//	};
+//
+//	vk::DescriptorPoolCreateInfo poolInfo
+//	{
+//		.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
+//		.maxSets = _totalSets,
+//		.poolSizeCount = static_cast<uint32_t>(poolSize.size()),
+//		.pPoolSizes = poolSize.data()
+//	};
+//
+//	_descriptorPool = vk::raii::DescriptorPool(Device::Inst().GetDevice(), poolInfo);*/
+//}
+
 void ImgnVulkan::CreateDescriptorSetLayout()
 {
 	std::array bindings =
@@ -555,12 +680,33 @@ void ImgnVulkan::CreateDescriptorSetLayout()
 	vk::DescriptorSetLayoutCreateInfo layoutInfo
 	{
 		.pNext = &bindingFlags,
-		.flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool,
+		.flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool | vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptor,
 		.bindingCount = static_cast<uint32_t>(bindings.size()),
 		.pBindings = bindings.data()
 	};
 
 	_descriptorSetLayout = Unique<vk::raii::DescriptorSetLayout>(_device->createDescriptorSetLayout(layoutInfo));
+
+
+
+	//vk::raii::CommandBuffer commandBuffer;
+
+	//vk::DescriptorBufferInfo bufferInfo
+	//{
+	//	.buffer = 
+	//}
+	//std::array writes =
+	//{
+	//	vk::WriteDescriptorSet
+	//	{
+	//		.dstSet = 0,
+	//		.dstBinding = 0,
+	//		.descriptorCount = 1,
+	//		.descriptorType = vk::DescriptorType::eUniformBuffer,
+	//		.pBufferInfo = 
+	//	}
+	//}
+	//commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, *_pipelines.pipelineLayout, 0, )
 }
 
 void ImgnVulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage)
@@ -588,6 +734,84 @@ void ImgnVulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspec
 	};
 
 	pImage.view = Unique<vk::raii::ImageView>(_device->createImageView(imageViewCreateInfo));
+}
+
+void ImgnVulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer)
+{
+	vk::BufferCreateInfo bufferCreateInfo
+	{
+		.size = pSize,
+		.usage = pUsage,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	pBuffer.buffer = Unique<vk::raii::Buffer>(_device->createBuffer(bufferCreateInfo));
+
+	vk::MemoryRequirements memReqs = pBuffer.buffer->getMemoryRequirements();
+	vk::MemoryAllocateInfo memoryAllocateInfo
+	{
+		.allocationSize = memReqs.size,
+		.memoryTypeIndex = FindMemoryType(memReqs.memoryTypeBits, pProps)
+	};
+
+	pBuffer.memory = Unique<vk::raii::DeviceMemory>(_device->allocateMemory(memoryAllocateInfo));
+
+	pBuffer.buffer->bindMemory(*pBuffer.memory, 0);
+}
+
+void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage)
+{
+	vk::ImageCreateInfo imageCreateInfo
+	{
+		.imageType = vk::ImageType::e2D,
+		.format = pFormat,
+		.extent = {pWidth , pHeight, 1},
+		.mipLevels = 1,
+		.arrayLayers = 1,
+		.samples = vk::SampleCountFlagBits::e1,
+		.tiling = pTiling,
+		.usage = pUsage,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	pImage.image = Unique<vk::raii::Image>(_device->createImage(imageCreateInfo));
+
+	vk::MemoryRequirements memReqs = pImage.image->getMemoryRequirements();
+	vk::MemoryAllocateInfo memoryAllocateInfo
+	{
+		.allocationSize = memReqs.size,
+		.memoryTypeIndex = FindMemoryType(memReqs.memoryTypeBits, pProps)
+	};
+
+	pImage.memory = Unique<vk::raii::DeviceMemory>(_device->allocateMemory(memoryAllocateInfo));
+	pImage.image->bindMemory(*pImage.memory, 0);
+}
+
+void ImgnVulkan::Init(RendererCreateInfo pCreateInfo)
+{
+	_info = pCreateInfo;
+
+	CreateInstance();
+	SetupDebugMessenger();
+	CreateSurface(_info.windowHandle);
+	PickPhysicalDevice();
+	CreateDevice();
+	CreateSwapchain();
+	CreateSwapchainImageViews();
+	CreateDescriptorSetLayout();
+	CreateGraphicsPipelines();
+	CreateCommandPool();
+	//CreateDepthResources();
+	//CreateTextureImage();
+	//CreateTextureImageView();
+	//CreateTextureSampler();
+	//CreateVertexBuffer();
+	//CreateIndexBuffer();
+	//CreateUniformBuffers();
+	//CreateDescriptorPool();
+	//CreateDescriptorSets();
+	CreateCommandBuffers();
+	CreateSyncObjects();
 }
 
 void ImgnVulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData)
