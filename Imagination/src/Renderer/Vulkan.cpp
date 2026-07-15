@@ -1,6 +1,7 @@
 #include "pch.hpp"
-#include "ImgnVulkan.hpp"
+#include "Vulkan.hpp"
 #include "gltf/stb_image.h"
+#include "EngineShaders.h"
 
 static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity, vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData, void*)
 {
@@ -12,7 +13,7 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSever
 	return vk::False;
 }
 
-void ImgnVulkan::CreateDevice()
+void Vulkan::CreateDevice()
 {
 	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = _physicalDevice->getQueueFamilyProperties();
 
@@ -28,10 +29,11 @@ void ImgnVulkan::CreateDevice()
 
 	if (_queueIdx == ~0) throw std::runtime_error("Could not find a queue for graphics and present -> terminating");
 
-	vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT, vk::PhysicalDeviceDescriptorIndexingFeatures> featureChain =
+	vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceVulkan14Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT, vk::PhysicalDeviceDescriptorIndexingFeatures> featureChain =
 	{
 		{.features = {.samplerAnisotropy = true} },                               // vk::PhysicalDeviceFeatures2 (empty for now)
 		{.synchronization2 = true, .dynamicRendering = true },      // Enable dynamic rendering from Vulkan 1.3
+		{.pushDescriptor = true},
 		{.extendedDynamicState = true },   // Enable extended dynamic state from the extension
 		{.shaderSampledImageArrayNonUniformIndexing = true, .descriptorBindingSampledImageUpdateAfterBind = true, .descriptorBindingUpdateUnusedWhilePending = true, .descriptorBindingPartiallyBound = true, .descriptorBindingVariableDescriptorCount = true, .runtimeDescriptorArray = true}
 	};
@@ -57,7 +59,7 @@ void ImgnVulkan::CreateDevice()
 	_queue = Unique<vk::raii::Queue>(_device->getQueue(_queueIdx, 0));
 }
 
-void ImgnVulkan::CreateSurface(void* pWindowHandle)
+void Vulkan::CreateSurface(void* pWindowHandle)
 {
 	VkSurfaceKHR surface;
 
@@ -73,7 +75,7 @@ void ImgnVulkan::CreateSurface(void* pWindowHandle)
 	_surface = Unique<vk::raii::SurfaceKHR>(_instance->createWin32SurfaceKHR(surfaceCreateInfo));
 }
 
-void ImgnVulkan::CreateInstance()
+void Vulkan::CreateInstance()
 {
 	constexpr vk::ApplicationInfo applicationInfo
 	{
@@ -125,7 +127,7 @@ void ImgnVulkan::CreateInstance()
 	_instance = Unique<vk::raii::Instance>(_ctx->createInstance(instanceCreateInfo));
 }
 
-void ImgnVulkan::CreateSwapchain()
+void Vulkan::CreateSwapchain()
 {
 	vk::SurfaceCapabilitiesKHR surfaceCapabilities = _physicalDevice->getSurfaceCapabilitiesKHR(*_surface);
 	_swapchainExtent = ChooseSwapchainExtent(surfaceCapabilities);
@@ -155,26 +157,19 @@ void ImgnVulkan::CreateSwapchain()
 	};
 
 	_swapchain = Unique<vk::raii::SwapchainKHR>(_device->createSwapchainKHR(swapchainCreateInfo));
-	_swapchainImages.resize(_swapchain->getImages().size());
-
-	for (uint8_t i = 0; auto& image : _swapchain->getImages())
-	{
-		_swapchainImages[i] = Unique<vk::raii::Image>(image);
-		i++;
-	}
-	//_swapchainImages = _swapchain->getImages();
+	_swapchainImages = _swapchain->getImages();
 }
 
-void ImgnVulkan::CreateSwapchainImageViews()
+void Vulkan::CreateSwapchainImageViews()
 {
 	_swapchainImageViews.clear();
-	_swapchainImageViews.reserve(_swapchainImages.size());
+	_swapchainImageViews.resize(_swapchainImages.size());
 
 	for (auto& image : _swapchainImages)
 	{
 		vk::ImageViewCreateInfo imageViewCreateInfo
 		{
-			.image = *image,
+			.image = image,
 			.viewType = vk::ImageViewType::e2D,
 			.format = _swapchainSurfaceFormat.format,
 			.components
@@ -200,7 +195,7 @@ void ImgnVulkan::CreateSwapchainImageViews()
 	}
 }
 
-void ImgnVulkan::CreateCommandPool()
+void Vulkan::CreateCommandPool()
 {
 	vk::CommandPoolCreateInfo poolInfo
 	{
@@ -211,7 +206,7 @@ void ImgnVulkan::CreateCommandPool()
 	_commandPool = Unique<vk::raii::CommandPool>(_device->createCommandPool(poolInfo));
 }
 
-void ImgnVulkan::CreateCommandBuffers()
+void Vulkan::CreateCommandBuffers()
 {
 	_commandBuffers.clear();
 
@@ -231,7 +226,7 @@ void ImgnVulkan::CreateCommandBuffers()
 	}
 }
 
-void ImgnVulkan::PickPhysicalDevice()
+void Vulkan::PickPhysicalDevice()
 {
 	auto physicalDevices = vk::raii::PhysicalDevices(*_instance);
 	if (physicalDevices.empty()) throw std::runtime_error("failed to find GPUs with Vulkan support!");
@@ -262,7 +257,7 @@ void ImgnVulkan::PickPhysicalDevice()
 	else throw std::runtime_error("failed to find a suitable GPU!");
 }
 
-void ImgnVulkan::SetupDebugMessenger()
+void Vulkan::SetupDebugMessenger()
 {
 	if (!_enableValidationLayers) return;
 
@@ -281,7 +276,7 @@ void ImgnVulkan::SetupDebugMessenger()
 	_debugMessenger = Unique<vk::raii::DebugUtilsMessengerEXT>(_instance->createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT));
 }
 
-uint32_t ImgnVulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
+uint32_t Vulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
 {
 	vk::PhysicalDeviceMemoryProperties memProperties = _physicalDevice->getMemoryProperties();
 
@@ -297,7 +292,7 @@ uint32_t ImgnVulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlag
 	throw std::runtime_error("failed to find suitable memory type!");
 }
 
-vk::Extent2D ImgnVulkan::ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+vk::Extent2D Vulkan::ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities)
 {
 	if (pCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) return pCapabilities.currentExtent;
 
@@ -308,7 +303,16 @@ vk::Extent2D ImgnVulkan::ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const&
 	};
 }
 
-uint32_t ImgnVulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+void Vulkan::CopyBuffer(vk::raii::Buffer& pSrc, vk::raii::Buffer& pDst, vk::DeviceSize pSize)
+{
+	unique<vk::raii::CommandBuffer> commandBuffer = StartSingleTimeCommand();
+
+	commandBuffer->copyBuffer(pSrc, pDst, vk::BufferCopy(0, 0, pSize));
+
+	EndSingleTimeCommand(*commandBuffer);
+}
+
+uint32_t Vulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities)
 {
 	auto minImageCount = std::max(3u, pCapabilities.minImageCount);
 	if ((0 < pCapabilities.maxImageCount) && (pCapabilities.maxImageCount < minImageCount)) minImageCount = pCapabilities.maxImageCount;
@@ -316,7 +320,7 @@ uint32_t ImgnVulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR con
 	return minImageCount;
 }
 
-vk::PresentModeKHR ImgnVulkan::ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes)
+vk::PresentModeKHR Vulkan::ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes)
 {
 	assert(std::ranges::any_of(pAvailablePresentModes, [](auto presentMode) { return presentMode == vk::PresentModeKHR::eFifo; }));
 	return std::ranges::any_of(pAvailablePresentModes,
@@ -326,7 +330,7 @@ vk::PresentModeKHR ImgnVulkan::ChooseSwapchainPresentMode(std::vector<vk::Presen
 		}) ? vk::PresentModeKHR::eMailbox : vk::PresentModeKHR::eFifo;
 }
 
-vk::SurfaceFormatKHR ImgnVulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats)
+vk::SurfaceFormatKHR Vulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats)
 {
 	const auto formatIter = std::ranges::find_if(pAvailableFormats, [](const auto& format)
 		{
@@ -336,7 +340,11 @@ vk::SurfaceFormatKHR ImgnVulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::Su
 	return formatIter != pAvailableFormats.end() ? *formatIter : pAvailableFormats[0];
 }
 
-void ImgnVulkan::CreateGraphicsPipelines()
+void Vulkan::CopyBufferToImage(uint32_t pWidth, uint32_t pHeight, const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage)
+{
+}
+
+void Vulkan::CreateGraphicsPipelines()
 {
 	auto CreateSPV = [this](const std::string& pShader, const std::wstring& pTarget, const std::wstring& pEntryPoint = L"main") -> std::vector<uint32_t>
 		{
@@ -636,7 +644,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 	}
 }
 
-//void ImgnVulkan::CreateDescriptorPool()
+//void Vulkan::CreateDescriptorPool()
 //{
 //	/*std::array poolSize =
 //	{
@@ -656,7 +664,7 @@ void ImgnVulkan::CreateGraphicsPipelines()
 //	_descriptorPool = vk::raii::DescriptorPool(Device::Inst().GetDevice(), poolInfo);*/
 //}
 
-void ImgnVulkan::CreateDescriptorSetLayout()
+void Vulkan::CreateDescriptorSetLayout()
 {
 	std::array bindings =
 	{
@@ -668,7 +676,7 @@ void ImgnVulkan::CreateDescriptorSetLayout()
 	std::array flags =
 	{
 		vk::DescriptorBindingFlags{}, vk::DescriptorBindingFlags{},
-		vk::DescriptorBindingFlagBits::eVariableDescriptorCount | vk::DescriptorBindingFlagBits::ePartiallyBound | vk::DescriptorBindingFlagBits::eUpdateAfterBind | vk::DescriptorBindingFlagBits::eUpdateUnusedWhilePending
+		vk::DescriptorBindingFlagBits::ePartiallyBound
 	};
 
 	vk::DescriptorSetLayoutBindingFlagsCreateInfo bindingFlags
@@ -709,7 +717,7 @@ void ImgnVulkan::CreateDescriptorSetLayout()
 	//commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, *_pipelines.pipelineLayout, 0, )
 }
 
-void ImgnVulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage)
+void Vulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage)
 {
 	vk::ImageViewCreateInfo imageViewCreateInfo
 	{
@@ -736,7 +744,7 @@ void ImgnVulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspec
 	pImage.view = Unique<vk::raii::ImageView>(_device->createImageView(imageViewCreateInfo));
 }
 
-void ImgnVulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer)
+void Vulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer)
 {
 	vk::BufferCreateInfo bufferCreateInfo
 	{
@@ -759,7 +767,7 @@ void ImgnVulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage,
 	pBuffer.buffer->bindMemory(*pBuffer.memory, 0);
 }
 
-void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage)
+void Vulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage)
 {
 	vk::ImageCreateInfo imageCreateInfo
 	{
@@ -787,7 +795,7 @@ void ImgnVulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pForm
 	pImage.image->bindMemory(*pImage.memory, 0);
 }
 
-void ImgnVulkan::Init(RendererCreateInfo pCreateInfo)
+void Vulkan::Init(RendererCreateInfo pCreateInfo)
 {
 	_info = pCreateInfo;
 
@@ -811,30 +819,83 @@ void ImgnVulkan::Init(RendererCreateInfo pCreateInfo)
 	//CreateDescriptorPool();
 	//CreateDescriptorSets();
 	CreateCommandBuffers();
-	CreateSyncObjects();
+	//CreateSyncObjects();
 }
 
-void ImgnVulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData)
+Buffer Vulkan::CreateVertexBuffer(void* pData, uint64_t pSize)
 {
-	//vk::DeviceSize imageSize = pWidth * pHeight * 4;
+	Buffer vertexBuffer;
 
-	//Buffer staging = {};
-	//CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+	vk::BufferCreateInfo stagingInfo
+	{
+		.size = pSize,
+		.usage = vk::BufferUsageFlagBits::eTransferSrc,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
 
-	//void* data = staging.memory.mapMemory(0, imageSize);
-	//memcpy(data, pData, imageSize);
-	//staging.memory.unmapMemory();
+	Buffer staging;
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
 
-	//delete[] pData;
+	void* stagingData = staging.memory->mapMemory(0, stagingInfo.size);
+	memcpy(stagingData, pData, stagingInfo.size);
+	staging.memory->unmapMemory();
 
-	//CreateImage(width, height, vk::Format::eR8G8B8A8Srgb, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, _texture);
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer);
 
-	//TransitionImageLayout(_texture.image, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-	//CopyBufferToImage(staging.buffer, _texture.image, static_cast<uint32_t>(pWidth), static_cast<uint32_t>(pHeight));
-	//TransitionImageLayout(_texture.image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+	CopyBuffer(*staging.buffer, *vertexBuffer.buffer, stagingInfo.size);
+
+	return vertexBuffer;
 }
 
-void ImgnVulkan::CreateTextureImage(const std::string& pFile)
+Buffer Vulkan::CreateIndexBuffer(void* pData, uint64_t pSize)
+{
+	Buffer indexBuffer;
+
+	vk::BufferCreateInfo stagingInfo
+	{
+		.size = pSize,
+		.usage = vk::BufferUsageFlagBits::eTransferSrc,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+
+	Buffer staging;
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+
+	void* stagingData = staging.memory->mapMemory(0, stagingInfo.size);
+	memcpy(stagingData, pData, stagingInfo.size);
+	staging.memory->unmapMemory();
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer);
+
+	CopyBuffer(*staging.buffer, *indexBuffer.buffer, stagingInfo.size);
+
+	return indexBuffer;
+}
+
+Image Vulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData)
+{
+	vk::DeviceSize imageSize = pWidth * pHeight * 4;
+
+	Buffer staging;
+	CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+
+	void* data = staging.memory->mapMemory(0, imageSize);
+	memcpy(data, pData, imageSize);
+	staging.memory->unmapMemory();
+
+	delete[] pData;
+
+	Image texture;
+	CreateImage(pWidth, pHeight, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, texture);
+
+	TransitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *texture.image);
+	CopyBufferToImage(pWidth, pHeight, *staging.buffer, *texture.image);
+	TransitionImageLayout(vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *texture.image);
+
+	return texture;
+}
+
+Image Vulkan::CreateTextureImage(const std::string& pFile)
 {
 	int width, height, channels;
 
@@ -843,18 +904,136 @@ void ImgnVulkan::CreateTextureImage(const std::string& pFile)
 
 	vk::DeviceSize imageSize = width * height * 4;
 
-	//Buffer staging = {};
-	//CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+	Buffer staging;
+	CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
 
-	//void* data = staging.memory.mapMemory(0, imageSize);
-	//memcpy(data, pixels, imageSize);
-	//staging.memory.unmapMemory();
+	void* data = staging.memory->mapMemory(0, imageSize);
+	memcpy(data, pixels, imageSize);
+	staging.memory->unmapMemory();
 
-	//stbi_image_free(pixels);
+	stbi_image_free(pixels);
 
-	//CreateImage(width, height, vk::Format::eR8G8B8A8Srgb, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, _texture);
+	Image texture;
+	CreateImage(static_cast<int>(width), static_cast<int>(height), vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, texture);
 
-	//TransitionImageLayout(_texture.image, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-	//CopyBufferToImage(staging.buffer, _texture.image, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
-	//TransitionImageLayout(_texture.image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
+	TransitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *texture.image);
+	CopyBufferToImage(static_cast<int>(width), static_cast<int>(height), *staging.buffer, *texture.image);
+	TransitionImageLayout(vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *texture.image);
+
+	return texture;
+}
+
+void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect)
+{
+	vk::ImageMemoryBarrier barrier
+	{
+		.oldLayout = pOldLayout,
+		.newLayout = pNewLayout,
+		.image = pImage,
+		.subresourceRange = { pAspect, 0, 1, 0, 1 }
+	};
+
+	vk::PipelineStageFlags srcStage;
+	vk::PipelineStageFlags dstStage;
+
+	if (pOldLayout == vk::ImageLayout::eUndefined && pNewLayout == vk::ImageLayout::eTransferDstOptimal)
+	{
+		barrier.srcAccessMask = {};
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+		srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		dstStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		srcStage = vk::PipelineStageFlagBits::eTransfer;
+		dstStage = vk::PipelineStageFlagBits::eFragmentShader;
+	}
+	// 3. Color Attachment -> Transfer Source (Preparing your Lighting-Output for the Blit)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::eTransferSrcOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
+		srcStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		dstStage = vk::PipelineStageFlagBits::eTransfer;
+	}
+	// 4. Undefined/Present -> Color Attachment (Preparing Swapchain for rendering)
+	else if ((pOldLayout == vk::ImageLayout::eUndefined || pOldLayout == vk::ImageLayout::ePresentSrcKHR) &&
+		pNewLayout == vk::ImageLayout::eColorAttachmentOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+		barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		dstStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	}
+	// 5. Color Attachment -> Present (Sending Swapchain to monitor)
+	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		srcStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		dstStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	// 6. Transfer Dest -> Present (After Blit to Swapchain)
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::ePresentSrcKHR)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eNone;
+		srcStage = vk::PipelineStageFlagBits::eTransfer;
+		dstStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+	}
+	else
+	{
+		throw std::invalid_argument("unsupported layout transition!");
+	}
+
+	pCommandBuffer.pipelineBarrier(srcStage, dstStage, {}, nullptr, nullptr, barrier);
+}
+
+void Vulkan::TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect)
+{
+	unique<vk::raii::CommandBuffer> commandBuffer = StartSingleTimeCommand(); // Returns your unique/raii object
+
+	// Pass the raw handle (*commandBuffer) to the worker
+	TransitionImageLayout(*commandBuffer, pOldLayout, pNewLayout, pImage, pAspect);
+
+	EndSingleTimeCommand(*commandBuffer);
+}
+
+unique<vk::raii::CommandBuffer> Vulkan::StartSingleTimeCommand()
+{
+	vk::CommandBufferAllocateInfo allocInfo
+	{
+		.commandPool = *_commandPool,
+		.level = vk::CommandBufferLevel::ePrimary,
+		.commandBufferCount = 1
+	};
+
+	unique<vk::raii::CommandBuffer> commandBuffer = Unique<vk::raii::CommandBuffer>(std::move(_device->allocateCommandBuffers(allocInfo).front()));
+
+	vk::CommandBufferBeginInfo beginInfo
+	{
+		.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+	};
+
+	commandBuffer->begin(beginInfo);
+
+	return commandBuffer;
+}
+
+void Vulkan::EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer)
+{
+	pCommandBuffer.end();
+
+	vk::SubmitInfo submitInfo
+	{
+		.commandBufferCount = 1,
+		.pCommandBuffers = &*pCommandBuffer
+	};
+
+	_queue->submit(submitInfo, nullptr);
+	_queue->waitIdle();
 }

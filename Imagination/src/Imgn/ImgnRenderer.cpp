@@ -228,7 +228,10 @@ void ImgnRenderer::Init(RendererCreateInfo pCreateInfo)
 	switch (_info.backend)
 	{
 	case RendererBackend::Vulkan:
-		_vkCtx.InitVulkanCtx(static_cast<HWND>(_info.windowHandle), _info.width, _info.height);
+		{
+			_vkCtx = Unique<Vulkan>();
+			_vkCtx->Init(_info);
+		}
 		break;
 	case RendererBackend::D3D12:
 		break;
@@ -245,7 +248,7 @@ void ImgnRenderer::DrawFrame()
 	switch (_info.backend)
 	{
 	case RendererBackend::Vulkan:
-		_vkCtx.DrawFrame();
+		//_vkCtx.DrawFrame();
 		break;
 	case RendererBackend::D3D12:
 		break;
@@ -260,23 +263,23 @@ void ImgnRenderer::DrawFrame()
 
 void ImgnRenderer::CompileGraph()
 {
-	_vkCtx.CompileGraph();
+	//_vkCtx.CompileGraph();
 }
 
 void ImgnRenderer::UploadMesh(const Vertex* pVertices, uint64_t pVertexCount)
 {
-	ImgnVulkan::Vertex* vertices = new ImgnVulkan::Vertex[pVertexCount];
+	/*ImgnVulkan::Vertex* vertices = new ImgnVulkan::Vertex[pVertexCount];
 
 	memcpy(vertices, pVertices, sizeof(Vertex) * pVertexCount);
 
 	_vkCtx.UploadMesh(vertices, pVertexCount);
 
-	delete[] vertices;
+	delete[] vertices;*/
 }
 
 void ImgnRenderer::UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount)
 {
-	_vkCtx.UploadIndices(pIndices, pIndexCount);
+	//_vkCtx.UploadIndices(pIndices, pIndexCount);
 }
 
 uint32_t ImgnRenderer::AddMesh(const ImgnMesh& pMesh)
@@ -292,7 +295,7 @@ uint32_t ImgnRenderer::CreateBuffer(const ImgnBufferDesc& pDesc)
 	{
 	case RendererBackend::Vulkan:
 		{
-			vk::BufferUsageFlags usage;
+			/*vk::BufferUsageFlags usage;
 
 			if (HasFlag(pDesc.usage, ImgnBufferUsage::Vertex)) usage |= vk::BufferUsageFlagBits::eVertexBuffer;
 			if (HasFlag(pDesc.usage, ImgnBufferUsage::Index)) usage |= vk::BufferUsageFlagBits::eIndexBuffer;
@@ -301,7 +304,7 @@ uint32_t ImgnRenderer::CreateBuffer(const ImgnBufferDesc& pDesc)
 			if (HasFlag(pDesc.usage, ImgnBufferUsage::TransferSrc)) usage |= vk::BufferUsageFlagBits::eTransferSrc;
 			if (HasFlag(pDesc.usage, ImgnBufferUsage::TransferDst)) usage |= vk::BufferUsageFlagBits::eTransferDst;
 
-			_vkCtx.CreateBuffer(pDesc.name, pDesc.size, usage, pDesc.data);
+			_vkCtx.CreateBuffer(pDesc.name, pDesc.size, usage, pDesc.data);*/
 		}
 		break;
 	case RendererBackend::D3D12:
@@ -320,7 +323,7 @@ uint32_t ImgnRenderer::CreateImage(ImgnImageDesc pDesc)
 	{
 	case RendererBackend::Vulkan:
 		{
-			vk::ImageUsageFlags usage;
+			/*vk::ImageUsageFlags usage;
 
 			if (HasFlag(pDesc.usage, ImgnImageUsage::ColorAttachment)) usage |= vk::ImageUsageFlagBits::eColorAttachment;
 			if (HasFlag(pDesc.usage, ImgnImageUsage::Storage)) usage |= vk::ImageUsageFlagBits::eStorage;
@@ -337,7 +340,7 @@ uint32_t ImgnRenderer::CreateImage(ImgnImageDesc pDesc)
 			_images.push_back(std::move(image));
 
 			_renderGraph.AddResource(pDesc.name, pDesc.format, pDesc.extent, pDesc.usage, ImgnImageLayout::Undefined_ImageLayout, ImgnImageLayout::ShaderReadOnly_ImageLayout, ImgnAspect::Color_Aspect);
-			return static_cast<uint32_t>(_images.size() - 1);
+			return static_cast<uint32_t>(_images.size() - 1);*/
 		}
 		break;
 	case RendererBackend::D3D12:
@@ -347,8 +350,8 @@ uint32_t ImgnRenderer::CreateImage(ImgnImageDesc pDesc)
 	default:
 		break;
 	}
-	return 0;
 
+	return 0;
 }
 
 //uint32_t ImgnRenderer::CreateTexture(const ImgnTextureDesc& pDesc)
@@ -368,28 +371,51 @@ uint32_t ImgnRenderer::AddMaterial(const ImgnMaterial& pMaterial)
 	return static_cast<uint32_t>(_materials.size() - 1);
 }
 
-uint32_t ImgnRenderer::CreateImage(const uint8_t* pImageData, uint32_t pWidth, uint32_t pHeight)
+uint32_t ImgnRenderer::CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData)
 {
-	ImgnImage image
-	{
-		.handle = static_cast<uint32_t>(_images.size())
-	};
+	///*ImgnImage image
+	//{
+	//	.handle = static_cast<uint32_t>(_images.size())
+	//};*/
 
-	switch (_info.backend)
-	{
-	case RendererBackend::Vulkan:
-		image .vkImage = _vkCtx.CreateImage(pImageData, pWidth, pHeight);
-		break;
-	case RendererBackend::D3D12:
-		break;
-	case RendererBackend::Metal:
-		break;
-	default:
-		break;
-	}
+	//switch (_info.backend)
+	//{
+	//case RendererBackend::Vulkan:
+	//	image .vkImage = _vkCtx->CreateTextureImage(pWidth, pHeight, pImageData);
+	//	break;
+	//case RendererBackend::D3D12:
+	//	break;
+	//case RendererBackend::Metal:
+	//	break;
+	//default:
+	//	break;
+	//}
 
-	_images.push_back(std::move(image));
-	return static_cast<uint32_t>(_images.size() - 1);
+	//_images.push_back(std::move(image));
+	//return static_cast<uint32_t>(_images.size() - 1);
+	return 0;
+}
+
+uint32_t ImgnRenderer::CreateVertexBuffer(std::vector<Vertex>& pVertices)
+{
+	_buffers.push_back(_vkCtx->CreateVertexBuffer(pVertices.data(), pVertices.size() * sizeof(Vertex)));
+
+	return static_cast<uint32_t>(_buffers.size() - 1);
+}
+
+uint32_t ImgnRenderer::CreateIndexBuffer(std::vector<uint32_t>& pIndices)
+{
+	_buffers.push_back(_vkCtx->CreateIndexBuffer(pIndices.data(), pIndices.size() * sizeof(uint32_t)));
+
+	return static_cast<uint32_t>(_buffers.size() - 1);
+}
+
+void ImgnRenderer::BeginScene()
+{
+}
+
+void ImgnRenderer::EndScene()
+{
 }
 
 //void ImgnRenderer::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)

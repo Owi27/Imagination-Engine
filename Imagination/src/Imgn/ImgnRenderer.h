@@ -1,13 +1,16 @@
 #pragma once
-#include <ImgnVulkan.hpp>
+//#include <ImgnVulkan.hpp>
 #include "ImgnRenderResources.h"
 #include "ImgnRenderGraph.h"
+#include "Renderer/Vulkan.hpp"
 
-constexpr uint32_t NumDescriptorsStreaming = 2048;
-constexpr const wchar_t* VertexTarget = L"vs_6_6";
-constexpr const wchar_t* FragmentTarget = L"ps_6_6";
-constexpr const wchar_t* ComputeTarget = L"cs_6_6";
-
+namespace Imgn
+{
+	constexpr uint32_t NumDescriptorsStreaming = 2048;
+	constexpr const wchar_t* VertexTarget = L"vs_6_6";
+	constexpr const wchar_t* FragmentTarget = L"ps_6_6";
+	constexpr const wchar_t* ComputeTarget = L"cs_6_6";
+}
 //enum class RendererBackend
 //{
 //	Vulkan, D3D12, Metal
@@ -43,15 +46,19 @@ constexpr const wchar_t* ComputeTarget = L"cs_6_6";
 //note to self, renderer only stores external images.
 class ImgnRenderer
 {
-	ImgnRenderGraph _renderGraph;
-	ImgnVulkan::Ctx _vkCtx;
+	//ImgnRenderGraph _renderGraph;
+	unique<Vulkan> _vkCtx;
 	uint32_t _w, _h;
 	void SetupDeferedRenderer();
 
 	RendererCreateInfo _info;
 
-	std::vector<ImgnImage> _images;
-	std::vector<ImgnBuffer> _buffers;
+	//std::vector<ImgnImage> _images;
+	//std::vector<ImgnBuffer> _buffers;
+
+	std::vector<Image> _images;
+	std::vector<Buffer> _buffers;
+
 	std::vector<ImgnMesh> _meshes;
 	std::vector<ImgnMaterial> _materials;
 
@@ -87,7 +94,14 @@ public:
 	uint32_t CreateImage(ImgnImageDesc pDesc);
 	uint32_t CreateMaterial(const ImgnMaterialDesc& pDesc);
 	uint32_t AddMaterial(const ImgnMaterial& pMaterial);
-	uint32_t CreateImage(const uint8_t* pImageData, uint32_t pWidth, uint32_t pHeight);
+	uint32_t CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData);
 
+	uint32_t CreateVertexBuffer(std::vector<Vertex>& pVertices);
+	uint32_t CreateIndexBuffer(std::vector<uint32_t>& pIndices);
 
+	Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
+	Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
+
+	void BeginScene();
+	void EndScene();
 };

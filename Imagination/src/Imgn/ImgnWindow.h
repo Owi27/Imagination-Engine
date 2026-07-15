@@ -53,7 +53,24 @@ public:
 
         _ctx->Init(createInfo);
         IMGN_CORE_INFO("Graphics ctx initialized");
-        
+
+        std::vector vertices =
+        {
+            Vertex
+            {
+                .pos = { 0.f, .5f, 0.f}
+            },
+            Vertex
+            {
+                .pos = { .5f, -.5f, 0.f}
+            },
+            Vertex
+            {
+                .pos = { -.5f, -.5f, 0.f}
+            }
+        };
+
+        uint32_t vertexBuffer = _ctx->CreateVertexBuffer(vertices);
     }
 
     /*virtual*/ ~ImgnWindow()

@@ -186,10 +186,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{D4C3CA30-A98C-357A-96C4-C3ACFD0AF936}</Project>
       <Name>IMGN</Name>
     </ProjectReference>
-    <ProjectReference Include="D:\GitHub\Imagination-Engine\build\ImgnVulkan.vcxproj">
-      <Project>{C094A958-2859-35A8-A5F1-333669BFA0C3}</Project>
-      <Name>ImgnVulkan</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

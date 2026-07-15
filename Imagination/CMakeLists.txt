@@ -9,11 +9,11 @@ target_precompile_headers(IMGN PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/pch.hpp)
 
 target_include_directories(IMGN PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_definitions(IMGN PRIVATE IMGN_BUILD_DLL PUBLIC IMGN_PLATFORM_WINDOWS IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
-target_link_libraries(IMGN PUBLIC Vulkan::Vulkan ImgnVulkan)
+target_link_libraries(IMGN PUBLIC Vulkan::Vulkan)
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Sources/VulkanDispatcher.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 set_target_properties(IMGN PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination OBJECT_OUTPUTS_DIRECTORY ${OBJ_DIR}/Imagination)
 
-add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}/Daydream COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:IMGN>" "${OUTPUT_DIR}/Daydream" COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImgnVulkan>" "${OUTPUT_DIR}/Daydream")
+add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}/Daydream COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:IMGN>" "${OUTPUT_DIR}/Daydream") # COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImgnVulkan>" "${OUTPUT_DIR}/Daydream")
 
-add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ImgnVulkan> $<TARGET_FILE_DIR:IMGN>)
+#add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ImgnVulkan> $<TARGET_FILE_DIR:IMGN>)

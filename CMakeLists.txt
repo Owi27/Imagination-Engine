@@ -18,7 +18,6 @@ file(GLOB_RECURSE IMGUI_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/In
 
 add_executable(Extract
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Spike.hlsl
     ${HEADERS}
     ${SOURCES}
     ${IMGUI_SOURCES}
@@ -32,7 +31,7 @@ target_link_options(Extract PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/SUBSYSTEM:CONSOLE>
 )
 
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Spike.hlsl ${HEADERS} ${SOURCES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${HEADERS} ${SOURCES})
 
 target_include_directories(Extract PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Includes
@@ -59,24 +58,24 @@ set_source_files_properties(
 message(STATUS "Main file = ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 message(STATUS "Sources = ${SOURCES}")
 
-file(GLOB_RECURSE ImgnVulkanFiles CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.h ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.cpp)
+#file(GLOB_RECURSE ImgnVulkanFiles CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.h ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.hpp ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/*.cpp)
 # file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Sources/*.cpp)
-add_library(ImgnVulkan SHARED ${ImgnVulkanFiles}
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/main.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/framework.hpp
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.hpp 
-${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
-
-target_include_directories(ImgnVulkan PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan)
-target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
-
-target_compile_definitions(ImgnVulkan PRIVATE IMGN_VULKAN_BUILD_DLL PUBLIC IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
-
-target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
-
-target_precompile_headers(ImgnVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp)
+#add_library(ImgnVulkan SHARED ${ImgnVulkanFiles}
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/main.cpp
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.cpp
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/framework.hpp
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.hpp 
+#${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/ImgnVulkan.cpp)
+#
+#target_include_directories(ImgnVulkan PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan)
+#target_compile_features(ImgnVulkan PUBLIC cxx_std_23)
+#
+#target_compile_definitions(ImgnVulkan PRIVATE IMGN_VULKAN_BUILD_DLL PUBLIC IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
+#
+#target_link_libraries(ImgnVulkan PUBLIC Vulkan::Vulkan)
+#
+#target_precompile_headers(ImgnVulkan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/DLL/ImgnVulkan/pch.hpp)
 
 
 add_subdirectory(Imagination)

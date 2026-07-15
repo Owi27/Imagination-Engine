@@ -29,7 +29,7 @@ struct Image
 	unique<vk::raii::DeviceMemory> memory;
 };
 
-class ImgnVulkan
+class Vulkan
 {
 #ifdef NDEBUG
 	const bool _enableValidationLayers = false;
@@ -75,7 +75,7 @@ class ImgnVulkan
 
 	RendererCreateInfo _info;
 
-	unique<vk::raii::Context> _ctx;
+	unique<vk::raii::Context> _ctx = Unique<vk::raii::Context>();
 	unique<vk::raii::Instance> _instance;
 	unique<vk::raii::Device> _device;
 	unique<vk::raii::PhysicalDevice> _physicalDevice;
@@ -90,7 +90,7 @@ class ImgnVulkan
 	vk::Extent2D _swapchainExtent;
 	unique<vk::raii::SwapchainKHR> _swapchain;
 	vk::SurfaceFormatKHR _swapchainSurfaceFormat;
-	std::vector<unique<vk::raii::Image>> _swapchainImages;
+	std::vector<vk::Image> _swapchainImages;
 	std::vector<unique<vk::raii::ImageView>> _swapchainImageViews;
 
 	/*Descriptors*/
@@ -101,17 +101,18 @@ class ImgnVulkan
 
 	uint32_t _queueIdx = 0, _frameIdx = 0;
 
-	void CleanupSwapchain();
-	void RecreateSwapchain();
+	//void CleanupSwapchain();
+	//void RecreateSwapchain();
 	void PickPhysicalDevice();
 	void SetupDebugMessenger();
 
-
 	uint32_t FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps);
 	vk::Extent2D ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities);
+	void CopyBuffer(vk::raii::Buffer& pSrc, vk::raii::Buffer& pDst, vk::DeviceSize pSize);
 	uint32_t ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities);
 	vk::PresentModeKHR ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes);
 	vk::SurfaceFormatKHR ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats);
+	void CopyBufferToImage(uint32_t pWidth, uint32_t pHeight, const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage);
 
 	void CreateDevice();
 	void CreateSurface(void* pWindowHandle);
@@ -119,16 +120,16 @@ class ImgnVulkan
 	void CreateSwapchain();
 	void CreateSwapchainImageViews();
 	void CreateCommandPool();
-	void CreateSyncObjects();
-	void CreateIndexBuffer();
-	void CreateVertexBuffer();
+	//void CreateSyncObjects();
+	//void CreateIndexBuffer();
+	//void CreateVertexBuffer();
 	void CreateCommandBuffers();
-	void CreateDepthResources();
-	void CreateUniformBuffers();
+	//void CreateDepthResources();
+	//void CreateUniformBuffers();
 	//void CreateDescriptorPool();
 	//void CreateDescriptorSets();
-	void CreateTextureSampler();
-	void CreateTextureImageView();
+	//void CreateTextureSampler();
+	//void CreateTextureImageView();
 	void CreateGraphicsPipelines();
 	void CreateDescriptorSetLayout();
 
@@ -138,20 +139,39 @@ class ImgnVulkan
 
 public:
 	/* Class Defaults */
-	ImgnVulkan()
+	Vulkan()
 	{
 
 	}
 
-	~ImgnVulkan()
+	~Vulkan()
 	{
 
 	}
 
 	/* Class Functions */
 	void Init(RendererCreateInfo pCreateInfo);
+	
+	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
+	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
 
-	void CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
-	void CreateTextureImage(const std::string& pFile);
+	//template<typename T>
+	//void CreateUniformBuffer(void* pData, uint64_t pSize = sizeof(T));
+
+	//template<typename T>
+	//void CreateStorageBuffer(void* pData, uint64_t pSize = sizeof(T));
+
+	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
+	Image CreateTextureImage(const std::string& pFile);
+
+	// For general transitions inside an existing command buffer
+	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
+
+	// For one-off transitions (like texture loading)
+	void TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
+
+
+	unique<vk::raii::CommandBuffer> StartSingleTimeCommand();
+	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer);
 	
 };

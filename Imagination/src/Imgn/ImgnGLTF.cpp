@@ -1,4 +1,4 @@
-#include "D:/GitHub/Imagination-Engine/build/CMakeFiles/Imagination.dir/Debug/cmake_pch.hxx"
+#include "pch.hpp"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -93,7 +93,7 @@ std::vector<uint32_t> ImgnGLTF::LoadGLTFTextures(const tinygltf::Model& pModel, 
 
 	for (const tinygltf::Image& image : pModel.images)
 	{
-		textures.push_back(pRenderer.CreateImage(image.image.data(), image.width, image.height));
+		textures.push_back(pRenderer.CreateImage(image.width, image.height, image.image.data()));
 	}
 
 	return textures;
