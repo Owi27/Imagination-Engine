@@ -4,23 +4,6 @@ struct TestComp : public ImgnComponent
 {
 	TestComp() : ImgnComponent("Tester")
 	{
-		std::array vertices =
-		{
-			Vertex
-			{
-				.pos = { 0.f, .5f, 0.f}
-			},
-			Vertex
-			{
-				.pos = { .5f, -.5f, 0.f}
-			},
-			Vertex
-			{
-				.pos = { -.5f, -.5f, 0.f}
-			}
-		};
-
-		unique<vk::raii::CommandBuffer> commandBuffer;
 
 
 	}
@@ -38,6 +21,25 @@ public:
 	Daydream()
 	{
 		AddComponent<TestComp>();
+
+		std::vector vertices =
+		{
+			Vertex
+			{
+				.pos = { 0.f, .5f, 0.f}
+			},
+			Vertex
+			{
+				.pos = { .5f, -.5f, 0.f}
+			},
+			Vertex
+			{
+				.pos = { -.5f, -.5f, 0.f}
+			}
+		};
+
+		//uint32_t vertexBuffer = Renderer().CreateVertexBuffer(vertices);
+
 	}
 
 	~Daydream()

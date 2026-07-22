@@ -13,6 +13,13 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSever
 	return vk::False;
 }
 
+void Vulkan::CreateDXC()
+{
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&_compiler));
+	DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&_utils));
+	_utils->CreateDefaultIncludeHandler(&_includeHandler);
+}
+
 void Vulkan::CreateDevice()
 {
 	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = _physicalDevice->getQueueFamilyProperties();
@@ -314,7 +321,7 @@ void Vulkan::CopyBuffer(vk::raii::Buffer& pSrc, vk::raii::Buffer& pDst, vk::Devi
 
 uint32_t Vulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities)
 {
-	auto minImageCount = std::max(3u, pCapabilities.minImageCount);
+	auto minImageCount = std::max(2u, pCapabilities.minImageCount);
 	if ((0 < pCapabilities.maxImageCount) && (pCapabilities.maxImageCount < minImageCount)) minImageCount = pCapabilities.maxImageCount;
 
 	return minImageCount;
@@ -556,92 +563,24 @@ void Vulkan::CreateGraphicsPipelines()
 	}
 
 	/* Lighting */
-	{
-		vk::raii::ShaderModule computeSM = CreateShaderModule(CreateSPV(Shaders::LightingComputeShader, ComputeTarget));
+	//{
+	//	vk::raii::ShaderModule computeSM = CreateShaderModule(CreateSPV(Shaders::LightingComputeShader, ComputeTarget));
 
-		vk::PipelineShaderStageCreateInfo computeShaderStageInfo
-		{
-			.stage = vk::ShaderStageFlagBits::eCompute,
-			.module = computeSM,
-			.pName = "main"
-		};
+	//	vk::PipelineShaderStageCreateInfo computeShaderStageInfo
+	//	{
+	//		.stage = vk::ShaderStageFlagBits::eCompute,
+	//		.module = computeSM,
+	//		.pName = "main"
+	//	};
 
-		vk::ComputePipelineCreateInfo computePipelineCreateInfo
-		{
-			.stage = computeShaderStageInfo,
-			.layout = *_pipelines.pipelineLayout
-		};
+	//	vk::ComputePipelineCreateInfo computePipelineCreateInfo
+	//	{
+	//		.stage = computeShaderStageInfo,
+	//		.layout = *_pipelines.pipelineLayout
+	//	};
 
-		_pipelines.lightingPipeline = Unique<vk::raii::Pipeline>(_device->createComputePipeline(nullptr, computePipelineCreateInfo));
-
-		//delete
-		{
-			vk::raii::ShaderModule vertexSM = CreateShaderModule(CreateSPV(Shaders::LightingVertexShader, VertexTarget));
-			vk::raii::ShaderModule fragmentSM = CreateShaderModule(CreateSPV(Shaders::LightingFragmentShader, FragmentTarget));
-
-			vk::PipelineShaderStageCreateInfo vertShaderStageInfo
-			{
-				.stage = vk::ShaderStageFlagBits::eVertex,
-				.module = vertexSM,
-				.pName = "main"
-			};
-
-			vk::PipelineShaderStageCreateInfo fragShaderStageInfo
-			{
-				.stage = vk::ShaderStageFlagBits::eFragment,
-				.module = fragmentSM,
-				.pName = "main"
-			};
-
-			std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
-
-			vk::PipelineVertexInputStateCreateInfo vertexInputInfo
-			{
-				.vertexBindingDescriptionCount = 0,
-				.pVertexBindingDescriptions = nullptr,
-				.vertexAttributeDescriptionCount = 0,
-				.pVertexAttributeDescriptions = nullptr
-			};
-
-			vk::PipelineRasterizationStateCreateInfo rasterizer
-			{
-				.depthClampEnable = vk::False,
-				.rasterizerDiscardEnable = vk::False,
-				.polygonMode = vk::PolygonMode::eFill,
-				.cullMode = vk::CullModeFlagBits::eNone,
-				.frontFace = vk::FrontFace::eCounterClockwise,
-				.depthBiasEnable = vk::False,
-				.depthBiasSlopeFactor = 1.0f,
-				.lineWidth = 1.0f
-			};
-
-			vk::PipelineColorBlendStateCreateInfo colorBlending
-			{
-				.logicOpEnable = vk::False,
-				.logicOp = vk::LogicOp::eCopy,
-				.attachmentCount = 1,
-				.pAttachments = &colorBlendAttachment
-			};
-
-			std::array colorAttachment = { vk::Format::eR8G8B8A8Unorm };
-			vk::Format depthFormat = vk::Format::eD32Sfloat;
-
-			vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
-			{
-				.colorAttachmentCount = colorAttachment.size(),
-				.pColorAttachmentFormats = colorAttachment.data(),
-				.depthAttachmentFormat = depthFormat
-			};
-
-			pipelineInfo.pNext = &pipelineRenderingCreateInfo;
-			pipelineInfo.pStages = shaderStages.data();
-			pipelineInfo.pVertexInputState = &vertexInputInfo;
-			pipelineInfo.pRasterizationState = &rasterizer;
-			pipelineInfo.pColorBlendState = &colorBlending;
-
-			//_pipelines.lightingPipeline = vk::raii::Pipeline(Device::Inst().GetDevice(), nullptr, pipelineInfo);
-		}
-	}
+	//	_pipelines.lightingPipeline = Unique<vk::raii::Pipeline>(_device->createComputePipeline(nullptr, computePipelineCreateInfo));
+	//}
 }
 
 //void Vulkan::CreateDescriptorPool()
@@ -670,10 +609,10 @@ void Vulkan::CreateDescriptorSetLayout()
 	{
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
 		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
-		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eCombinedImageSampler, NumDescriptorsStreaming, vk::ShaderStageFlagBits::eFragment, nullptr)
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eCombinedImageSampler, 30, vk::ShaderStageFlagBits::eFragment, nullptr)
 	};
 
-	std::array flags =
+	std::array<vk::DescriptorBindingFlags, 3> flags =
 	{
 		vk::DescriptorBindingFlags{}, vk::DescriptorBindingFlags{},
 		vk::DescriptorBindingFlagBits::ePartiallyBound
@@ -799,6 +738,7 @@ void Vulkan::Init(RendererCreateInfo pCreateInfo)
 {
 	_info = pCreateInfo;
 
+	CreateDXC();
 	CreateInstance();
 	SetupDebugMessenger();
 	CreateSurface(_info.windowHandle);

@@ -114,6 +114,7 @@ class Vulkan
 	vk::SurfaceFormatKHR ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats);
 	void CopyBufferToImage(uint32_t pWidth, uint32_t pHeight, const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage);
 
+	void CreateDXC();
 	void CreateDevice();
 	void CreateSurface(void* pWindowHandle);
 	void CreateInstance();

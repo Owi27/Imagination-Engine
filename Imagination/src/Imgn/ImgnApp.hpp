@@ -12,18 +12,22 @@ class IMGN_API ImgnApp
 	bool _running = true;
 	unique<ImgnWindow> _window;
 	ImgnEntity _entity;
+	unique<ImgnRenderer> _renderer;
 
 public:
 	ImgnApp()
 	{
 		//if (!_instance) _instance.reset(new ImgnApp());
 
-		_window = std::make_unique<ImgnWindow>();
+		_window = Unique<ImgnWindow>();
+		_renderer = Unique<ImgnRenderer>();
+		
+		_renderer->Init(_window->GetRendererCreateInfo());
+		IMGN_CORE_INFO("Graphics ctx initialized");
 
-		ImgnRenderer r;
 
-		ImgnGLTF gl;
-		gl.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", r);
+		//ImgnGLTF gl;
+		//gl.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", r);
 	}
 
 	~ImgnApp()
@@ -37,6 +41,7 @@ public:
 		return *_instance; 
 	}
 	inline ImgnWindow& GetWindow() { return *_window; }
+	inline ImgnRenderer& Renderer() { return *_renderer; }
 
 	void Run();
 	void OnEvent(Event& pEvent);

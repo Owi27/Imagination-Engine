@@ -23,7 +23,6 @@ class IMGN_API ImgnWindow
     GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE _windowHandle;
     uint32_t _width = 1280, _height = 720;
     GEventResponder _responder;
-    unique<ImgnRenderer> _ctx;
 
 public:
     using EventCallbackFn = std::function<void(Event&)>;
@@ -45,36 +44,23 @@ public:
 
         _window.GetWindowHandle(_windowHandle);
 
-        _ctx = std::make_unique<ImgnRenderer>();
-        RendererCreateInfo createInfo
-        {
-            .windowHandle = _windowHandle.window,
-        };
-
-        _ctx->Init(createInfo);
-        IMGN_CORE_INFO("Graphics ctx initialized");
-
-        std::vector vertices =
-        {
-            Vertex
-            {
-                .pos = { 0.f, .5f, 0.f}
-            },
-            Vertex
-            {
-                .pos = { .5f, -.5f, 0.f}
-            },
-            Vertex
-            {
-                .pos = { -.5f, -.5f, 0.f}
-            }
-        };
-
-        uint32_t vertexBuffer = _ctx->CreateVertexBuffer(vertices);
     }
 
     /*virtual*/ ~ImgnWindow()
     {
 
+    }
+
+    void* GetWindowHandle() { return _windowHandle.window; }
+    RendererCreateInfo GetRendererCreateInfo(bool pValidation = true, RendererBackend pBackend = RendererBackend::Vulkan)
+    {
+        return RendererCreateInfo
+        {
+            .backend = pBackend,
+            .windowHandle = _windowHandle.window,
+            .width = _width,
+            .height = _height,
+            .enableValidation = pValidation
+        };
     }
 };
