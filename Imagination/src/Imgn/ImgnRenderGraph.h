@@ -11,7 +11,7 @@ namespace Imgn
 		std::vector<std::string_view> bufferIN;
 		std::vector<std::string_view> bufferOUT;
 
-		std::function<vk::raii::CommandBuffer& ()> Execute;
+		std::function<void(vk::raii::CommandBuffer&)> Execute;
 	};
 
 	class ImgnRenderGraph

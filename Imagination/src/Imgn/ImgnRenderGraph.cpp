@@ -187,6 +187,12 @@ namespace Imgn
 		// Transform resource descriptions into actual GPU objects
 		for (auto& [name, image] : _images)
 		{
+			if (name.contains("Depth"))
+			{
+				image = _vk.CreateDepthImage(GetImageWidthFromKey(name), GetImageHeightFromKey(name));
+				continue;
+			}
+
 			std::vector<uint8_t> newImageData(width * height, 0); //all black image
 
 			image = _vk.CreateTextureImage(GetImageWidthFromKey(name), GetImageHeightFromKey(name), newImageData.data());

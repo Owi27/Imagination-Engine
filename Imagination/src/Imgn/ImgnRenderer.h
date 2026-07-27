@@ -72,6 +72,16 @@ namespace Imgn
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
 
+		std::string MakeBufferKey(std::string_view pName, uint64_t pSize) { _graph->MakeBufferKey(pName, pSize); }
+		std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight) { _graph->MakeImageKey(pName, pWidth, pHeight); }
+
+		Image& GetRenderGraphImage(std::string_view pName) { return _graph->GetImage(pName); }
+		Buffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
+
+		vk::raii::Pipeline& GetGBufferPipeline() { return *_vkCtx->_pipelines.gBufferPipeline; }
+		vk::raii::PipelineLayout& GetPipelineLayout() { return *_vkCtx->_pipelines.pipelineLayout; }
+
+
 		void StartFrame();
 		void EndFrame();
 

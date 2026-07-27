@@ -828,6 +828,16 @@ vk::raii::Semaphore Vulkan::CreateVkSemaphore()
 	return _device->createSemaphore(vk::SemaphoreCreateInfo());
 }
 
+Image Vulkan::CreateDepthImage(uint32_t pWidth, uint32_t pHeight)
+{
+	Image depth;
+	
+	CreateImage(_swapchainExtent.width, _swapchainExtent.height, vk::Format::eD32Sfloat, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal, depth);
+	CreateImageView(vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth, depth);
+
+	return depth;
+}
+
 Image Vulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData)
 {
 	vk::DeviceSize imageSize = pWidth * pHeight * 4;
@@ -843,6 +853,7 @@ Image Vulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_
 
 	Image texture;
 	CreateImage(pWidth, pHeight, vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, texture);
+	CreateImageView(vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eDepth, texture);
 
 	TransitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *texture.image);
 	CopyBufferToImage(pWidth, pHeight, *staging.buffer, *texture.image);
@@ -871,6 +882,7 @@ Image Vulkan::CreateTextureImage(const std::string& pFile)
 
 	Image texture;
 	CreateImage(static_cast<int>(width), static_cast<int>(height), vk::Format::eR8G8B8A8Unorm, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, texture);
+	CreateImageView(vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eDepth, texture);
 
 	TransitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, *texture.image);
 	CopyBufferToImage(static_cast<int>(width), static_cast<int>(height), *staging.buffer, *texture.image);

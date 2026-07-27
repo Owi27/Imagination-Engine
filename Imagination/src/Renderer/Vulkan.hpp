@@ -97,8 +97,6 @@ class Vulkan
 	//unique<vk::raii::DescriptorPool> _descriptorPool;
 	unique<vk::raii::DescriptorSetLayout> _descriptorSetLayout;
 
-	Pipelines _pipelines;
-
 	uint32_t _queueIdx = 0, _frameIdx = 0;
 
 	//void CleanupSwapchain();
@@ -139,6 +137,8 @@ class Vulkan
 	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
 
 public:
+	Pipelines _pipelines;
+
 	/* Class Defaults */
 	Vulkan()
 	{
@@ -166,6 +166,7 @@ public:
 	//template<typename T>
 	//void CreateStorageBuffer(void* pData, uint64_t pSize = sizeof(T));
 
+	Image CreateDepthImage(uint32_t pWidth, uint32_t pHeight);
 	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
 	Image CreateTextureImage(const std::string& pFile);
 
