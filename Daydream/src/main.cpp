@@ -38,7 +38,9 @@ public:
 			}
 		};
 
-		//uint32_t vertexBuffer = Renderer().CreateVertexBuffer(vertices);
+		uint32_t vertexBuffer = Renderer().CreateVertexBuffer(vertices);
+
+
 
 	}
 

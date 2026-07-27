@@ -1,8 +1,206 @@
-#include "D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx"
+#include "pch.hpp"
 #include "ImgnRenderGraph.h"
 
-//uint32_t ImgnRenderGraph::AddResource(const std::string& pName, ImgnFormat pFormat, ImgnExtent3D pExtent, ImgnImageUsage pUsage, ImgnImageLayout pInitialLayout, ImgnImageLayout pFinalLayout, ImgnAspect pAspect)
-//{
-//	//ImgnVulkan::Ctx::CreateImage()
-//	return 0;
-//}
+namespace Imgn
+{
+	std::string ImgnRenderGraph::MakeBufferKey(std::string_view pName, uint64_t pSize)
+	{
+		return std::format("{}|size={}", pName, pSize);
+	}
+
+	std::string ImgnRenderGraph::MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight)
+	{
+		return std::format("{}|width={}|height={}", pName, pWidth, pHeight);
+	}
+
+	uint64_t ImgnRenderGraph::GetBufferSizeFromKey(std::string_view pKey)
+	{
+		constexpr std::string_view token = "|size=";
+
+		const uint32_t pos = pKey.rfind(token);
+
+		if (pos == std::string_view::npos)
+		{
+			IMGN_FATAL("buffer key doesn't contain size: {}", pKey);
+		}
+
+		const std::string_view size = pKey.substr(pos + token.size());
+
+		uint64_t bufferSize = 0;
+
+		const auto [end, error] = std::from_chars(size.data(), size.data() + size.size(), bufferSize);
+
+		return bufferSize;
+	}
+
+	uint32_t ImgnRenderGraph::GetImageWidthFromKey(std::string_view pKey)
+	{
+		constexpr std::string_view token = "|width=";
+
+		const uint32_t pos = pKey.find(token);
+
+		if (pos == std::string_view::npos)
+		{
+			IMGN_FATAL("image key doesn't contain width: {}", pKey);
+		}
+
+		const size_t valueStart = pos + token.size();
+		const size_t valueEnd = pKey.find('|', valueStart);
+
+		const std::string_view widthText = pKey.substr(valueStart, valueEnd == std::string_view::npos ? std::string_view::npos : valueEnd - valueStart);
+
+		uint32_t width = 0;
+
+		const auto [end, error] = std::from_chars(widthText.data(), widthText.data() + widthText.size(), width);
+
+		return width;
+	}
+
+	uint32_t ImgnRenderGraph::GetImageHeightFromKey(std::string_view pKey)
+	{
+		constexpr std::string_view token = "|height=";
+
+		const uint32_t position = pKey.rfind(token);
+
+		if (position == std::string_view::npos)
+		{
+			IMGN_FATAL("image key doesn't contain height: {}", pKey);
+		}
+
+		const std::string_view heightText = pKey.substr(position + token.size());
+
+		uint32_t height = 0;
+
+		const auto [end, error] = std::from_chars(heightText.data(), heightText.data() + heightText.size(), height);
+
+		return height;
+	}
+
+	void ImgnRenderGraph::Compile()
+	{
+		std::vector<std::vector<size_t>> dependencies(_passes.size());  // What each pass depends on
+		std::vector<std::vector<size_t>> dependents(_passes.size());    // What depends on each pass
+
+		// Track which pass produces each resource (write-after-write dependencies)
+		std::unordered_map<std::string, size_t> resourceWriters;
+
+		// Dependency Discovery Through Resource Usage Analysis
+		// Analyze each pass to determine data flow relationships
+		for (int i = 0; auto& pass : _passes)
+		{
+			for (const auto& output : pass.imageOUT)
+			{
+				resourceWriters[output] = i; //set the idx of the pass that writes the output
+			}
+
+			for (const auto& output : pass.bufferOUT)
+			{
+				resourceWriters[output] = i; //set the idx of the pass that writes the output
+			}
+
+			i++;
+		}
+
+		for (int i = 0; auto& pass : _passes)
+		{
+			for (const auto& input : pass.imageIN)
+			{
+				auto it = resourceWriters.find(input);
+				if (it != resourceWriters.end())
+				{
+					// Found the pass that produces this input - create dependency link
+					dependencies[i].push_back(it->second);      // This pass depends on the producer
+					dependents[it->second].push_back(i);        // Producer has this as dependent
+				}
+			}
+
+			for (const auto& input : pass.bufferIN)
+			{
+				auto it = resourceWriters.find(input);
+				if (it != resourceWriters.end())
+				{
+					// Found the pass that produces this input - create dependency link
+					dependencies[i].push_back(it->second);      // This pass depends on the producer
+					dependents[it->second].push_back(i);        // Producer has this as dependent
+				}
+			}
+
+			i++;
+		}
+
+		// Topological Sort for Optimal Execution Order
+		// Use depth-first search to compute valid execution sequence while detecting cycles
+		std::vector<bool> visited(_passes.size(), false);       // Track completed nodes
+		std::vector<bool> inStack(_passes.size(), false);       // Track current recursion path
+
+		std::function<void(size_t)> visit = [&](size_t node)
+			{
+				if (inStack[node])
+				{
+					// Cycle detection - circular dependency found
+					IMGN_FATAL("Cycle detected in RenderGraph")
+						throw std::runtime_error("Cycle detected in rendergraph");
+				}
+
+				if (visited[node])
+				{
+					return;  // Already processed this node and its dependencies
+				}
+
+				inStack[node] = true;   // Mark as currently being processed
+
+				// Recursively process all dependent passes first (post-order traversal)
+				for (auto dependency : dependencies[node])
+				{
+					visit(dependency);
+				}
+
+				inStack[node] = false;  // Remove from current path
+				visited[node] = true;   // Mark as completely processed
+				_executionOrder.push_back(node);  // Add to execution sequence
+			};
+
+		// Process all unvisited nodes to handle disconnected graph components
+		for (size_t i = 0; i < _passes.size(); i++)
+		{
+			if (!visited[i])
+			{
+				visit(i);
+			}
+		}
+
+		//auto& device = ; TODO
+		// Automatic Synchronization Object Creation
+		   // Generate semaphores for all dependencies identified during analysis
+		for (size_t i = 0; i < _passes.size(); i++)
+		{
+			for (auto dep : dependencies[i])
+			{
+				// Create a GPU semaphore for this dependency relationship
+				// The dependent pass will wait on this semaphore before executing
+				_semaphores.emplace_back(Unique<vk::raii::Semaphore>(std::move(_vk.CreateVkSemaphore())));
+				_semaphoreSignalWaitPairs.emplace_back(dep, i);    // (producer, consumer) pair
+			}
+		}
+
+		// Physical Resource Allocation and Creation
+		// Transform resource descriptions into actual GPU objects
+		for (auto& [name, image] : _images)
+		{
+			std::vector<uint8_t> newImageData(width * height, 0); //all black image
+
+			image = _vk.CreateTextureImage(GetImageWidthFromKey(name), GetImageHeightFromKey(name), newImageData.data());
+		}
+
+		for (auto& [name, buffer] : _buffers)
+		{
+			if (name.contains("UB")) buffer = _vk.CreateUniformBuffer(nullptr, GetBufferSizeFromKey(name));
+			if (name.contains("SB")) buffer = _vk.CreateStorageBuffer(nullptr, GetBufferSizeFromKey(name));
+		}
+	}
+
+	void ImgnRenderGraph::AddPass(RenderPass& pPass)
+	{
+		_passes.push_back(pPass);
+	}
+}

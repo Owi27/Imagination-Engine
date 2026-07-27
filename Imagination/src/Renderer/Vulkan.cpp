@@ -766,23 +766,16 @@ Buffer Vulkan::CreateVertexBuffer(void* pData, uint64_t pSize)
 {
 	Buffer vertexBuffer;
 
-	vk::BufferCreateInfo stagingInfo
-	{
-		.size = pSize,
-		.usage = vk::BufferUsageFlagBits::eTransferSrc,
-		.sharingMode = vk::SharingMode::eExclusive
-	};
-
 	Buffer staging;
 	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
 
-	void* stagingData = staging.memory->mapMemory(0, stagingInfo.size);
-	memcpy(stagingData, pData, stagingInfo.size);
+	void* stagingData = staging.memory->mapMemory(0, pSize);
+	memcpy(stagingData, pData, pSize);
 	staging.memory->unmapMemory();
 
 	CreateBuffer(pSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer);
 
-	CopyBuffer(*staging.buffer, *vertexBuffer.buffer, stagingInfo.size);
+	CopyBuffer(*staging.buffer, *vertexBuffer.buffer, pSize);
 
 	return vertexBuffer;
 }
@@ -791,25 +784,48 @@ Buffer Vulkan::CreateIndexBuffer(void* pData, uint64_t pSize)
 {
 	Buffer indexBuffer;
 
-	vk::BufferCreateInfo stagingInfo
-	{
-		.size = pSize,
-		.usage = vk::BufferUsageFlagBits::eTransferSrc,
-		.sharingMode = vk::SharingMode::eExclusive
-	};
-
 	Buffer staging;
 	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
 
-	void* stagingData = staging.memory->mapMemory(0, stagingInfo.size);
-	memcpy(stagingData, pData, stagingInfo.size);
+	void* stagingData = staging.memory->mapMemory(0, pSize);
+	memcpy(stagingData, pData, pSize);
 	staging.memory->unmapMemory();
 
 	CreateBuffer(pSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer);
 
-	CopyBuffer(*staging.buffer, *indexBuffer.buffer, stagingInfo.size);
+	CopyBuffer(*staging.buffer, *indexBuffer.buffer, pSize);
 
 	return indexBuffer;
+}
+
+Buffer Vulkan::CreateUniformBuffer(void* pData, uint64_t pSize)
+{
+	Buffer uniformBuffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, uniformBuffer);
+
+	return uniformBuffer;
+}
+
+Buffer Vulkan::CreateStorageBuffer(void* pData, uint64_t pSize)
+{
+	Buffer storageBuffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, storageBuffer);
+
+	return storageBuffer;
+}
+
+void Vulkan::MapBufferData(void* pData, uint64_t pSize, Buffer* pBuffer)
+{
+	if (!pData) IMGN_WARN("Data trying to be mapped is null");
+
+	std::memcpy(pBuffer->memory->mapMemory(0, pSize), pData, pSize);
+}
+
+vk::raii::Semaphore Vulkan::CreateVkSemaphore()
+{
+	return _device->createSemaphore(vk::SemaphoreCreateInfo());
 }
 
 Image Vulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData)

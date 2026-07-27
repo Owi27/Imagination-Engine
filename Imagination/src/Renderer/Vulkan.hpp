@@ -155,7 +155,11 @@ public:
 	
 	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
+	Buffer CreateUniformBuffer(void* pData, uint64_t pSize);
+	Buffer CreateStorageBuffer(void* pData, uint64_t pSize);
+	void MapBufferData(void* pData, uint64_t pSize, Buffer* pBuffer);
 
+	vk::raii::Semaphore CreateVkSemaphore();
 	//template<typename T>
 	//void CreateUniformBuffer(void* pData, uint64_t pSize = sizeof(T));
 
@@ -171,6 +175,7 @@ public:
 	// For one-off transitions (like texture loading)
 	void TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
 
+	vk::raii::CommandBuffer& GetCurrentCommandBuffer() { return *_commandBuffers[_frameIdx]; }
 
 	unique<vk::raii::CommandBuffer> StartSingleTimeCommand();
 	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer);

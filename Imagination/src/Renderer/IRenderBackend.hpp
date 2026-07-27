@@ -1,4 +1,6 @@
 #pragma once
+#include <stdint.h>
+
 enum class RendererBackend
 {
 	Vulkan, D3D12, Metal
