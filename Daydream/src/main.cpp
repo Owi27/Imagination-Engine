@@ -63,37 +63,92 @@ public:
 			},
 			.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
 			{
-				commandBuffer.beginRendering();
-
-				commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Renderer().GetGBufferPipeline());
-
-				//uniform buffer
-				vk::DescriptorBufferInfo uboInfo
+				std::array colorAttachments =
 				{
-					.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer,
-					.offset = 0,
-					.range = 192
-				};
-
-				const std::array writes
-				{
-					vk::WriteDescriptorSet
+					vk::RenderingAttachmentInfo
 					{
-						.dstSet = nullptr,
-						.dstBinding = 0,
-						.dstArrayElement = 0,
-						.descriptorCount = 1,
-						.descriptorType = vk::DescriptorType::eUniformBuffer,
-						.pBufferInfo = &uboInfo
+						.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("G-BufferAlbedo", GetWindow().GetWidth(), GetWindow().GetHeight())).view,
+						.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+						.loadOp = vk::AttachmentLoadOp::eClear,
+						.storeOp = vk::AttachmentStoreOp::eStore,
+						.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
+					},
+					vk::RenderingAttachmentInfo
+					{
+						.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("G-BufferNormal", GetWindow().GetWidth(), GetWindow().GetHeight())).view,
+						.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+						.loadOp = vk::AttachmentLoadOp::eClear,
+						.storeOp = vk::AttachmentStoreOp::eStore,
+						.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
+					},
+					vk::RenderingAttachmentInfo
+					{
+						.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("G-BufferMaterial", GetWindow().GetWidth(), GetWindow().GetHeight())).view,
+						.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+						.loadOp = vk::AttachmentLoadOp::eClear,
+						.storeOp = vk::AttachmentStoreOp::eStore,
+						.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
+					},
+					vk::RenderingAttachmentInfo
+					{
+						.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("G-BufferEmissive", GetWindow().GetWidth(), GetWindow().GetHeight())).view,
+						.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+						.loadOp = vk::AttachmentLoadOp::eClear,
+						.storeOp = vk::AttachmentStoreOp::eStore,
+						.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
 					},
 				};
 
-				commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, Renderer().GetPipelineLayout(), 0, writes);
+				vk::RenderingAttachmentInfo depthAttachment
+				{
+					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).view,
+					.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+					.loadOp = vk::AttachmentLoadOp::eClear,
+					.storeOp = vk::AttachmentStoreOp::eStore,
+					.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
+				};
+
+				vk::RenderingInfo renderingInfo
+				{
+					.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
+					.layerCount = 1,
+					.colorAttachmentCount = colorAttachments.size(),
+					.pColorAttachments = colorAttachments.data(),
+					.pDepthAttachment = &depthAttachment,
+				};
+
+				commandBuffer.beginRendering(renderingInfo);
+				commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, Renderer().GetGBufferPipeline());
+
+				//push descriptor set
+				{
+					//uniform buffer
+					vk::DescriptorBufferInfo uboInfo
+					{
+						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer,
+						.offset = 0,
+						.range = 192
+					};
+
+					const std::array writes
+					{
+						vk::WriteDescriptorSet
+						{
+							.dstSet = nullptr,
+							.dstBinding = 0,
+							.dstArrayElement = 0,
+							.descriptorCount = 1,
+							.descriptorType = vk::DescriptorType::eUniformBuffer,
+							.pBufferInfo = &uboInfo
+						},
+					};
+
+					commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, Renderer().GetPipelineLayout(), 0, writes);
+				}
 
 				commandBuffer.endRendering();
 			}
 		};
-
 	}
 
 	~Daydream()
