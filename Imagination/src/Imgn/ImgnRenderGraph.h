@@ -6,22 +6,31 @@ namespace Imgn
 	struct IMGN_API RenderPass
 	{
 		std::string name;
-		std::vector<std::string_view> imageIN;
-		std::vector<std::string_view> imageOUT;
-		std::vector<std::string_view> bufferIN;
-		std::vector<std::string_view> bufferOUT;
+		vk::PipelineBindPoint bindPoint;
 
-		std::function<void(vk::raii::CommandBuffer&)> Execute;
+		std::vector<std::string> imageIN;
+		std::vector<std::string> imageOUT;
+		std::vector<std::string> bufferIN;
+		std::vector<std::string> bufferOUT;
+
+		std::function<void(vk::raii::CommandBuffer&/*, uint32_t*/)> Execute;
 	};
 
 	class ImgnRenderGraph
 	{
+		struct RenderGraphFrameResources
+		{
+			std::unordered_map<std::string, RGImage> images;
+			std::unordered_map<std::string, RGBuffer> buffers;
+		};
+		
 		Vulkan& _vk;
 
 		std::vector<uint64_t> _executionOrder;
 		std::vector<RenderPass> _passes;
-		std::unordered_map<std::string_view, Image> _images;
-		std::unordered_map<std::string_view, Buffer> _buffers;
+		std::unordered_map<std::string, RGImage> _images;
+		std::unordered_map<std::string, RGBuffer> _buffers;
+		std::array<RenderGraphFrameResources, 2> _frameResources;
 
 		std::vector<unique<vk::raii::Semaphore>> _semaphores;
 		std::vector<std::pair<uint64_t, uint64_t>> _semaphoreSignalWaitPairs;
@@ -46,10 +55,29 @@ namespace Imgn
 		std::string MakeBufferKey(std::string_view pName, uint64_t pSize);
 		std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight);
 
-		Image& GetImage(std::string_view pName) { return _images[pName]; }
-		Buffer& GetBuffer(std::string_view pName) { return _buffers[pName]; }
+		RGImage& GetImage(std::string_view pName)
+		{
+			auto it = _images.find(std::string(pName));
 
+			if (it == _images.end())
+				throw std::runtime_error(
+					std::format("RenderGraph image not found: {}", pName));
+
+			return it->second;
+		}
+
+		RGBuffer& GetBuffer(std::string_view pName)
+		{
+			auto it = _buffers.find(std::string(pName));
+
+			if (it == _buffers.end())
+				throw std::runtime_error(
+					std::format("RenderGraph buffer not found: {}", pName));
+
+			return it->second;
+		}
 		void Compile();
+		void Execute(vk::raii::CommandBuffer& pCommandBuffer);
 
 		void AddPass(RenderPass& pPass);
 	};

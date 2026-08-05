@@ -6,7 +6,6 @@
 
 namespace Imgn
 {
-	constexpr uint32_t NumDescriptorsStreaming = 2048;
 	constexpr const wchar_t* VertexTarget = L"vs_6_6";
 	constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 	constexpr const wchar_t* ComputeTarget = L"cs_6_6";
@@ -29,7 +28,7 @@ namespace Imgn
 		std::vector<Buffer> _buffers;
 
 		std::vector<ImgnMesh> _meshes;
-		std::vector<ImgnMaterial> _materials;
+		std::vector<Material> _materials;
 
 		std::map<std::string, uint32_t> _renderPassMap; //use pass to get idx
 
@@ -39,7 +38,7 @@ namespace Imgn
 		/* Class Defaults */
 		ImgnRenderer()
 		{
-			_graph = Unique<ImgnRenderGraph>(_vkCtx);
+			
 		}
 
 		~ImgnRenderer()
@@ -55,6 +54,7 @@ namespace Imgn
 
 		void DrawFrame();
 		void CompileGraph();
+		void ExecuteGraph();
 
 		void UploadMesh(const Vertex* pVertices, uint64_t pVertexCount);
 		void UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount);
@@ -63,27 +63,38 @@ namespace Imgn
 		uint32_t CreateBuffer(const ImgnBufferDesc& pDesc);
 		uint32_t CreateImage(ImgnImageDesc pDesc);
 		uint32_t CreateMaterial(const ImgnMaterialDesc& pDesc);
-		uint32_t AddMaterial(const ImgnMaterial& pMaterial);
+		uint32_t AddMaterial(const Material& pMaterial);
 		uint32_t CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData);
 
 		uint32_t CreateVertexBuffer(std::vector<Vertex>& pVertices);
 		uint32_t CreateIndexBuffer(std::vector<uint32_t>& pIndices);
+		uint32_t CreateUniformBuffer(void* pData, uint64_t pSize);
+		uint32_t CreateStorageBuffer(void* pData, uint64_t pSize);
+		uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
+		ImgnMesh GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
+		const Material& GetMaterial(uint32_t pHandle) const { return _materials[pHandle]; }
 
-		std::string MakeBufferKey(std::string_view pName, uint64_t pSize) { _graph->MakeBufferKey(pName, pSize); }
-		std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight) { _graph->MakeImageKey(pName, pWidth, pHeight); }
+		std::string MakeBufferKey(std::string_view pName, uint64_t pSize) { return _graph->MakeBufferKey(pName, pSize); }
+		std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight) { return _graph->MakeImageKey(pName, pWidth, pHeight); }
 
-		Image& GetRenderGraphImage(std::string_view pName) { return _graph->GetImage(pName); }
-		Buffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
+		RGImage& GetRenderGraphImage(std::string_view pName) { return _graph->GetImage(pName); }
+		RGBuffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
 
+		vk::raii::DescriptorSet& GetTextureDescriptorSet() { return _vkCtx->GetTextureDescriptorSet(); }
 		vk::raii::Pipeline& GetGBufferPipeline() { return *_vkCtx->_pipelines.gBufferPipeline; }
+		vk::raii::Pipeline& GetLightingPipeline() { return *_vkCtx->_pipelines.lightingPipeline; }
 		vk::raii::PipelineLayout& GetPipelineLayout() { return *_vkCtx->_pipelines.pipelineLayout; }
 
+		void MapBufferData(std::string_view pKey, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_graph->GetBuffer(pKey).buffer); }
 
-		void StartFrame();
+		void AddPass(RenderPass& pRenderPass) { _graph->AddPass(pRenderPass); }
+
+		bool StartFrame();
 		void EndFrame();
+		void EndFrame(std::string_view pName);
 
 		void BeginScene();
 		void EndScene();

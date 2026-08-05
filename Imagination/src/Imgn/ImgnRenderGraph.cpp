@@ -82,7 +82,7 @@ namespace Imgn
 		std::vector<std::vector<size_t>> dependents(_passes.size());    // What depends on each pass
 
 		// Track which pass produces each resource (write-after-write dependencies)
-		std::unordered_map<std::string, size_t> resourceWriters;
+		std::unordered_map<std::string_view, size_t> resourceWriters;
 
 		// Dependency Discovery Through Resource Usage Analysis
 		// Analyze each pass to determine data flow relationships
@@ -157,6 +157,7 @@ namespace Imgn
 
 				inStack[node] = false;  // Remove from current path
 				visited[node] = true;   // Mark as completely processed
+
 				_executionOrder.push_back(node);  // Add to execution sequence
 			};
 
@@ -172,36 +173,144 @@ namespace Imgn
 		//auto& device = ; TODO
 		// Automatic Synchronization Object Creation
 		   // Generate semaphores for all dependencies identified during analysis
-		for (size_t i = 0; i < _passes.size(); i++)
-		{
-			for (auto dep : dependencies[i])
-			{
-				// Create a GPU semaphore for this dependency relationship
-				// The dependent pass will wait on this semaphore before executing
-				_semaphores.emplace_back(Unique<vk::raii::Semaphore>(std::move(_vk.CreateVkSemaphore())));
-				_semaphoreSignalWaitPairs.emplace_back(dep, i);    // (producer, consumer) pair
-			}
-		}
+		//for (size_t i = 0; i < _passes.size(); i++)
+		//{
+		//	for (auto dep : dependencies[i])
+		//	{
+		//		// Create a GPU semaphore for this dependency relationship
+		//		// The dependent pass will wait on this semaphore before executing
+		//		_semaphores.emplace_back(Unique<vk::raii::Semaphore>(std::move(_vk.CreateVkSemaphore())));
+		//		_semaphoreSignalWaitPairs.emplace_back(dep, i);    // (producer, consumer) pair
+		//	}
+		//}
 
 		// Physical Resource Allocation and Creation
 		// Transform resource descriptions into actual GPU objects
-		for (auto& [name, image] : _images)
+		for (auto& pass : _passes)
 		{
-			if (name.contains("Depth"))
+			for (auto& imageOUT : pass.imageOUT)
 			{
-				image = _vk.CreateDepthImage(GetImageWidthFromKey(name), GetImageHeightFromKey(name));
+				if (imageOUT.contains("Depth"))
+				{
+					_images[imageOUT] = _vk.CreateRenderImage(GetImageWidthFromKey(imageOUT), GetImageHeightFromKey(imageOUT), vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth);
+					continue;
+				}
+
+				std::vector<uint8_t> newImageData(GetImageWidthFromKey(imageOUT) * GetImageHeightFromKey(imageOUT) * 4, 0); //all black image
+
+				_images[imageOUT] = _vk.CreateRenderImage(GetImageWidthFromKey(imageOUT), GetImageHeightFromKey(imageOUT), vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+			}
+		}
+
+		for (auto& pass : _passes)
+		{
+			for (auto& bufferOUT : pass.bufferOUT)
+			{
+				if (bufferOUT.contains("UB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, GetBufferSizeFromKey(bufferOUT), vk::BufferUsageFlagBits::eUniformBuffer);
+				if (bufferOUT.contains("SB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, GetBufferSizeFromKey(bufferOUT), vk::BufferUsageFlagBits::eStorageBuffer);
+			}
+		}
+	}
+
+	void ImgnRenderGraph::Execute(vk::raii::CommandBuffer& pCommandBuffer)
+	{
+		for (auto passIdx : _executionOrder)
+		{
+			const auto& pass = _passes[passIdx];
+
+			for (auto& input : pass.bufferIN)
+			{
+				RGBuffer& resource = _buffers[input];
+
+				vk::BufferMemoryBarrier2 barrier
+				{
+					.srcStageMask = resource.currentStage,
+					.srcAccessMask = resource.currentAccess,
+					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
+					.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
+					.buffer = *resource.buffer.buffer,
+					.offset = 0,
+					.size = VK_WHOLE_SIZE
+				};
+
+				pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
+
+				resource.currentStage = vk::PipelineStageFlagBits2::eAllGraphics;
+				resource.currentAccess = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead;
+			}
+
+
+			for (auto& input : pass.imageIN)
+			{
+				RGImage& resource = _images[input];
+
+				if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
+				{
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect);
+					resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+				}
+			}
+
+			for (auto& output : pass.imageOUT)
+			{
+				RGImage& resource = _images[output];
+				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eColor) ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
+
+				if (resource.currentLayout != target)
+				{
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, target, *resource.image.image, resource.aspect);
+					resource.currentLayout = target;
+				}
+			}
+
+			if (!pass.Execute)
+			{
+				throw std::runtime_error(
+					std::format("Render pass '{}' has no Execute callback", pass.name));
+			}
+
+			pass.Execute(pCommandBuffer);
+
+			for (auto& output : pass.bufferOUT)
+			{
+				RGBuffer& resource = _buffers[output];
+
+				vk::BufferMemoryBarrier2 barrier
+				{
+					.srcStageMask = resource.currentStage,
+					.srcAccessMask = resource.currentAccess,
+					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
+					.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
+					.buffer = *resource.buffer.buffer,
+					.offset = 0,
+					.size = VK_WHOLE_SIZE
+				};
+
+				pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
+
+				resource.currentStage = vk::PipelineStageFlagBits2::eComputeShader;
+				resource.currentAccess = vk::AccessFlagBits2::eShaderWrite;
+			}
+		}
+
+		for (auto& [name, resource] : _images)
+		{
+			if (resource.aspect & vk::ImageAspectFlagBits::eDepth)
+			{
+				if (resource.currentLayout != vk::ImageLayout::eDepthStencilAttachmentOptimal)
+				{
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eDepthStencilAttachmentOptimal, *resource.image.image, resource.aspect);
+					resource.currentLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
+				}
+
 				continue;
 			}
 
-			std::vector<uint8_t> newImageData(width * height, 0); //all black image
-
-			image = _vk.CreateTextureImage(GetImageWidthFromKey(name), GetImageHeightFromKey(name), newImageData.data());
-		}
-
-		for (auto& [name, buffer] : _buffers)
-		{
-			if (name.contains("UB")) buffer = _vk.CreateUniformBuffer(nullptr, GetBufferSizeFromKey(name));
-			if (name.contains("SB")) buffer = _vk.CreateStorageBuffer(nullptr, GetBufferSizeFromKey(name));
+			if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
+			{
+				_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect);
+				resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+			}
 		}
 	}
 

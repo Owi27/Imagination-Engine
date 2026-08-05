@@ -27,6 +27,7 @@ import vulkan_hpp;
 
 #include "Imgn/ImgnLog.h"
 #include "Renderer/RenderStructs.h"
+#include "Renderer/RenderPassStructs.h"
 
 
 //gateware enables

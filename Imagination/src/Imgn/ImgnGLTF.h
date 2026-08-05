@@ -41,26 +41,38 @@
 //};
 
 
-class ImgnGLTF
+namespace Imgn
 {
+	struct ImgnModel
+	{
+		std::vector<uint32_t> materials, meshes;
 
-	std::vector<uint32_t> LoadGLTFTextures(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-	std::vector<uint32_t> LoadGLTFMaterials(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-	std::vector<uint32_t> LoadGLTFMeshes(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-	std::pair<std::vector<Vertex>, std::vector<uint32_t>> GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive);
+		uint32_t materialBuffer = UINT32_MAX;
+		uint64_t materialBufferSize = 0;
+	};
 
-public:
-	/* Class Defaults */
-	ImgnGLTF()
+	class IMGN_API ImgnGLTF
 	{
 
-	}
+		std::vector<uint32_t> LoadGLTFTextures(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
+		std::vector<uint32_t> LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, ImgnRenderer& pRenderer);
+		std::vector<uint32_t> LoadGLTFMeshes(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
+		void CreateMaterialBuffer(const std::vector<uint32_t>& pMaterials, ImgnRenderer& pRenderer, ImgnModel& pModel);
+		std::pair<std::vector<Vertex>, std::vector<uint32_t>> GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive);
 
-	~ImgnGLTF()
-	{
+	public:
+		/* Class Defaults */
+		ImgnGLTF()
+		{
 
-	}
+		}
 
-	/* Class Functions */
-	void LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
-};
+		~ImgnGLTF()
+		{
+
+		}
+
+		/* Class Functions */
+		ImgnModel LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
+	};
+}

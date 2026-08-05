@@ -7,7 +7,7 @@
 
 void ImGuiComponent::OnInit()
 {
-	ImgnApp& app = ImgnApp::Get();
+	Imgn::ImgnApp& app = Imgn::ImgnApp::Get();
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();

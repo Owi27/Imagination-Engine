@@ -1,16 +1,25 @@
 #include "pch.hpp"
 #include "ImgnApp.hpp"
 
-void ImgnApp::Run()
+namespace Imgn
 {
-	while (_running)
+	void ImgnApp::Run()
 	{
-		_entity.Dream(1.f);
-		_window->Dream();
-	}
-}
+		while (_running)
+		{
+			_entity.Dream(1.f);
+			_window->Dream();
 
-void ImgnApp::OnEvent(Event& pEvent)
-{
-	EventDispatcher dispatcher(pEvent);
+			if (_renderer->StartFrame())
+			{
+				_renderer->ExecuteGraph();
+				_renderer->EndFrame(_renderer->MakeImageKey("G-BufferAlbedo", _window->GetWidth(), _window->GetHeight()));
+			}
+		}
+	}
+
+	void ImgnApp::OnEvent(Event& pEvent)
+	{
+		EventDispatcher dispatcher(pEvent);
+	}
 }

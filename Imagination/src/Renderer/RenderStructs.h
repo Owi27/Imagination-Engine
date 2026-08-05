@@ -23,6 +23,37 @@ struct Vertex
 	}
 };
 
+namespace Imgn
+{
+	struct Material
+	{
+		std::array<float, 4> baseColorFactor;
+		std::array<float, 4> emissiveFactor;
+
+		// x = base color
+		// y = metallic/roughness
+		// z = emissive
+		// w = normal
+		std::array<int32_t, 4> textureIndices0;
+
+		// x = occlusion
+		// y = alpha mode
+		// z = double sided
+		// w = unused
+		std::array<int32_t, 4> textureIndices1;
+
+		// x = metallic
+		// y = roughness
+		// z = alpha cutoff
+		// w = normal scale
+		std::array<float, 4> materialFactors;
+
+		// x = occlusion strength
+		// yzw = unused
+		std::array<float, 4> extraFactors;
+	};
+}
+
 enum class RendererBackend
 {
 	Vulkan, D3D12, Metal

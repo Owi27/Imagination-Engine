@@ -14,6 +14,6 @@ uint32_t ImgnWindow::GetWidth()
 
 uint32_t ImgnWindow::GetHeight()
 {
-	_window.GetClientWidth(_height);
+	_window.GetClientHeight(_height);
 	return _height;
 }

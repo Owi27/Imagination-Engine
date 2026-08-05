@@ -233,6 +233,7 @@ namespace Imgn
 			{
 				_vkCtx = Unique<Vulkan>();
 				_vkCtx->Init(_info);
+				_graph = Unique<ImgnRenderGraph>(*_vkCtx);
 			}
 			break;
 		case RendererBackend::D3D12:
@@ -265,7 +266,12 @@ namespace Imgn
 
 	void ImgnRenderer::CompileGraph()
 	{
-		//_vkCtx.CompileGraph();
+		_graph->Compile();
+	}
+
+	void ImgnRenderer::ExecuteGraph()
+	{
+		_graph->Execute(_vkCtx->GetCurrentCommandBuffer());
 	}
 
 	void ImgnRenderer::UploadMesh(const Vertex* pVertices, uint64_t pVertexCount)
@@ -366,7 +372,7 @@ namespace Imgn
 		return 0;
 	}
 
-	uint32_t ImgnRenderer::AddMaterial(const ImgnMaterial& pMaterial)
+	uint32_t ImgnRenderer::AddMaterial(const Material& pMaterial)
 	{
 		_materials.push_back(pMaterial);
 
@@ -375,6 +381,10 @@ namespace Imgn
 
 	uint32_t ImgnRenderer::CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData)
 	{
+		uint32_t handle = static_cast<uint32_t>(_images.size());
+
+		_images.push_back(_vkCtx->CreateTextureImage(pWidth, pHeight, pImageData));
+		_vkCtx->UpdateImageDescriptor(handle, _images[handle]);
 		///*ImgnImage image
 		//{
 		//	.handle = static_cast<uint32_t>(_images.size())
@@ -394,8 +404,7 @@ namespace Imgn
 		//}
 
 		//_images.push_back(std::move(image));
-		//return static_cast<uint32_t>(_images.size() - 1);
-		return 0;
+		return handle;
 	}
 
 	uint32_t ImgnRenderer::CreateVertexBuffer(std::vector<Vertex>& pVertices)
@@ -412,11 +421,44 @@ namespace Imgn
 		return static_cast<uint32_t>(_buffers.size() - 1);
 	}
 
-	void ImgnRenderer::StartFrame()
+	uint32_t ImgnRenderer::CreateUniformBuffer(void* pData, uint64_t pSize)
 	{
-		vk::raii::CommandBuffer& commandBuffer = _vkCtx->GetCurrentCommandBuffer();
+		return 0;
+	}
 
+	uint32_t ImgnRenderer::CreateStorageBuffer(void* pData, uint64_t pSize)
+	{
+		_buffers.push_back(_vkCtx->CreateStorageBuffer(pData, pSize));
 
+		return static_cast<uint32_t>(_buffers.size() - 1);
+	}
+
+	uint32_t ImgnRenderer::CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles)
+	{
+		std::vector<Material> materials;
+		materials.reserve(pMaterialHandles.size());
+
+		for (uint32_t materialHandle : pMaterialHandles)
+		{
+			materials.push_back(GetMaterial(materialHandle));
+		}
+
+		return CreateStorageBuffer(materials.data(), materials.size() * sizeof(Material));
+	}
+
+	bool ImgnRenderer::StartFrame()
+	{
+		return _vkCtx->StartFrame();
+	}
+
+	void ImgnRenderer::EndFrame()
+	{
+		_vkCtx->EndFrame();
+	}
+
+	void ImgnRenderer::EndFrame(std::string_view pName)
+	{
+		_vkCtx->EndFrame(_graph->GetImage(pName));
 	}
 
 	void ImgnRenderer::BeginScene()

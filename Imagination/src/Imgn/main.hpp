@@ -2,11 +2,11 @@
 
 #ifdef IMGN_PLATFORM_WINDOWS
 
-extern ImgnApp* IMGN::CreateApplication();
+extern Imgn::ImgnApp* Imgn::CreateApplication();
 
 int main(int argc, char** argv)
 {
-	ImgnApp* app = IMGN::CreateApplication();
+	Imgn::ImgnApp* app = Imgn::CreateApplication();
 	app->Run();
 
 	delete app;

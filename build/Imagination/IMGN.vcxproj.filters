@@ -58,6 +58,7 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Gateware\Gateware.h">
@@ -141,6 +142,9 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\IRenderBackend.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderPassStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -174,6 +178,7 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\Imagination\CMakeFiles\IMGN.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Imagination\CMakeLists.txt" />

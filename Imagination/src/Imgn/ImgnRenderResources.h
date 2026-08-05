@@ -248,6 +248,7 @@ struct ImgnMesh
     std::vector<ImgnPrimitive> primitives;
 };
 
+
 enum class ImgnAlphaMode
 {
     Opaque,

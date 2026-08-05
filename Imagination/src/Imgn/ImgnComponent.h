@@ -21,7 +21,7 @@ class IMGN_API ImgnComponent
 	enum class State;
 	friend class ImgnEntity;
 
-	unique<ImgnEntity> _owner = nullptr;
+	ImgnEntity* _owner = nullptr;
 	State _state = State::Uninitialized;
 
 	virtual void OnInit() {}
@@ -60,8 +60,8 @@ public:
 	}
 
 	/* Class Functions */
-	void SetOwner(ImgnEntity* pEntity) { _owner.reset(pEntity); }
-	ImgnEntity* GetOwner() const { return _owner.get(); }
+	void SetOwner(ImgnEntity* pEntity) { _owner = pEntity; }
+	ImgnEntity* GetOwner() const { return _owner; }
 	inline const std::string& GetName() const { return _debugName; }
 
 	virtual void Init()

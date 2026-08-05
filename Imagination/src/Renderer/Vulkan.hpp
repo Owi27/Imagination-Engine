@@ -8,7 +8,7 @@ constexpr int MaxFramesInFlight = 2;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
 constexpr const wchar_t* ComputeTarget = L"cs_6_6";
-constexpr uint32_t NumDescriptorsStreaming = 2048;
+constexpr uint32_t NumDescriptorsStreaming = 128;
 
 struct Pipelines
 {
@@ -27,6 +27,24 @@ struct Image
 	unique<vk::raii::Image> image;
 	unique<vk::raii::ImageView> view;
 	unique<vk::raii::DeviceMemory> memory;
+};
+
+struct RGImage //literally just image, but with rendergraph info
+{
+	Image image;
+
+	vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
+	vk::ImageLayout currentLayout = vk::ImageLayout::eUndefined;
+	vk::ImageAspectFlags aspect = vk::ImageAspectFlagBits::eColor;
+	vk::PipelineStageFlags2 currentStage = vk::PipelineStageFlagBits2::eNone;
+};
+
+struct RGBuffer
+{
+	Buffer buffer;
+
+	vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
+	vk::PipelineStageFlags2 currentStage = vk::PipelineStageFlagBits2::eNone;
 };
 
 class Vulkan
@@ -84,7 +102,7 @@ class Vulkan
 	unique<vk::raii::DebugUtilsMessengerEXT> _debugMessenger;
 	unique<vk::raii::SurfaceKHR> _surface;
 
-	std::vector<unique<vk::raii::CommandBuffer>> _commandBuffers;
+	//std::vector<unique<vk::raii::CommandBuffer>> _commandBuffers;
 
 	/*Swapchain*/
 	vk::Extent2D _swapchainExtent;
@@ -94,15 +112,20 @@ class Vulkan
 	std::vector<unique<vk::raii::ImageView>> _swapchainImageViews;
 
 	/*Descriptors*/
-	//unique<vk::raii::DescriptorPool> _descriptorPool;
-	unique<vk::raii::DescriptorSetLayout> _descriptorSetLayout;
+	unique<vk::raii::DescriptorPool> _textureDescriptorPool;
+	unique<vk::raii::DescriptorSet> _textureDescriptorSet;
+	unique<vk::raii::DescriptorSetLayout> _pushDescriptorSetLayout, _textureDescriptorSetLayout;
 
-	uint32_t _queueIdx = 0, _frameIdx = 0;
+	unique<vk::raii::Sampler> _textureSampler;
+
+	uint32_t _queueIdx = 0;// , _frameIdx = 0;
 
 	//void CleanupSwapchain();
 	//void RecreateSwapchain();
+	void RecreateSwapchain();
 	void PickPhysicalDevice();
 	void SetupDebugMessenger();
+	void RecreateSurfaceAndSwapchain();
 
 	uint32_t FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps);
 	vk::Extent2D ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities);
@@ -119,15 +142,15 @@ class Vulkan
 	void CreateSwapchain();
 	void CreateSwapchainImageViews();
 	void CreateCommandPool();
-	//void CreateSyncObjects();
+	void CreateSyncObjects();
 	//void CreateIndexBuffer();
 	//void CreateVertexBuffer();
 	void CreateCommandBuffers();
 	//void CreateDepthResources();
 	//void CreateUniformBuffers();
-	//void CreateDescriptorPool();
-	//void CreateDescriptorSets();
-	//void CreateTextureSampler();
+	void CreateDescriptorPool();
+	void CreateDescriptorSets();
+	void CreateTextureSampler();
 	//void CreateTextureImageView();
 	void CreateGraphicsPipelines();
 	void CreateDescriptorSetLayout();
@@ -136,8 +159,15 @@ class Vulkan
 	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer);
 	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
 
+	uint32_t _activeImageIdx = 0, _frameInFlightIdx = 0;
+	std::array<unique<vk::raii::Fence>, MaxFramesInFlight> _frameFinishedFence;
+	std::array<unique<vk::raii::CommandBuffer>, MaxFramesInFlight> _commandBuffers;
+	std::array<unique<vk::raii::Semaphore>, MaxFramesInFlight> _imageAcquiredSemaphores;
+	std::vector<unique<vk::raii::Semaphore>> _presentationReadySemaphore;
+
 public:
 	Pipelines _pipelines;
+
 
 	/* Class Defaults */
 	Vulkan()
@@ -153,10 +183,17 @@ public:
 	/* Class Functions */
 	void Init(RendererCreateInfo pCreateInfo);
 	
+	bool StartFrame();
+	void EndFrame();
+	void EndFrame(RGImage& pImage);
+
 	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateUniformBuffer(void* pData, uint64_t pSize);
 	Buffer CreateStorageBuffer(void* pData, uint64_t pSize);
+
+	RGBuffer CreateRenderBuffer(void* pData, uint64_t pSize, vk::BufferUsageFlags pUsage);
+
 	void MapBufferData(void* pData, uint64_t pSize, Buffer* pBuffer);
 
 	vk::raii::Semaphore CreateVkSemaphore();
@@ -169,14 +206,19 @@ public:
 	Image CreateDepthImage(uint32_t pWidth, uint32_t pHeight);
 	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
 	Image CreateTextureImage(const std::string& pFile);
+	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect);
+
+	vk::raii::DescriptorSet& GetTextureDescriptorSet() const { return *_textureDescriptorSet; }
+	void UpdateImageDescriptor(uint32_t pSlot, const Image& pImage);
 
 	// For general transitions inside an existing command buffer
 	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
 
 	// For one-off transitions (like texture loading)
 	void TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
+	void TransitionBuffer(vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess, Buffer& pBuffer);
 
-	vk::raii::CommandBuffer& GetCurrentCommandBuffer() { return *_commandBuffers[_frameIdx]; }
+	vk::raii::CommandBuffer& GetCurrentCommandBuffer() { return *_commandBuffers[_frameInFlightIdx]; }
 
 	unique<vk::raii::CommandBuffer> StartSingleTimeCommand();
 	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer);
