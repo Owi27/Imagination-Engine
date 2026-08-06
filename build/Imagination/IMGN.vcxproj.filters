@@ -28,6 +28,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +41,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnMath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderGraph.cpp">
@@ -58,7 +64,6 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Gateware\Gateware.h">
@@ -106,6 +111,9 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnApp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -119,6 +127,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderGraph.h">
@@ -178,7 +189,6 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\Imagination\CMakeFiles\IMGN.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Imagination\CMakeLists.txt" />
