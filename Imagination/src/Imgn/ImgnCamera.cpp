@@ -1,6 +1,5 @@
 #include "pch.hpp"
 #include "ImgnCamera.h"
-#include "ImgnMath.h"
 
 namespace Imgn
 {

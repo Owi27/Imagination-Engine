@@ -12,6 +12,7 @@ namespace Imgn
 		static inline unique<ImgnApp> _instance;
 
 		bool _running = true;
+		std::chrono::steady_clock::time_point _lastFrameTime;
 		unique<ImgnWindow> _window;
 		ImgnEntity _entity;
 		unique<ImgnRenderer> _renderer;

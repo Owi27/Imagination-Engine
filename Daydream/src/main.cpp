@@ -5,12 +5,11 @@ struct TestComp : public ImgnComponent
 	TestComp() : ImgnComponent("Tester")
 	{
 
-
 	}
 
 	void Dream(float pDeltaTime) override
 	{
-		//IMGN_INFO("{} Test Comp Update", GetName());
+		//IMGN_INFO("DeltaTime {}s : {}ms", pDeltaTime, pDeltaTime * 1000.f);
 	}
 
 	/* Class Functions */
@@ -269,13 +268,16 @@ public:
 		Renderer().AddPass(lighting);
 		Renderer().CompileGraph();
 
-		std::array<float, 16> view, proj;
-		GW::MATH::GMatrix::LookAtLHF({ 0.f, 5.f, -5.5f }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, reinterpret_cast<GW::MATH::GMATRIXF&>(view));
-		GW::MATH::GMatrix::ProjectionVulkanLHF(0.785398f, static_cast<float>(GetWindow().GetWidth()) / static_cast<float>(GetWindow().GetHeight()), .1f, 1000.f, reinterpret_cast<GW::MATH::GMATRIXF&>(proj));
+		Imgn::PerspectiveCamera cam;
+		cam.SetViewportSize(GetWindow().GetWidth(), GetWindow().GetHeight());
+		//std::array<float, 16> view = , proj = ;
+		
+		//GW::MATH::GMatrix::LookAtLHF({ 0.f, 5.f, -5.5f }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }, reinterpret_cast<GW::MATH::GMATRIXF&>(view));
+		//GW::MATH::GMatrix::ProjectionVulkanLHF(0.785398f, static_cast<float>(GetWindow().GetWidth()) / static_cast<float>(GetWindow().GetHeight()), .1f, 1000.f, reinterpret_cast<GW::MATH::GMATRIXF&>(proj));
 		Imgn::GBufferUBO gUBO
 		{
-			.viewMatrix = view,
-			.projMatrix = proj
+			.viewMatrix = Imgn::Math::LookAtLH({ 0.f, 5.f, -5.5f }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }),
+			.projMatrix = cam.GetProjection()
 		};
 
 		Renderer().MapBufferData(Renderer().MakeBufferKey("G-BufferUBO", sizeof(Imgn::GBufferUBO)), &gUBO, sizeof(Imgn::GBufferUBO));

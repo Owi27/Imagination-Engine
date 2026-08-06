@@ -2,7 +2,7 @@
 
 namespace Imgn
 {
-	class Math
+	class IMGN_API Math
 	{
 	public:
 		Math() = delete;
@@ -18,6 +18,8 @@ namespace Imgn
 			0.f, 0.f, 0.f, 1.f,
 		};
 
+		static float Radians(float pDegrees) { return pDegrees * .01745329251f; }
+		static float Degrees(float pRadians) { return pRadians * 57.2957795131f; }
 		/* VEC2*/
 		/* VEC3*/
 		
@@ -53,7 +55,7 @@ namespace Imgn
 	/// <param name="lhs"></param>
 	/// <param name="rhs"></param>
 	/// <returns></returns>
-	vec3 operator+(const vec3& lhs, const vec3& rhs)
+	inline vec3 operator+(const vec3& lhs, const vec3& rhs)
 	{
 		return vec3
 		{
@@ -69,7 +71,7 @@ namespace Imgn
 	/// <param name="lhs"></param>
 	/// <param name="rhs"></param>
 	/// <returns></returns>
-	vec3 operator-(const vec3& lhs, const vec3& rhs)
+	inline vec3 operator-(const vec3& lhs, const vec3& rhs)
 	{
 		return vec3
 		{
@@ -85,7 +87,7 @@ namespace Imgn
 	/// <param name="lhs"></param>
 	/// <param name="rhs"></param>
 	/// <returns></returns>
-	vec3 operator*(const vec3& lhs, const vec3& rhs)
+	inline vec3 operator*(const vec3& lhs, const vec3& rhs)
 	{
 		return vec3
 		{

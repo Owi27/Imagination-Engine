@@ -147,6 +147,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderResources.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnTime.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/EngineShaders.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/RenderPassStructs.h"

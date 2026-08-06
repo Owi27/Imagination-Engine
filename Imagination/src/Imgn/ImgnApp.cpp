@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "ImgnApp.hpp"
+#include "ImgnTime.h"
 
 namespace Imgn
 {
@@ -7,7 +8,11 @@ namespace Imgn
 	{
 		while (_running)
 		{
-			_entity.Dream(1.f);
+			auto now = std::chrono::steady_clock::now();
+			Time deltaTime(now - _lastFrameTime);
+			_lastFrameTime = now;
+
+			_entity.Dream(deltaTime);
 			_window->Dream();
 
 			if (_renderer->StartFrame())
