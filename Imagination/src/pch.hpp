@@ -26,6 +26,7 @@ import vulkan_hpp;
 #include <chrono>
 
 #include "Imgn/ImgnLog.h"
+#include "Imgn/ImgnKey.MouseCodes.h"
 #include "Renderer/RenderStructs.h"
 #include "Renderer/RenderPassStructs.h"
 

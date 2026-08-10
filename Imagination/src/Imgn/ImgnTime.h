@@ -2,7 +2,7 @@
 
 namespace Imgn
 {
-	class Time
+	class IMGN_API Time
 	{
 		std::chrono::duration<float> _time;
 

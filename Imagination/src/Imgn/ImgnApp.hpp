@@ -4,6 +4,9 @@
 #include "Events/Event.h"
 #include "ImgnComponent.h"
 #include "ImgnGLTF.h"
+#include "ImgnLayer.h"
+#include "ImgnLayerStack.h"
+#include "ImgnInput.h"
 
 namespace Imgn
 {
@@ -12,6 +15,7 @@ namespace Imgn
 		static inline unique<ImgnApp> _instance;
 
 		bool _running = true;
+		LayerStack _layerStack;
 		std::chrono::steady_clock::time_point _lastFrameTime;
 		unique<ImgnWindow> _window;
 		ImgnEntity _entity;
@@ -21,8 +25,9 @@ namespace Imgn
 		ImgnApp()
 		{
 			//if (!_instance) _instance.reset(new ImgnApp());
-
 			_window = Unique<ImgnWindow>();
+			Input::Get(); //calling this just to create the input instance
+			Input::AttachToWindow(_window->GetUniversalWindowHandle());
 			_renderer = Unique<ImgnRenderer>();
 
 			_renderer->Init(_window->GetRendererCreateInfo());
@@ -43,11 +48,16 @@ namespace Imgn
 			if (!_instance) _instance.reset(new ImgnApp());
 			return *_instance;
 		}
+
 		inline ImgnWindow& GetWindow() { return *_window; }
 		inline ImgnRenderer& Renderer() { return *_renderer; }
 
 		void Run();
 		void OnEvent(Event& pEvent);
+
+		void AddLayer(unique<Layer> pLayer) { _layerStack.AddLayer(std::move(pLayer)); }
+		void AddOverlay(unique<Layer> pLayer) { _layerStack.AddOverlay(std::move(pLayer)); }
+
 
 		template<typename T, typename... Args>
 		T* AddComponent(Args&&... pArgs)

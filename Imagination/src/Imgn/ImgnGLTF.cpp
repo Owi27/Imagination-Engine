@@ -95,7 +95,6 @@ namespace Imgn
 
 		for (const tinygltf::Image& image : pModel.images)
 		{
-			IMGN_INFO("R: {}, G: {}, B{}", image.image[0], image.image[1], image.image[2]);
 			textures.push_back(pRenderer.CreateImage(image.width, image.height, image.image.data()));
 		}
 

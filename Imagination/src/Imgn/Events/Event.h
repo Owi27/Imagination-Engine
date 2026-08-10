@@ -77,6 +77,8 @@ public:
 	{
 	}
 
+	//void SetEvent(Event& pEvent) { _event = pEvent; }
+
 	template<typename T>
 	bool Dispatch(EventFunction<T> pFunc)
 	{

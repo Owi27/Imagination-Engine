@@ -1,25 +1,26 @@
 #include <Imgn.hpp>
 
-struct TestComp : public ImgnComponent
+struct TestLayer : public Imgn::Layer
 {
-	TestComp() : ImgnComponent("Tester")
+	TestLayer() : Layer("Test")
 	{
 
 	}
 
-	void Dream(float pDeltaTime) override
+	virtual void Dream(Imgn::Time pTime) override
 	{
-		//IMGN_INFO("DeltaTime {}s : {}ms", pDeltaTime, pDeltaTime * 1000.f);
+		//IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
 	}
 
 	/* Class Functions */
 };
+
 class Daydream : public Imgn::ImgnApp
 {
 public:
 	Daydream()
 	{
-		AddComponent<TestComp>();
+		AddLayer(Unique<TestLayer>());
 
 		Imgn::ImgnGLTF gltf;
 		Imgn::ImgnModel sponza = gltf.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", Renderer());
@@ -281,7 +282,6 @@ public:
 		};
 
 		Renderer().MapBufferData(Renderer().MakeBufferKey("G-BufferUBO", sizeof(Imgn::GBufferUBO)), &gUBO, sizeof(Imgn::GBufferUBO));
-
 
 		//while (true)
 		//{
