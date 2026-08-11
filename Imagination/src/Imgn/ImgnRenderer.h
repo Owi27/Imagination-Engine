@@ -77,8 +77,8 @@ namespace Imgn
 		ImgnMesh GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
 		const Material& GetMaterial(uint32_t pHandle) const { return _materials[pHandle]; }
 
-		std::string MakeBufferKey(std::string_view pName, uint64_t pSize) { return _graph->MakeBufferKey(pName, pSize); }
-		std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight) { return _graph->MakeImageKey(pName, pWidth, pHeight); }
+		std::string CreateRGBufferDesc(const std::string& pName, uint64_t pSize) { return _graph->CreateRGBufferDesc(pName, pSize); }
+		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat) { return _graph->CreateRGImageDesc(pName, pWidth, pHeight, pFormat); }
 
 		RGImage& GetRenderGraphImage(std::string_view pName) { return _graph->GetImage(pName); }
 		RGBuffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
@@ -88,7 +88,8 @@ namespace Imgn
 		vk::raii::Pipeline& GetLightingPipeline() { return *_vkCtx->_pipelines.lightingPipeline; }
 		vk::raii::PipelineLayout& GetPipelineLayout() { return *_vkCtx->_pipelines.pipelineLayout; }
 
-		void MapBufferData(std::string_view pKey, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_graph->GetBuffer(pKey).buffer); }
+		void MapBufferData(uint32_t pHandle, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_buffers[pHandle]); }
+		void MapRGBufferData(std::string_view pKey, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_graph->GetBuffer(pKey).buffer); }
 
 		void AddPass(RenderPass& pRenderPass) { _graph->AddPass(pRenderPass); }
 

@@ -3,78 +3,111 @@
 
 namespace Imgn
 {
-	std::string ImgnRenderGraph::MakeBufferKey(std::string_view pName, uint64_t pSize)
+	//std::string ImgnRenderGraph::MakeBufferKey(std::string_view pName, uint64_t pSize)
+	//{
+	//	return std::format("{}|size={}", pName, pSize);
+	//}
+
+	//std::string ImgnRenderGraph::MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight)
+	//{
+	//	return std::format("{}|width={}|height={}", pName, pWidth, pHeight);
+	//}
+
+	std::string ImgnRenderGraph::CreateRGBufferDesc(const std::string& pName, uint64_t pSize)
 	{
-		return std::format("{}|size={}", pName, pSize);
-	}
-
-	std::string ImgnRenderGraph::MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight)
-	{
-		return std::format("{}|width={}|height={}", pName, pWidth, pHeight);
-	}
-
-	uint64_t ImgnRenderGraph::GetBufferSizeFromKey(std::string_view pKey)
-	{
-		constexpr std::string_view token = "|size=";
-
-		const uint32_t pos = pKey.rfind(token);
-
-		if (pos == std::string_view::npos)
+		_bufferDesc[pName] = RGBufferDesc
 		{
-			IMGN_FATAL("buffer key doesn't contain size: {}", pKey);
+			.size = pSize
+		};
+
+		return pName;
+	}
+
+	std::string ImgnRenderGraph::CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat)
+	{
+		_imageDesc[pName] = RGImageDesc
+		{
+			.width = pWidth,
+			.height = pHeight,
+			.format = pFormat
+		};
+
+		if (pName.contains("Depth"))
+		{
+			_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eDepth);
+			
+			return pName;
 		}
 
-		const std::string_view size = pKey.substr(pos + token.size());
+		std::vector<uint8_t> newImageData(pWidth * pHeight * 4, 0); //all black image
 
-		uint64_t bufferSize = 0;
+		_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eColor);
 
-		const auto [end, error] = std::from_chars(size.data(), size.data() + size.size(), bufferSize);
-
-		return bufferSize;
+		return pName;
 	}
 
-	uint32_t ImgnRenderGraph::GetImageWidthFromKey(std::string_view pKey)
-	{
-		constexpr std::string_view token = "|width=";
+	//uint64_t ImgnRenderGraph::GetBufferSizeFromKey(std::string_view pKey)
+	//{
+	//	constexpr std::string_view token = "|size=";
 
-		const uint32_t pos = pKey.find(token);
+	//	const uint32_t pos = pKey.rfind(token);
 
-		if (pos == std::string_view::npos)
-		{
-			IMGN_FATAL("image key doesn't contain width: {}", pKey);
-		}
+	//	if (pos == std::string_view::npos)
+	//	{
+	//		IMGN_FATAL("buffer key doesn't contain size: {}", pKey);
+	//	}
 
-		const size_t valueStart = pos + token.size();
-		const size_t valueEnd = pKey.find('|', valueStart);
+	//	const std::string_view size = pKey.substr(pos + token.size());
 
-		const std::string_view widthText = pKey.substr(valueStart, valueEnd == std::string_view::npos ? std::string_view::npos : valueEnd - valueStart);
+	//	uint64_t bufferSize = 0;
 
-		uint32_t width = 0;
+	//	const auto [end, error] = std::from_chars(size.data(), size.data() + size.size(), bufferSize);
 
-		const auto [end, error] = std::from_chars(widthText.data(), widthText.data() + widthText.size(), width);
+	//	return bufferSize;
+	//}
 
-		return width;
-	}
+	//uint32_t ImgnRenderGraph::GetImageWidthFromKey(std::string_view pKey)
+	//{
+	//	constexpr std::string_view token = "|width=";
 
-	uint32_t ImgnRenderGraph::GetImageHeightFromKey(std::string_view pKey)
-	{
-		constexpr std::string_view token = "|height=";
+	//	const uint32_t pos = pKey.find(token);
 
-		const uint32_t position = pKey.rfind(token);
+	//	if (pos == std::string_view::npos)
+	//	{
+	//		IMGN_FATAL("image key doesn't contain width: {}", pKey);
+	//	}
 
-		if (position == std::string_view::npos)
-		{
-			IMGN_FATAL("image key doesn't contain height: {}", pKey);
-		}
+	//	const size_t valueStart = pos + token.size();
+	//	const size_t valueEnd = pKey.find('|', valueStart);
 
-		const std::string_view heightText = pKey.substr(position + token.size());
+	//	const std::string_view widthText = pKey.substr(valueStart, valueEnd == std::string_view::npos ? std::string_view::npos : valueEnd - valueStart);
 
-		uint32_t height = 0;
+	//	uint32_t width = 0;
 
-		const auto [end, error] = std::from_chars(heightText.data(), heightText.data() + heightText.size(), height);
+	//	const auto [end, error] = std::from_chars(widthText.data(), widthText.data() + widthText.size(), width);
 
-		return height;
-	}
+	//	return width;
+	//}
+
+	//uint32_t ImgnRenderGraph::GetImageHeightFromKey(std::string_view pKey)
+	//{
+	//	constexpr std::string_view token = "|height=";
+
+	//	const uint32_t position = pKey.rfind(token);
+
+	//	if (position == std::string_view::npos)
+	//	{
+	//		IMGN_FATAL("image key doesn't contain height: {}", pKey);
+	//	}
+
+	//	const std::string_view heightText = pKey.substr(position + token.size());
+
+	//	uint32_t height = 0;
+
+	//	const auto [end, error] = std::from_chars(heightText.data(), heightText.data() + heightText.size(), height);
+
+	//	return height;
+	//}
 
 	void ImgnRenderGraph::Compile()
 	{
@@ -192,13 +225,13 @@ namespace Imgn
 			{
 				if (imageOUT.contains("Depth"))
 				{
-					_images[imageOUT] = _vk.CreateRenderImage(GetImageWidthFromKey(imageOUT), GetImageHeightFromKey(imageOUT), vk::Format::eD32Sfloat, vk::ImageAspectFlagBits::eDepth);
+					_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eDepth);
 					continue;
 				}
 
-				std::vector<uint8_t> newImageData(GetImageWidthFromKey(imageOUT) * GetImageHeightFromKey(imageOUT) * 4, 0); //all black image
+				std::vector<uint8_t> newImageData(_imageDesc[imageOUT].width* _imageDesc[imageOUT].height * 4, 0); //all black image
 
-				_images[imageOUT] = _vk.CreateRenderImage(GetImageWidthFromKey(imageOUT), GetImageHeightFromKey(imageOUT), vk::Format::eR8G8B8A8Unorm, vk::ImageAspectFlagBits::eColor);
+				_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eColor);
 			}
 		}
 
@@ -206,8 +239,9 @@ namespace Imgn
 		{
 			for (auto& bufferOUT : pass.bufferOUT)
 			{
-				if (bufferOUT.contains("UB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, GetBufferSizeFromKey(bufferOUT), vk::BufferUsageFlagBits::eUniformBuffer);
-				if (bufferOUT.contains("SB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, GetBufferSizeFromKey(bufferOUT), vk::BufferUsageFlagBits::eStorageBuffer);
+				if (bufferOUT.contains("UB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eUniformBuffer);
+				if (bufferOUT.contains("SB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eStorageBuffer);
+
 			}
 		}
 	}

@@ -13,7 +13,10 @@ namespace Imgn
 		GInput _input; //todo remove gw
 		GBufferedInput _bufferedInput; //todo remove gw
 		GEventResponder _responder; //todo remove gw
+		using EventCallbackFn = std::function<void(Event&)>;
+		EventCallbackFn _eventCallback;
 
+		void OnGatewareEvent(const GW::GEvent& pEvent);
 		Input() /*Constructor*/
 		{
 			//_windowHandle = pWindow;
@@ -139,6 +142,7 @@ namespace Imgn
 		bool IsKeyPressedImpl(int pKeyCode);
 		bool IsMouseButtonPressedImpl(int pButton);
 		std::pair<float, float> GetMousePositionImpl();
+		std::pair<float, float> GetMouseDeltaImpl();
 		//float GetMouseXImpl(); float GetMouseYImpl();
 
 	public:
@@ -169,6 +173,11 @@ namespace Imgn
 		static bool IsKeyPressed(int pKeyCode);
 		static bool IsMouseButtonPressed(int pButton);
 		static std::pair<float, float> GetMousePosition();
+		static std::pair<float, float> GetMouseDelta();
 		static float GetMouseX(); static float GetMouseY();
+		static float GetMouseXDelta(); static float GetMouseYDelta();
+
+		//for gateware...
+		static void SetEventCallback(EventCallbackFn pCallback);
 	};
 }

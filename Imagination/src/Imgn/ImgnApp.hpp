@@ -26,8 +26,11 @@ namespace Imgn
 		{
 			//if (!_instance) _instance.reset(new ImgnApp());
 			_window = Unique<ImgnWindow>();
+			_window->SetEventCallback(IMGN_BIND_EVENT_FN(ImgnApp::OnEvent));
 			Input::Get(); //calling this just to create the input instance
 			Input::AttachToWindow(_window->GetUniversalWindowHandle());
+			Input::SetEventCallback([this](Event& pEvent){ OnEvent(pEvent); });
+
 			_renderer = Unique<ImgnRenderer>();
 
 			_renderer->Init(_window->GetRendererCreateInfo());

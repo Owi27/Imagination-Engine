@@ -423,7 +423,9 @@ namespace Imgn
 
 	uint32_t ImgnRenderer::CreateUniformBuffer(void* pData, uint64_t pSize)
 	{
-		return 0;
+		_buffers.push_back(_vkCtx->CreateUniformBuffer(pData, pSize));
+
+		return static_cast<uint32_t>(_buffers.size() - 1);
 	}
 
 	uint32_t ImgnRenderer::CreateStorageBuffer(void* pData, uint64_t pSize)

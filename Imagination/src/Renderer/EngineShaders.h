@@ -83,15 +83,14 @@ struct GBufferPC
 
 struct UniformBuffer
 {
-    matrix view;
-    matrix proj;
+    matrix viewProj;
 };
 ConstantBuffer<UniformBuffer> ubo : register(b0, space0);
 
 VOut main(VIn input)
 {
     VOut output;
-    output.pos = mul(ubo.proj, mul(ubo.view, mul(pc.model, float4(input.pos, 1))));
+    output.pos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
     output.wPos = input.pos;
     output.uv = input.uv;
     output.nrm = input.nrm;

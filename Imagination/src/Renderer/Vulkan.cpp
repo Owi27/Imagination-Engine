@@ -706,7 +706,13 @@ void Vulkan::CreateGraphicsPipelines()
 			.pAttachments = blendStates.data()
 		};
 
-		std::array colorAttachmentFormats = { vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, vk::Format::eR8G8B8A8Unorm, };
+		std::array colorAttachmentFormats = 
+		{ 
+			vk::Format::eR8G8B8A8Srgb,
+			vk::Format::eR8G8B8A8Unorm, 
+			vk::Format::eR8G8B8A8Unorm, 
+			vk::Format::eR8G8B8A8Srgb,
+		};
 
 		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
 		{
@@ -1221,6 +1227,18 @@ Buffer Vulkan::CreateUniformBuffer(void* pData, uint64_t pSize)
 	Buffer uniformBuffer;
 
 	CreateBuffer(pSize, vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, uniformBuffer);
+
+	if (!pData) return uniformBuffer;
+
+	Buffer stagingBuffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer);
+
+	void* mappedData = stagingBuffer.memory->mapMemory(0, pSize);
+	std::memcpy(mappedData, pData, pSize);
+	stagingBuffer.memory->unmapMemory();
+
+	CopyBuffer(*stagingBuffer.buffer, *uniformBuffer.buffer, pSize);
 
 	return uniformBuffer;
 }

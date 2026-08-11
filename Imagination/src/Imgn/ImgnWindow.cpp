@@ -1,19 +1,31 @@
 #include "../pch.hpp"
 #include "ImgnWindow.h"
 
-void ImgnWindow::Dream()
+namespace Imgn
 {
-	_window.ProcessWindowEvents();
-}
+	void ImgnWindow::Dream()
+	{
+		_window.ProcessWindowEvents();
+	}
 
-uint32_t ImgnWindow::GetWidth()
-{
-	_window.GetClientWidth(_width);
-	return _width;
-}
+	uint32_t ImgnWindow::GetWidth()
+	{
+		_window.GetWidth(_width);
+		return _width;
+	}
 
-uint32_t ImgnWindow::GetHeight()
-{
-	_window.GetClientHeight(_height);
-	return _height;
+	uint32_t ImgnWindow::GetHeight()
+	{
+		_window.GetHeight(_height);
+		return _height;
+	}
+
+	float ImgnWindow::GetAspectRatio()
+	{
+		return static_cast<float>(_width) / static_cast<float>(_height);
+	}
+
+	void ImgnWindow::SetEventCallback(const EventCallbackFn& pCallback)
+	{
+	}
 }

@@ -33,6 +33,8 @@ struct RGImage //literally just image, but with rendergraph info
 {
 	Image image;
 
+	uint32_t width = 1, height = 1;
+	vk::Format format = vk::Format::eR8G8B8A8Unorm;
 	vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
 	vk::ImageLayout currentLayout = vk::ImageLayout::eUndefined;
 	vk::ImageAspectFlags aspect = vk::ImageAspectFlagBits::eColor;

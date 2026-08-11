@@ -17,8 +17,7 @@
 #endif // IMGN_ENABLE_ASSERTS
 
 #define BIT(x) (1 << x)
-
-//#include <memory>
+#define IMGN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
 
 template<typename T>
 using unique = std::unique_ptr<T>;

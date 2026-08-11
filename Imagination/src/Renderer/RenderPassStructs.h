@@ -10,7 +10,7 @@ namespace Imgn
 
 	struct GBufferUBO
 	{
-		std::array<float, 16> viewMatrix, projMatrix;
+		std::array<float, 16> viewProj;
 	};
 
 	struct GBufferMaterial

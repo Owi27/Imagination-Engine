@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "ImgnApp.hpp"
 #include "ImgnTime.h"
+#include "ImgnCamera.h"
 
 namespace Imgn
 {
@@ -17,16 +18,11 @@ namespace Imgn
 				layer->Dream(deltaTime);
 			}
 
-			IMGN_CORE_TRACE("x {}, y {}", Input::GetMouseX(), Input::GetMouseY());
+
+			//IMGN_CORE_TRACE("x {}, y {}", Input::GetMouseX(), Input::GetMouseY());
 
 			_entity.Dream(deltaTime);
 			_window->Dream();
-
-			if (_renderer->StartFrame())
-			{
-				_renderer->ExecuteGraph();
-				_renderer->EndFrame(_renderer->MakeImageKey("G-BufferAlbedo", _window->GetWidth(), _window->GetHeight()));
-			}
 		}
 	}
 
