@@ -2,7 +2,7 @@
 
 class TestLayer : public Imgn::Layer
 {
-	float _cameraSpeed = 100.f, _pitch = 0.f, _yaw = 0.f;
+	float _cameraSpeed = 100.f,  _yaw = 0.f;
 	vec3 _camPos = { 0, 0, 0 };
 	Imgn::PerspectiveCamera _camera;
 
@@ -20,7 +20,8 @@ public:
 	{
 		_renderer = pRenderer;
 		_window = pWindow;
-
+		_camera.SetFarPlane(10000.f);
+		_camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
 		Imgn::ImgnGLTF gltf;
 		Imgn::ImgnModel sponza = gltf.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
 
@@ -41,16 +42,7 @@ public:
 				_renderer->CreateRGImageDesc("G-BufferMaterial", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Unorm),
 				_renderer->CreateRGImageDesc("G-BufferEmissive", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Srgb),
 				_renderer->CreateRGImageDesc("Depth", _window->GetWidth(), _window->GetHeight(), vk::Format::eD32Sfloat)
-				/*Renderer().MakeImageKey("G-BufferAlbedo", GetWindow().GetWidth(), GetWindow().GetHeight()),
-				Renderer().MakeImageKey("G-BufferNormal", GetWindow().GetWidth(), GetWindow().GetHeight()),
-				Renderer().MakeImageKey("G-BufferMaterial", GetWindow().GetWidth(), GetWindow().GetHeight()),
-				Renderer().MakeImageKey("G-BufferEmissive", GetWindow().GetWidth(), GetWindow().GetHeight()),
-				Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())*/
 			},
-			//.bufferOUT =
-			//{
-			//	Renderer().MakeBufferKey("G-BufferUBO", sizeof(Imgn::GBufferUBO)), //edit size
-			//},
 			.Execute = [&, sponza](vk::raii::CommandBuffer& commandBuffer)
 			{
 				std::array colorAttachments =
@@ -323,22 +315,29 @@ public:
 	/* Class Functions */
 	void UpdateCamera(Imgn::Time pTime)
 	{
-		//position
-		if (Imgn::Input::IsKeyPressed(IMGN_KEY_W))
-			_camPos[2] += _cameraSpeed * pTime;
-		else if (Imgn::Input::IsKeyPressed(IMGN_KEY_S))
-			_camPos[2] -= _cameraSpeed * pTime;
-		if (Imgn::Input::IsKeyPressed(IMGN_KEY_A))
-			_camPos[0] -= _cameraSpeed * pTime;
-		else if (Imgn::Input::IsKeyPressed(IMGN_KEY_D))
-			_camPos[0] += _cameraSpeed * pTime;
+		float speed = _cameraSpeed * pTime;
+
+		float moveX = 0.f;
+		float moveZ = 0.f;
+
+		if (Imgn::Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
+		else if (Imgn::Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
+		if (Imgn::Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
+		else if (Imgn::Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
+
+		// local movement -> world movement
+		_camPos[0] += (moveX * std::cos(_yaw) + moveZ * std::sin(_yaw)) * speed;
+		_camPos[2] += (-moveX * std::sin(_yaw) + moveZ * std::cos(_yaw)) * speed;
+
 		if (Imgn::Input::IsKeyPressed(IMGN_KEY_SPACE))
 		{
-			if (Imgn::Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT))
-				_camPos[1] -= _cameraSpeed * pTime;
-			else
-				_camPos[1] += _cameraSpeed * pTime;
+			if (Imgn::Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) _camPos[1] -= _cameraSpeed * pTime;
+			else _camPos[1] += _cameraSpeed * pTime;
 		}
+
+		// local movement -> world movement
+		_camPos[0] += (moveX * std::cos(_yaw) + moveZ * std::sin(_yaw)) * pTime;
+		_camPos[2] += (-moveX * std::sin(_yaw) + moveZ * std::cos(_yaw)) * pTime;
 
 		_camera.SetPosition(_camPos);
 
@@ -346,11 +345,10 @@ public:
 		auto [deltaX, deltaY] = Imgn::Input::GetMouseDelta();
 		float pitch = Imgn::Math::Radians(45.f) * deltaY / _window->GetHeight();
 		float yaw = Imgn::Math::Radians(45.f) * _window->GetAspectRatio() * deltaX / _window->GetWidth();
-		
-		_pitch += pitch;
+
 		_yaw += yaw;
 
-		_camera.Rotate(_pitch, _yaw);
+		_camera.Rotate(pitch, yaw);
 	}
 };
 

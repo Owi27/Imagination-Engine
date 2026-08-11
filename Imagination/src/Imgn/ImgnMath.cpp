@@ -135,14 +135,14 @@ namespace Imgn
 	mat4 Math::PerspectiveVKLH(float pFOV, float pAspect, float pNear, float pFar)
 	{
 		float yScale = 1.f / std::tanf(pFOV * .5f);
-		float z = pFar / (pFar - pNear);
+		float z = pNear / (pNear - pFar);
 
 		return mat4
 		{
 			yScale / pAspect, 0.f, 0.f, 0.f,
 			0.f, -yScale, 0.f, 0.f,
 			0.f, 0.f, z, 1.f,
-			0.f, 0.f, -pNear * z, 0.f,
+			0.f, 0.f, -pFar * z, 0.f,
 		};
 	}
 

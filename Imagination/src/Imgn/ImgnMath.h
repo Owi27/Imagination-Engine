@@ -77,6 +77,16 @@ namespace Imgn
 		};
 	}
 
+	inline vec3 operator*(const vec3& lhs, const float rhs)
+	{
+		return
+		{
+			lhs[0] * rhs,
+			lhs[1] * rhs,
+			lhs[2] * rhs
+		};
+	}
+
 	/// <summary>
 	/// vec3 cross product
 	/// </summary>

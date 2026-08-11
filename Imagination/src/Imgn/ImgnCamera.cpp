@@ -5,9 +5,10 @@ namespace Imgn
 {
 	void PerspectiveCamera::RecalculateView()
 	{
-		mat4 transform = Math::Translate(Math::identity, _pos) * Math::Rotate(Math::identity, { _rot[0], _rot[1], _rot[2] }, _rot[3]);
+		//_transform = Math::Translate(_transform, _pos);
+		//	Math::Rotate(Math::identity, { _rot[0], _rot[1], _rot[2] }, _rot[3]);
 
-		_view = Math::Inverse(transform);
+		_view = Math::Inverse(_transform);
 	}
 
 	void PerspectiveCamera::RecalculateProjection()
@@ -42,6 +43,11 @@ namespace Imgn
 	{
 		_pos = pPos;
 
+		_transform[12] = _pos[0];
+		_transform[13] = _pos[1];
+		_transform[14] = _pos[2];
+		_transform[15] = 1.f;
+
 		RecalculateView();
 	}
 
@@ -63,15 +69,14 @@ namespace Imgn
 
 	void PerspectiveCamera::Rotate(float pPitch, float pYaw)
 	{
-		mat4 transform = Math::Translate(Math::identity, _pos);
+		//_transform = Math::Translate(_transform, _pos);
 
-		transform = Math::Rotate(transform, { 1.f, 0.f, 0.f }, pPitch);
-		vec4 row4 = { transform[12], transform[13], transform[14], transform[15] };
-		transform = Math::Rotate(transform, { 0.f, 1.f, 0.f }, pYaw, true);
+		_transform = Math::Rotate(_transform, { 1.f, 0.f, 0.f }, pPitch);
+		_transform = Math::Rotate(_transform, { 0.f, 1.f, 0.f }, pYaw, true);
 		
-		for (size_t i = 0; i < 4; i++) transform[i + 12] = row4[i];
+		//for (size_t i = 0; i < 4; i++) _transform[i + 12] = row4[i];
 
-		_view = Math::Inverse(transform);
+		RecalculateView();
 	}
 
 	void OrthographicCamera::RecalculateView()

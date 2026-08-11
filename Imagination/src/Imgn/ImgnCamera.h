@@ -25,7 +25,7 @@ namespace Imgn
 		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 1000.f, _aspect = 16.f / 9.f;
 		vec3 _pos = { 0.f, 0.f, 0.f };
 		vec4 _rot = { 0.f, 0.f, 0.f, 0.f };
-		mat4 _view, _proj;
+		mat4 _transform = Math::identity, _view = Math::identity, _proj = Math::identity;
 
 	public:
 		PerspectiveCamera(float pFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 1000.f)
