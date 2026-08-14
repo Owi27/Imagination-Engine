@@ -87,6 +87,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp"
@@ -141,6 +142,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/Event.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.h"
@@ -195,6 +197,84 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/gltf/json.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/pch.hpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# ImaginationEditor_SOURCES at ImaginationEditor/CMakeLists.txt:4 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.cpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/main.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# ImaginationEditor_HEADERS at ImaginationEditor/CMakeLists.txt:3 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.h")
+set(OLD_GLOB
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# ImaginationEditor_HEADERS at ImaginationEditor/CMakeLists.txt:3 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.hpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

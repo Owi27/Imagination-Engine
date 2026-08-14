@@ -453,14 +453,14 @@ namespace Imgn
 		return _vkCtx->StartFrame();
 	}
 
+	void ImgnRenderer::BlitToSwapchain(std::string_view pName)
+	{
+		_vkCtx->BlitToSwapchain(_graph->GetImage(pName));
+	}
+
 	void ImgnRenderer::EndFrame()
 	{
 		_vkCtx->EndFrame();
-	}
-
-	void ImgnRenderer::EndFrame(std::string_view pName)
-	{
-		_vkCtx->EndFrame(_graph->GetImage(pName));
 	}
 
 	void ImgnRenderer::BeginScene()

@@ -80,6 +80,6 @@ message(STATUS "Sources = ${SOURCES}")
 
 add_subdirectory(Imagination)
 add_subdirectory(Daydream)
-
+add_subdirectory(ImaginationEditor)
 
 #DLL Renderbackends

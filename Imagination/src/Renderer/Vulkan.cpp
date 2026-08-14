@@ -222,7 +222,7 @@ void Vulkan::CreateSyncObjects()
 
 	for (size_t i = 0; i < _swapchainImages.size(); i++)
 	{
-		_presentationReadySemaphore.push_back(Unique<vk::raii::Semaphore>(_device->createSemaphore({})) );
+		_presentationReadySemaphore.push_back(Unique<vk::raii::Semaphore>(_device->createSemaphore({})));
 	}
 
 	for (size_t i = 0; i < MaxFramesInFlight; i++)
@@ -472,7 +472,7 @@ vk::SurfaceFormatKHR Vulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::Surfac
 void Vulkan::CopyBufferToImage(uint32_t pWidth, uint32_t pHeight, const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage)
 {
 	unique<vk::raii::CommandBuffer> commandBuffer = StartSingleTimeCommand();
-	
+
 	vk::BufferImageCopy region
 	{
 		.bufferOffset = 0,
@@ -589,7 +589,7 @@ void Vulkan::CreateGraphicsPipelines()
 
 	vk::PushConstantRange pcr
 	{
-		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute,
 		.offset = 0,
 		.size = 128
 	};
@@ -706,11 +706,11 @@ void Vulkan::CreateGraphicsPipelines()
 			.pAttachments = blendStates.data()
 		};
 
-		std::array colorAttachmentFormats = 
-		{ 
+		std::array colorAttachmentFormats =
+		{
 			vk::Format::eR8G8B8A8Srgb,
-			vk::Format::eR8G8B8A8Unorm, 
-			vk::Format::eR8G8B8A8Unorm, 
+			vk::Format::eR8G8B8A8Unorm,
+			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Srgb,
 		};
 
@@ -788,8 +788,10 @@ void Vulkan::CreateDescriptorSetLayout()
 {
 	std::array bindings =
 	{
-		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
-		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, nullptr),
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eSampledImage, 10, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
+		vk::DescriptorSetLayoutBinding(3, vk::DescriptorType::eStorageImage, 1, vk::ShaderStageFlagBits::eCompute, nullptr)
 	};
 
 	//std::array<vk::DescriptorBindingFlags, 3> flags =
@@ -1016,82 +1018,7 @@ bool Vulkan::StartFrame()
 	return true;
 }
 
-void Vulkan::EndFrame()
-{
-	vk::raii::CommandBuffer& commandBuffer = *_commandBuffers[_frameInFlightIdx];
-
-	if (_activeImageIdx >= _swapchainImages.size())
-	{
-		std::string message = "_activeImageIdx: " + std::to_string(_activeImageIdx) + ", swapchain image count: " + std::to_string(_swapchainImages.size());
-		std::cerr << message << '\n';
-		throw std::runtime_error(message);
-	}
-	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, _swapchainImages[_activeImageIdx]);
-
-	//blit final color for now
-	//{
-	//	vk::ImageSubresourceLayers subresource
-	//	{
-	//		.aspectMask = vk::ImageAspectFlagBits::eColor,
-	//		.mipLevel = 0,
-	//		.baseArrayLayer = 0,
-	//		.layerCount = 1
-	//	};
-
-	//	vk::ImageBlit blit
-	//	{
-	//		.srcSubresource = subresource,
-	//		.dstSubresource = subresource,
-	//	};
-
-	//	vk::Offset3D blitOffset0{ 0, 0, 0 };
-	//	//vk::Offset3D blitOffsetSrc1{ (int32_t)renderWidth, (int32_t)renderHeight, 1 };
-	//	vk::Offset3D blitOffsetDst1{ (int32_t)_swapchainExtent.width, (int32_t)_swapchainExtent.height, 1 };
-	//	blit.srcOffsets[0] = blitOffset0;
-	//	blit.srcOffsets[1] = blitOffsetDst1;
-	//	blit.dstOffsets[0] = blitOffset0;
-	//	blit.dstOffsets[1] = blitOffsetDst1;
-
-	//	//auto finalColor = _graph.GetResource("FinalColor");
-	//	_commandBuffers[_frameInFlightIdx]->blitImage(*pImage.image.image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[_activeImageIdx], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
-
-	//	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR, _swapchainImages[_activeImageIdx]);
-	//}
-	TransitionImageLayout(*commandBuffer, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR, _swapchainImages[_activeImageIdx]);
-
-	commandBuffer.end();
-
-	_device->resetFences(**_frameFinishedFence[_frameInFlightIdx]);
-
-	vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
-
-	const vk::SubmitInfo submitInfo
-	{
-		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = &**_imageAcquiredSemaphores[_frameInFlightIdx],
-		.pWaitDstStageMask = &waitDestinationStageMask,
-		.commandBufferCount = 1,
-		.pCommandBuffers = &**_commandBuffers[_frameInFlightIdx],
-		.signalSemaphoreCount = 1,
-		.pSignalSemaphores = &**_presentationReadySemaphore[_activeImageIdx]
-	};
-
-	_queue->submit(submitInfo, *_frameFinishedFence[_frameInFlightIdx]);
-
-	const vk::PresentInfoKHR presentInfoKHR
-	{
-		.waitSemaphoreCount = 1,
-		.pWaitSemaphores = &**_presentationReadySemaphore[_activeImageIdx],
-		.swapchainCount = 1,
-		.pSwapchains = &**_swapchain,
-		.pImageIndices = &_activeImageIdx
-	};
-
-	_queue->presentKHR(presentInfoKHR);
-	_frameInFlightIdx = (_frameInFlightIdx + 1) % MaxFramesInFlight;
-}
-
-void Vulkan::EndFrame(RGImage& pImage)
+void Vulkan::BlitToSwapchain(RGImage& pImage)
 {
 	if (!pImage.image.image)
 		throw std::runtime_error("EndFrame received a null render image");
@@ -1103,37 +1030,41 @@ void Vulkan::EndFrame(RGImage& pImage)
 
 	pImage.currentLayout = vk::ImageLayout::eTransferSrcOptimal;
 	//blit final color for now
+	vk::ImageSubresourceLayers subresource
 	{
-		vk::ImageSubresourceLayers subresource
-		{
-			.aspectMask = vk::ImageAspectFlagBits::eColor,
-			.mipLevel = 0,
-			.baseArrayLayer = 0,
-			.layerCount = 1
-		};
+		.aspectMask = vk::ImageAspectFlagBits::eColor,
+		.mipLevel = 0,
+		.baseArrayLayer = 0,
+		.layerCount = 1
+	};
 
-		vk::ImageBlit blit
-		{
-			.srcSubresource = subresource,
-			.dstSubresource = subresource,
-		};
+	vk::ImageBlit blit
+	{
+		.srcSubresource = subresource,
+		.dstSubresource = subresource,
+	};
 
-		vk::Offset3D blitOffset0{ 0, 0, 0 };
-		//vk::Offset3D blitOffsetSrc1{ (int32_t)renderWidth, (int32_t)renderHeight, 1 };
-		vk::Offset3D blitOffsetDst1{ (int32_t)_swapchainExtent.width, (int32_t)_swapchainExtent.height, 1 };
-		blit.srcOffsets[0] = blitOffset0;
-		blit.srcOffsets[1] = blitOffsetDst1;
-		blit.dstOffsets[0] = blitOffset0;
-		blit.dstOffsets[1] = blitOffsetDst1;
+	vk::Offset3D blitOffset0{ 0, 0, 0 };
+	//vk::Offset3D blitOffsetSrc1{ (int32_t)renderWidth, (int32_t)renderHeight, 1 };
+	vk::Offset3D blitOffsetDst1{ (int32_t)_swapchainExtent.width, (int32_t)_swapchainExtent.height, 1 };
+	blit.srcOffsets[0] = blitOffset0;
+	blit.srcOffsets[1] = blitOffsetDst1;
+	blit.dstOffsets[0] = blitOffset0;
+	blit.dstOffsets[1] = blitOffsetDst1;
 
-		//auto finalColor = _graph.GetResource("FinalColor");
-		_commandBuffers[_frameInFlightIdx]->blitImage(*pImage.image.image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[_activeImageIdx], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
+	//auto finalColor = _graph.GetResource("FinalColor");
+	_commandBuffers[_frameInFlightIdx]->blitImage(*pImage.image.image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[_activeImageIdx], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
 
-		TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pImage.image.image, pImage.aspect);
+	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pImage.image.image, pImage.aspect);
 
-		pImage.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-		TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::ePresentSrcKHR, _swapchainImages[_activeImageIdx]);
-	}
+	pImage.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eColorAttachmentOptimal, _swapchainImages[_activeImageIdx]);
+}
+
+void Vulkan::EndFrame()
+{
+	vk::raii::CommandBuffer& commandBuffer = *_commandBuffers[_frameInFlightIdx];
+	TransitionImageLayout(*commandBuffer, vk::ImageLayout::eColorAttachmentOptimal, vk::ImageLayout::ePresentSrcKHR, _swapchainImages[_activeImageIdx]);
 	commandBuffer.end();
 
 	_device->resetFences(**_frameFinishedFence[_frameInFlightIdx]);
@@ -1381,9 +1312,9 @@ void Vulkan::UpdateImageDescriptor(uint32_t pSlot, const Image& pImage)
 		throw std::runtime_error("Image descriptor slot exceeds NumDescriptorsStreaming");
 	}
 	if (!pImage.view)
-	{ 
+	{
 		IMGN_FATAL("Image view is null");
-		throw std::runtime_error("Cannot update descriptor with a null image view"); 
+		throw std::runtime_error("Cannot update descriptor with a null image view");
 	}
 
 	vk::DescriptorImageInfo imageInfo
@@ -1481,7 +1412,7 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 		barrier.srcAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 		srcStage = vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
-		dstStage = vk::PipelineStageFlagBits::eFragmentShader;
+		dstStage = vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader;
 	}
 	else if (pOldLayout == vk::ImageLayout::eShaderReadOnlyOptimal && pNewLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
 	{
@@ -1510,7 +1441,7 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 		barrier.srcAccessMask = vk::AccessFlagBits::eShaderRead;
 		barrier.dstAccessMask = vk::AccessFlagBits::eTransferRead;
 
-		srcStage =vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader;
+		srcStage = vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader;
 		dstStage = vk::PipelineStageFlagBits::eTransfer;
 	}
 	else if (pOldLayout == vk::ImageLayout::eTransferSrcOptimal && pNewLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
@@ -1520,6 +1451,14 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 
 		srcStage = vk::PipelineStageFlagBits::eTransfer;
 		dstStage = vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader;
+	}
+	else if (pOldLayout == vk::ImageLayout::eTransferDstOptimal && pNewLayout == vk::ImageLayout::eColorAttachmentOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite;
+
+		srcStage = vk::PipelineStageFlagBits::eTransfer;
+		dstStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 	}
 	else
 	{
@@ -1577,4 +1516,34 @@ void Vulkan::EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer)
 
 	_queue->submit(submitInfo, nullptr);
 	_queue->waitIdle();
+}
+
+ImGui_ImplVulkan_InitInfo Vulkan::GetImGuiInitInfo()
+{
+	_imguiColorFormat = static_cast<VkFormat>(_swapchainSurfaceFormat.format);
+
+	return ImGui_ImplVulkan_InitInfo
+	{
+		.ApiVersion = vk::ApiVersion14,
+		.Instance = **_instance,
+		.PhysicalDevice = **_physicalDevice,
+		.Device = **_device,
+		.QueueFamily = _queueIdx,
+		.Queue = **_queue,
+		//.DescriptorPool = *_descriptorPool,
+		.DescriptorPoolSize = IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE,
+		.MinImageCount = static_cast<uint32_t>(_swapchainImages.size()),
+		.ImageCount = static_cast<uint32_t>(_swapchainImages.size()),
+		//.PipelineCache = *_pipelines.pipelinecac,
+		.PipelineInfoMain
+		{
+			.PipelineRenderingCreateInfo =
+			{
+				.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR,
+				.colorAttachmentCount = 1,
+				.pColorAttachmentFormats = &_imguiColorFormat,
+			}
+		},
+		.UseDynamicRendering = true,
+	};
 }

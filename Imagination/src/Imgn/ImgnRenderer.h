@@ -72,6 +72,8 @@ namespace Imgn
 		uint32_t CreateStorageBuffer(void* pData, uint64_t pSize);
 		uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
+		vk::raii::Sampler& GetTextureSampler() { return _vkCtx->GetTextureSampler(); }
+
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
 		ImgnMesh GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
@@ -93,11 +95,18 @@ namespace Imgn
 
 		void AddPass(RenderPass& pRenderPass) { _graph->AddPass(pRenderPass); }
 
+		vk::raii::CommandBuffer& GetActiveCommandBuffer() { return _vkCtx->GetActiveCommandBuffer(); }
+		vk::ImageView GetActiveSwapchainImageView() { return _vkCtx->GetActiveSwapchainImageView(); }
+		vk::Extent2D GetSwapchainExtent() const { return _vkCtx->GetSwapchainExtent(); }
+
+
 		bool StartFrame();
+		void BlitToSwapchain(std::string_view pName);
 		void EndFrame();
-		void EndFrame(std::string_view pName);
 
 		void BeginScene();
 		void EndScene();
+
+		ImGui_ImplVulkan_InitInfo GetImGuiInitInfo() { return _vkCtx->GetImGuiInitInfo(); }
 	};
 }

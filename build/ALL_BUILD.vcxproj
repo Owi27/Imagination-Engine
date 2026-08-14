@@ -186,6 +186,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{D4C3CA30-A98C-357A-96C4-C3ACFD0AF936}</Project>
       <Name>IMGN</Name>
     </ProjectReference>
+    <ProjectReference Include="D:\GitHub\Imagination-Engine\build\ImaginationEditor\ImaginationEditor.vcxproj">
+      <Project>{E676C50A-1DBA-367D-91AD-B58CEE578EDE}</Project>
+      <Name>ImaginationEditor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

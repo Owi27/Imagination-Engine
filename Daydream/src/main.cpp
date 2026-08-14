@@ -2,7 +2,7 @@
 
 class TestLayer : public Imgn::Layer
 {
-	float _cameraSpeed = 100.f,  _yaw = 0.f;
+	float _cameraSpeed = 100.f, _yaw = 0.f;
 	vec3 _camPos = { 0, 0, 0 };
 	Imgn::PerspectiveCamera _camera;
 
@@ -10,6 +10,37 @@ class TestLayer : public Imgn::Layer
 	Imgn::ImgnRenderer* _renderer;
 
 	uint32_t gBufferUBOHandle = 0;
+
+	struct PointLight
+	{
+		vec3 pos, col;
+		float range, intensity;
+	};
+
+	std::array<PointLight, 3> pointLights
+	{
+		PointLight
+		{
+			.pos = {0.f, 0.f, 0.f},
+			.col = {1.f, 0.f, 0.f},
+			.range = 1000.f,
+			.intensity = 100.f
+		},
+		PointLight
+		{
+			.pos = {1000.f, 0.f, 0.f},
+			.col = {0.f, 1.f, 1.f},
+			.range = 1000.f,
+			.intensity = 100.f
+		},
+		PointLight
+		{
+			.pos = {-1000.f, 0.f, 0.f},
+			.col = {1.f, 0.f, 1.f},
+			.range = 1000.f,
+			.intensity = 100.f
+		},
+	};
 
 public:
 	TestLayer() : Layer("Test")
@@ -168,90 +199,151 @@ public:
 			}
 		};
 
-		//Imgn::RenderPass lighting
-		//{
-		//	.name = "LightingPass",
-		//	.imageIN =
-		//	{
-		//		"G-BufferAlbedo",
-		//		"G-BufferNormal",
-		//		"G-BufferMaterial",
-		//		"G-BufferEmissive",
-		//		"Depth"
-		//	},
-		//	.imageOUT =
-		//	{
-		//		Renderer().MakeImageKey("LitScene", GetWindow().GetWidth(), GetWindow().GetHeight()),
-		//	},
-		//	.bufferOUT =
-		//	{
-		//		Renderer().MakeBufferKey("LightingUBO", 256), //edit size
-		//		Renderer().MakeBufferKey("LightingSBO", 256)
-		//	},
-		//	.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
-		//	{
-		//		/*vk::RenderingAttachmentInfo colorAttachment
-		//		{
-		//			.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("LitScene", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-		//			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-		//			.loadOp = vk::AttachmentLoadOp::eClear,
-		//			.storeOp = vk::AttachmentStoreOp::eStore,
-		//			.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
-		//		};
+		Imgn::RenderPass lighting
+		{
+			.name = "LightingPass",
+			.imageIN =
+			{
+				"G-BufferAlbedo",
+				"G-BufferNormal",
+				"G-BufferMaterial",
+				"G-BufferEmissive",
+				"Depth"
+			},
+			.imageOUT =
+			{
+				_renderer->CreateRGImageDesc("LitScene", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat)
+			},
+			.bufferOUT =
+			{
+				//Renderer().MakeBufferKey("LightingUBO", 256), //edit size
+				//Renderer().MakeBufferKey("LightingSBO", 256)
+			},
+			.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
+			{
+				/*vk::RenderingAttachmentInfo colorAttachment
+				{
+					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("LitScene", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
+					.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+					.loadOp = vk::AttachmentLoadOp::eClear,
+					.storeOp = vk::AttachmentStoreOp::eStore,
+					.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
+				};
 
-		//		vk::RenderingAttachmentInfo depthAttachment
-		//		{
-		//			.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-		//			.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-		//			.loadOp = vk::AttachmentLoadOp::eClear,
-		//			.storeOp = vk::AttachmentStoreOp::eStore,
-		//			.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
-		//		};
+				vk::RenderingAttachmentInfo depthAttachment
+				{
+					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
+					.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+					.loadOp = vk::AttachmentLoadOp::eClear,
+					.storeOp = vk::AttachmentStoreOp::eStore,
+					.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
+				};
 
-		//		vk::RenderingInfo renderingInfo
-		//		{
-		//			.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
-		//			.layerCount = 1,
-		//			.colorAttachmentCount = 1,
-		//			.pColorAttachments = &colorAttachment,
-		//			.pDepthAttachment = &depthAttachment,
-		//		};
+				vk::RenderingInfo renderingInfo
+				{
+					.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
+					.layerCount = 1,
+					.colorAttachmentCount = 1,
+					.pColorAttachments = &colorAttachment,
+					.pDepthAttachment = &depthAttachment,
+				}; */
 
-		//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, Renderer().GetLightingPipeline());*/
+				commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, _renderer->GetLightingPipeline());
+				commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet(), {});
 
-		//		//push descriptor set
-		//		{
-		//			//uniform buffer
-		//			/*vk::DescriptorBufferInfo uboInfo
-		//			{
-		//				.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-		//				.offset = 0,
-		//				.range = 192
-		//			};
+				Imgn::LightingPC pc
+				{
+					.invViewProj = Imgn::Math::Inverse(_camera.GetViewProj()),
+					.camPos = _camera.GetPosition(),
+					.width = _window->GetWidth(),
+					.height = _window->GetHeight()
+				};
 
-		//			const std::array writes
-		//			{
-		//				vk::WriteDescriptorSet
-		//				{
-		//					.dstSet = nullptr,
-		//					.dstBinding = 0,
-		//					.dstArrayElement = 0,
-		//					.descriptorCount = 1,
-		//					.descriptorType = vk::DescriptorType::eUniformBuffer,
-		//					.pBufferInfo = &uboInfo
-		//				},
-		//			};
+				commandBuffer.pushConstants<Imgn::LightingPC>(*_renderer->GetPipelineLayout(), vk::ShaderStageFlagBits::eCompute, 0, pc);
 
-		//			commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, Renderer().GetPipelineLayout(), 0, writes);*/
-		//		}
+				//push descriptor set
+				{
+					//uniform buffer
+					/*vk::DescriptorBufferInfo uboInfo
+					{
+						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
+						.offset = 0,
+						.range = 192
+					};*/
 
-		//		//commandBuffer.dispatch(std::ceil(GetWindow().GetWidth() / 8), std::ceil(GetWindow().GetHeight() / 8), 1);
-		//	}
-		//};
+					std::array images =
+					{
+						vk::DescriptorImageInfo
+						{
+							.sampler = nullptr,
+							.imageView = *_renderer->GetRenderGraphImage("G-BufferAlbedo").image.view,
+							.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						},
+						vk::DescriptorImageInfo
+						{
+							.sampler = nullptr,
+							.imageView = *_renderer->GetRenderGraphImage("G-BufferNormal").image.view,
+							.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						},
+						vk::DescriptorImageInfo
+						{
+							.sampler = nullptr,
+							.imageView = *_renderer->GetRenderGraphImage("G-BufferMaterial").image.view,
+							.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						},
+						vk::DescriptorImageInfo
+						{
+							.sampler = nullptr,
+							.imageView = *_renderer->GetRenderGraphImage("G-BufferEmissive").image.view,
+							.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						},
+						vk::DescriptorImageInfo
+						{
+							.sampler = nullptr,
+							.imageView = *_renderer->GetRenderGraphImage("Depth").image.view,
+							.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+						},
+					};
+
+					vk::DescriptorImageInfo litImage
+					{
+						.sampler = nullptr,
+						.imageView = *_renderer->GetRenderGraphImage("LitScene").image.view,
+						.imageLayout = vk::ImageLayout::eGeneral
+					};
+
+					const std::array writes
+					{
+						vk::WriteDescriptorSet //image in
+						{
+							.dstSet = nullptr,
+							.dstBinding = 2,
+							.dstArrayElement = 0,
+							.descriptorCount = static_cast<uint32_t>(images.size()),
+							.descriptorType = vk::DescriptorType::eSampledImage,
+							.pImageInfo = images.data()
+						},
+						vk::WriteDescriptorSet //out
+						{
+							.dstSet = nullptr,
+							.dstBinding = 3,
+							.dstArrayElement = 0,
+							.descriptorCount = 1,
+							.descriptorType = vk::DescriptorType::eStorageImage,
+							.pImageInfo = &litImage
+						},
+					};
+
+					commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 0, writes);
+				}
+
+				commandBuffer.dispatch(std::ceil(_window->GetWidth() / 8), std::ceil(_window->GetHeight() / 8), 1);
+			}
+		};
 
 
 		_renderer->AddPass(gBuffer);
-		//Renderer().AddPass(lighting);
+		_renderer->AddPass(lighting);
 		_renderer->CompileGraph();
 
 		//Imgn::PerspectiveCamera cam;
@@ -284,11 +376,8 @@ public:
 			IMGN_INFO("Tab key pressed");
 		}
 
-		if (_renderer->StartFrame())
-		{
-			_renderer->ExecuteGraph();
-			_renderer->EndFrame("G-BufferAlbedo");
-		}
+		_renderer->ExecuteGraph();
+		_renderer->BlitToSwapchain("LitScene");
 	}
 
 	void OnEvent(Event& pEvent) override
@@ -316,7 +405,6 @@ public:
 	void UpdateCamera(Imgn::Time pTime)
 	{
 		float speed = _cameraSpeed * pTime;
-
 		float moveX = 0.f;
 		float moveZ = 0.f;
 
@@ -358,7 +446,7 @@ public:
 	Daydream()
 	{
 		AddLayer(Unique<TestLayer>(&GetWindow(), &Renderer())); //treating as my rendering layer for now
-
+		AddOverlay(Unique<Imgn::ImGuiLayer>(&GetWindow(), &Renderer()));
 		//Imgn::ImgnGLTF gltf;
 		//Imgn::ImgnModel sponza = gltf.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", Renderer());
 

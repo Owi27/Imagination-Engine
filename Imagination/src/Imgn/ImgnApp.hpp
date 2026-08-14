@@ -58,8 +58,8 @@ namespace Imgn
 		void Run();
 		void OnEvent(Event& pEvent);
 
-		void AddLayer(unique<Layer> pLayer) { _layerStack.AddLayer(std::move(pLayer)); }
-		void AddOverlay(unique<Layer> pLayer) { _layerStack.AddOverlay(std::move(pLayer)); }
+		void AddLayer(unique<Layer> pLayer);
+		void AddOverlay(unique<Layer> pLayer);
 
 
 		template<typename T, typename... Args>
@@ -75,8 +75,5 @@ namespace Imgn
 		}
 	};
 
-}
-namespace Imgn
-{
 	ImgnApp* CreateApplication();
 }

@@ -3,6 +3,8 @@
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 using namespace Microsoft::WRL;
+#include "ImGui/imgui_impl_vulkan.h"
+
 
 constexpr int MaxFramesInFlight = 2;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
@@ -122,6 +124,8 @@ class Vulkan
 
 	uint32_t _queueIdx = 0;// , _frameIdx = 0;
 
+	VkFormat _imguiColorFormat;
+
 	//void CleanupSwapchain();
 	//void RecreateSwapchain();
 	void RecreateSwapchain();
@@ -186,8 +190,8 @@ public:
 	void Init(RendererCreateInfo pCreateInfo);
 	
 	bool StartFrame();
+	void BlitToSwapchain(RGImage& pImage);
 	void EndFrame();
-	void EndFrame(RGImage& pImage);
 
 	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
@@ -210,6 +214,7 @@ public:
 	Image CreateTextureImage(const std::string& pFile);
 	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect);
 
+	vk::raii::Sampler& GetTextureSampler() const { return *_textureSampler; }
 	vk::raii::DescriptorSet& GetTextureDescriptorSet() const { return *_textureDescriptorSet; }
 	void UpdateImageDescriptor(uint32_t pSlot, const Image& pImage);
 
@@ -224,5 +229,13 @@ public:
 
 	unique<vk::raii::CommandBuffer> StartSingleTimeCommand();
 	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer);
+
+	vk::raii::CommandBuffer& GetActiveCommandBuffer() { return *_commandBuffers[_frameInFlightIdx]; }
+
+	vk::ImageView GetActiveSwapchainImageView() { return **_swapchainImageViews[_activeImageIdx]; }
+
+	vk::Extent2D GetSwapchainExtent() const { return _swapchainExtent; }
+
+	ImGui_ImplVulkan_InitInfo GetImGuiInitInfo();
 	
 };

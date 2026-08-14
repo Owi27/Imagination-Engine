@@ -114,6 +114,7 @@
 #define IMGN_KEY_KP_9                 99
 #define IMGN_KEY_KP_DECIMAL          100
 #define IMGN_KEY_KP_ENTER            101
+//#define IMGN_KEY_KP_EQUAL
 
 // Gateware calls this G_KEY_COMMAND. It is primarily meaningful on macOS.
 #define IMGN_KEY_LEFT_SUPER           102

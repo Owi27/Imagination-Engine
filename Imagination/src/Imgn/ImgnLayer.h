@@ -21,8 +21,9 @@ namespace Imgn
 		}
 
 		virtual void Sleep() {}
-		virtual void Dream(Time pTime) {}
 		virtual void WakeUp() {}
+		//virtual void OnImGuiRender() {}
+		virtual void Dream(Time pTime) {}
 		virtual void OnEvent(Event& pEvent) {}
 
 		inline const std::string& GetName() const { return _name; }

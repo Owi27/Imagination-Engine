@@ -3,7 +3,8 @@
 	[
 		"D:/GitHub/Imagination-Engine/build/cmake_install.cmake",
 		"D:/GitHub/Imagination-Engine/build/Imagination/cmake_install.cmake",
-		"D:/GitHub/Imagination-Engine/build/Daydream/cmake_install.cmake"
+		"D:/GitHub/Imagination-Engine/build/Daydream/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/ImaginationEditor/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

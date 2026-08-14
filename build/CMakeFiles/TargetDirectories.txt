@@ -5,3 +5,5 @@ D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir
 D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/ALL_BUILD.dir
 D:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir
 D:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir
+D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ALL_BUILD.dir

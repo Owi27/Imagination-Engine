@@ -20,6 +20,14 @@ namespace Imgn
 
 				if (_eventCallback) _eventCallback(event);
 
+				// Character/typing event
+				if (data.typedChar != 0)
+				{
+					KeyTypedEvent typedEvent(static_cast<unsigned char>(data.typedChar));
+
+					if (_eventCallback) _eventCallback(typedEvent);
+				}
+
 				break;
 			}
 

@@ -9,7 +9,7 @@
 #include "Imgn/ImgnKey.MouseCodes.h"
 #include "Imgn/ImgnCamera.h"
 #include "Imgn/ImgnMath.h"
-#include "Imgn/ImgnGui.h"
+#include "Imgn/ImGui/ImgnGui.h"
 #include "Imgn/ImgnRenderer.h"
 
 // entry point

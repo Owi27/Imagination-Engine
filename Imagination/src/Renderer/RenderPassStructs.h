@@ -20,4 +20,12 @@ namespace Imgn
 		float metallic, roughness, alphaCutoff;
 		int alphaMode, doubleSided;
 	};
+
+	//lighting
+	struct LightingPC
+	{
+		mat4 invViewProj;
+		vec3 camPos;
+		uint32_t width, height, pointLightCount;
+	};
 }

@@ -13,11 +13,15 @@ namespace Imgn
 			Time deltaTime(now - _lastFrameTime);
 			_lastFrameTime = now;
 
-			for (unique<Layer>& layer : _layerStack)
+			if (_renderer->StartFrame())
 			{
-				layer->Dream(deltaTime);
-			}
+				for (unique<Layer>& layer : _layerStack)
+				{
+					layer->Dream(deltaTime);
+				}
 
+				_renderer->EndFrame();
+			}
 
 			//IMGN_CORE_TRACE("x {}, y {}", Input::GetMouseX(), Input::GetMouseY());
 
@@ -35,5 +39,17 @@ namespace Imgn
 			(*--iter)->OnEvent(pEvent);
 			if (pEvent.Handled()) break;
 		}
+	}
+
+	void ImgnApp::AddLayer(unique<Layer> pLayer)
+	{
+		pLayer->Sleep();
+		_layerStack.AddLayer(std::move(pLayer));
+	}
+
+	void ImgnApp::AddOverlay(unique<Layer> pLayer)
+	{
+		pLayer->Sleep();
+		_layerStack.AddOverlay(std::move(pLayer));
 	}
 }

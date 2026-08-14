@@ -7,7 +7,7 @@ namespace Imgn
 	{
 	public:
 		virtual ~ICamera() = default;
-
+		
 		virtual void SetPosition(vec3 pPos) = 0;
 		virtual void SetRotation(vec4 pRot) = 0;
 		//virtual void SetViewportSize(uint32_t pWidth, uint32_t pHeight) = 0;
@@ -16,7 +16,7 @@ namespace Imgn
 		virtual void RecalculateProjection() = 0;
 
 		[[nodiscard]] virtual const mat4& GetView() const = 0;
-		[[nodiscard]] virtual const mat4& GetViewProj() const = 0;
+		[[nodiscard]] virtual const mat4 GetViewProj() const = 0;
 		[[nodiscard]] virtual const mat4& GetProjection() const = 0;
 	};
 
@@ -40,7 +40,8 @@ namespace Imgn
 		// Inherited via ICamera
 		const mat4& GetProjection() const override { return _proj; };
 		const mat4& GetView() const override { return _view; }
-		const mat4& GetViewProj() const override { return _view * _proj; }
+		const mat4 GetViewProj() const override { return _view * _proj; }
+		const vec3& GetPosition() const { return _pos; }
 
 		void RecalculateView() override;
 		void RecalculateProjection() override;
@@ -76,7 +77,7 @@ namespace Imgn
 		// Inherited via ICamera
 		const mat4& GetView() const override { return _view; }
 		const mat4& GetProjection() const override { return _proj; };
-		const mat4& GetViewProj() const override { return _view * _proj; }
+		const mat4 GetViewProj() const override { return _view * _proj; }
 
 		void RecalculateView() override;
 		void RecalculateProjection() override;

@@ -17,11 +17,16 @@
 	<Project Path="Imagination/IMGN.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="d4c3ca30-a98c-357a-96c4-c3acfd0af936">
 		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 	</Project>
+	<Project Path="ImaginationEditor/ImaginationEditor.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="e676c50a-1dba-367d-91ad-b58cee578ede">
+		<BuildDependency Project="Imagination/IMGN.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
 	<Folder Name="/CMakePredefinedTargets/">
 		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="125f7eee-499d-3e89-8787-98da2016d14a">
 			<BuildDependency Project="Daydream/DAYDREAM.vcxproj"/>
 			<BuildDependency Project="Extract.vcxproj"/>
 			<BuildDependency Project="Imagination/IMGN.vcxproj"/>
+			<BuildDependency Project="ImaginationEditor/ImaginationEditor.vcxproj"/>
 			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 			<Build Solution="Debug|*" Project="false"/>
 			<Build Solution="Release|*" Project="false"/>
