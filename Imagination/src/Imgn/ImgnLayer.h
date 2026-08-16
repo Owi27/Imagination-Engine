@@ -22,7 +22,7 @@ namespace Imgn
 
 		virtual void Sleep() {}
 		virtual void WakeUp() {}
-		//virtual void OnImGuiRender() {}
+		virtual void OnImGuiRender() {}
 		virtual void Dream(Time pTime) {}
 		virtual void OnEvent(Event& pEvent) {}
 

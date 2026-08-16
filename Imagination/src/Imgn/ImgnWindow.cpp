@@ -3,6 +3,11 @@
 
 namespace Imgn
 {
+	void ImgnWindow::SetWindowTitle(const std::string& pWindowName)
+	{
+		_window.SetWindowName(pWindowName.c_str());
+	}
+
 	void ImgnWindow::Dream()
 	{
 		_window.ProcessWindowEvents();

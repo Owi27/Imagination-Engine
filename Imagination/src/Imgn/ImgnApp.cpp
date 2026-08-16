@@ -20,6 +20,14 @@ namespace Imgn
 					layer->Dream(deltaTime);
 				}
 
+				_imGuiLayer->Begin();
+				for (unique<Layer>& layer : _layerStack)
+				{
+					layer->OnImGuiRender();
+				}
+				_imGuiLayer->OnImGuiRender();
+				_imGuiLayer->End();
+
 				_renderer->EndFrame();
 			}
 
@@ -39,6 +47,8 @@ namespace Imgn
 			(*--iter)->OnEvent(pEvent);
 			if (pEvent.Handled()) break;
 		}
+		
+		_imGuiLayer->OnEvent(pEvent);
 	}
 
 	void ImgnApp::AddLayer(unique<Layer> pLayer)

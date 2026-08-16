@@ -12,7 +12,6 @@ namespace Imgn
 
         GEventResponder _responder;
 
-        static int ToImGuiMouseButton(int pButton);
         static void AddImGuiSpecialInputEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed);
         static int ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* pViewport, ImU64 pVkInstance, const void* pVkAllocator, ImU64* pOutSurface);
 
@@ -44,10 +43,13 @@ namespace Imgn
         ImGuiLayer& operator=(ImGuiLayer&& pOther) noexcept = default;
 
         /*Class Functions*/
-        void Sleep();
-        void WakeUp();
-        void Dream(Time pTime);
-        void OnEvent(Event& pEvent);
+        virtual void Sleep() override;
+        virtual void WakeUp() override;
+        virtual void OnImGuiRender() override;
+        virtual void Dream(Time pTime) override;
+        virtual void OnEvent(Event& pEvent) override;
 
+        void Begin();
+        void End();
     };
 }

@@ -54,6 +54,7 @@ namespace Imgn
 
         }
 
+        void SetWindowTitle(const std::string& pWindowName);
         void* GetWindowHandle() { return _windowHandle.window; }
         GW::SYSTEM::UNIVERSAL_WINDOW_HANDLE& GetUniversalWindowHandle() { return _windowHandle; }
         RendererCreateInfo GetRendererCreateInfo(bool pValidation = true, RendererBackend pBackend = RendererBackend::Vulkan)

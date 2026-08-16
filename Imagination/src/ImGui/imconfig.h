@@ -14,6 +14,21 @@
 
 #pragma once
 
+#ifdef _WIN32
+
+#ifdef IMGN_BUILD_DLL
+
+#define IMGUI_API __declspec(dllexport)
+#define IMGUI_IMPL_API __declspec(dllexport)
+
+#else
+
+#define IMGUI_API __declspec(dllimport)
+#define IMGUI_IMPL_API __declspec(dllimport)
+
+#endif
+
+#endif
 //---- Define assertion handler. Defaults to calling assert().
 // - If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
 // - Compiling with NDEBUG will usually strip out assert() to nothing, which is NOT recommended because we use asserts to notify of programmer mistakes.
@@ -136,7 +151,7 @@
 //#define IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS
 
 //---- Debug Tools: Enable slower asserts
-//#define IMGUI_DEBUG_PARANOID
+//#define IMGUI_DEBUG_PARANOID//#define IMGUI_API __declspec(dllexport)
 
 //---- Tip: You can add extra functions within the ImGui:: namespace from anywhere (e.g. your own sources/header files)
 /*

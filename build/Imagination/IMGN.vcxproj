@@ -127,11 +127,22 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Daydream
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/ImaginationEditor
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/ImaginationEditor
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -200,11 +211,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Daydream
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/ImaginationEditor
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/ImaginationEditor
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -273,11 +295,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Daydream
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/ImaginationEditor
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/ImaginationEditor
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -346,11 +379,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message></Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
 "C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Daydream
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/ImaginationEditor
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.dll D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/ImaginationEditor
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone

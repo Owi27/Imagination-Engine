@@ -15,6 +15,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Sources/VulkanDispatcher
 set_target_properties(IMGN PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Imagination OBJECT_OUTPUTS_DIRECTORY ${OBJ_DIR}/Imagination)
 
 add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}/Daydream COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:IMGN>" "${OUTPUT_DIR}/Daydream") # COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:ImgnVulkan>" "${OUTPUT_DIR}/Daydream")
+add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}/ImaginationEditor COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:IMGN>" "${OUTPUT_DIR}/ImaginationEditor")
 
 #add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ImgnVulkan> $<TARGET_FILE_DIR:IMGN>)
 if(MSVC)

@@ -132,6 +132,7 @@ namespace Imgn
 		}
 
 	}
+
 	int ImGuiLayer::ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* pViewport, ImU64 pVkInstance, const void* pVkAllocator, ImU64* pOutSurface)
 	{
 		VkWin32SurfaceCreateInfoKHR createInfo
@@ -150,6 +151,9 @@ namespace Imgn
 		ImGui::StyleColorsDark();
 
 		ImGuiIO& io = ImGui::GetIO();
+		//io.Fonts->AddFontFromFileTTF("../../Fonts/Raleway-Regular.ttf", 16.f);
+		io.Fonts->AddFontFromFileTTF("../../Fonts/consola.ttf", 12.f);
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplWin32_Init(_window->GetWindowHandle());
 		ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
@@ -161,51 +165,49 @@ namespace Imgn
 
 	void ImGuiLayer::WakeUp()
 	{
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+	}
+
+	void ImGuiLayer::OnImGuiRender()
+	{
+		//ImGui::DockSpaceOverViewport();
+
+		//// Show demo options and help
+		//if (ImGui::BeginMainMenuBar())
+		//{
+		//	if (ImGui::BeginMenu("File"))
+		//	{
+		//		if (ImGui::MenuItem("Exit")) ImgnApp::Get().Close();
+		//		ImGui::EndMenu();
+		//	}
+		//	ImGui::EndMainMenuBar();
+		//}
+
+		//ImGui::ShowDemoWindow();
+		//ImGui::Begin("Style");
+		//ImGui::ShowStyleEditor();
+		//ImGui::End();
+
+		//if (!_sceneWindow)
+		//{
+		//	_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("LitScene").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+		//}
+
+		//ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
+
+		//ImGui::Begin("Vulkan Texture Test");
+		//ImGui::Image(ImTextureRef(textureID), ImVec2(_window->GetWidth(), _window->GetHeight()));
+		//ImGui::End();
+
+		//ImGui::End();
 	}
 
 	void ImGuiLayer::Dream(Time pTime)
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(_window->GetWidth(), _window->GetHeight());
-		io.DeltaTime = pTime;
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-
-		ImGui::ShowDemoWindow();
-		ImGui::Begin("Style");
-		ImGui::ShowStyleEditor();
-		ImGui::End();
-
-
-		ImGui::Render();
-		vk::raii::CommandBuffer& commandBuffer = _renderer->GetActiveCommandBuffer();
-		vk::RenderingAttachmentInfo colorAttachment
-		{
-			.imageView = _renderer->GetActiveSwapchainImageView(),
-			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-			.loadOp = vk::AttachmentLoadOp::eLoad,
-			.storeOp = vk::AttachmentStoreOp::eStore
-		};
-
-		vk::RenderingInfo renderingInfo
-		{
-			.renderArea =
-			{
-				.offset = { 0, 0 },
-				.extent = _renderer->GetSwapchainExtent()
-			},
-			.layerCount = 1,
-			.colorAttachmentCount = 1,
-			.pColorAttachments = &colorAttachment
-		};
-
-		commandBuffer.beginRendering(renderingInfo);
-
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *commandBuffer);
-
-		commandBuffer.endRendering();
+		io.DeltaTime = pTime;	
 	}
 
 	void ImGuiLayer::OnEvent(Event& pEvent)
@@ -276,6 +278,47 @@ namespace Imgn
 
 				return false;
 			});*/
+
+	}
+	void ImGuiLayer::Begin()
+	{
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void ImGuiLayer::End()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		io.DisplaySize = ImVec2(_window->GetWidth(), _window->GetHeight());
+		//io.DeltaTime = pTime;
+		ImGui::Render();
+		vk::raii::CommandBuffer& commandBuffer = _renderer->GetActiveCommandBuffer();
+		vk::RenderingAttachmentInfo colorAttachment
+		{
+			.imageView = _renderer->GetActiveSwapchainImageView(),
+			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+			.loadOp = vk::AttachmentLoadOp::eLoad,
+			.storeOp = vk::AttachmentStoreOp::eStore
+		};
+
+		vk::RenderingInfo renderingInfo
+		{
+			.renderArea =
+			{
+				.offset = { 0, 0 },
+				.extent = _renderer->GetSwapchainExtent()
+			},
+			.layerCount = 1,
+			.colorAttachmentCount = 1,
+			.pColorAttachments = &colorAttachment
+		};
+
+		commandBuffer.beginRendering(renderingInfo);
+
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *commandBuffer);
+
+		commandBuffer.endRendering();
 
 	}
 }

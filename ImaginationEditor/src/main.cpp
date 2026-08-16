@@ -1,4 +1,5 @@
 #include <Imgn.hpp>
+#include <Imgn/main.hpp>
 
 #include "EditorLayer.hpp"
 
@@ -11,6 +12,9 @@ namespace Imgn
     public:
         ImaginationEditor() /*Constructor*/
         {
+            GetWindow().SetWindowTitle("Imagination Engine (In Progress)");
+            AddLayer(Unique<EditorLayer>(&GetWindow(), &Renderer()));
+
         }
 
         ~ImaginationEditor() /*Destructor*/
