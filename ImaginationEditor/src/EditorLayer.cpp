@@ -285,8 +285,6 @@ namespace Imgn
 			CameraComponent* cam;// = GetComponent<CameraComponent>();
 			TransformComponent* transform;// = GetComponent<TransformComponent>();
 
-			float mouseSensitivity = 1.f;
-
 			void UpdateCamera(Time pTime)
 			{
 				auto [deltaX, deltaY] = Input::GetMouseDelta();
