@@ -39,10 +39,10 @@ namespace Imgn
 		static mat4 Inverse(mat4 pMat);
 		static mat4 LookAtLH(vec3 pEye, vec3 pAt, vec3 pUp);
 		static mat4 Rotate(mat4 pMat, vec3 pAxis, float pRadian, bool pGlobal = false);
+		static mat4 Scale(mat4 pMat, vec3 pScale, bool pGlobal = false);
 		static mat4 Translate(mat4 pMat, vec3 pVec, bool pGlobal = false);
 		static mat4 PerspectiveVKLH(float pFOV, float pAspect, float pNear, float pFar);
 		static mat4 Orthographic(float pRight, float pLeft, float pTop, float pBottom, float pNear = -1.f, float pFar = 1.f);
-
 	};
 
 	/// <summary>

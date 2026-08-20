@@ -76,7 +76,7 @@ namespace Imgn
 
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
-		ImgnMesh GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
+		ImgnMesh& GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
 		const Material& GetMaterial(uint32_t pHandle) const { return _materials[pHandle]; }
 
 		std::string CreateRGBufferDesc(const std::string& pName, uint64_t pSize) { return _graph->CreateRGBufferDesc(pName, pSize); }
@@ -99,6 +99,7 @@ namespace Imgn
 		vk::ImageView GetActiveSwapchainImageView() { return _vkCtx->GetActiveSwapchainImageView(); }
 		vk::Extent2D GetSwapchainExtent() const { return _vkCtx->GetSwapchainExtent(); }
 
+		//void DrawMesh(vk::raii::CommandBuffer& pCommandBuffer, uint32_t pVertexBuffer, uint32_t pIndexBuffer, std::vector<ImgnPrimitive> pPrimitives);
 
 		bool StartFrame();
 		void BlitToSwapchain(std::string_view pName);
@@ -106,6 +107,8 @@ namespace Imgn
 
 		void BeginScene();
 		void EndScene();
+
+		void ResizeViewport(uint32_t pWidth, uint32_t pHeight);
 
 		ImGui_ImplVulkan_InitInfo GetImGuiInitInfo() { return _vkCtx->GetImGuiInitInfo(); }
 	};

@@ -20,7 +20,7 @@ namespace Imgn
 		std::chrono::steady_clock::time_point _lastFrameTime;
 		unique<ImgnWindow> _window;
 		unique<ImGuiLayer> _imGuiLayer;
-		ImgnEntity _entity;
+		Entity _entity;
 		unique<ImgnRenderer> _renderer;
 
 	public:

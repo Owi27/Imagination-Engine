@@ -213,6 +213,7 @@ namespace Imgn
 		for (const tinygltf::Mesh& mesh : pModel.meshes)
 		{
 			ImgnMesh m;
+			m.name = mesh.name;
 
 			std::vector<Vertex> vertices;// = vertexData.first;
 			std::vector<uint32_t> indices;// = vertexData.second;

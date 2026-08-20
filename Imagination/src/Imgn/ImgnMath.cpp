@@ -132,6 +132,32 @@ namespace Imgn
 		return rotation; // no axis, just return identity
 	}
 
+	mat4 Math::Scale(mat4 pMat, vec3 pScale, bool pGlobal)
+	{
+		mat4 scale
+		{
+			pScale[0], 0.f, 0.f, 0.f,
+			0.f, pScale[1], 0.f, 0.f,
+			0.f, 0.f, pScale[2], 0.f,
+			0.f, 0.f, 0.f, 1.f
+		};
+
+		if (pGlobal)
+		{
+			mat4 out;
+			vec4 translation = { pMat[12], pMat[13], pMat[14], pMat[15] };
+
+			out = pMat * scale;
+
+			for (size_t i = 0; i < 4; i++) out[i + 12] = translation[i];
+			
+			return out;
+		}
+
+
+		return scale * pMat;
+	}
+
 	mat4 Math::PerspectiveVKLH(float pFOV, float pAspect, float pNear, float pFar)
 	{
 		float yScale = 1.f / std::tanf(pFOV * .5f);

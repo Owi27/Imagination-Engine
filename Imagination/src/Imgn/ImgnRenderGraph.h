@@ -3,6 +3,9 @@
 
 namespace Imgn
 {
+	class ImgnRenderer;
+	class RenderContext;
+
 	struct IMGN_API RenderPass
 	{
 		std::string name;
@@ -13,7 +16,7 @@ namespace Imgn
 		std::vector<std::string> bufferIN;
 		std::vector<std::string> bufferOUT;
 
-		std::function<void(vk::raii::CommandBuffer&/*, uint32_t*/)> Execute;
+		std::function<void(RenderContext&)> Execute;
 	};
 
 	class ImgnRenderGraph
@@ -51,6 +54,8 @@ namespace Imgn
 		/*uint64_t GetBufferSizeFromKey(std::string_view pKey);
 		uint32_t GetImageWidthFromKey(std::string_view pKey);
 		uint32_t GetImageHeightFromKey(std::string_view pKey);*/
+
+		ImgnRenderer* _renderer = nullptr;
 
 	public:
 		ImgnRenderGraph(Vulkan& pVk) : _vk(pVk)
@@ -90,6 +95,9 @@ namespace Imgn
 
 			return it->second;
 		}
+
+		void SetRenderer(ImgnRenderer* pRenderer) { _renderer = pRenderer; }
+
 		void Compile();
 		void Execute(vk::raii::CommandBuffer& pCommandBuffer);
 

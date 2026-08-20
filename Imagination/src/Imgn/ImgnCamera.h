@@ -20,9 +20,86 @@ namespace Imgn
 		[[nodiscard]] virtual const mat4& GetProjection() const = 0;
 	};
 
+	enum class CameraType
+	{
+		Orthographic, Perspective
+	};
+
+	class IMGN_API Camera
+	{
+		mat4 _proj = Math::identity;
+		CameraType type = CameraType::Perspective;
+		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 5000.f, _aspect = 16.f / 9.f, _right = 1.f, _left = 1.f, _top = 1.f, _bottom = 1.f;
+
+	public:
+		Camera()
+		{
+		}
+
+		~Camera() /*Destructor*/
+		{
+		}
+
+		/*Copy Constructor*/
+		Camera(const Camera& pOther) = default;
+
+		/*Copy Assignment Operator*/
+		Camera& operator=(const Camera& pOther) = default;
+
+		/*Move Constructor*/
+		Camera(Camera&& pOther) noexcept = default;
+
+		/*Move Assignment Operator*/
+		Camera& operator=(Camera&& pOther) noexcept = default;
+
+		void CreatePerspectiveCamera(float pFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 5000.f)
+		{
+			type = CameraType::Perspective;
+
+			_fov = pFOV;
+			_nearPlane = pNearPlane;
+			_farPlane = pFarPlane;
+
+			RecalculateProjection();
+		}
+
+		void CreateOrthographicCamera(float pRight, float pLeft, float pTop, float pBottom, float pNear = -1.f, float pFar = 1.f)
+		{
+			type = CameraType::Orthographic;
+
+			_right = pRight;
+			_left = pLeft;
+			_top = pTop;
+			_bottom = pBottom;
+
+			_nearPlane = pNear;
+			_farPlane = pFar;
+
+			RecalculateProjection();
+		}
+
+		/*Class Functions*/
+		void RecalculateProjection();
+		const mat4& GetProjection() const { return _proj; };
+		void SetViewportSize(uint32_t pWidth, uint32_t pHeight);
+
+		//pers
+		float& GetFOV() { return _fov; }
+		float& GetAspect() { return _aspect; }
+		float& GetFarPlane() { return _farPlane; }
+		float& GetNearPlane() { return _nearPlane; }
+
+		//ortho
+		float& GetOrthoRight() { return _right; }
+		float& GetOrthoLeft() { return _left; }
+		float& GetOrthoTop() { return _top; }
+		float& GetOrthoBottom() { return _bottom; }
+	};
+
 	class IMGN_API PerspectiveCamera : ICamera
 	{
 		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 1000.f, _aspect = 16.f / 9.f;
+
 		vec3 _pos = { 0.f, 0.f, 0.f };
 		vec4 _rot = { 0.f, 0.f, 0.f, 0.f };
 		mat4 _transform = Math::identity, _view = Math::identity, _proj = Math::identity;
@@ -39,21 +116,21 @@ namespace Imgn
 
 		// Inherited via ICamera
 		const mat4& GetProjection() const override { return _proj; };
-		const mat4& GetView() const override { return _view; }
-		const mat4 GetViewProj() const override { return _view * _proj; }
-		const vec3& GetPosition() const { return _pos; }
+		//const mat4& GetView() const override { return _view; }
+		//const mat4 GetViewProj() const override { return _view * _proj; }
+		//const vec3& GetPosition() const { return _pos; }
 
-		void RecalculateView() override;
+		//void RecalculateView() override;
 		void RecalculateProjection() override;
 
 		void SetFOV(float pFOV);
 		void SetFarPlane(float pFarPlane);
 		void SetNearPlane(float pNearPlane);
-		void SetPosition(vec3 pPos) override;
-		void SetRotation(vec4 pRot) override;
-		void SetViewportSize(uint32_t pWidth, uint32_t pHeight);// override;
+		//void SetPosition(vec3 pPos) override;
+		//void SetRotation(vec4 pRot) override;
+		//void SetViewportSize(uint32_t pWidth, uint32_t pHeight);// override;
 
-		void Rotate(float pPitch, float pYaw);
+		//void Rotate(float pPitch, float pYaw);
 	};
 
 	class IMGN_API OrthographicCamera : ICamera
@@ -75,7 +152,7 @@ namespace Imgn
 		}
 
 		// Inherited via ICamera
-		const mat4& GetView() const override { return _view; }
+		//const mat4& GetView() const override { return _view; }
 		const mat4& GetProjection() const override { return _proj; };
 		const mat4 GetViewProj() const override { return _view * _proj; }
 
@@ -89,5 +166,4 @@ namespace Imgn
 		void SetRotation(vec4 pRot) override;
 		//void SetViewportSize(uint32_t pWidth, uint32_t pHeight) override;
 	};
-
 }

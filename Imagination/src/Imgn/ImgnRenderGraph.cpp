@@ -1,6 +1,9 @@
 #include "pch.hpp"
 #include "ImgnRenderGraph.h"
 
+#include "ImgnRenderer.h"
+#include "ImgnRenderContext.h"
+
 namespace Imgn
 {
 	//std::string ImgnRenderGraph::MakeBufferKey(std::string_view pName, uint64_t pSize)
@@ -303,7 +306,13 @@ namespace Imgn
 					std::format("Render pass '{}' has no Execute callback", pass.name));
 			}
 
-			pass.Execute(pCommandBuffer);
+			RenderContext context
+			{
+				*_renderer,
+				pCommandBuffer
+			};
+
+			pass.Execute(context);
 
 			for (auto& output : pass.bufferOUT)
 			{

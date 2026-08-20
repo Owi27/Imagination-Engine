@@ -234,6 +234,7 @@ namespace Imgn
 				_vkCtx = Unique<Vulkan>();
 				_vkCtx->Init(_info);
 				_graph = Unique<ImgnRenderGraph>(*_vkCtx);
+				_graph->SetRenderer(this);
 			}
 			break;
 		case RendererBackend::D3D12:
@@ -448,6 +449,24 @@ namespace Imgn
 		return CreateStorageBuffer(materials.data(), materials.size() * sizeof(Material));
 	}
 
+	//void ImgnRenderer::DrawMesh(vk::raii::CommandBuffer& pCommandBuffer, uint32_t pVertexBuffer, uint32_t pIndexBuffer, std::vector<ImgnPrimitive> pPrimitives)
+	//{
+	//	pCommandBuffer.bindVertexBuffers(0, **GetBuffer(pVertexBuffer).buffer, { 0 });
+	//	pCommandBuffer.bindIndexBuffer(**GetBuffer(pIndexBuffer).buffer, 0, vk::IndexType::eUint32);
+
+	//	for (auto& prim : pPrimitives)
+	//	{
+	//		GBufferPC pc
+	//		{
+	//			.model = Math::identity,
+	//			.materialIndex = prim.material
+	//		};
+
+	//		pCommandBuffer.pushConstants<GBufferPC>(*GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, pc);
+	//		pCommandBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
+	//	}
+	//}
+
 	bool ImgnRenderer::StartFrame()
 	{
 		return _vkCtx->StartFrame();
@@ -468,6 +487,10 @@ namespace Imgn
 	}
 
 	void ImgnRenderer::EndScene()
+	{
+	}
+
+	void ImgnRenderer::ResizeViewport(uint32_t pWidth, uint32_t pHeight)
 	{
 	}
 

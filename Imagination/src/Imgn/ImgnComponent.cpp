@@ -1,42 +1,45 @@
 #include "pch.hpp"
 #include "ImgnComponent.h"
 
-void ImgnEntity::Init()
+namespace Imgn
 {
-	for (auto& component : _components)
+	void Entity::Init()
 	{
-		component->Init();
+		for (auto& component : _components)
+		{
+			component->Init();
+		}
 	}
-}
 
-void ImgnEntity::Dream(float pDeltaTime)
-{
-	if (!_active) return;
-
-	for (auto& component : _components)
+	void Entity::Dream(float pDeltaTime)
 	{
-		component->Dream(pDeltaTime);
+		if (!_active) return;
+
+		for (auto& component : _components)
+		{
+			component->Dream(pDeltaTime);
+		}
 	}
-}
 
-void ImgnEntity::OnEvent(Event& pEvent)
-{
-	if (!_active) return;
-
-	for (auto& component : _components)
+	void Entity::OnEvent(Event& pEvent)
 	{
-		component->OnEvent(pEvent);
+		if (!_active) return;
 
-		if (pEvent.Handled()) break;
+		for (auto& component : _components)
+		{
+			component->OnEvent(pEvent);
+
+			if (pEvent.Handled()) break;
+		}
 	}
-}
 
-void ImgnEntity::Render()
-{
-	if (!_active) return;
-
-	for (auto& component : _components)
+	void Entity::Render()
 	{
-		component->Render();
+		if (!_active) return;
+
+		for (auto& component : _components)
+		{
+			component->Render();
+		}
 	}
 }
