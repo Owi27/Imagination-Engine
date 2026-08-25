@@ -7,9 +7,9 @@ namespace Imgn
 {
 	void EditorLayer::UpdateCamera(Time pTime)
 	{
-		auto* transform = _mainCamera->GetComponent<TransformComponent>();
+		auto* transform = _sceneCamera->GetComponent<TransformComponent>();
 
-		auto* cameraComponent = _mainCamera->GetComponent<CameraComponent>();
+		auto* cameraComponent = _sceneCamera->GetComponent<CameraComponent>();
 
 		if (!transform || !cameraComponent) return;
 
@@ -218,8 +218,8 @@ namespace Imgn
 
 				LightingPC pc
 				{
-					.invViewProj = Math::Inverse(_mainCamera->GetComponent<TransformComponent>()->GetTransform() * _mainCamera->GetComponent<CameraComponent>()->camera.GetProjection()),
-					.camPos = _mainCamera->GetComponent<TransformComponent>()->position,
+					.invViewProj = Math::Inverse(_sceneCamera->GetComponent<TransformComponent>()->GetTransform() * _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection()),
+					.camPos = _sceneCamera->GetComponent<TransformComponent>()->position,
 					.width = _window->GetWidth(),
 					.height = _window->GetHeight()
 				};
@@ -273,11 +273,10 @@ namespace Imgn
 			entity->AddComponent<Imgn::MeshComponent>(meshHandle);
 		}
 
-		_mainCamera = _activeScene->CreateEntity("SceneCamera");
-		CameraComponent* camera = _mainCamera->AddComponent<CameraComponent>();
-		TransformComponent* cameraTransform = _mainCamera->GetComponent<TransformComponent>();
+		_sceneCamera = _activeScene->CreateEntity("SceneCamera");
+		CameraComponent* camera = _sceneCamera->AddComponent<CameraComponent>();
+		TransformComponent* cameraTransform = _sceneCamera->GetComponent<TransformComponent>();
 		camera->camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
-
 
 		class TestScript : public ScriptableEntity
 		{
@@ -290,41 +289,39 @@ namespace Imgn
 				auto [deltaX, deltaY] = Input::GetMouseDelta();
 
 				if (!Input::IsKeyPressed(IMGN_MOUSE_BUTTON_RIGHT)) return;
+
 				float speed = cam->cameraSpeed * pTime;
 				float moveX = 0.f;
 				float moveZ = 0.f;
-				vec3 camPos = transform->position;
 
-				if (Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
-				else if (Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
-				if (Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
-				else if (Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
+				if (Imgn::Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
+				else if (Imgn::Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
+				if (Imgn::Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
+				else if (Imgn::Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
 
+				vec3& camPos = transform->position;
 				// local movement -> world movement
-				camPos[0] += (moveX * std::cos(_yaw) + moveZ * std::sin(_yaw)) * speed;
-				camPos[2] += (-moveX * std::sin(_yaw) + moveZ * std::cos(_yaw)) * speed;
+				camPos[0] += (moveX * std::cos(Math::Radians(transform->rotation[1])) + moveZ * std::sin(Math::Radians(transform->rotation[1]))) * speed;
+				camPos[2] += (-moveX * std::sin(Math::Radians(transform->rotation[1])) + moveZ * std::cos(Math::Radians(transform->rotation[1]))) * speed;
 
-				if (Input::IsKeyPressed(IMGN_KEY_SPACE))
+				if (Imgn::Input::IsKeyPressed(IMGN_KEY_SPACE))
 				{
-					if (Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) camPos[1] -= speed;
+					if (Imgn::Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) camPos[1] -= speed;
 					else camPos[1] += speed;
 				}
 
-				// local movement -> world movement
-				camPos[0] += (moveX * std::cos(_yaw) + moveZ * std::sin(_yaw)) * speed;
-				camPos[2] += (-moveX * std::sin(_yaw) + moveZ * std::cos(_yaw)) * speed;
-
-				transform->position = camPos;
+				//transform->position = camPos;
 
 				//rotation
-				//auto [deltaX, deltaY] = Input::GetMouseDelta();
-				float pitch = 45.f * deltaY / ImgnApp::Get().GetWindow().GetHeight();
-				float yaw = 45.f * ImgnApp::Get().GetWindow().GetAspectRatio() * deltaX / ImgnApp::Get().GetWindow().GetWidth();
+				//auto [deltaX, deltaY] = Imgn::Input::GetMouseDelta();
+				float pitch = Imgn::Math::Radians(45.f) * deltaY / cam->camera.GetHeight();
+				float yaw = Imgn::Math::Radians(45.f) * cam->camera.GetAspect() *deltaX / cam->camera.GetWidth();
 
-				_yaw += Math::Radians(yaw);
+				_yaw += yaw;
 
-				transform->rotation[0] += pitch;
-				transform->rotation[1] += yaw;// (pitch, yaw);
+				//	//_transform = Math::Translate(_transform, _pos);
+				transform->rotation[0] += Math::Degrees(pitch);
+				transform->rotation[1] += Math::Degrees(yaw);
 			}
 
 		public:
@@ -346,7 +343,7 @@ namespace Imgn
 			}
 		};
 
-		_mainCamera->AddComponent<ScriptComponent>()->Bind<TestScript>();
+		_sceneCamera->AddComponent<ScriptComponent>()->Bind<TestScript>();
 		//_camera.SetFarPlane(10000.f);
 		//_camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
 
@@ -356,7 +353,6 @@ namespace Imgn
 		};
 
 		gBufferUBOHandle = _renderer->CreateUniformBuffer(&gBufferUBO, sizeof(GBufferUBO));
-
 	}
 
 	void EditorLayer::WakeUp()
@@ -469,6 +465,7 @@ namespace Imgn
 		ImGui::Begin("SceneView");
 		ImVec2 sceneViewSize = ImGui::GetContentRegionAvail();
 		_sceneWidth = static_cast<uint32_t>(sceneViewSize.x); _sceneHeight = static_cast<uint32_t>(sceneViewSize.y);
+		_sceneCamera->GetComponent<CameraComponent>()->camera.SetViewportSize(_sceneWidth, _sceneHeight);
 		ImGui::Image(ImTextureRef(textureID), ImVec2(_window->GetWidth(), _window->GetHeight()));
 		ImGui::End();
 	}
@@ -479,7 +476,7 @@ namespace Imgn
 
 		GBufferUBO gBufferUBO
 		{
-			.viewProj = Math::Inverse(_mainCamera->GetComponent<TransformComponent>()->GetTransform()) * _mainCamera->GetComponent<CameraComponent>()->camera.GetProjection()
+			.viewProj = Math::Inverse(_sceneCamera->GetComponent<TransformComponent>()->GetTransform()) * _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection()
 		};
 		_renderer->MapBufferData(gBufferUBOHandle, &gBufferUBO, sizeof(GBufferUBO));
 		//IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());

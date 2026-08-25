@@ -135,7 +135,8 @@ namespace Imgn
 	{
 		if (pWidth == 0 || pHeight == 0) return;
 
-		_aspect = static_cast<float>(pWidth) / static_cast<float>(pHeight);
+		_width = pWidth; _height = pHeight;
+		_aspect = static_cast<float>(_width) / static_cast<float>(_height);
 
 		RecalculateProjection();
 	}

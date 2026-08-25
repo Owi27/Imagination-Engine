@@ -11,7 +11,7 @@ namespace Imgn
 
         vec3 position = { 0.f, 0.f, 0.f }, rotation = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
 
-        mat4 GetTransform() const
+        mat4 GetTransform()
         {
             mat4 transform = Math::identity;
             transform = Math::Translate(transform, position);
@@ -20,7 +20,7 @@ namespace Imgn
             transform = Math::Rotate(transform, { 0.f, 0.f, 1.f }, Math::Radians(rotation[2]));
             transform = Math::Scale(transform, scale);
 
-            return transform;
+            return transform; 
         }
 
         TransformComponent() : Component("Transform")

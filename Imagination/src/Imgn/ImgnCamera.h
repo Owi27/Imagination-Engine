@@ -29,6 +29,7 @@ namespace Imgn
 	{
 		mat4 _proj = Math::identity;
 		CameraType type = CameraType::Perspective;
+		uint32_t _width = 0, _height = 0;
 		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 5000.f, _aspect = 16.f / 9.f, _right = 1.f, _left = 1.f, _top = 1.f, _bottom = 1.f;
 
 	public:
@@ -82,6 +83,9 @@ namespace Imgn
 		void RecalculateProjection();
 		const mat4& GetProjection() const { return _proj; };
 		void SetViewportSize(uint32_t pWidth, uint32_t pHeight);
+		
+		uint32_t& GetWidth() { return _width; }
+		uint32_t& GetHeight() { return _height; }
 
 		//pers
 		float& GetFOV() { return _fov; }

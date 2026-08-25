@@ -23,7 +23,6 @@ namespace Imgn
 				}
 			}
 		}
-
 	}
 
 	Entity* Scene::CreateEntity(const std::string& pName)

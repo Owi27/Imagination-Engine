@@ -8,14 +8,14 @@ namespace Imgn
         ImgnRenderer* _renderer;
         vk::DescriptorSet _sceneWindow = nullptr;
 
-		float _cameraSpeed = 500.f, _yaw = 0.f;
+		float _cameraSpeed = 500.f, _yaw = 0.f; // , _sceneViewportAspect = 0.f;
 		//vec3 _camPos = { 0, 0, 0 };
 		//PerspectiveCamera _camera;
 		bool _cameraLookActive = false;
 		uint32_t gBufferUBOHandle = 0, _sceneWidth = 0, _sceneHeight = 0;
 
 		shared<Scene> _activeScene;
-		Entity* _mainCamera = nullptr;
+		Entity* _sceneCamera = nullptr;
 		Entity* _selectedEntity = nullptr;
 		struct PointLight
 		{
