@@ -120,7 +120,7 @@ namespace Imgn
 	}
 	void Camera::RecalculateProjection()
 	{
-		if (type == CameraType::Perspective)
+		if (_type == CameraType::Perspective)
 		{
 			if (_farPlane <= _nearPlane) _farPlane = _nearPlane + 0.001f;
 
@@ -128,7 +128,7 @@ namespace Imgn
 		}
 		else
 		{
-			_proj = Math::Orthographic(_right * _aspect * .5f, _left * _aspect * .5f, _top * .5f, _bottom * .5f);
+			_proj = Math::Orthographic(_orthoSize * _aspect * .5f, -_orthoSize * _aspect * .5f, _orthoSize * .5f, -_orthoSize * .5f);
 		}
 	}
 	void Camera::SetViewportSize(uint32_t pWidth, uint32_t pHeight)

@@ -110,6 +110,7 @@ namespace Imgn
 		std::vector<unique<Component>>::iterator end() { return _components.end(); }
 
 		const std::string& GetName() const { return _name; }
+		void SetName(const std::string& pNewName) { _name = pNewName; }
 		bool IsActive() const { return _active; }
 		void SetActive(bool pIsActive) { _active = pIsActive; }
 
@@ -177,6 +178,9 @@ namespace Imgn
 
 			return false;
 		}
+
+		bool operator==(const Entity& pOther) const { return _name == pOther._name; }
+		bool operator!=(const Entity& pOther) const { return !(*this == pOther); }
 	};
 
 	class IMGN_API ScriptableEntity

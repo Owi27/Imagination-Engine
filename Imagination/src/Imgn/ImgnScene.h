@@ -6,6 +6,9 @@ namespace Imgn
 {
     class IMGN_API Scene
     {
+        friend class Entity;
+        friend class SceneHierarchy;
+
         std::vector<unique<Entity>> _entities;
         uint32_t _viewportWidth = 0, _viewportHeight = 0;
 

@@ -1,4 +1,5 @@
 #include <Imgn.hpp>
+#include "Panels/SceneHierarchy.h"
 
 namespace Imgn
 {
@@ -48,7 +49,8 @@ namespace Imgn
 			},
 		};
 
-		void UpdateCamera(Time pTime);
+		//panels
+		SceneHierarchy _sceneHierarchy;
 
     public:
         EditorLayer() /*Constructor*/

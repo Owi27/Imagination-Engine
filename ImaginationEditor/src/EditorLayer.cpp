@@ -1,100 +1,11 @@
 #include "EditorLayer.hpp"
+#include "EditorCamera.h"
 
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
 
 namespace Imgn
 {
-	void EditorLayer::UpdateCamera(Time pTime)
-	{
-		auto* transform = _sceneCamera->GetComponent<TransformComponent>();
-
-		auto* cameraComponent = _sceneCamera->GetComponent<CameraComponent>();
-
-		if (!transform || !cameraComponent) return;
-
-		auto [deltaX, deltaY] = Input::GetMouseDelta();
-
-		if (!Input::IsKeyPressed(IMGN_MOUSE_BUTTON_RIGHT)) return;
-
-		vec3& position = transform->position;
-		vec3& rotation = transform->rotation;
-		const float speed = cameraComponent->cameraSpeed * pTime;
-
-		const float pitchDelta = 45.f * deltaY / static_cast<float>(_window->GetHeight());
-		const float yawDelta = 45.f * _window->GetAspectRatio() * deltaX / static_cast<float>(_window->GetWidth());
-
-		rotation[0] += pitchDelta;
-		rotation[1] += yawDelta;
-
-		//// Prevent flipping over vertically.
-		//rotation[0] = std::clamp(rotation[0], -89.f, 89.f);
-
-		//movement
-		float moveX = 0.f;
-		float moveZ = 0.f;
-
-		if (Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
-		else if (Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
-		if (Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
-		else if (Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
-
-		// Prevent diagonal movement from being faster.
-		/*if (moveX != 0.f && moveZ != 0.f)
-		{
-			constexpr float diagonal = 0.70710678f;
-
-			moveX *= diagonal;
-			moveZ *= diagonal;
-		}*/
-
-		const float yaw = Math::Radians(rotation[1]);
-		position[0] += (moveX * std::cos(yaw) + moveZ * std::sin(yaw)) * speed;
-		position[2] += (-moveX * std::sin(yaw) + moveZ * std::cos(yaw)) * speed;
-
-		if (Input::IsKeyPressed(IMGN_KEY_SPACE))
-		{
-			if (Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) position[1] -= speed;
-			else position[1] += speed;
-		}
-
-
-
-		//vec3& camPos = _mainCamera->GetComponent<TransformComponent>()->position;
-
-		//float speed = _mainCamera->GetComponent<CameraComponent>()->cameraSpeed * pTime;
-		//float moveX = 0.f;
-		//float moveZ = 0.f;
-
-		//if (Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
-		//else if (Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
-		//if (Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
-		//else if (Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
-
-		//// local movement -> world movement
-		//camPos[0] += (moveX * std::cos(_yaw) + moveZ * std::sin(_yaw)) * speed;
-		//camPos[2] += (-moveX * std::sin(_yaw) + moveZ * std::cos(_yaw)) * speed;
-
-
-		//if (Input::IsKeyPressed(IMGN_KEY_SPACE))
-		//{
-		//	if (Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) camPos[1] -= speed;
-		//	else camPos[1] += speed;
-		//}
-
-		//_mainCamera->GetComponent<TransformComponent>()->position = camPos;
-
-		////rotation
-		//float pitch = Math::Radians(45.f) * deltaY / _window->GetHeight();
-		//float yaw = Math::Radians(45.f) * _window->GetAspectRatio() * deltaX / _window->GetWidth();
-
-		//_yaw += yaw;
-
-		//_mainCamera->GetComponent<TransformComponent>()->rotation[0] = pitch;
-		//_mainCamera->GetComponent<TransformComponent>()->rotation[1] = yaw;
-		////_camera.Rotate(pitch, yaw);
-	}
-
 	void EditorLayer::Sleep()
 	{
 		ImgnGLTF gltf;
@@ -278,74 +189,7 @@ namespace Imgn
 		TransformComponent* cameraTransform = _sceneCamera->GetComponent<TransformComponent>();
 		camera->camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
 
-		class TestScript : public ScriptableEntity
-		{
-			float _yaw = 0.f;
-			CameraComponent* cam;// = GetComponent<CameraComponent>();
-			TransformComponent* transform;// = GetComponent<TransformComponent>();
-
-			void UpdateCamera(Time pTime)
-			{
-				auto [deltaX, deltaY] = Input::GetMouseDelta();
-
-				if (!Input::IsKeyPressed(IMGN_MOUSE_BUTTON_RIGHT)) return;
-
-				float speed = cam->cameraSpeed * pTime;
-				float moveX = 0.f;
-				float moveZ = 0.f;
-
-				if (Imgn::Input::IsKeyPressed(IMGN_KEY_W)) moveZ += 1.f;
-				else if (Imgn::Input::IsKeyPressed(IMGN_KEY_S)) moveZ -= 1.f;
-				if (Imgn::Input::IsKeyPressed(IMGN_KEY_D)) moveX += 1.f;
-				else if (Imgn::Input::IsKeyPressed(IMGN_KEY_A)) moveX -= 1.f;
-
-				vec3& camPos = transform->position;
-				// local movement -> world movement
-				camPos[0] += (moveX * std::cos(Math::Radians(transform->rotation[1])) + moveZ * std::sin(Math::Radians(transform->rotation[1]))) * speed;
-				camPos[2] += (-moveX * std::sin(Math::Radians(transform->rotation[1])) + moveZ * std::cos(Math::Radians(transform->rotation[1]))) * speed;
-
-				if (Imgn::Input::IsKeyPressed(IMGN_KEY_SPACE))
-				{
-					if (Imgn::Input::IsKeyPressed(IMGN_KEY_LEFT_SHIFT)) camPos[1] -= speed;
-					else camPos[1] += speed;
-				}
-
-				//transform->position = camPos;
-
-				//rotation
-				//auto [deltaX, deltaY] = Imgn::Input::GetMouseDelta();
-				float pitch = Imgn::Math::Radians(45.f) * deltaY / cam->camera.GetHeight();
-				float yaw = Imgn::Math::Radians(45.f) * cam->camera.GetAspect() *deltaX / cam->camera.GetWidth();
-
-				_yaw += yaw;
-
-				//	//_transform = Math::Translate(_transform, _pos);
-				transform->rotation[0] += Math::Degrees(pitch);
-				transform->rotation[1] += Math::Degrees(yaw);
-			}
-
-		public:
-			void Sleep()
-			{
-				IMGN_TRACE("sleep");
-				cam = GetComponent<CameraComponent>();
-				transform = GetComponent<TransformComponent>();
-			}
-
-			void WakeUp()
-			{
-
-			}
-
-			void Dream(Time pTime)
-			{
-				UpdateCamera(pTime);
-			}
-		};
-
-		_sceneCamera->AddComponent<ScriptComponent>()->Bind<TestScript>();
-		//_camera.SetFarPlane(10000.f);
-		//_camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
+		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
 
 		GBufferUBO gBufferUBO
 		{
@@ -353,6 +197,8 @@ namespace Imgn
 		};
 
 		gBufferUBOHandle = _renderer->CreateUniformBuffer(&gBufferUBO, sizeof(GBufferUBO));
+
+		_sceneHierarchy.SetSceneContext(_activeScene);
 	}
 
 	void EditorLayer::WakeUp()
@@ -379,19 +225,21 @@ namespace Imgn
 		ImGui::ShowStyleEditor();
 		ImGui::End();
 
-		ImGui::Begin("Scene Hierarchy");
-		for (auto& entityPtr : _activeScene->GetEntities())
-		{
-			Entity* entity = entityPtr.get();
+		_sceneHierarchy.OnImGuiRender();
 
-			bool selected = entity == _selectedEntity;
+		//ImGui::Begin("Scene Hierarchy");
+		//for (auto& entityPtr : _activeScene->GetEntities())
+		//{
+		//	Entity* entity = entityPtr.get();
 
-			if (ImGui::Selectable(entity->GetName().c_str(), selected))
-			{
-				_selectedEntity = entity;
-			}
-		}
-		ImGui::End();
+		//	bool selected = entity == _selectedEntity;
+
+		//	if (ImGui::Selectable(entity->GetName().c_str(), selected))
+		//	{
+		//		_selectedEntity = entity;
+		//	}
+		//}
+		//ImGui::End();
 
 		ImGui::Begin("Inspector");
 		{
@@ -409,35 +257,35 @@ namespace Imgn
 					}
 				}
 
-				if (CameraComponent* cameraComp = _selectedEntity->GetComponent<CameraComponent>()) //means its a camera
-				{
-					ImGui::DragFloat("Camera Speed", &cameraComp->cameraSpeed, 5.f);
+				//if (CameraComponent* cameraComp = _selectedEntity->GetComponent<CameraComponent>()) //means its a camera
+				//{
+				//	ImGui::DragFloat("Camera Speed", &cameraComp->cameraSpeed, 5.f);
 
-					if (cameraComp->cameraType == CameraType::Perspective)
-					{
-						if (ImGui::DragFloat("FOV", &cameraComp->camera.GetFOV(), 5.f) ||
-							ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
-							ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
-							ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f))
-						{
-							cameraComp->camera.RecalculateProjection();
-						}
-					}
+				//	if (cameraComp->cameraType == CameraType::Perspective)
+				//	{
+				//		if (ImGui::DragFloat("FOV", &cameraComp->camera.GetFOV(), 5.f) ||
+				//			ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
+				//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
+				//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f))
+				//		{
+				//			cameraComp->camera.RecalculateProjection();
+				//		}
+				//	}
 
-					if (cameraComp->cameraType == CameraType::Orthographic)
-					{
-						if (ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
-							ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
-							ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f) ||
-							ImGui::DragFloat("Ortho Right", &cameraComp->camera.GetOrthoRight(), 5.f) ||
-							ImGui::DragFloat("Ortho Left", &cameraComp->camera.GetOrthoLeft(), 5.f) ||
-							ImGui::DragFloat("Ortho Top", &cameraComp->camera.GetOrthoTop(), 5.f) ||
-							ImGui::DragFloat("Ortho Bottom", &cameraComp->camera.GetOrthoBottom(), 5.f))
-						{
-							cameraComp->camera.RecalculateProjection();
-						}
-					}
-				}
+				//	if (cameraComp->cameraType == CameraType::Orthographic)
+				//	{
+				//		if (ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
+				//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
+				//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f) ||
+				//			ImGui::DragFloat("Ortho Right", &cameraComp->camera.GetOrthoRight(), 5.f) ||
+				//			ImGui::DragFloat("Ortho Left", &cameraComp->camera.GetOrthoLeft(), 5.f) ||
+				//			ImGui::DragFloat("Ortho Top", &cameraComp->camera.GetOrthoTop(), 5.f) ||
+				//			ImGui::DragFloat("Ortho Bottom", &cameraComp->camera.GetOrthoBottom(), 5.f))
+				//		{
+				//			cameraComp->camera.RecalculateProjection();
+				//		}
+				//	}
+				//}
 
 				if (auto* mesh = _selectedEntity->GetComponent<MeshComponent>())
 				{

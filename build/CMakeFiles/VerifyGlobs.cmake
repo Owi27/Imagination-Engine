@@ -225,7 +225,9 @@ endif()
 # ImaginationEditor_SOURCES at ImaginationEditor/CMakeLists.txt:4 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.cpp")
 set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/main.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
@@ -252,6 +254,8 @@ endif()
 # ImaginationEditor_HEADERS at ImaginationEditor/CMakeLists.txt:3 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.h")
 set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.h"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

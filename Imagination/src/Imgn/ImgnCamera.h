@@ -22,15 +22,15 @@ namespace Imgn
 
 	enum class CameraType
 	{
-		Orthographic, Perspective
+		Perspective, Orthographic
 	};
 
 	class IMGN_API Camera
 	{
 		mat4 _proj = Math::identity;
-		CameraType type = CameraType::Perspective;
+		CameraType _type = CameraType::Perspective;
 		uint32_t _width = 0, _height = 0;
-		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 5000.f, _aspect = 16.f / 9.f, _right = 1.f, _left = 1.f, _top = 1.f, _bottom = 1.f;
+		float _fov = Math::Radians(45), _nearPlane = .1f, _farPlane = 5000.f, _aspect = 16.f / 9.f, _orthoSize = 1.f, _orthoNear = -1.f, _orthoFar = 1.f;
 
 	public:
 		Camera()
@@ -55,7 +55,7 @@ namespace Imgn
 
 		void CreatePerspectiveCamera(float pFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 5000.f)
 		{
-			type = CameraType::Perspective;
+			_type = CameraType::Perspective;
 
 			_fov = pFOV;
 			_nearPlane = pNearPlane;
@@ -64,17 +64,13 @@ namespace Imgn
 			RecalculateProjection();
 		}
 
-		void CreateOrthographicCamera(float pRight, float pLeft, float pTop, float pBottom, float pNear = -1.f, float pFar = 1.f)
+		void CreateOrthographicCamera(float pOrthoSize, float pNear = -1.f, float pFar = 1.f)
 		{
-			type = CameraType::Orthographic;
+			_type = CameraType::Orthographic;
 
-			_right = pRight;
-			_left = pLeft;
-			_top = pTop;
-			_bottom = pBottom;
-
-			_nearPlane = pNear;
-			_farPlane = pFar;
+			_orthoSize = pOrthoSize;
+			_orthoNear = pNear;
+			_orthoFar = pFar;
 
 			RecalculateProjection();
 		}
@@ -87,6 +83,9 @@ namespace Imgn
 		uint32_t& GetWidth() { return _width; }
 		uint32_t& GetHeight() { return _height; }
 
+		CameraType GetType() { return _type; }
+		void SetType(CameraType pType) { _type = pType; }
+
 		//pers
 		float& GetFOV() { return _fov; }
 		float& GetAspect() { return _aspect; }
@@ -94,10 +93,10 @@ namespace Imgn
 		float& GetNearPlane() { return _nearPlane; }
 
 		//ortho
-		float& GetOrthoRight() { return _right; }
-		float& GetOrthoLeft() { return _left; }
-		float& GetOrthoTop() { return _top; }
-		float& GetOrthoBottom() { return _bottom; }
+		float& GetOrthoSize() { return _orthoSize; }
+		float& GetOrthoNear() { return _orthoNear; }
+		float& GetOrthoFar() { return _orthoFar; }
+		//float& GetOrthoBottom() { return _bottom; }
 	};
 
 	class IMGN_API PerspectiveCamera : ICamera
