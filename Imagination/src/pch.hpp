@@ -24,6 +24,7 @@ import vulkan_hpp;
 #include <unordered_set>
 #include <format>
 #include <chrono>
+#include <filesystem>
 
 #include "Imgn/ImgnLog.h"
 #include "Imgn/ImgnKey.MouseCodes.h"

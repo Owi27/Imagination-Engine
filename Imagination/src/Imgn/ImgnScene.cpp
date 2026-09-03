@@ -25,12 +25,25 @@ namespace Imgn
 		}
 	}
 
+	Entity* Scene::CreateEntity(const ID pID)
+	{
+		_entities.emplace_back(Unique<Entity>(pName));
+		_entities.back()->AddComponent<TransformComponent>();
+
+		return &*_entities.back();
+	}
+
 	Entity* Scene::CreateEntity(const std::string& pName)
 	{
 		_entities.emplace_back(Unique<Entity>(pName));
 		_entities.back()->AddComponent<TransformComponent>();
 
 		return &*_entities.back();
+	}
+
+	void Scene::DestroyEntity(unique<Entity>& pEntity)
+	{
+		std::erase(_entities, pEntity);
 	}
 
 	void Scene::OnViewportResize(uint32_t pWidth, uint32_t pHeight)
@@ -41,7 +54,6 @@ namespace Imgn
 		for (auto& entity : _entities)
 			if (CameraComponent* cameraComp = entity->GetComponent<CameraComponent>())
 				if (!cameraComp->fixedAspect) cameraComp->camera.SetViewportSize(pWidth, pHeight);
-
 	}
 
 }

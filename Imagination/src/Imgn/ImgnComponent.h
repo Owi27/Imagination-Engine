@@ -1,14 +1,17 @@
 #pragma once
 #include "ImgnCore.hpp"
 #include "Events/Event.h"
+#include "ImgnTime.h"
+
+#define IMGN_COMPONENT_ID(pTypeName) static constexpr ID TypeID = HashID(pTypeName);
 
 namespace Imgn
 {
 	class Entity;
-	using ComponentTypeID = uint64_t;
-	constexpr ComponentTypeID HashComponentName(std::string_view pName)
+	using ID = uint64_t;
+	constexpr ID HashID(std::string_view pName)
 	{
-		ComponentTypeID hash = 14695981039346656037ull;
+		ID hash = 14695981039346656037ull;
 
 		for (char c : pName)
 		{
@@ -19,6 +22,8 @@ namespace Imgn
 
 		return hash;
 	}
+
+	IMGN_API ID GenerateEntityID(std::string_view pName);
 
 	class IMGN_API Component
 	{
@@ -79,14 +84,18 @@ namespace Imgn
 		}
 
 		template<typename T>
-		static ComponentTypeID GetTypeID()
+		static constexpr ID GetTypeID()
 		{
 			return T::TypeID;
 		}
+
+		virtual void Serialize(std::fstream& pStream) = 0;
+		virtual void Deserialize(std::fstream& pStream) = 0;
 	};
 
 	class Entity
 	{
+		ID _id = 0;
 		std::string _name;
 		bool _active = true;
 		std::vector<unique<Component>> _components;
@@ -96,6 +105,7 @@ namespace Imgn
 		Entity(const std::string& pName = "ImgnEntity")
 		{
 			_name = pName;
+			_id = GenerateEntityID(_name);
 		}
 
 		~Entity()
@@ -109,10 +119,12 @@ namespace Imgn
 		std::vector<unique<Component>>::iterator begin() { return _components.begin(); }
 		std::vector<unique<Component>>::iterator end() { return _components.end(); }
 
+		ID GetID() const { return _id; }
 		const std::string& GetName() const { return _name; }
 		void SetName(const std::string& pNewName) { _name = pNewName; }
 		bool IsActive() const { return _active; }
 		void SetActive(bool pIsActive) { _active = pIsActive; }
+		const std::vector<unique<Component>>& GetComponents() const { return _components; }
 
 		void Init();
 		void Dream(float pDeltaTime);

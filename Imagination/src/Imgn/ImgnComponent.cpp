@@ -3,6 +3,15 @@
 
 namespace Imgn
 {
+	ID GenerateEntityID(std::string_view pName)
+	{
+		static uint64_t counter = 0;
+
+		std::string id = std::string(pName) + std::to_string(counter++);
+
+		return HashID(id);
+	}
+
 	void Entity::Init()
 	{
 		for (auto& component : _components)

@@ -43,7 +43,9 @@ namespace Imgn
         void Dream(Time pTime);
 
         /*Class Functions*/
+        Entity* CreateEntity(const ID pID);
         Entity* CreateEntity(const std::string& pName = "Entity");
+        void DestroyEntity(unique<Entity>& pEntity);
         std::vector<unique<Entity>>& GetEntities() { return _entities; }
 
         void OnViewportResize(uint32_t pWidth, uint32_t pHeight);

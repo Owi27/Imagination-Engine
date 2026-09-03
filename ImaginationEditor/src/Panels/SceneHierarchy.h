@@ -19,6 +19,9 @@ namespace Imgn
 
 		void DrawComponents(Entity* pEntity);
 
+		template<typename T>
+		void CreateComponentSettings(Entity* pEntity, std::string_view pComponentTitle, std::function<void(bool)> pComponentSettings);
+
 		void OnImGuiRender();
 	};
 }

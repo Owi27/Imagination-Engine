@@ -20,7 +20,7 @@ namespace Imgn
 		[[nodiscard]] virtual const mat4& GetProjection() const = 0;
 	};
 
-	enum class CameraType
+	enum class CameraType : uint8_t
 	{
 		Perspective, Orthographic
 	};

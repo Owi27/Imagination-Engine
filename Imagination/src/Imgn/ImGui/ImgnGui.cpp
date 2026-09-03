@@ -124,9 +124,9 @@ namespace Imgn
 		case IMGN_KEY_KP_ENTER:        pIO.AddKeyEvent(ImGuiKey_KeypadEnter, pPressed); break;
 			//case IMGN_KEY_KP_EQUAL:        pIO.AddKeyEvent(ImGuiKey_KeypadEqual, pPressed); break;
 		//mouse
-		case IMGN_MOUSE_BUTTON_LEFT:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Left, pPressed);
-		case IMGN_MOUSE_BUTTON_RIGHT:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Right, pPressed);
-		case IMGN_MOUSE_BUTTON_MIDDLE:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Middle, pPressed);
+		case IMGN_MOUSE_BUTTON_LEFT:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Left, pPressed); break;
+		case IMGN_MOUSE_BUTTON_RIGHT:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Right, pPressed); break;
+		case IMGN_MOUSE_BUTTON_MIDDLE:	pIO.AddMouseButtonEvent(ImGuiMouseButton_Middle, pPressed); break;
 		default:
 			break;
 		}

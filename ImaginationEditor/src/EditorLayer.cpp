@@ -1,5 +1,6 @@
 #include "EditorLayer.hpp"
 #include "EditorCamera.h"
+#include <Imgn/SceneSerializer.h>
 
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
@@ -199,6 +200,11 @@ namespace Imgn
 		gBufferUBOHandle = _renderer->CreateUniformBuffer(&gBufferUBO, sizeof(GBufferUBO));
 
 		_sceneHierarchy.SetSceneContext(_activeScene);
+
+		SceneSerializer serializer(_activeScene);
+		serializer.Serialize("Assets/Scenes/Test.imgn");
+
+		serializer.Deserialize("Assets/Scenes/Test.imgn");
 	}
 
 	void EditorLayer::WakeUp()
@@ -241,67 +247,67 @@ namespace Imgn
 		//}
 		//ImGui::End();
 
-		ImGui::Begin("Inspector");
-		{
-			if (_selectedEntity)
-			{
-				ImGui::Text("%s", _selectedEntity->GetName().c_str());
+		//ImGui::Begin("Inspector");
+		//{
+		//	if (_selectedEntity)
+		//	{
+		//		ImGui::Text("%s", _selectedEntity->GetName().c_str());
 
-				if (auto* transform = _selectedEntity->GetComponent<TransformComponent>())
-				{
-					if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-					{
-						ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
-						ImGui::DragFloat3("Rotation", transform->rotation.data(), 0.5f);
-						ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
-					}
-				}
+		//		if (auto* transform = _selectedEntity->GetComponent<TransformComponent>())
+		//		{
+		//			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+		//			{
+		//				ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
+		//				ImGui::DragFloat3("Rotation", transform->rotation.data(), 0.5f);
+		//				ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
+		//			}
+		//		}
 
-				//if (CameraComponent* cameraComp = _selectedEntity->GetComponent<CameraComponent>()) //means its a camera
-				//{
-				//	ImGui::DragFloat("Camera Speed", &cameraComp->cameraSpeed, 5.f);
+		//		//if (CameraComponent* cameraComp = _selectedEntity->GetComponent<CameraComponent>()) //means its a camera
+		//		//{
+		//		//	ImGui::DragFloat("Camera Speed", &cameraComp->cameraSpeed, 5.f);
 
-				//	if (cameraComp->cameraType == CameraType::Perspective)
-				//	{
-				//		if (ImGui::DragFloat("FOV", &cameraComp->camera.GetFOV(), 5.f) ||
-				//			ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
-				//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
-				//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f))
-				//		{
-				//			cameraComp->camera.RecalculateProjection();
-				//		}
-				//	}
+		//		//	if (cameraComp->cameraType == CameraType::Perspective)
+		//		//	{
+		//		//		if (ImGui::DragFloat("FOV", &cameraComp->camera.GetFOV(), 5.f) ||
+		//		//			ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
+		//		//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
+		//		//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f))
+		//		//		{
+		//		//			cameraComp->camera.RecalculateProjection();
+		//		//		}
+		//		//	}
 
-				//	if (cameraComp->cameraType == CameraType::Orthographic)
-				//	{
-				//		if (ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
-				//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
-				//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f) ||
-				//			ImGui::DragFloat("Ortho Right", &cameraComp->camera.GetOrthoRight(), 5.f) ||
-				//			ImGui::DragFloat("Ortho Left", &cameraComp->camera.GetOrthoLeft(), 5.f) ||
-				//			ImGui::DragFloat("Ortho Top", &cameraComp->camera.GetOrthoTop(), 5.f) ||
-				//			ImGui::DragFloat("Ortho Bottom", &cameraComp->camera.GetOrthoBottom(), 5.f))
-				//		{
-				//			cameraComp->camera.RecalculateProjection();
-				//		}
-				//	}
-				//}
+		//		//	if (cameraComp->cameraType == CameraType::Orthographic)
+		//		//	{
+		//		//		if (ImGui::DragFloat("Near", &cameraComp->camera.GetNearPlane(), 5.f) ||
+		//		//			ImGui::DragFloat("Far", &cameraComp->camera.GetFarPlane(), 5.f) ||
+		//		//			ImGui::DragFloat("Aspect", &cameraComp->camera.GetAspect(), 5.f) ||
+		//		//			ImGui::DragFloat("Ortho Right", &cameraComp->camera.GetOrthoRight(), 5.f) ||
+		//		//			ImGui::DragFloat("Ortho Left", &cameraComp->camera.GetOrthoLeft(), 5.f) ||
+		//		//			ImGui::DragFloat("Ortho Top", &cameraComp->camera.GetOrthoTop(), 5.f) ||
+		//		//			ImGui::DragFloat("Ortho Bottom", &cameraComp->camera.GetOrthoBottom(), 5.f))
+		//		//		{
+		//		//			cameraComp->camera.RecalculateProjection();
+		//		//		}
+		//		//	}
+		//		//}
 
-				if (auto* mesh = _selectedEntity->GetComponent<MeshComponent>())
-				{
-					if (ImGui::CollapsingHeader("Mesh"))
-					{
-						ImGui::Text("Mesh: %u", mesh->mesh);
+		//		if (auto* mesh = _selectedEntity->GetComponent<MeshComponent>())
+		//		{
+		//			if (ImGui::CollapsingHeader("Mesh"))
+		//			{
+		//				ImGui::Text("Mesh: %u", mesh->mesh);
 
-						/*ImGui::Checkbox(
-							"Visible",
-							&mesh->visible
-						);*/
-					}
-				}
-			}
-		}
-		ImGui::End();
+		//				/*ImGui::Checkbox(
+		//					"Visible",
+		//					&mesh->visible
+		//				);*/
+		//			}
+		//		}
+		//	}
+		//}
+		//ImGui::End();
 
 		if (!_sceneWindow)
 		{
