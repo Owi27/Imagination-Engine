@@ -32,7 +32,7 @@ namespace Imgn
 		};
 
 		std::string entityHeader = "Entities";
-		std::string entityKey = "Entity";
+		//std::string entityKey = "Entity";
 
 		Write(&fileHeader, sizeof(SceneFileHeader));
 		Write(entityHeader.data(), entityHeader.size());
@@ -42,6 +42,10 @@ namespace Imgn
 			if (!entity) return;
 
 			//serialize entity
+			uint32_t nameLength = entity->GetName().size();
+			Write(&nameLength, sizeof(uint32_t));
+			Write(entity->GetName().data(), entity->GetName().size()); //name
+
 			ID id = entity->GetID();
 			Write(&id, sizeof(id));
 			uint64_t componentCount = entity->GetComponents().size();
@@ -61,9 +65,7 @@ namespace Imgn
 	}
 	bool SceneSerializer::Deserialize(const std::string& pFilepath)
 	{
-		_stream.open(pFilepath, std::ios::binary | std::ios::out | std::ios::trunc);
-
-		Scene test;
+		_stream.open(pFilepath, std::ios::binary | std::ios::in);
 
 		SceneFileHeader fileHeader;
 		Read(&fileHeader, sizeof(SceneFileHeader));
@@ -76,6 +78,11 @@ namespace Imgn
 
 			for (uint32_t i = 0; i < fileHeader.entityCount; i++)
 			{
+				uint32_t nameLength;
+				Read(&nameLength, sizeof(uint32_t));
+				std::string entityName(nameLength, '\0');
+				Read(entityName.data(), nameLength);
+
 				ID entityID = 0;
 				Read(&entityID, sizeof(entityID));
 
@@ -84,13 +91,23 @@ namespace Imgn
 
 				if (Entity* entity = _scene->CreateEntity())
 				{
+					entity->SetName(entityName);
+
 					for (uint64_t i = 0; i < componentCount; i++)
 					{
 						ID componentID = 0;
 						Read(&componentID, sizeof(ID));
+						
+						switch (componentID)
+						{
+						case TransformComponent::TypeID: entity->AddComponent<TransformComponent>()->Deserialize(_stream); break;
+						case CameraComponent::TypeID: entity->AddComponent<CameraComponent>()->Deserialize(_stream); break;
+						case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
+						case ScriptComponent::TypeID: entity->AddComponent<ScriptComponent>()->Deserialize(_stream); break;
+						default: break;
+						}
 					}
 				}
-
 			}
 
 			_stream.close();

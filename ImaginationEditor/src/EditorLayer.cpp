@@ -191,6 +191,7 @@ namespace Imgn
 		camera->camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
 
 		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
+		_sceneHierarchy.SetSceneContext(_activeScene);
 
 		GBufferUBO gBufferUBO
 		{
@@ -198,13 +199,6 @@ namespace Imgn
 		};
 
 		gBufferUBOHandle = _renderer->CreateUniformBuffer(&gBufferUBO, sizeof(GBufferUBO));
-
-		_sceneHierarchy.SetSceneContext(_activeScene);
-
-		SceneSerializer serializer(_activeScene);
-		serializer.Serialize("Assets/Scenes/Test.imgn");
-
-		serializer.Deserialize("Assets/Scenes/Test.imgn");
 	}
 
 	void EditorLayer::WakeUp()
@@ -220,6 +214,16 @@ namespace Imgn
 		{
 			if (ImGui::BeginMenu("File"))
 			{
+				if (ImGui::MenuItem("Serialize"))
+				{
+					SceneSerializer serializer(_activeScene);
+					serializer.Serialize("Assets/Scenes/Test.imgn");
+				}
+				if (ImGui::MenuItem("Deserialize"))
+				{
+					SceneSerializer serializer(_activeScene);
+					serializer.Deserialize("Assets/Scenes/Test.imgn");
+				}
 				if (ImGui::MenuItem("Exit")) ImgnApp::Get().Close();
 				ImGui::EndMenu();
 			}

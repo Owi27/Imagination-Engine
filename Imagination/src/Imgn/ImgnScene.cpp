@@ -25,14 +25,6 @@ namespace Imgn
 		}
 	}
 
-	Entity* Scene::CreateEntity(const ID pID)
-	{
-		_entities.emplace_back(Unique<Entity>(pName));
-		_entities.back()->AddComponent<TransformComponent>();
-
-		return &*_entities.back();
-	}
-
 	Entity* Scene::CreateEntity(const std::string& pName)
 	{
 		_entities.emplace_back(Unique<Entity>(pName));

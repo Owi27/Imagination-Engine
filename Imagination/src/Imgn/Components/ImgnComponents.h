@@ -24,10 +24,7 @@ namespace Imgn
 			return transform;
 		}
 
-		TransformComponent() : Component("Transform")
-		{
-		}
-
+		TransformComponent() : Component("Transform") {}
 
 		// Inherited via Component
 		void Serialize(std::fstream& pStream) override
@@ -54,7 +51,8 @@ namespace Imgn
 
 		uint32_t mesh;
 
-		explicit MeshComponent(uint32_t pMesh) : Component("Mesh")
+		MeshComponent() : Component("Mesh") {}
+		MeshComponent(uint32_t pMesh) : Component("Mesh")
 		{
 			mesh = pMesh;
 		}
@@ -81,7 +79,6 @@ namespace Imgn
 		bool mainCamera = true;
 		bool fixedAspect = false;
 		float cameraSpeed = 250.f;
-
 
 		CameraComponent(float pSizeOrFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 1000.f, CameraType pType = CameraType::Perspective) : Component("Camera")
 		{
@@ -113,11 +110,29 @@ namespace Imgn
 
 		void Deserialize(std::fstream& pStream) override
 		{
-			pStream.read(reinterpret_cast<char*>(position.data()), position.size() * sizeof(float));
-			pStream.read(reinterpret_cast<char*>(rotation.data()), rotation.size() * sizeof(float));
-			pStream.read(reinterpret_cast<char*>(scale.data()), scale.size() * sizeof(float));
-		}
+			float fov, pNear, pFar, oSize, oNear, oFar;
+			uint8_t camType;
 
+			pStream.read(reinterpret_cast<char*>(&camType), sizeof(CameraType));
+			pStream.read(reinterpret_cast<char*>(&fov), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&pNear), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&pFar), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oSize), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oNear), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oFar), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&mainCamera), sizeof(bool));
+			pStream.read(reinterpret_cast<char*>(&fixedAspect), sizeof(bool));
+
+			switch (static_cast<CameraType>(camType))
+			{
+			case Imgn::CameraType::Perspective:
+				camera.CreatePerspectiveCamera(fov, pNear, pFar);
+				break;
+			case Imgn::CameraType::Orthographic:
+				camera.CreateOrthographicCamera(oSize, oNear, oFar);
+				break;
+			}
+		}
 	};
 
 	struct ScriptComponent : public Component
@@ -146,6 +161,10 @@ namespace Imgn
 		void Serialize(std::fstream& pStream) override
 		{
 			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
+		}
+
+		void Deserialize(std::fstream& pStream) override
+		{
 		}
 	};
 }
