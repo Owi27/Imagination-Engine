@@ -11,26 +11,27 @@ namespace Imgn
 
 		vec3& position = transform->position;
 		vec3& rotation = transform->rotation;
+		const float sensisitivty = .1f;
 		float speed = cam->cameraSpeed * pTime;
 
-		float pitch = Imgn::Math::Radians(45.f) * deltaY / cam->camera.GetHeight();
-		float yaw = Imgn::Math::Radians(45.f) * cam->camera.GetAspect() * deltaX / cam->camera.GetWidth();
+		rotation[0] += std::clamp(deltaY * sensisitivty, -89.f, 89.f);
+		rotation[1] += deltaX * sensisitivty;
 
-		rotation[0] += pitch;
-		rotation[1] += yaw;
+		float pitch = Math::Radians(rotation[0]);
+		float yaw = Math::Radians(rotation[1]);
 
 		vec3 forward =
 		{
-			std::sin(Math::Radians(rotation[1])) * std::cos(Math::Radians(rotation[0])),
-			-std::sin(Math::Radians(rotation[0])),
-			std::cos(Math::Radians(rotation[1])) * std::cos(Math::Radians(rotation[0]))
+			std::sin(yaw),
+			0.f,
+			std::cos(yaw)
 		};
 
 		vec3 right =
 		{
-			std::cos(Math::Radians(rotation[1])),
-			0.0f,
-			-std::sin(Math::Radians(rotation[1]))
+			 std::cos(yaw),
+			0.f,
+			-std::sin(yaw)
 		};
 
 		float moveX = 0.f;
@@ -43,7 +44,6 @@ namespace Imgn
 
 		// local movement -> world movement
 		position[0] += (right[0] * moveX + forward[0] * moveZ) * speed;
-		position[1] += (right[1] * moveX + forward[1] * moveZ) * speed;
 		position[2] += (right[2] * moveX + forward[2] * moveZ) * speed;
 
 		if (Imgn::Input::IsKeyPressed(IMGN_KEY_SPACE))
@@ -59,6 +59,30 @@ namespace Imgn
 		//	//_transform = Math::Translate(_transform, _pos);
 		//transform->rotation[0] += Math::Degrees(pitch);
 		//transform->rotation[1] += Math::Degrees(yaw);
+	}
+
+	mat4 EditorCamera::GetCamView()
+	{
+		const float pitch = Math::Radians(transform->rotation[0]);
+
+		const float yaw =
+			Math::Radians(transform->rotation[1]);
+
+		vec3 forward =
+		{
+			std::sin(yaw) * std::cos(pitch),
+			-std::sin(pitch),
+			std::cos(yaw) * std::cos(pitch)
+		};
+
+		vec3 target =
+		{
+			transform->position[0] + forward[0],
+			transform->position[1] + forward[1],
+			transform->position[2] + forward[2]
+		};
+
+		return Math::LookAtLH(transform->position, target, { 0.f, 1.f, 0.f });
 	}
 
 }

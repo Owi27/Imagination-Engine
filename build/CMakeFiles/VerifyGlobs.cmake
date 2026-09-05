@@ -259,6 +259,7 @@ file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.h"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

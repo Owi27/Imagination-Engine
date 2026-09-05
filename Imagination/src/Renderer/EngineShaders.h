@@ -70,6 +70,8 @@ struct VOut
     float2 uv : TEXCOORD0;
     float4 tan : TANGENT;
     float3 col : COLOR;
+    float4 cPos : POSITION1;
+    float4 pPos : POSITION2;
     //float3x3 TBN : TEXCOORD1;
     //int idx : INDEX;
 };
@@ -84,18 +86,23 @@ struct GBufferPC
 struct UniformBuffer
 {
     matrix viewProj;
+    matrix prevViewProj;
+    matrix jitteredViewProj;
 };
 ConstantBuffer<UniformBuffer> ubo : register(b0, space0);
 
 VOut main(VIn input)
 {
     VOut output;
-    output.pos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
+    output.pos = mul(ubo.jitteredViewProj, mul(pc.model, float4(input.pos, 1)));
     output.wPos = input.pos;
     output.uv = input.uv;
     output.nrm = input.nrm;
     output.tan = input.tan;
     output.col = input.col;
+
+    output.cPos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
+    output.pPos = mul(ubo.prevViewProj, mul(pc.model, float4(input.pos, 1)));
     
     //output.idx = id;
 
@@ -116,6 +123,8 @@ VOut main(VIn input)
     float2 uv : TEXCOORD0;
     float4 tan : TANGENT;
     float3 col : COLOR;
+    float4 cPos : POSITION1;
+    float4 pPos : POSITION2;
 };
 
 struct FOut
@@ -124,6 +133,7 @@ struct FOut
     float4 Normal : SV_TARGET1;
     float4 MStuff : SV_TARGET2;
     float4 Emissi : SV_TARGET3; //emissive
+    float2 Velocity : SV_TARGET4;
     //float4 Albedo   : SV_TARGET2;
 };
 
@@ -170,6 +180,13 @@ StructuredBuffer<Material> materialInfo : register(t1, space0);
 
 Texture2D materialTextures[] : register(t0, space1);
 SamplerState materialSampler : register(s0, space1);
+
+float2 ClipToUV(float4 pClip)
+{
+    float2 ndc = pClip.xy / pClip.w;
+    
+    return ndc * .5f + .5f;
+}
 
 FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
 {
@@ -261,10 +278,13 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
         worldNormal = -worldNormal;
     }
 
+    //velocity
+    //float2 currNDC = input.cPos.xy / input.cPos.w, prevNDC = input.pPos.xy / input.pPos.w;
     output.Albedo = float4(albedo.rgb, 1.f);
     output.Normal = float4(worldNormal * .5f + .5f, 1.f);
     output.MStuff = float4(metallic, roughness, ao, 1.0f);
     output.Emissi = float4(emissive, 1.f);
+    output.Velocity = float2(ClipToUV(input.cPos) - ClipToUV(input.pPos));
 
     return output;
 })";

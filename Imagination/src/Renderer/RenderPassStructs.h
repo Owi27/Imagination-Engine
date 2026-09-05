@@ -10,7 +10,7 @@ namespace Imgn
 
 	struct GBufferUBO
 	{
-		std::array<float, 16> viewProj;
+		mat4 viewProj, prevViewProj, jitteredViewProj;
 	};
 
 	struct GBufferMaterial
@@ -27,5 +27,11 @@ namespace Imgn
 		mat4 invViewProj;
 		vec3 camPos;
 		uint32_t width, height, pointLightCount;
+	};
+
+	//velocity
+	struct Velocity
+	{
+		mat4 currViewProj, prevViewProj;
 	};
 }

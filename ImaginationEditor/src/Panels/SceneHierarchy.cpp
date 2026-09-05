@@ -6,6 +6,12 @@
 
 namespace Imgn
 {
+	void SceneHierarchy::SetSceneContext(const shared<Scene>& pScene)
+	{
+		_scene = pScene;
+		_selectedEntity = nullptr;
+	}
+
 	void SceneHierarchy::DrawComponents(Entity* pEntity)
 	{
 		char buffer[32];

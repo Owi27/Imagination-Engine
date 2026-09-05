@@ -27,5 +27,7 @@ namespace Imgn
 		{
 			UpdateCamera(pTime);
 		}
+
+		mat4 GetCamView();
 	};
 }

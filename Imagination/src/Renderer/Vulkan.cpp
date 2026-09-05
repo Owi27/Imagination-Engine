@@ -696,7 +696,7 @@ void Vulkan::CreateGraphicsPipelines()
 			.stencilTestEnable = vk::False
 		};
 
-		std::array blendStates = { colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
+		std::array blendStates = { colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
 
 		vk::PipelineColorBlendStateCreateInfo colorBlending
 		{
@@ -712,6 +712,7 @@ void Vulkan::CreateGraphicsPipelines()
 			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Srgb,
+			vk::Format::eR16G16Sfloat
 		};
 
 		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo

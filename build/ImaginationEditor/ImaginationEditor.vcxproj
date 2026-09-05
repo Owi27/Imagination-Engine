@@ -405,6 +405,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorCamera.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorLayer.hpp" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\SceneHierarchy.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Utils\EditorUtils.h" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorCamera.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

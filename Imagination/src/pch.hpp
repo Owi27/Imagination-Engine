@@ -25,6 +25,7 @@ import vulkan_hpp;
 #include <format>
 #include <chrono>
 #include <filesystem>
+#include <random>
 
 #include "Imgn/ImgnLog.h"
 #include "Imgn/ImgnKey.MouseCodes.h"

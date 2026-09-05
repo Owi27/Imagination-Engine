@@ -15,7 +15,7 @@ namespace Imgn
 			SetSceneContext(pScene);
 		}
 
-		void SetSceneContext(const shared<Scene>& pScene) { _scene = pScene; }
+		void SetSceneContext(const shared<Scene>& pScene);
 
 		void DrawComponents(Entity* pEntity);
 

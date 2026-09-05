@@ -80,7 +80,7 @@ namespace Imgn
 		bool fixedAspect = false;
 		float cameraSpeed = 250.f;
 
-		CameraComponent(float pSizeOrFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 1000.f, CameraType pType = CameraType::Perspective) : Component("Camera")
+		CameraComponent(float pSizeOrFOV = Math::Radians(45.f), float pNearPlane = .1f, float pFarPlane = 5000.f, CameraType pType = CameraType::Perspective) : Component("Camera")
 		{
 			switch (pType)
 			{
