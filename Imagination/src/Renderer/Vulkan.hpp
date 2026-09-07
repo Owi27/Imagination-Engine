@@ -120,7 +120,7 @@ class Vulkan
 	unique<vk::raii::DescriptorSet> _textureDescriptorSet;
 	unique<vk::raii::DescriptorSetLayout> _pushDescriptorSetLayout, _textureDescriptorSetLayout;
 
-	unique<vk::raii::Sampler> _textureSampler;
+	unique<vk::raii::Sampler> _textureSampler, _taaSampler;
 
 	uint32_t _queueIdx = 0;// , _frameIdx = 0;
 
@@ -156,6 +156,7 @@ class Vulkan
 	//void CreateUniformBuffers();
 	void CreateDescriptorPool();
 	void CreateDescriptorSets();
+	void CreateTAASampler();
 	void CreateTextureSampler();
 	//void CreateTextureImageView();
 	void CreateGraphicsPipelines();
@@ -214,6 +215,7 @@ public:
 	Image CreateTextureImage(const std::string& pFile);
 	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect);
 
+	vk::raii::Sampler& GetTAASampler() const { return *_textureSampler; }
 	vk::raii::Sampler& GetTextureSampler() const { return *_textureSampler; }
 	vk::raii::DescriptorSet& GetTextureDescriptorSet() const { return *_textureDescriptorSet; }
 	void UpdateImageDescriptor(uint32_t pSlot, const Image& pImage);

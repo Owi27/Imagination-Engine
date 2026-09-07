@@ -248,14 +248,14 @@ namespace Imgn
 					{
 						ctx.CreateDescriptorImageInfo("LitScene"),
 						ctx.CreateDescriptorImageInfo("TAAHistory"),
-						ctx.CreateDescriptorImageInfo("G-BufferVelocity", _renderer->GetTextureSampler()),
+						ctx.CreateDescriptorImageInfo("G-BufferVelocity"),
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", nullptr, vk::ImageLayout::eGeneral);
 
 					//sampler
 
-					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetTextureSampler());
+					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetTAASampler());
 
 					std::array writes
 					{

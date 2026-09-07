@@ -72,6 +72,7 @@ namespace Imgn
 		uint32_t CreateStorageBuffer(void* pData, uint64_t pSize);
 		uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
+		vk::raii::Sampler& GetTAASampler() { return _vkCtx->GetTAASampler(); }
 		vk::raii::Sampler& GetTextureSampler() { return _vkCtx->GetTextureSampler(); }
 
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }

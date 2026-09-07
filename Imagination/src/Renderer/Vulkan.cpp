@@ -287,6 +287,32 @@ void Vulkan::CreateDescriptorSets()
 	_textureDescriptorSet = Unique<vk::raii::DescriptorSet>(std::move(descriptorSets.front()));
 }
 
+void Vulkan::CreateTAASampler()
+{
+	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
+
+	vk::SamplerCreateInfo samplerInfo
+	{
+		.magFilter = vk::Filter::eLinear,
+		.minFilter = vk::Filter::eLinear,
+		.mipmapMode = vk::SamplerMipmapMode::eLinear,
+		.addressModeU = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeV = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeW = vk::SamplerAddressMode::eClampToEdge,
+		.mipLodBias = 0.f,
+		.anisotropyEnable = vk::False,
+		.maxAnisotropy = properties.limits.maxSamplerAnisotropy,
+		.compareEnable = vk::False,
+		.compareOp = vk::CompareOp::eAlways,
+		.minLod = 0.f,
+		.maxLod = 0.f,
+		.borderColor = vk::BorderColor::eFloatOpaqueBlack,
+		.unnormalizedCoordinates = vk::False
+	};
+
+	_taaSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
+}
+
 void Vulkan::CreateTextureSampler()
 {
 	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
@@ -311,7 +337,6 @@ void Vulkan::CreateTextureSampler()
 	};
 
 	_textureSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
-
 }
 
 void Vulkan::RecreateSwapchain()
