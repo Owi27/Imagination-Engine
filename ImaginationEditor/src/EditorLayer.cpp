@@ -198,7 +198,7 @@ namespace Imgn
 						ctx.CreateDescriptorImageInfo("Depth"),
 					};
 
-					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", vk::ImageLayout::eGeneral);
+					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
 
 
 					std::array writes
@@ -222,8 +222,8 @@ namespace Imgn
 			.imageIN =
 			{
 				"LitScene",
-				//"G-BufferVelocity",
-				"TAAHistory"
+				"TAAHistory",
+				"G-BufferVelocity",
 			},
 			.imageOUT =
 			{
@@ -248,14 +248,20 @@ namespace Imgn
 					{
 						ctx.CreateDescriptorImageInfo("LitScene"),
 						ctx.CreateDescriptorImageInfo("TAAHistory"),
+						ctx.CreateDescriptorImageInfo("G-BufferVelocity", _renderer->GetTextureSampler()),
 					};
 
-					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", vk::ImageLayout::eGeneral);
+					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", nullptr, vk::ImageLayout::eGeneral);
+
+					//sampler
+
+					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetTextureSampler());
 
 					std::array writes
 					{
 						ctx.CreateWriteDescriptorSet(2, vk::DescriptorType::eSampledImage, images),
-						ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage)
+						ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage),
+						ctx.CreateWriteDescriptorSet(4, vk::DescriptorType::eSampler, sampler)
 					};
 
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);

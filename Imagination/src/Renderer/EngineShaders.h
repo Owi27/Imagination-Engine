@@ -470,7 +470,6 @@ float3 ReconstructWorldPosition(float2 pUV, float pDepth)
     return world.xyz;
 }
 
-
 [numthreads(8, 8, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
 {
@@ -508,9 +507,13 @@ void main( uint3 DTid : SV_DispatchThreadID )
     litScene[pixel] = float4(color, 1.f);
 })";
 
-    std::string TAAComputeShader = R"(Texture2D<float4> taaInput[2] : register(t2, space0);
-RWTexture2D<float4> taaOutput : register(u3, space0);
+    std::string TAAComputeShader = R"(#define TAAResolved 0
+#define TAAHistory 1
+#define Velocity 2
 
+Texture2D<float4> taaInput[3] : register(t2, space0);
+RWTexture2D<float4> taaOutput : register(u3, space0);
+SamplerState _sampler : register(s2, space0);
 
 [numthreads(8, 8, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
@@ -521,8 +524,10 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     float2 uv = (float2(pixel) + .5f) / float2(width, height);
     
-    float3 currColor = taaInput[0].Load(int3(pixel, 0)).rgb;
-    float3 prevColor = taaInput[1].Load(int3(pixel, 0)).rgb;
+    float2 reprojectedUV = uv +float2(taaInput[Velocity].Load(int3(pixel, 0)).rg);
+    float3 currColor = taaInput[TAAResolved].Load(int3(pixel, 0)).rgb;
+    float3 prevColor = taaInput[TAAHistory].SampleLevel(_sampler, reprojectedUV, 0).rgb;
+//    Load(int3(reprojectedUV, 0)).rgb;
     
     taaOutput[pixel] = float4(currColor * .1f + prevColor * .9f, 1.f);
 })";

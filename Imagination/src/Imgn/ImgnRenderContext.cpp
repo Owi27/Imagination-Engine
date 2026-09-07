@@ -77,13 +77,22 @@ namespace Imgn
 			.range = pSize
 		};
 	}
-	vk::DescriptorImageInfo RenderContext::CreateDescriptorImageInfo(std::string_view pName, vk::ImageLayout pLayout, vk::Sampler pSampler)
+	vk::DescriptorImageInfo RenderContext::CreateDescriptorImageInfo(std::string_view pName, vk::Sampler pSampler, vk::ImageLayout pLayout)
 	{
 		return vk::DescriptorImageInfo
 		{
 			.sampler = pSampler,
 			.imageView = *_renderer->GetRenderGraphImage(pName).image.view,
 			.imageLayout = pLayout,
+		};
+	}
+	vk::DescriptorImageInfo RenderContext::CreateSamplerInfo(vk::Sampler pSampler)
+	{
+		return vk::DescriptorImageInfo
+		{
+			.sampler = pSampler,
+			.imageView = nullptr,
+			.imageLayout = vk::ImageLayout::eUndefined,
 		};
 	}
 	vk::WriteDescriptorSet RenderContext::CreateWriteDescriptorSet(uint32_t pBinding, vk::DescriptorType pDescriptorType, vk::DescriptorBufferInfo& pBufferInfo)

@@ -45,7 +45,8 @@ namespace Imgn
 		void SetScissor(uint32_t pWidth, uint32_t pHeight);
 
 		vk::DescriptorBufferInfo CreateDescriptorBufferInfo(uint32_t pHandle, uint64_t pSize);
-		vk::DescriptorImageInfo CreateDescriptorImageInfo(std::string_view pName, vk::ImageLayout pLayout = vk::ImageLayout::eShaderReadOnlyOptimal, vk::Sampler pSampler = nullptr);
+		vk::DescriptorImageInfo CreateDescriptorImageInfo(std::string_view pName, vk::Sampler pSampler = nullptr, vk::ImageLayout pLayout = vk::ImageLayout::eShaderReadOnlyOptimal);
+		vk::DescriptorImageInfo CreateSamplerInfo(vk::Sampler pSampler);
 
 		vk::WriteDescriptorSet CreateWriteDescriptorSet(uint32_t pBinding, vk::DescriptorType pDescriptorType, vk::DescriptorBufferInfo& pBufferInfo);
 		vk::WriteDescriptorSet CreateWriteDescriptorSet(uint32_t pBinding, vk::DescriptorType pDescriptorType, vk::DescriptorImageInfo& pImageInfo);
