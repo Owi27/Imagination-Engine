@@ -14,7 +14,7 @@ constexpr uint32_t NumDescriptorsStreaming = 128;
 
 struct Pipelines
 {
-	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline;
+	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline, taaPipeline;
 	unique<vk::raii::PipelineLayout> pipelineLayout;
 };
 
@@ -237,5 +237,7 @@ public:
 	vk::Extent2D GetSwapchainExtent() const { return _swapchainExtent; }
 
 	ImGui_ImplVulkan_InitInfo GetImGuiInitInfo();
+
+	void CopyRenderImage(RGImage& pSrc, RGImage& pDst);
 	
 };

@@ -30,8 +30,8 @@ namespace Imgn
 	};
 
 	//velocity
-	struct Velocity
+	/*struct TAAPC
 	{
 		mat4 currViewProj, prevViewProj;
-	};
+	};*/
 }

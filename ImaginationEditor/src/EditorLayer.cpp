@@ -77,7 +77,7 @@ namespace Imgn
 				vk::RenderingAttachmentInfo depthAttachment = ctx.CreateRenderingAttachmentInfo("Depth");
 
 				ctx.BeginRendering(_window->GetWidth(), _window->GetHeight(), colorAttachments, &depthAttachment);
-				ctx.BindPipeline(vk::PipelineBindPoint::eGraphics, _renderer->GetGBufferPipeline());
+				ctx.BindPipeline(vk::PipelineBindPoint::eGraphics, *_renderer->GetPipelines().gBufferPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
 				ctx.SetViewport(_window->GetWidth(), _window->GetHeight());
 				ctx.SetScissor(_window->GetWidth(), _window->GetHeight());
@@ -166,7 +166,7 @@ namespace Imgn
 					.pDepthAttachment = &depthAttachment,
 				}; */
 
-				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, _renderer->GetLightingPipeline());
+				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, *_renderer->GetPipelines().lightingPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
 
 				LightingPC pc
@@ -214,33 +214,25 @@ namespace Imgn
 			}
 		};
 
+		_renderer->CreateRGImageDesc("TAAHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat);
+
 		RenderPass TAA
 		{
 			.name = "TemporalAntiAliasing",
 			.imageIN =
 			{
 				"LitScene",
-				"G-BufferVelocity",
+				//"G-BufferVelocity",
 				"TAAHistory"
 			},
 			.imageOUT =
 			{
-				//_renderer->CreateRGImageDesc("TAAResolved", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat)
+				_renderer->CreateRGImageDesc("TAAResolved", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat)
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
-				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, _renderer->GetLightingPipeline());
+				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, *_renderer->GetPipelines().taaPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
-
-				LightingPC pc
-				{
-					.invViewProj = Math::Inverse(gBufferUBO.viewProj),
-					.camPos = _sceneCamera->GetComponent<TransformComponent>()->position,
-					.width = _window->GetWidth(),
-					.height = _window->GetHeight()
-				};
-
-				ctx.PushConstants<LightingPC>(vk::ShaderStageFlagBits::eCompute, pc);
 
 				//push descriptor set
 				{
@@ -254,15 +246,11 @@ namespace Imgn
 
 					std::array images =
 					{
-						ctx.CreateDescriptorImageInfo("G-BufferAlbedo"),
-						ctx.CreateDescriptorImageInfo("G-BufferNormal"),
-						ctx.CreateDescriptorImageInfo("G-BufferMaterial"),
-						ctx.CreateDescriptorImageInfo("G-BufferEmissive"),
-						ctx.CreateDescriptorImageInfo("Depth"),
+						ctx.CreateDescriptorImageInfo("LitScene"),
+						ctx.CreateDescriptorImageInfo("TAAHistory"),
 					};
 
-					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", vk::ImageLayout::eGeneral);
-
+					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", vk::ImageLayout::eGeneral);
 
 					std::array writes
 					{
@@ -277,10 +265,9 @@ namespace Imgn
 			}
 		};
 
-
 		_renderer->AddPass(gBuffer);
 		_renderer->AddPass(lighting);
-		//_renderer->AddPass(TAA);
+		_renderer->AddPass(TAA);
 		_renderer->CompileGraph();
 
 		_activeScene = Shared<Scene>();
@@ -366,7 +353,7 @@ namespace Imgn
 
 		if (!_sceneWindow)
 		{
-			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("LitScene").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("TAAResolved").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 		}
 
 		ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
@@ -384,7 +371,7 @@ namespace Imgn
 		_activeScene->Dream(pTime);
 		//UpdateCamera(pTime);
 
-		constexpr float JITTER_DEBUG_SCALE = 10.f;
+		constexpr float JITTER_DEBUG_SCALE = 1.f;
 
 		mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
 		vec2 jitter = GetProjectionJitter(_window->GetWidth(), _window->GetHeight());
@@ -401,7 +388,10 @@ namespace Imgn
 
 
 		_renderer->ExecuteGraph();
-		_renderer->BlitToSwapchain("LitScene");
+		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
+
+		_taaHistoryValid = true;
+		_renderer->BlitToSwapchain("TAAResolved");
 	}
 
 	void EditorLayer::OnEvent(Event& pEvent)

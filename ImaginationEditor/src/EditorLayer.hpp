@@ -55,6 +55,8 @@ namespace Imgn
 		//ubo
 		GBufferUBO gBufferUBO;
 
+		bool _taaHistoryValid = false;
+
 		std::default_random_engine gen = std::default_random_engine(777);
 
 		mat4 GetCamView(TransformComponent* pTransform);

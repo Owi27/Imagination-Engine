@@ -291,7 +291,11 @@ namespace Imgn
 			for (auto& output : pass.imageOUT)
 			{
 				RGImage& resource = _images[output];
-				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eColor) ? vk::ImageLayout::eColorAttachmentOptimal : vk::ImageLayout::eDepthStencilAttachmentOptimal;
+				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eDepth)
+					? vk::ImageLayout::eDepthStencilAttachmentOptimal
+					: (pass.bindPoint == vk::PipelineBindPoint::eCompute
+						? vk::ImageLayout::eGeneral
+						: vk::ImageLayout::eColorAttachmentOptimal);
 
 				if (resource.currentLayout != target)
 				{

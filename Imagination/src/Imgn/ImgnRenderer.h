@@ -86,8 +86,9 @@ namespace Imgn
 		RGBuffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
 
 		vk::raii::DescriptorSet& GetTextureDescriptorSet() { return _vkCtx->GetTextureDescriptorSet(); }
-		vk::raii::Pipeline& GetGBufferPipeline() { return *_vkCtx->_pipelines.gBufferPipeline; }
-		vk::raii::Pipeline& GetLightingPipeline() { return *_vkCtx->_pipelines.lightingPipeline; }
+		//vk::raii::Pipeline& GetGBufferPipeline() { return *_vkCtx->_pipelines.gBufferPipeline; }
+		//vk::raii::Pipeline& GetLightingPipeline() { return *_vkCtx->_pipelines.lightingPipeline; }
+		Pipelines& GetPipelines() const { return _vkCtx->_pipelines; }
 		vk::raii::PipelineLayout& GetPipelineLayout() { return *_vkCtx->_pipelines.pipelineLayout; }
 
 		void MapBufferData(uint32_t pHandle, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_buffers[pHandle]); }
@@ -109,6 +110,8 @@ namespace Imgn
 		void EndScene();
 
 		void ResizeViewport(uint32_t pWidth, uint32_t pHeight);
+
+		void CopyRenderImage(std::string_view pSrc, std::string_view pDst) { _vkCtx->CopyRenderImage(_graph->GetImage(pSrc), _graph->GetImage(pDst)); }
 
 		ImGui_ImplVulkan_InitInfo GetImGuiInitInfo() { return _vkCtx->GetImGuiInitInfo(); }
 	};
