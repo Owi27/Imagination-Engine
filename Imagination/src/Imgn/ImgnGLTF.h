@@ -48,6 +48,8 @@ namespace Imgn
 	{
 		std::vector<uint32_t> materials, meshes;
 
+		std::vector<Skeleton> skeletons;
+
 		uint32_t materialBuffer = UINT32_MAX;
 		uint64_t materialBufferSize = 0;
 	};

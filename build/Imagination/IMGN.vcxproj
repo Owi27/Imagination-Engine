@@ -91,32 +91,24 @@
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <BufferSecurityCheck>
-      </BufferSecurityCheck>
-      <CallingConvention>
-      </CallingConvention>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <FloatingPointModel>
-      </FloatingPointModel>
-      <ForceConformanceInForLoopScope>
-      </ForceConformanceInForLoopScope>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>D:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Debug//cmake_pch.pch</PrecompiledHeaderOutputFile>
-      <RemoveUnreferencedCodeData>
-      </RemoveUnreferencedCodeData>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
-      <TreatWChar_tAsBuiltInType>
-      </TreatWChar_tAsBuiltInType>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;IMGN_BUILD_DLL;IMGN_PLATFORM_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Debug";IMGN_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -135,8 +127,7 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
@@ -164,20 +155,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>C:\VulkanSDK\1.4.335.0\Lib\vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImageHasSafeExceptionHandlers>
-      </ImageHasSafeExceptionHandlers>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
       <ImportLibrary>D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Imagination/IMGN.lib</ImportLibrary>
-      <LinkErrorReporting>
-      </LinkErrorReporting>
+      <LinkErrorReporting></LinkErrorReporting>
       <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/bin/Debug-Windows-x64/Imagination/IMGN.pdb</ProgramDataBaseFile>
-      <RandomizedBaseAddress>
-      </RandomizedBaseAddress>
-      <SubSystem>
-      </SubSystem>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -189,32 +175,24 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <BufferSecurityCheck>
-      </BufferSecurityCheck>
-      <CallingConvention>
-      </CallingConvention>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <FloatingPointModel>
-      </FloatingPointModel>
-      <ForceConformanceInForLoopScope>
-      </ForceConformanceInForLoopScope>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>D:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Release//cmake_pch.pch</PrecompiledHeaderOutputFile>
-      <RemoveUnreferencedCodeData>
-      </RemoveUnreferencedCodeData>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
-      <TreatWChar_tAsBuiltInType>
-      </TreatWChar_tAsBuiltInType>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_BUILD_DLL;IMGN_PLATFORM_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="Release";IMGN_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -233,8 +211,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
@@ -262,20 +239,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>C:\VulkanSDK\1.4.335.0\Lib\vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImageHasSafeExceptionHandlers>
-      </ImageHasSafeExceptionHandlers>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
       <ImportLibrary>D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Imagination/IMGN.lib</ImportLibrary>
-      <LinkErrorReporting>
-      </LinkErrorReporting>
+      <LinkErrorReporting></LinkErrorReporting>
       <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/bin/Release-Windows-x64/Imagination/IMGN.pdb</ProgramDataBaseFile>
-      <RandomizedBaseAddress>
-      </RandomizedBaseAddress>
-      <SubSystem>
-      </SubSystem>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -287,32 +259,24 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <BufferSecurityCheck>
-      </BufferSecurityCheck>
-      <CallingConvention>
-      </CallingConvention>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <FloatingPointModel>
-      </FloatingPointModel>
-      <ForceConformanceInForLoopScope>
-      </ForceConformanceInForLoopScope>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>D:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/MinSizeRel//cmake_pch.pch</PrecompiledHeaderOutputFile>
-      <RemoveUnreferencedCodeData>
-      </RemoveUnreferencedCodeData>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
-      <TreatWChar_tAsBuiltInType>
-      </TreatWChar_tAsBuiltInType>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_BUILD_DLL;IMGN_PLATFORM_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="MinSizeRel";IMGN_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -331,8 +295,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
@@ -360,20 +323,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>C:\VulkanSDK\1.4.335.0\Lib\vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImageHasSafeExceptionHandlers>
-      </ImageHasSafeExceptionHandlers>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
       <ImportLibrary>D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Imagination/IMGN.lib</ImportLibrary>
-      <LinkErrorReporting>
-      </LinkErrorReporting>
+      <LinkErrorReporting></LinkErrorReporting>
       <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/bin/MinSizeRel-Windows-x64/Imagination/IMGN.pdb</ProgramDataBaseFile>
-      <RandomizedBaseAddress>
-      </RandomizedBaseAddress>
-      <SubSystem>
-      </SubSystem>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -385,32 +343,24 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/VulkanSDK/1.4.335.0/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <BufferSecurityCheck>
-      </BufferSecurityCheck>
-      <CallingConvention>
-      </CallingConvention>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <FloatingPointModel>
-      </FloatingPointModel>
-      <ForceConformanceInForLoopScope>
-      </ForceConformanceInForLoopScope>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>D:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch</PrecompiledHeaderOutputFile>
-      <RemoveUnreferencedCodeData>
-      </RemoveUnreferencedCodeData>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
-      <TreatWChar_tAsBuiltInType>
-      </TreatWChar_tAsBuiltInType>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;IMGN_BUILD_DLL;IMGN_PLATFORM_WINDOWS;IMGN_VULKAN_PLATFORM_WINDOWS;VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1;UNICODE;_UNICODE;CMAKE_INTDIR="RelWithDebInfo";IMGN_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -429,8 +379,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>	</Message>
       <Command>setlocal
 "C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Daydream
 if %errorlevel% neq 0 goto :cmEnd
@@ -458,20 +407,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalDependencies>C:\VulkanSDK\1.4.335.0\Lib\vulkan-1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
+      <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImageHasSafeExceptionHandlers>
-      </ImageHasSafeExceptionHandlers>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
       <ImportLibrary>D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.lib</ImportLibrary>
-      <LinkErrorReporting>
-      </LinkErrorReporting>
+      <LinkErrorReporting></LinkErrorReporting>
       <ProgramDataBaseFile>D:/GitHub/Imagination-Engine/build/bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.pdb</ProgramDataBaseFile>
-      <RandomizedBaseAddress>
-      </RandomizedBaseAddress>
-      <SubSystem>
-      </SubSystem>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem></SubSystem>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -535,7 +479,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Imagination\src\Imgn\Skeleton.cpp" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\build\Imagination\CMakeFiles\IMGN.dir\cmake_pch.cxx">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -558,7 +501,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch</PrecompiledHeaderOutputFile>
       <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</ScanSourceForModuleDependencies>
     </ClCompile>
-    <ClInclude Include="..\..\Imagination\src\Imgn\Skeleton.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Gateware\Gateware.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imconfig.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui.h" />
@@ -594,6 +536,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnTime.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnWindow.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Skeleton.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\main.hpp" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\EngineShaders.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\IRenderBackend.hpp" />
@@ -744,6 +687,12 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Skeleton.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

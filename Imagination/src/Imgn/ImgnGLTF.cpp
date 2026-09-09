@@ -257,6 +257,14 @@ namespace Imgn
 
 		_outModel.materials = LoadGLTFMaterials(model, LoadGLTFTextures(model, pRenderer), pRenderer);
 		_outModel.meshes = LoadGLTFMeshes(model, pRenderer);
+
+		_outModel.skeletons.reserve(model.skins.size());
+
+		for (const tinygltf::Skin& skin : model.skins)
+		{
+			_outModel.skeletons.push_back(LoadSkeleton(model, skin));
+		}
+
 		CreateMaterialBuffer(pRenderer);
 
 		return _outModel;
@@ -297,11 +305,14 @@ namespace Imgn
 			}
 		}
 
-		const tinygltf::Accessor& accessor = pModel.accessors[pSkin.inverseBindMatrices];
-		const tinygltf::BufferView& view = pModel.bufferViews[accessor.bufferView];
-		const tinygltf::Buffer& buffer = pModel.buffers[view.buffer];
-		const unsigned char* data = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+		if (pSkin.inverseBindMatrices >= 0)
+		{
+			const tinygltf::Accessor& accessor = pModel.accessors[pSkin.inverseBindMatrices];
+			const tinygltf::BufferView& view = pModel.bufferViews[accessor.bufferView];
+			const tinygltf::Buffer& buffer = pModel.buffers[view.buffer];
+			const unsigned char* data = buffer.data.data() + view.byteOffset + accessor.byteOffset;
 
+		}
 
 		return skeleton;
 	}
