@@ -215,7 +215,7 @@ public:
 	Image CreateTextureImage(const std::string& pFile);
 	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect);
 
-	vk::raii::Sampler& GetTAASampler() const { return *_textureSampler; }
+	vk::raii::Sampler& GetTAASampler() const { return *_taaSampler; }
 	vk::raii::Sampler& GetTextureSampler() const { return *_textureSampler; }
 	vk::raii::DescriptorSet& GetTextureDescriptorSet() const { return *_textureDescriptorSet; }
 	void UpdateImageDescriptor(uint32_t pSlot, const Image& pImage);

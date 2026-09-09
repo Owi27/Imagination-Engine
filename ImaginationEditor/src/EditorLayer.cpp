@@ -48,8 +48,9 @@ namespace Imgn
 	}
 	void EditorLayer::Sleep()
 	{
-		ImgnGLTF gltf;
-		ImgnModel sponza = gltf.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
+		GLTFLoader& loader = GLTFLoader::Get();
+		ImgnModel sponza = loader.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
+		ImgnModel testGlb = loader.LoadModel("../../Models/Vroid/Test.gltf", *_renderer);
 
 		RenderPass gBuffer
 		{
@@ -83,12 +84,12 @@ namespace Imgn
 				ctx.SetScissor(_window->GetWidth(), _window->GetHeight());
 
 				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandle, sizeof(GBufferUBO));
-				vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
+				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
 
 				std::vector writes
 				{
 					ctx.CreateWriteDescriptorSet(0, vk::DescriptorType::eUniformBuffer, uboInfo),
-					ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
+					//ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
 				};
 
 				ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
@@ -101,7 +102,18 @@ namespace Imgn
 					{
 						if (MeshComponent* meshComp = entity->GetComponent<MeshComponent>())
 						{
+							auto& mesh = _renderer->GetMesh(meshComp->mesh);
+							if (!meshComp->visible) continue;
+
 							ctx.BindMesh(meshComp->mesh);
+							vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
+
+							std::vector writes
+							{
+								ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
+							};
+
+							ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
 
 							for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
 							{
@@ -116,6 +128,42 @@ namespace Imgn
 							}
 						}
 					}
+
+					//for (auto& children : entity->GetChildren())
+					//{
+					//	if (!children->IsActive()) continue;
+
+					//	if (TransformComponent* transform = children->GetComponent<TransformComponent>())
+					//	{
+					//		if (MeshComponent* meshComp = children->GetComponent<MeshComponent>())
+					//		{
+					//			auto& mesh = _renderer->GetMesh(meshComp->mesh);
+					//			if (!meshComp->visible) continue;
+
+					//			ctx.BindMesh(meshComp->mesh);
+					//			vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
+
+					//			std::vector writes
+					//			{
+					//				ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
+					//			};
+
+					//			ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
+
+					//			for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
+					//			{
+					//				GBufferPC pc
+					//				{
+					//					.model = transform->GetTransform(),
+					//					.materialIndex = prim.material
+					//				};
+
+					//				ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
+					//				ctx.DrawPrimitive(prim);
+					//			}
+					//		}
+					//	}
+					//}
 				}
 
 				ctx.EndRendering();
@@ -210,7 +258,7 @@ namespace Imgn
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
 				}
 
-				ctx.Dispatch(std::ceil(_window->GetWidth() / 8), std::ceil(_window->GetHeight() / 8), 1);
+				ctx.Dispatch((_window->GetWidth() + 7) / 8, (_window->GetHeight() + 7) / 8, 1);
 			}
 		};
 
@@ -234,6 +282,12 @@ namespace Imgn
 				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, *_renderer->GetPipelines().taaPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
 
+				TAAPC pc
+				{
+					.historyValid = _taaHistoryValid
+				};
+
+				ctx.PushConstants<TAAPC>(vk::ShaderStageFlagBits::eCompute, pc);
 				//push descriptor set
 				{
 					//uniform buffer
@@ -267,7 +321,7 @@ namespace Imgn
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
 				}
 
-				ctx.Dispatch(std::ceil(_window->GetWidth() / 8), std::ceil(_window->GetHeight() / 8), 1);
+				ctx.Dispatch((_window->GetWidth() + 7) / 8, (_window->GetHeight() + 7) / 8, 1);
 			}
 		};
 
@@ -281,7 +335,25 @@ namespace Imgn
 		for (auto& meshHandle : sponza.meshes)
 		{
 			Entity* entity = _activeScene->CreateEntity("Sponza");
-			entity->AddComponent<Imgn::MeshComponent>(meshHandle);
+			MeshComponent* mesh = entity->AddComponent<Imgn::MeshComponent>(meshHandle);
+			mesh->materials = sponza.materials;
+			//todo remove
+			_renderer->GetMesh(meshHandle).materialBuffer = sponza.materialBuffer;
+			_renderer->GetMesh(meshHandle).materialBufferSize = sponza.materialBufferSize;
+
+		}
+
+		Entity* vroid = _activeScene->CreateEntity("Vroid");
+		for (int i = 0; auto& meshHandle : testGlb.meshes)
+		{
+
+			Entity* child = vroid->AddChild(_activeScene->CreateEntity((_renderer->GetMesh(meshHandle).name)));
+			MeshComponent* mesh = child->AddComponent<Imgn::MeshComponent>();
+			mesh->mesh = meshHandle;
+			mesh->materials = testGlb.materials;
+			//todo remove
+			_renderer->GetMesh(meshHandle).materialBuffer = testGlb.materialBuffer;
+			_renderer->GetMesh(meshHandle).materialBufferSize = testGlb.materialBufferSize;
 		}
 
 		_sceneCamera = _activeScene->CreateEntity("SceneCamera");
@@ -359,7 +431,7 @@ namespace Imgn
 
 		if (!_sceneWindow)
 		{
-			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("TAAResolved").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("G-BufferVelocity").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 		}
 
 		ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));

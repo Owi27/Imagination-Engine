@@ -39,5 +39,6 @@ shared<T> Shared(Args&&... args)
 using vec2 = std::array<float, 2>;
 using vec3 = std::array<float, 3>;
 using vec4 = std::array<float, 4>;
+using uvec4 = std::array<uint32_t, 4>;
 using mat3 = std::array<float, 9>;
 using mat4 = std::array<float, 16>;

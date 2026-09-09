@@ -72,8 +72,6 @@ struct VOut
     float3 col : COLOR;
     float4 cPos : POSITION1;
     float4 pPos : POSITION2;
-    //float3x3 TBN : TEXCOORD1;
-    //int idx : INDEX;
 };
 
 [[vk::push_constant]]
@@ -97,20 +95,16 @@ VOut main(VIn input)
     output.pos = mul(ubo.jitteredViewProj, mul(pc.model, float4(input.pos, 1)));
     output.wPos = input.pos;
     output.uv = input.uv;
-    output.nrm = input.nrm;
-    output.tan = input.tan;
+    
+    float3x3 model3x3 = (float3x3) pc.model;
+    
+    output.nrm = normalize(mul(model3x3, input.nrm));
+    output.tan.xyz = normalize(mul(model3x3, input.tan.xyz));
+    output.tan.w = input.tan.w;
     output.col = input.col;
 
     output.cPos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
     output.pPos = mul(ubo.prevViewProj, mul(pc.model, float4(input.pos, 1)));
-    
-    //output.idx = id;
-
-//VOut output;
-//    output.pos = float4(input.pos.xy, 0.5, 1.0); // Bypass matrices
-//    output.uv = input.uv;
-//    output.nrm = input.nrm;
-//    return output;
     
     return output;
 })";
@@ -230,7 +224,7 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
             discard;
     }
 
-    float metallic  = metallicFactor;
+    float metallic = metallicFactor;
     float roughness = roughnessFactor;
 
     if (metallicRoughnessTexture > -1)
@@ -238,7 +232,7 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
         float4 mr = materialTextures[metallicRoughnessTexture].Sample(materialSampler, input.uv);
 
         roughness *= mr.g;
-        metallic  *= mr.b;
+        metallic *= mr.b;
     }
     
     float ao = 1.0f;
@@ -258,28 +252,29 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
 
         emissive *= emissiveSample;
     }
-
-    float3 normal = float3(0.f, 0.f, 1.f);
+    
+    float3 N = normalize(input.nrm);
+    float3 worldNormal = N;
     if (normalTexture > -1)
     {
-        normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
+        float3 normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
         normal = normalize(normal * float3(normalTextureScale, normalTextureScale, 1.f));
-    }
-    float3 T = normalize(input.tan.xyz);
-    float3 N = normalize(input.nrm);
-    T = normalize(T - dot(T, N) * N); // Gram-Schmidt
-    float3 B = cross(N, T) * input.tan.w; // handedness
-    float3x3 TBN = float3x3(T, B, N);
-    float3 worldNormal = normalize(mul(normal, TBN));
-    //float3 worldNormal = normalize(T * normal.x + B * normal.y + N * normal.z);
 
+        if (any(input.tan))
+        {
+            float3 T = normalize(input.tan.xyz);
+            T = normalize(T - dot(T, N) * N);
+            float3 B = cross(N, T) * input.tan.w;
+            float3x3 TBN = float3x3(T, B, N);
+            worldNormal = normalize(mul(normal, TBN));
+        }
+    }
+    
     if (doubleSided != 0 && !isFrontFace)
     {
         worldNormal = -worldNormal;
     }
 
-    //velocity
-    //float2 currNDC = input.cPos.xy / input.cPos.w, prevNDC = input.pPos.xy / input.pPos.w;
     output.Albedo = float4(albedo.rgb, 1.f);
     output.Normal = float4(worldNormal * .5f + .5f, 1.f);
     output.MStuff = float4(metallic, roughness, ao, 1.0f);
@@ -507,9 +502,16 @@ void main( uint3 DTid : SV_DispatchThreadID )
     litScene[pixel] = float4(color, 1.f);
 })";
 
-    std::string TAAComputeShader = R"(#define TAAResolved 0
+    std::string TAAComputeShader = R"(#define LitScene 0
 #define TAAHistory 1
 #define Velocity 2
+
+[[vk::push_constant]]
+struct TAAPC
+{
+    bool validHistory;
+} pc;
+
 
 Texture2D<float4> taaInput[3] : register(t2, space0);
 RWTexture2D<float4> taaOutput : register(u3, space0);
@@ -525,13 +527,28 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float2 uv = (float2(pixel) + .5f) / float2(width, height);
     
     float2 reprojectedUV = uv - float2(taaInput[Velocity].Load(int3(pixel, 0)).rg);
-    float3 currColor = taaInput[TAAResolved].Load(int3(pixel, 0)).rgb;
+    float3 currColor = taaInput[LitScene].Load(int3(pixel, 0)).rgb;
 //    Load(int3(reprojectedUV, 0)).rgb;
     
     float3 prevColor = currColor;
     //valid history
-    if (all(reprojectedUV >= .0f) && all(reprojectedUV <= 1.f)) prevColor = taaInput[TAAHistory].SampleLevel(_sampler, reprojectedUV, 0).rgb;
+    if (pc.validHistory) prevColor = taaInput[TAAHistory].Sample(_sampler, reprojectedUV).rgb;
     
-    taaOutput[pixel] = float4(currColor * .1f + prevColor * .9f, 1.f);
+    float3 minColor = 9999.f, maxColor = -9999.f;
+    
+    //color clamping
+    for (int y = -1; y <= 1; y++)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            float3 color = taaInput[LitScene].Load(int3(clamp(pixel + int2(x, y), int2(0, 0), int2(width - 1, height - 1)), 0.f)).rgb;
+            minColor = min(minColor, color);
+            maxColor = max(maxColor, color);
+        }
+    }
+    
+    float3 previousColorClamped = clamp(prevColor, minColor, maxColor);
+    
+    taaOutput[pixel] = float4(currColor * .1f + previousColorClamped * .9f, 1.f);
 })";
 }

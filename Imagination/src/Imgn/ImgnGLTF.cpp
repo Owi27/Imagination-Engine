@@ -4,92 +4,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "ImgnGLTF.h"
 
-//void ImgnGLTF::LoadModel(const std::string& pFile)
-//{
-//	tinygltf::TinyGLTF loader;
-//	tinygltf::Model model;
-//	std::string error;
-//	std::string warning;
-//
-//	bool r = loader.LoadASCIIFromFile(&model, &error, &warning, pFile);
-//
-//	if (!warning.empty())
-//	{
-//		printf("Warn: %s\n", warning.c_str());
-//	}
-//
-//	if (!error.empty())
-//	{
-//		printf("Err: %s\n", error.c_str());
-//	}
-//
-//	if (!r)
-//	{
-//		printf("Failed to parse glTF: %s\n", pFile.c_str());
-//	}
-//
-//	model.materials[0].pbrMetallicRoughness.
-//}
-//
-//std::vector<uint32_t> ImgnGLTF::LoadGLTFTextures(const tinygltf::Model& pModel)
-//{
-//}
-//
-//std::vector<uint32_t> ImgnGLTF::LoadGLTFMaterials(const tinygltf::Model& pModel)
-//{
-//	std::vector<uint32_t> materials(pModel.materials.size());
-//
-//	for (const tinygltf::Material& material : pModel.materials)
-//	{
-//		const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
-//
-//		ImgnMaterial m
-//		{
-//			.baseColor = pbr.baseColorFactor.size() == 4 ? vec4{ static_cast<float>(pbr.baseColorFactor[0]), static_cast<float>(pbr.baseColorFactor[1]), static_cast<float>(pbr.baseColorFactor[2]), static_cast<float>(pbr.baseColorFactor[3]) } : vec4{1.f, 1.f, 1.f, 1.f},
-//			.emissive = material.emissiveFactor.size() == 3 ? vec3{ static_cast<float>(material.emissiveFactor[0]), static_cast<float>(material.emissiveFactor[1]), static_cast<float>(material.emissiveFactor[2]) } : vec3{1.f, 1.f, 1.f},
-//			.baseColorTexture = pbr.baseColorTexture.index > -1 ? pModel.textures[pbr.baseColorTexture.index].source : -1,
-//			.normalTexture = material.normalTexture.index > -1 ? pModel.textures[material.normalTexture.index].source : -1,
-//			.metallicRoughnessTexture = pbr.metallicRoughnessTexture.index > -1 ? pModel.textures[pbr.metallicRoughnessTexture.index].source : -1,
-//			.occlusionTexture = material.occlusionTexture.index > -1 ? pModel.textures[material.occlusionTexture.index].source : -1,
-//			.emissiveTexture = material.emissiveTexture.index > -1 ? pModel.textures[material.emissiveTexture.index].source : -1,
-//			.metallic = pbr.metallicFactor,
-//			.roughness = pbr.roughnessFactor,
-//			.alphaCutoff = material.alphaCutoff,
-//			.alphaMode = material.alphaMode == "BLEND" ? ImgnAlphaMode::Blend : material.alphaMode == "MASK" ? ImgnAlphaMode::Mask : ImgnAlphaMode::Opaque
-//		};
-//
-//		//todo
-//	}
-//
-//	return materials;
-//}
-//
-//std::vector<uint32_t> ImgnGLTF::LoadGLTFMeshes(const tinygltf::Model& pModel)
-//{
-//	std::vector<uint32_t> meshes;
-//
-//	for (const tinygltf::Mesh& mesh : pModel.meshes)
-//	{
-//		for (const tinygltf::Primitive& primitive : mesh.primitives)
-//		{
-//			if (primitive.mode != TINYGLTF_MODE_TRIANGLES) continue;
-//
-//
-//		}
-//	}
-//
-//	return meshes;
-//}
-//
-//void ImgnGLTF::LoadModel(const std::filesystem::path& pFile)
-//{
-//	model.materials[0].pbrMetallicRoughness.
-//
-//}
-
 namespace Imgn
 {
-	std::vector<uint32_t> ImgnGLTF::LoadGLTFTextures(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
+	std::vector<uint32_t> GLTFLoader::LoadGLTFTextures(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
 	{
 		std::vector<uint32_t> textures; textures.reserve(pModel.images.size());
 
@@ -101,32 +18,13 @@ namespace Imgn
 		return textures;
 	}
 
-	std::vector<uint32_t> ImgnGLTF::LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, Imgn::ImgnRenderer& pRenderer)
+	std::vector<uint32_t> GLTFLoader::LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, Imgn::ImgnRenderer& pRenderer)
 	{
 		std::vector<uint32_t> materials; materials.reserve(pModel.materials.size());
 
 		if (pModel.materials.empty())
 		{
-			Material defaultMaterial
-			{
-				.baseColorFactor = { 1.f, 1.f, 1.f, 1.f },
-				.emissiveFactor = { 0.f, 0.f, 0.f, 0.f },
-
-				.textureIndices0 = { -1, -1, -1, -1 },
-
-				.textureIndices1 =
-				{
-					-1,
-					static_cast<int32_t>(ImgnAlphaMode::Opaque),
-					0,
-					0
-				},
-
-				.materialFactors = { 1.f, 1.f, 0.5f, 1.f },
-				.extraFactors = { 1.f, 0.f, 0.f, 0.f }
-			};
-
-			materials.push_back(pRenderer.AddMaterial(defaultMaterial));
+			materials.push_back(0);
 			return materials;
 		}
 
@@ -204,11 +102,9 @@ namespace Imgn
 		return materials;
 	}
 
-	std::vector<uint32_t> ImgnGLTF::LoadGLTFMeshes(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
+	std::vector<uint32_t> GLTFLoader::LoadGLTFMeshes(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
 	{
 		std::vector<uint32_t> meshes;
-		//std::vector<Vertex> vertices;// = vertexData.first;
-		//std::vector<uint32_t> indices;// = vertexData.second;
 
 		for (const tinygltf::Mesh& mesh : pModel.meshes)
 		{
@@ -229,7 +125,7 @@ namespace Imgn
 					.name = mesh.name + "Primitive",
 					.vertexOffset = static_cast<int>(vertices.size()),
 					.firstIndex = static_cast<uint32_t>(indices.size()),
-					.material = primitive.material > -1 ? static_cast<uint32_t>(primitive.material) : -1,
+					.material = primitive.material > -1 ? static_cast<uint32_t>(primitive.material) : 0,
 				};
 
 				vertices.insert(vertices.end(), vertexData.first.begin(), vertexData.first.end());
@@ -240,27 +136,8 @@ namespace Imgn
 				m.primitives.push_back(prim);
 			}
 
-			//ImgnBufferDesc vertexBufferDesc
-			//{
-			//	.name = mesh.name + "VertexBuffer",
-			//	.size = sizeof(Vertex) * vertices.size(),
-			//	.data = vertices.data(),
-			//	.usage = ImgnBufferUsage::Vertex,
-			//};
-
-			//ImgnBufferDesc indexBufferDesc
-			//{
-			//	.name = mesh.name + "IndexBuffer",
-			//	.size = sizeof(uint32_t) * indices.size(),
-			//	.data = indices.data(),
-			//	.usage = ImgnBufferUsage::Index,
-			//};
-
 			m.vertexBuffer = pRenderer.CreateVertexBuffer(vertices);
 			m.indexBuffer = pRenderer.CreateIndexBuffer(indices);
-
-			//m.vertexBuffer = pRenderer.CreateBuffer(vertexBufferDesc);
-			//m.indexBuffer = pRenderer.CreateBuffer(indexBufferDesc);
 
 			meshes.push_back(pRenderer.AddMesh(m));
 		}
@@ -268,13 +145,13 @@ namespace Imgn
 		return meshes;
 	}
 
-	void ImgnGLTF::CreateMaterialBuffer(const std::vector<uint32_t>& pMaterials, ImgnRenderer& pRenderer, ImgnModel& pModel)
+	void GLTFLoader::CreateMaterialBuffer(ImgnRenderer& pRenderer)
 	{
-		pModel.materialBuffer = pRenderer.CreateMaterialBuffer(pMaterials);
-		pModel.materialBufferSize = static_cast<uint64_t>(pModel.materials.size()) * sizeof(Material);
+		_outModel.materialBuffer = pRenderer.CreateMaterialBuffer(_outModel.materials);
+		_outModel.materialBufferSize = static_cast<uint64_t>(_outModel.materials.size()) * sizeof(Material);
 	}
 
-	std::pair<std::vector<Vertex>, std::vector<uint32_t>> ImgnGLTF::GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive)
+	std::pair<std::vector<Vertex>, std::vector<uint32_t>> GLTFLoader::GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
@@ -288,6 +165,8 @@ namespace Imgn
 		const tinygltf::Accessor* nrmAcc = pPrimitive.attributes.contains("NORMAL") ? &pModel.accessors[pPrimitive.attributes.at("NORMAL")] : nullptr;
 		const tinygltf::Accessor* uvAcc = pPrimitive.attributes.contains("TEXCOORD_0") ? &pModel.accessors[pPrimitive.attributes.at("TEXCOORD_0")] : nullptr;
 		const tinygltf::Accessor* tanAcc = pPrimitive.attributes.contains("TANGENT") ? &pModel.accessors[pPrimitive.attributes.at("TANGENT")] : nullptr;
+		const tinygltf::Accessor* jointAcc = pPrimitive.attributes.contains("JOINTS_0") ? &pModel.accessors[pPrimitive.attributes.at("JOINTS_0")] : nullptr;
+		const tinygltf::Accessor* weightAcc = pPrimitive.attributes.contains("WEIGHTS_0") ? &pModel.accessors[pPrimitive.attributes.at("WEIGHTS_0")] : nullptr;
 
 		for (size_t i = 0; i < posAccessor.count; i++)
 		{
@@ -348,10 +227,8 @@ namespace Imgn
 		return { vertices, indices };
 	}
 
-	ImgnModel ImgnGLTF::LoadModel(const std::filesystem::path& pFile, Imgn::ImgnRenderer& pRenderer)
+	ImgnModel GLTFLoader::LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer)
 	{
-		ImgnModel out;
-
 		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;
 		std::string error;
@@ -378,10 +255,76 @@ namespace Imgn
 			throw std::runtime_error("Failed to parse glTF: " + pFile.string() + "\n" + error);
 		}
 
-		out.materials = LoadGLTFMaterials(model, LoadGLTFTextures(model, pRenderer), pRenderer);
-		out.meshes = LoadGLTFMeshes(model, pRenderer);
-		CreateMaterialBuffer(out.materials, pRenderer, out);
+		_outModel.materials = LoadGLTFMaterials(model, LoadGLTFTextures(model, pRenderer), pRenderer);
+		_outModel.meshes = LoadGLTFMeshes(model, pRenderer);
+		CreateMaterialBuffer(pRenderer);
 
-		return out;
+		return _outModel;
+	}
+
+	Skeleton GLTFLoader::LoadSkeleton(const tinygltf::Model& pModel, const tinygltf::Skin& pSkin)
+	{
+		Skeleton skeleton;
+		skeleton.name = pSkin.name;
+		skeleton.rootNode = pSkin.skeleton;
+		skeleton.joints.resize(pSkin.joints.size());
+
+		for (size_t i = 0; i < pSkin.joints.size(); i++)
+		{
+			int nodeIdx = pSkin.joints[i];
+			const tinygltf::Node& node = pModel.nodes[nodeIdx];
+			Joint& joint = skeleton.joints[i];
+			joint.name = node.name;
+			joint.nodeIdx = nodeIdx;
+			skeleton.nodeToJoint[nodeIdx] = i;
+		}
+
+		auto nodeParents = BuildNodeParents(pModel);
+
+		for (size_t i = 0; i < pSkin.joints.size(); i++)
+		{
+			Joint& joint = skeleton.joints[i];
+			int32_t parentNode = nodeParents[joint.nodeIdx];
+			while (parentNode != -1)
+			{
+				if (skeleton.nodeToJoint.contains(parentNode))
+				{
+					joint.parentJoint = skeleton.nodeToJoint[parentNode];
+					break;
+				}
+
+				parentNode = nodeParents[parentNode];
+			}
+		}
+
+		const tinygltf::Accessor& accessor = pModel.accessors[pSkin.inverseBindMatrices];
+		const tinygltf::BufferView& view = pModel.bufferViews[accessor.bufferView];
+		const tinygltf::Buffer& buffer = pModel.buffers[view.buffer];
+		const unsigned char* data = buffer.data.data() + view.byteOffset + accessor.byteOffset;
+
+
+		return skeleton;
+	}
+
+	std::vector<int32_t> GLTFLoader::BuildNodeParents(const tinygltf::Model& pModel)
+	{
+		std::vector<int32_t> parents(pModel.nodes.size(), -1);
+
+		for (size_t i = 0; i < pModel.nodes.size(); i++)
+		{
+			const tinygltf::Node& node = pModel.nodes[i];
+
+			for (int childrenIdx : node.children)
+			{
+				parents[childrenIdx] = static_cast<int32_t>(i);
+			}
+		}
+
+		return parents;
+	}
+
+	ImgnModel GLTFLoader::LoadModel(const std::filesystem::path& pFile, Imgn::ImgnRenderer& pRenderer)
+	{
+		return _instance->LoadModelImpl(pFile, pRenderer);
 	}
 }

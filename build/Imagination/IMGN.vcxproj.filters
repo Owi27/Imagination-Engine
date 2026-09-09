@@ -85,6 +85,7 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Imagination\src\Imgn\Skeleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Gateware\Gateware.h">
@@ -237,6 +238,7 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\build\Imagination\CMakeFiles\IMGN.dir\RelWithDebInfo\cmake_pch.hxx">
       <Filter>Precompile Header File</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Imagination\src\Imgn\Skeleton.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D:\GitHub\Imagination-Engine\Imagination\CMakeLists.txt" />

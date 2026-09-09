@@ -50,6 +50,9 @@ namespace Imgn
 		IMGN_COMPONENT_ID("Imgn.MeshComponent");
 
 		uint32_t mesh;
+		std::vector<uint32_t> materials;
+
+		bool visible = true; //cast and receive shadows?
 
 		MeshComponent() : Component("Mesh") {}
 		MeshComponent(uint32_t pMesh) : Component("Mesh")

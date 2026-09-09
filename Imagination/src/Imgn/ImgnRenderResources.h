@@ -246,6 +246,10 @@ struct ImgnMesh
     uint32_t vertexBuffer = InvalidHandle, indexBuffer = InvalidHandle;
 
     std::vector<ImgnPrimitive> primitives;
+
+    uint32_t materialBuffer = UINT32_MAX;
+    uint64_t materialBufferSize = 0;
+
 };
 
 

@@ -245,6 +245,18 @@ namespace Imgn
 			//todo write failed to init graphics device
 			break;
 		}
+
+		Material defaultMaterial
+		{
+			.baseColorFactor = { 1.f, 1.f, 1.f, 1.f },
+			.emissiveFactor = { 0.f, 0.f, 0.f, 0.f },
+			.textureIndices0 = { -1, -1, -1, -1 },
+			.textureIndices1 = { -1, static_cast<int32_t>(ImgnAlphaMode::Opaque), 0, 0 },
+			.materialFactors = { 1.f, 1.f, 0.5f, 1.f },
+			.extraFactors = { 1.f, 0.f, 0.f, 0.f }
+		};
+
+		AddMaterial(defaultMaterial); //idx 0
 	}
 
 	void ImgnRenderer::DrawFrame()

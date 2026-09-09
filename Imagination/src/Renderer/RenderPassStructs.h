@@ -30,8 +30,8 @@ namespace Imgn
 	};
 
 	//velocity
-	/*struct TAAPC
+	struct TAAPC
 	{
-		mat4 currViewProj, prevViewProj;
-	};*/
+		bool historyValid;
+	};
 }

@@ -100,6 +100,7 @@ namespace Imgn
 		bool _active = true;
 		std::vector<unique<Component>> _components;
 		std::unordered_map<uint64_t, Component*> _componentMap;
+		std::vector<Entity*> _children;
 
 	public:
 		Entity(const std::string& pName = "ImgnEntity")
@@ -125,6 +126,9 @@ namespace Imgn
 		bool IsActive() const { return _active; }
 		void SetActive(bool pIsActive) { _active = pIsActive; }
 		const std::vector<unique<Component>>& GetComponents() const { return _components; }
+		
+		std::vector<Entity*>& GetChildren() { return _children; }
+		Entity* AddChild(Entity* pChild) { _children.push_back(pChild); return pChild; }
 
 		void Init();
 		void Dream(float pDeltaTime);

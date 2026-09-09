@@ -3,6 +3,7 @@
 #include "ImgnRenderer.h"
 #include <filesystem>
 #include <utility>
+#include "Skeleton.h"
 
 //enum class AlphaMode : uint32_t
 //{
@@ -51,28 +52,42 @@ namespace Imgn
 		uint64_t materialBufferSize = 0;
 	};
 
-	class IMGN_API ImgnGLTF
+	class IMGN_API GLTFLoader
 	{
+		static inline unique<GLTFLoader> _instance;
+
+		std::unordered_map<int, int> _primToMat;
+
+		ImgnModel _outModel;
 
 		std::vector<uint32_t> LoadGLTFTextures(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
 		std::vector<uint32_t> LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, ImgnRenderer& pRenderer);
 		std::vector<uint32_t> LoadGLTFMeshes(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-		void CreateMaterialBuffer(const std::vector<uint32_t>& pMaterials, ImgnRenderer& pRenderer, ImgnModel& pModel);
+		void CreateMaterialBuffer(ImgnRenderer& pRenderer);
 		std::pair<std::vector<Vertex>, std::vector<uint32_t>> GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive);
+		ImgnModel LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
+		Skeleton LoadSkeleton(const tinygltf::Model& pModel, const tinygltf::Skin& pSkin);
+		std::vector<int32_t> BuildNodeParents(const tinygltf::Model& pModel);
 
 	public:
 		/* Class Defaults */
-		ImgnGLTF()
+		GLTFLoader()
 		{
 
 		}
 
-		~ImgnGLTF()
+		~GLTFLoader()
 		{
 
+		}
+
+		inline static GLTFLoader& Get()
+		{
+			if (!_instance) _instance.reset(new GLTFLoader());
+			return *_instance;
 		}
 
 		/* Class Functions */
-		ImgnModel LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
+		static ImgnModel LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
 	};
 }

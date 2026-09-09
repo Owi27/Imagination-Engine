@@ -2,11 +2,13 @@
 
 struct Vertex
 {
-	std::array<float, 3> pos;
-	std::array<float, 3> nrm;
-	std::array<float, 2> uv0;
-	std::array<float, 4> tan;
-	std::array<float, 3> clr = { 1.0f, 1.0f, 1.0f };
+	vec3 pos;
+	vec3 nrm;
+	vec2 uv0;
+	vec4 tan;
+	vec3 clr = { 1.0f, 1.0f, 1.0f };
+	uvec4 joints;
+	vec4 weights;
 
 	//vk
 	static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }

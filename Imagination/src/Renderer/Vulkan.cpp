@@ -1016,6 +1016,7 @@ void Vulkan::Init(RendererCreateInfo pCreateInfo)
 	//CreateTextureImage();
 	//CreateTextureImageView();
 	CreateTextureSampler();
+	CreateTAASampler();
 	//CreateVertexBuffer();
 	//CreateIndexBuffer();
 	//CreateUniformBuffers();
