@@ -202,6 +202,33 @@ namespace Imgn
 
 			v.clr = { 1.f, 1.f, 1.f };
 
+			if (jointAcc)
+			{
+				const auto& view = pModel.bufferViews[jointAcc->bufferView];
+				//const unsigned char* data = buffer.data.data() + view.byteOffset +jointAcc->byteOffset + i * jointAcc->ByteStride(view);
+				//const unsigned char* data = &pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))];
+
+				//uvec4 joint;
+				for (size_t i = 0; i < 4; i++)
+				{
+					int16_t joint;
+					if (jointAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+						v.joints[i] = reinterpret_cast<const uint8_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[i];
+					else if (jointAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+						v.joints[i] = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[i];
+				}
+
+				//const uint16_t* j = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))]);
+				//v.joints = { j[0], j[1], j[2], j[3] };
+			}
+
+			if (weightAcc)
+			{
+				const auto& view = pModel.bufferViews[weightAcc->bufferView];
+				const float* w = reinterpret_cast<const float*>(&pModel.buffers[view.buffer].data[view.byteOffset + weightAcc->byteOffset + (i * weightAcc->ByteStride(view))]);
+				v.weights = { w[0], w[1], w[2], w[3] };
+			}
+
 			vertices.push_back(v);
 		}
 
@@ -310,8 +337,16 @@ namespace Imgn
 			const tinygltf::Accessor& accessor = pModel.accessors[pSkin.inverseBindMatrices];
 			const tinygltf::BufferView& view = pModel.bufferViews[accessor.bufferView];
 			const tinygltf::Buffer& buffer = pModel.buffers[view.buffer];
+			const uint64_t stride = accessor.ByteStride(view);
 			const unsigned char* data = buffer.data.data() + view.byteOffset + accessor.byteOffset;
 
+			for (size_t i = 0; i < accessor.count; i++)
+			{
+				const float* matrixData = reinterpret_cast<const float*>(data + i * stride);
+				mat4 inverseBind = Math::identity;
+				memcpy(inverseBind.data(), matrixData, sizeof(mat4));
+				skeleton.joints[i].inverseBindMatrix = inverseBind;
+			}
 		}
 
 		return skeleton;
