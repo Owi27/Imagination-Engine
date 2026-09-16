@@ -225,6 +225,9 @@ namespace Imgn
 				: vk::ImageAspectFlagBits::eColor;
 
 			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect);
+			// Persistent TAA history must start as zeros (not undefined GPU garbage).
+			if (name == "TAAHistory")
+				_vk.ClearRenderImage(_images[name]);
 		}
 
 		for (auto& pass : _passes)
