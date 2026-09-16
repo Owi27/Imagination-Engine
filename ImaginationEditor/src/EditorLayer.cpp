@@ -456,7 +456,7 @@ namespace Imgn
 
 		if (!_sceneWindow)
 		{
-			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("G-BufferVelocity").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("TAAResolved").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 		}
 
 		ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
