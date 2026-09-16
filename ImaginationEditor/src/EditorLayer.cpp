@@ -12,6 +12,7 @@ namespace Imgn
 {
 	namespace
 	{
+		// Radical-inverse Halton sequence (Elo / common TAA practice).
 		float Halton(uint32_t index, uint32_t base)
 		{
 			float f = 1.f;
@@ -52,12 +53,15 @@ namespace Imgn
 	vec2 EditorLayer::GetJitterSample()
 	{
 		constexpr uint32_t sampleCount = 8;
+		// 1-based index into an 8-sample Halton(2,3) cycle
 		const uint32_t index = (_jitterFrameIndex++ % sampleCount) + 1;
+		// Map [0,1] -> pixel-center offset [-0.5, 0.5]
 		return { Halton(index, 2) - 0.5f, Halton(index, 3) - 0.5f };
 	}
 	vec2 EditorLayer::GetProjectionJitter(uint32_t pWidth, uint32_t pHeight)
 	{
 		vec2 pixelJitter = GetJitterSample();
+		// Elo: valid projection jitter is +/-1/(2w), +/-1/(2h) == +/-0.5/w, +/-0.5/h
 		return { pixelJitter[0] / static_cast<float>(pWidth), pixelJitter[1] / static_cast<float>(pHeight) };
 	}
 	void EditorLayer::Sleep()
@@ -151,4 +155,4 @@ namespace Imgn
 			}
 		};
 
-PLACEHOLDER_REST
+#include "EditorLayer_SleepTail.inl"
