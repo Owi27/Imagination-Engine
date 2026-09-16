@@ -24,6 +24,7 @@ struct FOut
 struct GBufferPC
 {
     matrix model;
+    matrix prevModel;
     uint materialIndex;
 } pc;
 
