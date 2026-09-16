@@ -7,6 +7,7 @@ namespace Imgn
 {
 	struct TransformComponent : public Component
 	{
+		//static constexpr ID TypeID = HashComponentName("Imgn.TransformComponent");
 		IMGN_COMPONENT_ID("Imgn.TransformComponent");
 
 		vec3 position = { 0.f, 0.f, 0.f }, rotation = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
@@ -29,30 +30,33 @@ namespace Imgn
 
 		TransformComponent() : Component("Transform") {}
 
+		// Inherited via Component
 		void Serialize(std::fstream& pStream) override
 		{
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&TypeID), sizeof(ID));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(position.data()), position.size() * sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(rotation.data()), rotation.size() * sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(scale.data()), scale.size() * sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
+			pStream.write(reinterpret_cast<const char*>(position.data()), position.size() * sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(rotation.data()), rotation.size() * sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(scale.data()), scale.size() * sizeof(float));
 		}
 
+		// Inherited via Component
 		void Deserialize(std::fstream& pStream) override
 		{
-			pStream.read(reinterpret_cast\u003cchar*\u003e(position.data()), position.size() * sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(rotation.data()), rotation.size() * sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(scale.data()), scale.size() * sizeof(float));
+			pStream.read(reinterpret_cast<char*>(position.data()), position.size() * sizeof(float));
+			pStream.read(reinterpret_cast<char*>(rotation.data()), rotation.size() * sizeof(float));
+			pStream.read(reinterpret_cast<char*>(scale.data()), scale.size() * sizeof(float));
 		}
 	};
 
 	struct MeshComponent : public Component
 	{
+		//static constexpr ComponentTypeID TypeID = HashComponentName("Imgn.MeshComponent");
 		IMGN_COMPONENT_ID("Imgn.MeshComponent");
 
 		uint32_t mesh;
-		std::vector\u003cuint32_t\u003e materials;
+		std::vector<uint32_t> materials;
 
-		bool visible = true;
+		bool visible = true; //cast and receive shadows?
 
 		MeshComponent() : Component("Mesh") {}
 		MeshComponent(uint32_t pMesh) : Component("Mesh")
@@ -62,7 +66,7 @@ namespace Imgn
 
 		void Serialize(std::fstream& pStream) override
 		{
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&TypeID), sizeof(ID));
+			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
 		}
 
 		void Deserialize(std::fstream& pStream) override
@@ -72,6 +76,7 @@ namespace Imgn
 
 	struct CameraComponent : public Component
 	{
+		//static constexpr ComponentTypeID TypeID = HashComponentName("Imgn.CameraComponent");
 		IMGN_COMPONENT_ID("Imgn.CameraComponent");
 
 		Camera camera;
@@ -94,17 +99,17 @@ namespace Imgn
 
 		void Serialize(std::fstream& pStream) override
 		{
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&TypeID), sizeof(ID));
-			uint8_t camType = static_cast\u003cuint8_t\u003e(camera.GetType());
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camType), sizeof(CameraType));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetFOV()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetNearPlane()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetFarPlane()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetOrthoSize()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetOrthoNear()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&camera.GetOrthoFar()), sizeof(float));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&mainCamera), sizeof(bool));
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&fixedAspect), sizeof(bool));
+			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
+			uint8_t camType = static_cast<uint8_t>(camera.GetType());
+			pStream.write(reinterpret_cast<const char*>(&camType), sizeof(CameraType));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetFOV()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetNearPlane()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetFarPlane()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetOrthoSize()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetOrthoNear()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&camera.GetOrthoFar()), sizeof(float));
+			pStream.write(reinterpret_cast<const char*>(&mainCamera), sizeof(bool));
+			pStream.write(reinterpret_cast<const char*>(&fixedAspect), sizeof(bool));
 		}
 
 		void Deserialize(std::fstream& pStream) override
@@ -112,17 +117,17 @@ namespace Imgn
 			float fov, pNear, pFar, oSize, oNear, oFar;
 			uint8_t camType;
 
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&camType), sizeof(CameraType));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&fov), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&pNear), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&pFar), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&oSize), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&oNear), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&oFar), sizeof(float));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&mainCamera), sizeof(bool));
-			pStream.read(reinterpret_cast\u003cchar*\u003e(&fixedAspect), sizeof(bool));
+			pStream.read(reinterpret_cast<char*>(&camType), sizeof(CameraType));
+			pStream.read(reinterpret_cast<char*>(&fov), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&pNear), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&pFar), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oSize), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oNear), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&oFar), sizeof(float));
+			pStream.read(reinterpret_cast<char*>(&mainCamera), sizeof(bool));
+			pStream.read(reinterpret_cast<char*>(&fixedAspect), sizeof(bool));
 
-			switch (static_cast\u003cCameraType\u003e(camType))
+			switch (static_cast<CameraType>(camType))
 			{
 			case Imgn::CameraType::Perspective:
 				camera.CreatePerspectiveCamera(fov, pNear, pFar);
@@ -136,29 +141,30 @@ namespace Imgn
 
 	struct ScriptComponent : public Component
 	{
+		//static constexpr ComponentTypeID TypeID = HashComponentName("Imgn.ScriptComponent");
 		IMGN_COMPONENT_ID("Imgn.ScriptComponent");
 
-		unique\u003cScriptableEntity\u003e instance = nullptr;
+		unique<ScriptableEntity> instance = nullptr;
 
-		std::function\u003cvoid()\u003e Create;
-		std::function\u003cvoid()\u003e Destroy;
-		std::function\u003cvoid()\u003e Sleep;
-		std::function\u003cvoid()\u003e WakeUp;
-		std::function\u003cvoid(Time pTime)\u003e Dream;
+		std::function<void()> Create;
+		std::function<void()> Destroy;
+		std::function<void()> Sleep;
+		std::function<void()> WakeUp;
+		std::function<void(Time pTime)> Dream;
 
-		template\u003ctypename T\u003e
-			requires std::derived_from\u003cT, ScriptableEntity\u003e
+		template<typename T>
+			requires std::derived_from<T, ScriptableEntity>
 		void Bind()
 		{
-			Create = [&]() { instance = Unique\u003cT\u003e(); };
-			Sleep = [&]() { static_cast\u003cT*\u003e(instance.get())->Sleep(); };
-			WakeUp = [&]() { static_cast\u003cT*\u003e(instance.get())->WakeUp(); };
-			Dream = [&](Time pTime) { static_cast\u003cT*\u003e(instance.get())->Dream(pTime); };
+			Create = [&]() { instance = Unique<T>(); };
+			Sleep = [&]() { static_cast<T*>(instance.get())->Sleep(); };
+			WakeUp = [&]() { static_cast<T*>(instance.get())->WakeUp(); };
+			Dream = [&](Time pTime) { static_cast<T*>(instance.get())->Dream(pTime); };
 		}
 
 		void Serialize(std::fstream& pStream) override
 		{
-			pStream.write(reinterpret_cast\u003cconst char*\u003e(&TypeID), sizeof(ID));
+			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
 		}
 
 		void Deserialize(std::fstream& pStream) override
