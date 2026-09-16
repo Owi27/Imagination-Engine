@@ -225,8 +225,8 @@ namespace Imgn
 				: vk::ImageAspectFlagBits::eColor;
 
 			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect);
-			// Persistent TAA history must start as zeros (not undefined GPU garbage).
-			if (name == "TAAHistory")
+			// Persistent TAA / velocity history must start as zeros (not undefined GPU garbage).
+			if (name == "TAAHistory" || name == "VelocityHistory")
 				_vk.ClearRenderImage(_images[name]);
 		}
 
@@ -261,7 +261,7 @@ namespace Imgn
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
 					.buffer = *resource.buffer.buffer,
-					.offset = 0,
+					offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
 
@@ -324,7 +324,7 @@ namespace Imgn
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
 					.buffer = *resource.buffer.buffer,
-					.offset = 0,
+					offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
 
