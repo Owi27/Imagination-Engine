@@ -57,11 +57,11 @@ namespace Imgn
 
 		bool _taaHistoryValid = false;
 
-		std::default_random_engine gen = std::default_random_engine(777);
+		// Halton(2,3) 8-tap cycle for projection jitter (Elo TAA)
+		uint32_t _jitterFrameIndex = 0;
 
 		mat4 GetCamView(TransformComponent* pTransform);
 
-		//uint32_t _jitterFrameIndex = 0;
 		vec2 GetJitterSample();
 		vec2 GetProjectionJitter(uint32_t pWidth, uint32_t pHeight);
 

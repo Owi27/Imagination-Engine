@@ -9,6 +9,23 @@
 
 namespace Imgn
 {
+	namespace
+	{
+		// Radical-inverse Halton sequence (Elo / common TAA practice).
+		float Halton(uint32_t index, uint32_t base)
+		{
+			float f = 1.f;
+			float r = 0.f;
+			while (index > 0)
+			{
+				f /= static_cast<float>(base);
+				r += f * static_cast<float>(index % base);
+				index /= base;
+			}
+			return r;
+		}
+	}
+
 	mat4 EditorLayer::GetCamView(TransformComponent* pTransform)
 	{
 		const float pitch = Math::Radians(pTransform->rotation[0]);
@@ -34,17 +51,17 @@ namespace Imgn
 
 	vec2 EditorLayer::GetJitterSample()
 	{
-		constexpr int sampleCount = 8;
-
-		std::uniform_real_distribution<float> dist(-1.f, 1.f);
-
-		return { dist(gen), dist(gen) };
+		constexpr uint32_t sampleCount = 8;
+		// 1-based index into an 8-sample Halton(2,3) cycle
+		const uint32_t index = (_jitterFrameIndex++ % sampleCount) + 1;
+		// Map [0,1] → pixel-center offset [-0.5, 0.5]
+		return { Halton(index, 2) - 0.5f, Halton(index, 3) - 0.5f };
 	}
 	vec2 EditorLayer::GetProjectionJitter(uint32_t pWidth, uint32_t pHeight)
 	{
 		vec2 pixelJitter = GetJitterSample();
-
-		return { pixelJitter[0] / static_cast<float>(2 * pWidth), pixelJitter[1] / static_cast<float>(2 * pHeight) };
+		// Elo: valid projection jitter is ±1/(2w), ±1/(2h) == ±0.5/w, ±0.5/h
+		return { pixelJitter[0] / static_cast<float>(pWidth), pixelJitter[1] / static_cast<float>(pHeight) };
 	}
 	void EditorLayer::Sleep()
 	{
