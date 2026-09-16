@@ -24,8 +24,9 @@ struct FOut
 struct GBufferPC
 {
     matrix model;
-    matrix prevModel;
     uint materialIndex;
+    uint pad0, pad1, pad2;
+    float3x4 prevModel;
 } pc;
 
 #define ALPHA_OPAQUE 0
@@ -38,25 +39,25 @@ struct Material
     float4 emissiveFactor;
 
     // x = base color
-		// y = metallic/roughness
-		// z = emissive
-		// w = normal
+    // y = metallic/roughness
+    // z = emissive
+    // w = normal
     int4 textureIndices0;
 
     // x = occlusion
-		// y = alpha mode
-		// z = double sided
-		// w = unused
+    // y = alpha mode
+    // z = double sided
+    // w = unused
     int4 textureIndices1;
 
-    		// x = metallic
-		// y = roughness
-		// z = alpha cutoff
-		// w = normal scale
+        // x = metallic
+    // y = roughness
+    // z = alpha cutoff
+    // w = normal scale
     float4 materialFactors;
 
     // x = occlusion strength
-		// yzw = unused
+    // yzw = unused
     float4 extraFactors;
 };
 
