@@ -23,6 +23,7 @@ struct VOut
 struct GBufferPC
 {
     matrix model;
+    matrix prevModel;
     uint materialIndex;
 } pc;
 
@@ -49,7 +50,7 @@ VOut main(VIn input)
     output.col = input.col;
 
     output.cPos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
-    output.pPos = mul(ubo.prevViewProj, mul(pc.model, float4(input.pos, 1)));
+    output.pPos = mul(ubo.prevViewProj, mul(pc.prevModel, float4(input.pos, 1)));
     
     return output;
 }
