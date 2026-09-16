@@ -54,13 +54,13 @@ namespace Imgn
 		constexpr uint32_t sampleCount = 8;
 		// 1-based index into an 8-sample Halton(2,3) cycle
 		const uint32_t index = (_jitterFrameIndex++ % sampleCount) + 1;
-		// Map [0,1] → pixel-center offset [-0.5, 0.5]
+		// Map [0,1] -> pixel-center offset [-0.5, 0.5]
 		return { Halton(index, 2) - 0.5f, Halton(index, 3) - 0.5f };
 	}
 	vec2 EditorLayer::GetProjectionJitter(uint32_t pWidth, uint32_t pHeight)
 	{
 		vec2 pixelJitter = GetJitterSample();
-		// Elo: valid projection jitter is ±1/(2w), ±1/(2h) == ±0.5/w, ±0.5/h
+		// Elo: valid projection jitter is +/-1/(2w), +/-1/(2h) == +/-0.5/w, +/-0.5/h
 		return { pixelJitter[0] / static_cast<float>(pWidth), pixelJitter[1] / static_cast<float>(pHeight) };
 	}
 	void EditorLayer::Sleep()
@@ -102,12 +102,10 @@ namespace Imgn
 				ctx.SetScissor(_window->GetWidth(), _window->GetHeight());
 
 				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandle, sizeof(GBufferUBO));
-				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
 
 				std::vector writes
 				{
 					ctx.CreateWriteDescriptorSet(0, vk::DescriptorType::eUniformBuffer, uboInfo),
-					//ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
 				};
 
 				ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
@@ -146,42 +144,6 @@ namespace Imgn
 							}
 						}
 					}
-
-					//for (auto& children : entity->GetChildren())
-					//{
-					//	if (!children->IsActive()) continue;
-
-					//	if (TransformComponent* transform = children->GetComponent<TransformComponent>())
-					//	{
-					//		if (MeshComponent* meshComp = children->GetComponent<MeshComponent>())
-					//		{
-					//			auto& mesh = _renderer->GetMesh(meshComp->mesh);
-					//			if (!meshComp->visible) continue;
-
-					//			ctx.BindMesh(meshComp->mesh);
-					//			vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
-
-					//			std::vector writes
-					//			{
-					//				ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
-					//			};
-
-					//			ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
-
-					//			for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
-					//			{
-					//				GBufferPC pc
-					//				{
-					//					.model = transform->GetTransform(),
-					//					.materialIndex = prim.material
-					//				};
-
-					//				ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
-					//				ctx.DrawPrimitive(prim);
-					//			}
-					//		}
-					//	}
-					//}
 				}
 
 				ctx.EndRendering();
@@ -206,33 +168,6 @@ namespace Imgn
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
-				/*vk::RenderingAttachmentInfo colorAttachment
-				{
-					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("LitScene", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-					.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-					.loadOp = vk::AttachmentLoadOp::eClear,
-					.storeOp = vk::AttachmentStoreOp::eStore,
-					.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
-				};
-
-					vk::RenderingAttachmentInfo depthAttachment
-				{
-					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-					.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-					.loadOp = vk::AttachmentLoadOp::eClear,
-					.storeOp = vk::AttachmentStoreOp::eStore,
-					.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
-				};
-
-					vk::RenderingInfo renderingInfo
-				{
-					.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
-					.layerCount = 1,
-					.colorAttachmentCount = 1,
-					.pColorAttachments = &colorAttachment,
-					.pDepthAttachment = &depthAttachment,
-				}; */
-
 				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, *_renderer->GetPipelines().lightingPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
 
@@ -246,16 +181,7 @@ namespace Imgn
 
 				ctx.PushConstants<LightingPC>(vk::ShaderStageFlagBits::eCompute, pc);
 
-				//push descriptor set
 				{
-					//uniform buffer
-					/*vk::DescriptorBufferInfo uboInfo
-					{
-						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-						.offset = 0,
-						.range = 192
-					};*/
-
 					std::array images =
 					{
 						ctx.CreateDescriptorImageInfo("G-BufferAlbedo"),
@@ -266,7 +192,6 @@ namespace Imgn
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
-
 
 					std::array writes
 					{
@@ -281,12 +206,9 @@ namespace Imgn
 			}
 		};
 
-		// Persistent TAA history — graph-owned via CreateRGImageDesc (materialized at Compile).
-		// Imported (not imageOUT of TAA) so Execute keeps it as sampled/read-only before the
-		// pass; after resolve, Dream() CopyRenderImage(TAAResolved -> TAAHistory) updates it.
-		// First frame is safe via _taaHistoryValid / TAAPC.historyValid (false until copy).
-		// Ping-pong can replace this import+copy later if needed.
 		_renderer->CreateRGImageDesc("TAAHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat);
+		// Previous-frame velocity for TAA velocity rejection (same import+copy pattern as TAAHistory).
+		_renderer->CreateRGImageDesc("VelocityHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16Sfloat);
 
 		RenderPass TAA
 		{
@@ -297,6 +219,7 @@ namespace Imgn
 				"LitScene",
 				"TAAHistory",
 				"G-BufferVelocity",
+				"VelocityHistory",
 			},
 			.imageOUT =
 			{
@@ -313,26 +236,16 @@ namespace Imgn
 				};
 
 				ctx.PushConstants<TAAPC>(vk::ShaderStageFlagBits::eCompute, pc);
-				//push descriptor set
 				{
-					//uniform buffer
-					/*vk::DescriptorBufferInfo uboInfo
-					{
-						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-						.offset = 0,
-						.range = 192
-					};*/
-
 					std::array images =
 					{
 						ctx.CreateDescriptorImageInfo("LitScene"),
 						ctx.CreateDescriptorImageInfo("TAAHistory"),
 						ctx.CreateDescriptorImageInfo("G-BufferVelocity"),
+						ctx.CreateDescriptorImageInfo("VelocityHistory"),
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", nullptr, vk::ImageLayout::eGeneral);
-
-					//sampler
 
 					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetTAASampler());
 
@@ -362,7 +275,6 @@ namespace Imgn
 			Entity* entity = _activeScene->CreateEntity("Sponza");
 			MeshComponent* mesh = entity->AddComponent<Imgn::MeshComponent>(meshHandle);
 			mesh->materials = sponza.materials;
-			//todo remove
 			_renderer->GetMesh(meshHandle).materialBuffer = sponza.materialBuffer;
 			_renderer->GetMesh(meshHandle).materialBufferSize = sponza.materialBufferSize;
 
@@ -376,7 +288,6 @@ namespace Imgn
 			MeshComponent* mesh = child->AddComponent<Imgn::MeshComponent>();
 			mesh->mesh = meshHandle;
 			mesh->materials = testGlb.materials;
-			//todo remove
 			_renderer->GetMesh(meshHandle).materialBuffer = testGlb.materialBuffer;
 			_renderer->GetMesh(meshHandle).materialBufferSize = testGlb.materialBufferSize;
 		}
@@ -388,11 +299,6 @@ namespace Imgn
 
 		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
 		_sceneHierarchy.SetSceneContext(_activeScene);
-
-		//GBufferUBO gBufferUBO
-		//{
-		//	.viewProj = Math::Inverse(cameraTransform->GetTransform()) * camera->camera.GetProjection()
-		//};
 
 		gBufferUBO.viewProj = GetCamView(cameraTransform) * camera->camera.GetProjection();
 		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
@@ -408,7 +314,6 @@ namespace Imgn
 	{
 		ImGui::DockSpaceOverViewport();
 
-		// Show demo options and help
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -472,26 +377,23 @@ namespace Imgn
 	void EditorLayer::Dream(Time pTime)
 	{
 		_activeScene->Dream(pTime);
-		//UpdateCamera(pTime);
 
 		constexpr float JITTER_DEBUG_SCALE = 1.f;
 
 		mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
 		vec2 jitter = GetProjectionJitter(_window->GetWidth(), _window->GetHeight());
 		mat4 jitterMat = Math::Translate(Math::identity, { jitter[0] * JITTER_DEBUG_SCALE, jitter[1] * JITTER_DEBUG_SCALE, 0.f });
-		//proj[8] += jitter[0] * JITTER_DEBUG_SCALE;
-		//proj[9] += jitter[1] * JITTER_DEBUG_SCALE;
 		gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
 		gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
 
 		_renderer->MapBufferData(gBufferUBOHandle, &gBufferUBO, sizeof(GBufferUBO));
 
 		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
-		//IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
-
 
 		_renderer->ExecuteGraph();
 		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
+		// After resolve: current velocity becomes previous-frame history next frame.
+		_renderer->CopyRenderImage("G-BufferVelocity", "VelocityHistory");
 
 		_taaHistoryValid = true;
 		_renderer->BlitToSwapchain("TAAResolved");
