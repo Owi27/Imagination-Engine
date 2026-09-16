@@ -140,8 +140,8 @@ namespace Imgn
 								GBufferPC pc
 								{
 									.model = model,
+									.materialIndex = prim.material,
 									.prevModel = prevModel,
-									.materialIndex = prim.material
 								};
 
 								ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
