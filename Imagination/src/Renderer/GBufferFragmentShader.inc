@@ -23,8 +23,9 @@ struct FOut
 struct GBufferPC
 {
     matrix model;
-    matrix prevModel;
     uint materialIndex;
+    uint pad0, pad1, pad2;
+    float3x4 prevModel;
 } pc;
 
 #define ALPHA_OPAQUE 0
