@@ -4,7 +4,8 @@ namespace Imgn
 {
 	struct GBufferPC
 	{
-		std::array<float, 16> model;
+		mat4 model;
+		mat4 prevModel;
 		uint32_t materialIndex = 0xFFFFFFFF;
 	};
 
