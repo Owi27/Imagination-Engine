@@ -57,6 +57,15 @@ namespace Imgn
 
 		bool _taaHistoryValid = false;
 
+		// Camera-cut / large discontinuity: invalidate TAA (+ skip VelocityHistory) for N frames.
+		static constexpr float kTaaCutPosThreshold = 50.f;
+		static constexpr float kTaaCutForwardDotMin = 0.85f; // ~32 deg
+		static constexpr uint32_t kTaaInvalidateFrameCount = 3;
+		uint32_t _taaInvalidateFrames = 0;
+		bool _taaCamHistoryValid = false;
+		vec3 _taaPrevCamPos{};
+		vec3 _taaPrevCamForward{ 0.f, 0.f, 1.f };
+
 		// Halton(2,3) 8-tap cycle for projection jitter (Elo TAA)
 		uint32_t _jitterFrameIndex = 0;
 
