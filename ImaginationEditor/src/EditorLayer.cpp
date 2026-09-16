@@ -133,7 +133,7 @@ namespace Imgn
 							ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
 
 							const mat4 model = transform->GetTransform();
-							const mat4 prevModel = TaaObjectMv::ResolvePrevModel(transform, model);
+							const auto prevModel = TaaObjectMv::ResolvePrevModel(transform, model);
 
 							for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
 							{
