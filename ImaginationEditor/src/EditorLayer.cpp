@@ -55,6 +55,7 @@ namespace Imgn
 		RenderPass gBuffer
 		{
 			.name = "G-BufferPass",
+			.bindPoint = vk::PipelineBindPoint::eGraphics,
 			.imageOUT =
 			{
 				_renderer->CreateRGImageDesc("G-BufferAlbedo", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Srgb),
@@ -173,6 +174,7 @@ namespace Imgn
 		RenderPass lighting
 		{
 			.name = "LightingPass",
+			.bindPoint = vk::PipelineBindPoint::eCompute,
 			.imageIN =
 			{
 				"G-BufferAlbedo",
@@ -196,7 +198,7 @@ namespace Imgn
 					.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
 				};
 
-				vk::RenderingAttachmentInfo depthAttachment
+					vk::RenderingAttachmentInfo depthAttachment
 				{
 					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
 					.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
@@ -205,7 +207,7 @@ namespace Imgn
 					.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
 				};
 
-				vk::RenderingInfo renderingInfo
+					vk::RenderingInfo renderingInfo
 				{
 					.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
 					.layerCount = 1,
@@ -262,11 +264,17 @@ namespace Imgn
 			}
 		};
 
+		// Persistent TAA history — graph-owned via CreateRGImageDesc (materialized at Compile).
+		// Imported (not imageOUT of TAA) so Execute keeps it as sampled/read-only before the
+		// pass; after resolve, Dream() CopyRenderImage(TAAResolved -> TAAHistory) updates it.
+		// First frame is safe via _taaHistoryValid / TAAPC.historyValid (false until copy).
+		// Ping-pong can replace this import+copy later if needed.
 		_renderer->CreateRGImageDesc("TAAHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat);
 
 		RenderPass TAA
 		{
 			.name = "TemporalAntiAliasing",
+			.bindPoint = vk::PipelineBindPoint::eCompute,
 			.imageIN =
 			{
 				"LitScene",
