@@ -241,5 +241,6 @@ public:
 	ImGui_ImplVulkan_InitInfo GetImGuiInitInfo();
 
 	void CopyRenderImage(RGImage& pSrc, RGImage& pDst);
+	void ClearRenderImage(RGImage& pImage);
 	
 };

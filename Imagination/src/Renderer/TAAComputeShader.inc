@@ -1,4 +1,4 @@
-#define LitScene 0
+    std::string TAAComputeShader = R"(#define LitScene 0
 #define TAAHistory 1
 #define Velocity 2
 #define VelocityHistory 3
@@ -95,14 +95,14 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float3 currColor = taaInput[LitScene].Load(int3(pixel, 0)).rgb;
     
     float3 prevColor = currColor;
-    //valid history — Catmull-Rom history sample (keep RGB AABB clamp below)
+    //valid history - Catmull-Rom history sample (keep RGB AABB clamp below)
     if (pc.validHistory)
         prevColor = SampleHistoryCatmullRom(taaInput[TAAHistory], _sampler, reprojectedUV, float2(width, height));
     
     float3 minColor = 9999.f, maxColor = -9999.f;
     float3 neighborhoodSum = 0.0f.xxx;
     
-    //color clamping (RGB AABB — YCoCg later) + 3x3 neighborhood blur accum
+    //color clamping (RGB AABB - YCoCg later) + 3x3 neighborhood blur accum
     for (int y = -1; y <= 1; y++)
     {
         for (int x = -1; x <= 1; x++)
@@ -133,3 +133,4 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     taaOutput[pixel] = float4(currResolved * currWeight + previousColorClamped * (1.0f - currWeight), 1.f);
 }
+)";

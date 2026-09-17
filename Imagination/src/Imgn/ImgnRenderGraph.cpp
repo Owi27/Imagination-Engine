@@ -28,23 +28,15 @@ namespace Imgn
 
 	std::string ImgnRenderGraph::CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat)
 	{
+		// Register descriptor only — GPU images are created once in Compile().
+		// Previously this eagerly created an image and Compile() recreated imageOUT
+		// entries, leaking / double-allocating every RG color/depth target.
 		_imageDesc[pName] = RGImageDesc
 		{
 			.width = pWidth,
 			.height = pHeight,
 			.format = pFormat
 		};
-
-		if (pName.contains("Depth"))
-		{
-			_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eDepth);
-			
-			return pName;
-		}
-
-		std::vector<uint8_t> newImageData(pWidth * pHeight * 4, 0); //all black image
-
-		_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eColor);
 
 		return pName;
 	}
@@ -220,28 +212,31 @@ namespace Imgn
 		//	}
 		//}
 
-		// Physical Resource Allocation and Creation
-		// Transform resource descriptions into actual GPU objects
-		for (auto& pass : _passes)
+		// Physical Resource Allocation — one GPU image per CreateRGImageDesc entry.
+		// Covers pass imageOUT targets and persistent imports (e.g. TAAHistory).
+		// Skip if already present so Compile is idempotent / import-safe.
+		for (auto& [name, desc] : _imageDesc)
 		{
-			for (auto& imageOUT : pass.imageOUT)
-			{
-				if (imageOUT.contains("Depth"))
-				{
-					_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eDepth);
-					continue;
-				}
+			if (_images.contains(name))
+				continue;
 
-				std::vector<uint8_t> newImageData(_imageDesc[imageOUT].width* _imageDesc[imageOUT].height * 4, 0); //all black image
+			const vk::ImageAspectFlags aspect = name.contains("Depth")
+				? vk::ImageAspectFlagBits::eDepth
+				: vk::ImageAspectFlagBits::eColor;
 
-				_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eColor);
-			}
+			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect);
+			// Persistent TAA / velocity history must start as zeros (not undefined GPU garbage).
+			if (name == "TAAHistory" || name == "VelocityHistory")
+				_vk.ClearRenderImage(_images[name]);
 		}
 
 		for (auto& pass : _passes)
 		{
 			for (auto& bufferOUT : pass.bufferOUT)
 			{
+				if (_buffers.contains(bufferOUT))
+					continue;
+
 				if (bufferOUT.contains("UB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eUniformBuffer);
 				if (bufferOUT.contains("SB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eStorageBuffer);
 
@@ -266,7 +261,7 @@ namespace Imgn
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
 					.buffer = *resource.buffer.buffer,
-					.offset = 0,
+					offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
 
@@ -329,7 +324,7 @@ namespace Imgn
 					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
 					.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
 					.buffer = *resource.buffer.buffer,
-					.offset = 0,
+					offset = 0,
 					.size = VK_WHOLE_SIZE
 				};
 

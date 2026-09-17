@@ -12,6 +12,10 @@ namespace Imgn
 
 		vec3 position = { 0.f, 0.f, 0.f }, rotation = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
 
+		// Previous-frame world matrix for object motion vectors (runtime only; not serialized).
+		mat4 prevTransform = Math::identity;
+		bool prevTransformValid = false;
+
 		mat4 GetTransform()
 		{
 			mat4 transform = Math::identity;
@@ -63,9 +67,6 @@ namespace Imgn
 		void Serialize(std::fstream& pStream) override
 		{
 			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
-			//pStream.write(reinterpret_cast<const char*>(position.data()), position.size() * sizeof(float));
-			//pStream.write(reinterpret_cast<const char*>(rotation.data()), rotation.size() * sizeof(float));
-			//pStream.write(reinterpret_cast<const char*>(scale.data()), scale.size() * sizeof(float));
 		}
 
 		void Deserialize(std::fstream& pStream) override

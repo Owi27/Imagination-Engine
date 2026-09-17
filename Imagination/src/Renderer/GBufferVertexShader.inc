@@ -1,4 +1,4 @@
-struct VIn
+    std::string GBufferVertexShader = R"(struct VIn
 {
     float3 pos : POSITION0;
     float3 nrm : NORMAL0;
@@ -55,4 +55,4 @@ VOut main(VIn input)
     output.pPos = mul(ubo.prevViewProj, float4(prevWorld, 1));
     
     return output;
-}
+})";
