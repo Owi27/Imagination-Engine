@@ -13,7 +13,8 @@ namespace Imgn
 		//vec3 _camPos = { 0, 0, 0 };
 		//PerspectiveCamera _camera;
 		bool _cameraLookActive = false;
-		uint32_t gBufferUBOHandle = 0, _sceneWidth = 0, _sceneHeight = 0;
+		std::array<uint32_t, MaxFramesInFlight> gBufferUBOHandles;
+		uint32_t _sceneWidth = 0, _sceneHeight = 0;
 
 		shared<Scene> _activeScene;
 		Entity* _sceneCamera = nullptr;

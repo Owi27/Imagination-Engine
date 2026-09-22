@@ -50,6 +50,17 @@ namespace Imgn
 		} * (1.f / det);
 	}
 
+	mat4 Math::Transpose(mat4 pMat)
+	{
+		return mat4
+		{
+			pMat[0], pMat[4], pMat[8], pMat[12],
+			pMat[1], pMat[5], pMat[9], pMat[13],
+			pMat[2], pMat[6], pMat[10], pMat[14],
+			pMat[3], pMat[7], pMat[11], pMat[15]
+		};
+	}
+
 	mat4 Math::LookAtLH(vec3 pEye, vec3 pAt, vec3 pUp)
 	{
 		vec3 forward = Normalize(pAt - pEye), right = Normalize(pUp * forward), up = forward * right;

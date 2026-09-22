@@ -149,15 +149,47 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
         float3 normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
         normal = normalize(normal * float3(normalTextureScale, normalTextureScale, 1.f));
 
-        if (any(input.tan))
+        float tangentLengthSquared = dot(input.tan.xyz, input.tan.xyz);
+
+        if (all(isfinite(input.tan)) &&
+    tangentLengthSquared > 1e-12f &&
+    abs(input.tan.w) > 0.5f)
         {
-            float3 T = normalize(input.tan.xyz);
-            T = normalize(T - dot(T, N) * N);
-            float3 B = cross(N, T) * input.tan.w;
-            float3x3 TBN = float3x3(T, B, N);
-            worldNormal = normalize(mul(normal, TBN));
+            float3 T = input.tan.xyz * rsqrt(tangentLengthSquared);
+
+    // Remove any component parallel to the normal.
+            T -= dot(T, N) * N;
+
+            float orthogonalLengthSquared = dot(T, T);
+
+            if (orthogonalLengthSquared > 1e-12f)
+            {
+                T *= rsqrt(orthogonalLengthSquared);
+
+                float handedness = input.tan.w < 0.0f ? -1.0f : 1.0f;
+                float3 B = cross(N, T) * handedness;
+
+                float3x3 TBN = float3x3(T, B, N);
+                worldNormal = normalize(mul(normal, TBN));
+            }
         }
     }
+    //if (normalTexture > -1)
+    //{
+    //    float3 normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
+    //    normal = normalize(normal * float3(normalTextureScale, normalTextureScale, 1.f));
+
+    //    float tangentLengthSquared = dot(input.tan.xyz, input.tan.xyz);
+
+    //    if (any(input.tan))
+    //    {
+    //        float3 T = normalize(input.tan.xyz);
+    //        T = normalize(T - dot(T, N) * N);
+    //        float3 B = cross(N, T) * input.tan.w;
+    //        float3x3 TBN = float3x3(T, B, N);
+    //        worldNormal = normalize(mul(normal, TBN));
+    //    }
+    //}
     
     if (doubleSided != 0 && !isFrontFace)
     {

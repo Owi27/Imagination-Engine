@@ -510,6 +510,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_rectpack.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_textedit.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_truetype.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImLightRig.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImZoomSlider.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn.hpp" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\AppEvent.h" />
@@ -585,6 +593,42 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_widgets.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

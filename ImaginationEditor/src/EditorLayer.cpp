@@ -7,6 +7,8 @@
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
 
+#include "ImGuizmo/ImGuizmo.h"
+
 namespace Imgn
 {
 	mat4 EditorLayer::GetCamView(TransformComponent* pTransform)
@@ -83,7 +85,7 @@ namespace Imgn
 				ctx.SetViewport(_window->GetWidth(), _window->GetHeight());
 				ctx.SetScissor(_window->GetWidth(), _window->GetHeight());
 
-				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandle, sizeof(GBufferUBO));
+				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], sizeof(GBufferUBO));
 				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
 
 				std::vector writes
@@ -173,6 +175,7 @@ namespace Imgn
 		RenderPass lighting
 		{
 			.name = "LightingPass",
+			.bindPoint = vk::PipelineBindPoint::eCompute,
 			.imageIN =
 			{
 				"G-BufferAlbedo",
@@ -263,15 +266,18 @@ namespace Imgn
 		};
 
 		_renderer->CreateRGImageDesc("TAAHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat);
+		_renderer->CreateRGImageDesc("G-BufferVelocityHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16Sfloat);
 
 		RenderPass TAA
 		{
 			.name = "TemporalAntiAliasing",
+			.bindPoint = vk::PipelineBindPoint::eCompute,
 			.imageIN =
 			{
 				"LitScene",
 				"TAAHistory",
 				"G-BufferVelocity",
+				"G-BufferVelocityHistory",
 			},
 			.imageOUT =
 			{
@@ -284,7 +290,7 @@ namespace Imgn
 
 				TAAPC pc
 				{
-					.historyValid = _taaHistoryValid
+					.historyValid = static_cast<uint32_t>(_taaHistoryValid)
 				};
 
 				ctx.PushConstants<TAAPC>(vk::ShaderStageFlagBits::eCompute, pc);
@@ -303,6 +309,7 @@ namespace Imgn
 						ctx.CreateDescriptorImageInfo("LitScene"),
 						ctx.CreateDescriptorImageInfo("TAAHistory"),
 						ctx.CreateDescriptorImageInfo("G-BufferVelocity"),
+						ctx.CreateDescriptorImageInfo("G-BufferVelocityHistory"),
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", nullptr, vk::ImageLayout::eGeneral);
@@ -372,7 +379,10 @@ namespace Imgn
 		gBufferUBO.viewProj = GetCamView(cameraTransform) * camera->camera.GetProjection();
 		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 
-		gBufferUBOHandle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
+		for (auto& handle : gBufferUBOHandles)
+		{
+			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
+		}
 	}
 
 	void EditorLayer::WakeUp()
@@ -431,7 +441,7 @@ namespace Imgn
 
 		if (!_sceneWindow)
 		{
-			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("G-BufferVelocity").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("TAAResolved").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 		}
 
 		ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
@@ -441,6 +451,30 @@ namespace Imgn
 		_sceneWidth = static_cast<uint32_t>(sceneViewSize.x); _sceneHeight = static_cast<uint32_t>(sceneViewSize.y);
 		_sceneCamera->GetComponent<CameraComponent>()->camera.SetViewportSize(_sceneWidth, _sceneHeight);
 		ImGui::Image(ImTextureRef(textureID), ImVec2(_window->GetWidth(), _window->GetHeight()));
+
+		//gizmos
+		Entity* selectedEntity = _sceneHierarchy.GetSelectedEntity();
+		if (selectedEntity)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, static_cast<float>(ImGui::GetWindowWidth()), static_cast<float>(ImGui::GetWindowHeight()));
+
+			Entity* cameraEntity = _activeScene->GetPrimaryCameraEntity();
+			mat4& camProj = cameraEntity->GetComponent<CameraComponent>()->camera.GetProjection();
+			mat4 camView = Math::Inverse(cameraEntity->GetComponent<TransformComponent>()->GetTransform());
+
+			TransformComponent* tc = selectedEntity->GetComponent<TransformComponent>();
+			mat4 transform = tc->GetTransform();
+
+			ImGuizmo::Manipulate(camView.data(), camProj.data(), ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, transform.data());
+
+			if (ImGuizmo::IsUsing())
+			{
+				tc->position = { transform[12], transform[13], transform[14] };
+			}
+		}
+
 		ImGui::End();
 	}
 
@@ -459,7 +493,7 @@ namespace Imgn
 		gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
 		gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
 
-		_renderer->MapBufferData(gBufferUBOHandle, &gBufferUBO, sizeof(GBufferUBO));
+		_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
 
 		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 		//IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
@@ -467,6 +501,7 @@ namespace Imgn
 
 		_renderer->ExecuteGraph();
 		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
+		_renderer->CopyRenderImage("G-BufferVelocity", "G-BufferVelocityHistory");
 
 		_taaHistoryValid = true;
 		_renderer->BlitToSwapchain("TAAResolved");

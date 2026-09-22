@@ -1418,7 +1418,7 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 
 		srcStage = vk::PipelineStageFlagBits::eTransfer;
-		dstStage = vk::PipelineStageFlagBits::eFragmentShader;
+		dstStage = vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eComputeShader;
 	}
 	// 3. Color Attachment -> Transfer Source (Preparing your Lighting-Output for the Blit)
 	else if (pOldLayout == vk::ImageLayout::eColorAttachmentOptimal && pNewLayout == vk::ImageLayout::eTransferSrcOptimal)
@@ -1561,6 +1561,18 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 			dstStage =
 				vk::PipelineStageFlagBits::eTransfer;
 				}
+	else if (
+		pOldLayout == vk::ImageLayout::eUndefined &&
+		pNewLayout == vk::ImageLayout::eGeneral)
+		{
+			barrier.srcAccessMask = {};
+			barrier.dstAccessMask =
+				vk::AccessFlagBits::eShaderRead |
+				vk::AccessFlagBits::eShaderWrite;
+
+			srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			dstStage = vk::PipelineStageFlagBits::eComputeShader;
+			}
 	else
 	{
 		throw std::invalid_argument("unsupported layout transition!");

@@ -209,13 +209,13 @@ namespace Imgn
 				//const unsigned char* data = &pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))];
 
 				//uvec4 joint;
-				for (size_t i = 0; i < 4; i++)
+				for (size_t j = 0; j < 4; j++)
 				{
 					int16_t joint;
 					if (jointAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
-						v.joints[i] = reinterpret_cast<const uint8_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[i];
+						v.joints[j] = reinterpret_cast<const uint8_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[j];
 					else if (jointAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
-						v.joints[i] = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[i];
+						v.joints[j] = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))])[j];
 				}
 
 				//const uint16_t* j = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + jointAcc->byteOffset + (i * jointAcc->ByteStride(view))]);
@@ -226,7 +226,17 @@ namespace Imgn
 			{
 				const auto& view = pModel.bufferViews[weightAcc->bufferView];
 				const float* w = reinterpret_cast<const float*>(&pModel.buffers[view.buffer].data[view.byteOffset + weightAcc->byteOffset + (i * weightAcc->ByteStride(view))]);
-				v.weights = { w[0], w[1], w[2], w[3] };
+
+				for (size_t j = 0; j < 4; j++)
+				{
+					float weight;
+					if (weightAcc->componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
+						v.weights[j] = reinterpret_cast<const float*>(&pModel.buffers[view.buffer].data[view.byteOffset + weightAcc->byteOffset + (i * weightAcc->ByteStride(view))])[j];
+					else if (weightAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+						v.weights[j] = reinterpret_cast<const uint8_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + weightAcc->byteOffset + (i * weightAcc->ByteStride(view))])[j] / 255.f;
+					else if (weightAcc->componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+						v.weights[j] = reinterpret_cast<const uint16_t*>(&pModel.buffers[view.buffer].data[view.byteOffset + weightAcc->byteOffset + (i * weightAcc->ByteStride(view))])[j] / 65535.f;
+				}
 			}
 
 			vertices.push_back(v);
@@ -256,6 +266,7 @@ namespace Imgn
 
 	ImgnModel GLTFLoader::LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer)
 	{
+		_outModel = {};
 		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;
 		std::string error;
@@ -311,7 +322,7 @@ namespace Imgn
 			Joint& joint = skeleton.joints[i];
 			joint.name = node.name;
 			joint.nodeIdx = nodeIdx;
-			skeleton.nodeToJoint[nodeIdx] = i;
+			skeleton.nodeToJoint[nodeIdx] = static_cast<uint32_t>(i);
 		}
 
 		auto nodeParents = BuildNodeParents(pModel);
@@ -330,6 +341,11 @@ namespace Imgn
 
 				parentNode = nodeParents[parentNode];
 			}
+
+			if (skeleton.rootNode == -1 && joint.parentJoint == -1)
+			{
+				skeleton.rootNode = joint.nodeIdx;
+			}
 		}
 
 		if (pSkin.inverseBindMatrices >= 0)
@@ -340,12 +356,9 @@ namespace Imgn
 			const uint64_t stride = accessor.ByteStride(view);
 			const unsigned char* data = buffer.data.data() + view.byteOffset + accessor.byteOffset;
 
-			for (size_t i = 0; i < accessor.count; i++)
+			for (size_t i = 0; i < skeleton.joints.size(); i++)
 			{
-				const float* matrixData = reinterpret_cast<const float*>(data + i * stride);
-				mat4 inverseBind = Math::identity;
-				memcpy(inverseBind.data(), matrixData, sizeof(mat4));
-				skeleton.joints[i].inverseBindMatrix = inverseBind;
+				memcpy(skeleton.joints[i].inverseBindMatrix.data(), reinterpret_cast<const float*>(data + i * stride), sizeof(mat4));
 			}
 		}
 
@@ -371,6 +384,6 @@ namespace Imgn
 
 	ImgnModel GLTFLoader::LoadModel(const std::filesystem::path& pFile, Imgn::ImgnRenderer& pRenderer)
 	{
-		return _instance->LoadModelImpl(pFile, pRenderer);
+		return Get().LoadModelImpl(pFile, pRenderer);
 	}
 }

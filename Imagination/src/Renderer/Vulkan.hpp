@@ -229,6 +229,8 @@ public:
 
 	vk::raii::CommandBuffer& GetCurrentCommandBuffer() { return *_commandBuffers[_frameInFlightIdx]; }
 
+	uint32_t GetFrameInFlightIndex() const { return _frameInFlightIdx; }
+
 	unique<vk::raii::CommandBuffer> StartSingleTimeCommand();
 	void EndSingleTimeCommand(vk::raii::CommandBuffer& pCommandBuffer);
 

@@ -25,6 +25,24 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -115,6 +133,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImLightRig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImZoomSlider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn.hpp">

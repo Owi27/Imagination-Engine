@@ -23,5 +23,7 @@ namespace Imgn
 		void CreateComponentSettings(Entity* pEntity, std::string_view pComponentTitle, std::function<void(bool)> pComponentSettings);
 
 		void OnImGuiRender();
+
+		Entity* GetSelectedEntity() const { return _selectedEntity; }
 	};
 }

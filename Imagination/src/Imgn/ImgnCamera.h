@@ -78,6 +78,7 @@ namespace Imgn
 		/*Class Functions*/
 		void RecalculateProjection();
 		const mat4& GetProjection() const { return _proj; };
+		mat4& GetProjection()  { return _proj; };
 		void SetViewportSize(uint32_t pWidth, uint32_t pHeight);
 		
 		uint32_t& GetWidth() { return _width; }

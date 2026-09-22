@@ -38,6 +38,22 @@ namespace Imgn
 		std::erase(_entities, pEntity);
 	}
 
+	Entity* Scene::GetPrimaryCameraEntity()
+	{
+		for (auto& entity : _entities)
+		{
+			if (CameraComponent* cameraComponent = entity->GetComponent<CameraComponent>())
+			{
+				if (cameraComponent->mainCamera)
+				{
+					return entity.get();
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
 	void Scene::OnViewportResize(uint32_t pWidth, uint32_t pHeight)
 	{
 		_viewportWidth = pWidth;

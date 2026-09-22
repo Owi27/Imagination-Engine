@@ -32,6 +32,6 @@ namespace Imgn
 	//velocity
 	struct TAAPC
 	{
-		bool historyValid;
+		uint32_t historyValid;
 	};
 }

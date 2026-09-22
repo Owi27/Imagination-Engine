@@ -31,7 +31,7 @@ namespace Imgn
 			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
 			.loadOp = vk::AttachmentLoadOp::eClear,
 			.storeOp = vk::AttachmentStoreOp::eStore,
-			.clearValue = vk::ClearColorValue{ std::array<float, 4>{1.0f, 0.25f, 0.75f, 1.0f} }
+			.clearValue = vk::ClearColorValue{ std::array<float, 4>{ 0.f, 0.f, 0.f, 0.f} }
 		};
 	}
 

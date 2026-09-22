@@ -5,6 +5,8 @@
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
 
+#include "ImGuizmo/ImGuizmo.h"
+
 namespace Imgn
 {
 	void ImGuiLayer::AddImGuiSpecialInputEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed)
@@ -285,6 +287,7 @@ namespace Imgn
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::End()

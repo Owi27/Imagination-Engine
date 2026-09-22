@@ -100,6 +100,7 @@ namespace Imgn
 		vk::raii::CommandBuffer& GetActiveCommandBuffer() { return _vkCtx->GetActiveCommandBuffer(); }
 		vk::ImageView GetActiveSwapchainImageView() { return _vkCtx->GetActiveSwapchainImageView(); }
 		vk::Extent2D GetSwapchainExtent() const { return _vkCtx->GetSwapchainExtent(); }
+		uint32_t GetFrameInFlightIndex() const { return _vkCtx->GetFrameInFlightIndex(); }
 
 		//void DrawMesh(vk::raii::CommandBuffer& pCommandBuffer, uint32_t pVertexBuffer, uint32_t pIndexBuffer, std::vector<ImgnPrimitive> pPrimitives);
 

@@ -99,7 +99,7 @@ VOut main(VIn input)
     float3x3 model3x3 = (float3x3) pc.model;
     
     output.nrm = normalize(mul(model3x3, input.nrm));
-    output.tan.xyz = normalize(mul(model3x3, input.tan.xyz));
+    output.tan.xyz = mul(model3x3, input.tan.xyz);
     output.tan.w = input.tan.w;
     output.col = input.col;
 
@@ -179,7 +179,7 @@ float2 ClipToUV(float4 pClip)
 {
     float2 ndc = pClip.xy / pClip.w;
     
-    return ndc * .5f + .5f;
+    return ndc * .5 + .5f;
 }
 
 FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
@@ -260,15 +260,47 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
         float3 normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
         normal = normalize(normal * float3(normalTextureScale, normalTextureScale, 1.f));
 
-        if (any(input.tan))
+        float tangentLengthSquared = dot(input.tan.xyz, input.tan.xyz);
+
+        if (all(isfinite(input.tan)) &&
+    tangentLengthSquared > 1e-12f &&
+    abs(input.tan.w) > 0.5f)
         {
-            float3 T = normalize(input.tan.xyz);
-            T = normalize(T - dot(T, N) * N);
-            float3 B = cross(N, T) * input.tan.w;
-            float3x3 TBN = float3x3(T, B, N);
-            worldNormal = normalize(mul(normal, TBN));
+            float3 T = input.tan.xyz * rsqrt(tangentLengthSquared);
+
+    // Remove any component parallel to the normal.
+            T -= dot(T, N) * N;
+
+            float orthogonalLengthSquared = dot(T, T);
+
+            if (orthogonalLengthSquared > 1e-12f)
+            {
+                T *= rsqrt(orthogonalLengthSquared);
+
+                float handedness = input.tan.w < 0.0f ? -1.0f : 1.0f;
+                float3 B = cross(N, T) * handedness;
+
+                float3x3 TBN = float3x3(T, B, N);
+                worldNormal = normalize(mul(normal, TBN));
+            }
         }
     }
+    //if (normalTexture > -1)
+    //{
+    //    float3 normal = materialTextures[normalTexture].Sample(materialSampler, input.uv).rgb * 2.f - 1.f;
+    //    normal = normalize(normal * float3(normalTextureScale, normalTextureScale, 1.f));
+
+    //    float tangentLengthSquared = dot(input.tan.xyz, input.tan.xyz);
+
+    //    if (any(input.tan))
+    //    {
+    //        float3 T = normalize(input.tan.xyz);
+    //        T = normalize(T - dot(T, N) * N);
+    //        float3 B = cross(N, T) * input.tan.w;
+    //        float3x3 TBN = float3x3(T, B, N);
+    //        worldNormal = normalize(mul(normal, TBN));
+    //    }
+    //}
     
     if (doubleSided != 0 && !isFrontFace)
     {
@@ -494,26 +526,28 @@ void main( uint3 DTid : SV_DispatchThreadID )
     Lo += DirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
     
     float3 ambient = float3(.0f, .0f, .0f) * gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb * occlusion;
-    float3 color = ambient + Lo;
+    float3 color = ambient + Lo + gBuffer[GBUFFER_EMISSIVE].Load(int3(pixel, 0)).rgb;
     
     color = color / (color + float3(1.f, 1.f, 1.f));
     color = pow(color, float3(1.f / 2.2f, 1.f / 2.2f, 1.f / 2.2f));
 
     litScene[pixel] = float4(color, 1.f);
+    //litScene[pixel] = float4(gBuffer[GBUFFER_MATERIAL].Load(int3(pixel, 0)).rgb, 1.f);
 })";
 
     std::string TAAComputeShader = R"(#define LitScene 0
 #define TAAHistory 1
 #define Velocity 2
+#define VHistory 3
 
 [[vk::push_constant]]
 struct TAAPC
 {
-    bool validHistory;
+    uint  validHistory;
 } pc;
 
 
-Texture2D<float4> taaInput[3] : register(t2, space0);
+Texture2D<float4> taaInput[4] : register(t2, space0);
 RWTexture2D<float4> taaOutput : register(u3, space0);
 SamplerState _sampler : register(s4, space0);
 
@@ -526,29 +560,45 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float2 uv = (float2(pixel) + .5f) / float2(width, height);
     
-    float2 reprojectedUV = uv - float2(taaInput[Velocity].Load(int3(pixel, 0)).rg);
+    float2 currVelocityUV = taaInput[Velocity].Load(int3(pixel, 0)).rg;
+    float2 reprojectedUV = uv - currVelocityUV;
     float3 currColor = taaInput[LitScene].Load(int3(pixel, 0)).rgb;
 //    Load(int3(reprojectedUV, 0)).rgb;
     
     float3 prevColor = currColor;
     //valid history
-    if (pc.validHistory) prevColor = taaInput[TAAHistory].Sample(_sampler, reprojectedUV).rgb;
+    if (pc.validHistory == 1) prevColor = taaInput[TAAHistory].Sample(_sampler, reprojectedUV).rgb;
     
-    float3 minColor = 9999.f, maxColor = -9999.f;
+    float3 minColor = 9999.f, maxColor = -9999.f, currFrameBlurred = 0.f;
     
     //color clamping
     for (int y = -1; y <= 1; y++)
     {
         for (int x = -1; x <= 1; x++)
         {
-            float3 color = taaInput[LitScene].Load(int3(clamp(pixel + int2(x, y), int2(0, 0), int2(width - 1, height - 1)), 0.f)).rgb;
+            float3 color = taaInput[LitScene].Load(int3(clamp(pixel + int2(x, y), int2(0, 0), int2(width - 1, height - 1)), 0.f));
+            
+            currFrameBlurred += color;
             minColor = min(minColor, color);
             maxColor = max(maxColor, color);
         }
     }
     
-    float3 previousColorClamped = clamp(prevColor, minColor, maxColor);
+    currFrameBlurred *= .11111111111111111111111111111111f; ///= 9.f;
     
-    taaOutput[pixel] = float4(currColor * .1f + previousColorClamped * .9f, 1.f);
+    float3 previousColorClamped = clamp(prevColor, minColor, maxColor);
+    float3 accumulation = currColor * .1f + previousColorClamped * .9f;
+    
+    float velocityDisocclusion = 0.f;
+
+    if (pc.validHistory == 1)
+    {
+        float2 previousVelocityUV = taaInput[VHistory].Sample(_sampler, reprojectedUV).rg;
+        float velocityLength = length(previousVelocityUV - currVelocityUV);
+
+        velocityDisocclusion = saturate((velocityLength - 0.001f) * 10.f);
+    }
+    
+    taaOutput[pixel] = float4(lerp(accumulation, currFrameBlurred, velocityDisocclusion), 1.f);
 })";
 }

@@ -44,7 +44,7 @@ VOut main(VIn input)
     float3x3 model3x3 = (float3x3) pc.model;
     
     output.nrm = normalize(mul(model3x3, input.nrm));
-    output.tan.xyz = normalize(mul(model3x3, input.tan.xyz));
+    output.tan.xyz = mul(model3x3, input.tan.xyz);
     output.tan.w = input.tan.w;
     output.col = input.col;
 

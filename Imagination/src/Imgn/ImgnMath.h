@@ -37,6 +37,7 @@ namespace Imgn
 
 		/* MAT4 */
 		static mat4 Inverse(mat4 pMat);
+		static mat4 Transpose(mat4 pMat);
 		static mat4 LookAtLH(vec3 pEye, vec3 pAt, vec3 pUp);
 		static mat4 Rotate(mat4 pMat, vec3 pAxis, float pRadian, bool pGlobal = false);
 		static mat4 Scale(mat4 pMat, vec3 pScale, bool pGlobal = false);
