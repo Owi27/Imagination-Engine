@@ -1,0 +1,8 @@
+D:/GitHub/Imagination-Engine/build/x64-Debug/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/CMakeFiles/ZERO_CHECK.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/Imagination/CMakeFiles/IMGN.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/Imagination/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/Daydream/CMakeFiles/DAYDREAM.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/Daydream/CMakeFiles/ALL_BUILD.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/ImaginationEditor/CMakeFiles/ImaginationEditor.dir
+D:/GitHub/Imagination-Engine/build/x64-Debug/ImaginationEditor/CMakeFiles/ALL_BUILD.dir

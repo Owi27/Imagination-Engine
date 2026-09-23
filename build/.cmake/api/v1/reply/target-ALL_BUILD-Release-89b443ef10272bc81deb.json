@@ -1,0 +1,51 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"Daydream/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 10
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "CMakePredefinedTargets"
+	},
+	"id" : "ALL_BUILD::@d18117f7cfd3bcefe5ee",
+	"isGeneratorProvided" : true,
+	"name" : "ALL_BUILD",
+	"orderDependencies" : 
+	[
+		{
+			"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "Daydream",
+		"source" : "Daydream"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}

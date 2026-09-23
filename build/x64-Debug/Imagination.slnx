@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<BuildType Name="MinSizeRel"/>
+		<BuildType Name="RelWithDebInfo"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Project Path="Daydream/DAYDREAM.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="3fada62c-4153-3a8d-8f34-6cfb5e2ab43e">
+		<BuildDependency Project="Imagination/IMGN.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="Imagination/IMGN.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="3c06a2c2-dcc8-318d-a363-c5ed29587d3d">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="ImaginationEditor/ImaginationEditor.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7ff3dd31-7899-39e3-b269-8530156786a1" DefaultStartup="true">
+		<BuildDependency Project="Imagination/IMGN.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Folder Name="/CMakePredefinedTargets/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="2b96b253-0b8e-3c79-bb4c-1de535f52d60">
+			<BuildDependency Project="Daydream/DAYDREAM.vcxproj"/>
+			<BuildDependency Project="Imagination/IMGN.vcxproj"/>
+			<BuildDependency Project="ImaginationEditor/ImaginationEditor.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0450e462-4cc4-3cbd-bfab-f008e8211f5c"/>
+	</Folder>
+</Solution>

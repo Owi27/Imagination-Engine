@@ -149,12 +149,14 @@ namespace Imgn
 
 	void ImGuiLayer::Sleep()
 	{
+		std::cout << "Working Directory: " << std::filesystem::current_path() << '\n';
+
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
 
 		ImGuiIO& io = ImGui::GetIO();
 		//io.Fonts->AddFontFromFileTTF("../../Fonts/Raleway-Regular.ttf", 16.f);
-		io.Fonts->AddFontFromFileTTF("../../Fonts/consola.ttf", 12.f);
+		io.Fonts->AddFontFromFileTTF("../../../../Fonts/consola.ttf", 12.f);
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 		ImGui_ImplWin32_Init(_window->GetWindowHandle());

@@ -20,11 +20,5 @@ add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_direc
 #add_custom_command(TARGET IMGN POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ImgnVulkan> $<TARGET_FILE_DIR:IMGN>)
 if(MSVC)
     target_compile_options(IMGN PRIVATE /Zi)
-
-    target_link_options(
-        IMGN
-        PRIVATE
-        /DEBUG:FULL
-        /INCREMENTAL:NO
-    )
+    target_link_options(IMGN PRIVATE /DEBUG:FULL /INCREMENTAL:NO)
 endif()

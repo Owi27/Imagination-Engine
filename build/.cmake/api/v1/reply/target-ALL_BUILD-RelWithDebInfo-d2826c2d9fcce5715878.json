@@ -1,0 +1,51 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"ImaginationEditor/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 10
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "ImaginationEditor::@b7f6dfed6368fcf6af16"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "CMakePredefinedTargets"
+	},
+	"id" : "ALL_BUILD::@b7f6dfed6368fcf6af16",
+	"isGeneratorProvided" : true,
+	"name" : "ALL_BUILD",
+	"orderDependencies" : 
+	[
+		{
+			"id" : "ImaginationEditor::@b7f6dfed6368fcf6af16"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "ImaginationEditor",
+		"source" : "ImaginationEditor"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}

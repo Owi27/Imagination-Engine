@@ -1,0 +1,26 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "x64",
+      "displayName": "Windows x64",
+      "generator": "Visual Studio 18 2026",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": "x64"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "configurePreset": "x64",
+      "configuration": "Release"
+    }
+  ]
+}

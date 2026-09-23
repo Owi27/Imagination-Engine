@@ -14,7 +14,6 @@ namespace Imgn
         {
             GetWindow().SetWindowTitle("Imagination Engine (In Progress)");
             AddLayer(Unique<EditorLayer>(&GetWindow(), &Renderer()));
-
         }
 
         ~ImaginationEditor() /*Destructor*/

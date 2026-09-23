@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/GitHub/Imagination-Engine/build/x64-Debug/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/x64-Debug/Imagination/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/x64-Debug/Daydream/cmake_install.cmake",
+		"D:/GitHub/Imagination-Engine/build/x64-Debug/ImaginationEditor/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

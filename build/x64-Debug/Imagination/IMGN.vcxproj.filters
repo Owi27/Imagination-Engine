@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\build\x64-Debug\Imagination\CMakeFiles\IMGN.dir\cmake_pch.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_impl_vulkan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_impl_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImGui\ImgnGui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnGLTF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLayerStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnMath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Skeleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Gateware\Gateware.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_impl_vulkan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_impl_win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imgui_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_rectpack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_textedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGui\imstb_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\GraphEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImCurveEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImGuizmo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImLightRig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImSequencer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImVectorEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImZoomSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\AppEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\KeyEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\MouseEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImGui\ImgnGui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnApp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnCore.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnGLTF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnKey.MouseCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLayerStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderResources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Skeleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\main.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\EngineShaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\IRenderBackend.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderPassStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderStructs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\gltf\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\gltf\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\gltf\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\gltf\tiny_gltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\x64-Debug\Imagination\CMakeFiles\IMGN.dir\Debug\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\x64-Debug\Imagination\CMakeFiles\IMGN.dir\Release\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\x64-Debug\Imagination\CMakeFiles\IMGN.dir\MinSizeRel\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\build\x64-Debug\Imagination\CMakeFiles\IMGN.dir\RelWithDebInfo\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\GitHub\Imagination-Engine\Imagination\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{5D8F1B65-73AE-3A72-8474-19716B3B766C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompile Header File">
+      <UniqueIdentifier>{171D01F3-8A0E-372D-A6A5-64436EFEC724}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9D67F1AE-9D1C-3310-AFB0-9B6E4167A9AD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

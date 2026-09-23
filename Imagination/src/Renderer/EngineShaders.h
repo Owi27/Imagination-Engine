@@ -576,7 +576,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     {
         for (int x = -1; x <= 1; x++)
         {
-            float3 color = taaInput[LitScene].Load(int3(clamp(pixel + int2(x, y), int2(0, 0), int2(width - 1, height - 1)), 0.f));
+            float3 color = taaInput[LitScene].Load(int3(clamp(pixel + int2(x, y), int2(0, 0), int2(width - 1, height - 1)), 0.f)).rgb;
             
             currFrameBlurred += color;
             minColor = min(minColor, color);

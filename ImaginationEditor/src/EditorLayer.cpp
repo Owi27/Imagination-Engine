@@ -51,8 +51,8 @@ namespace Imgn
 	void EditorLayer::Sleep()
 	{
 		GLTFLoader& loader = GLTFLoader::Get();
-		ImgnModel sponza = loader.LoadModel("../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
-		ImgnModel testGlb = loader.LoadModel("../../Models/Vroid/Test.gltf", *_renderer);
+		ImgnModel sponza = loader.LoadModel("../../../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
+		ImgnModel testGlb = loader.LoadModel("../../../../Models/Vroid/Test.gltf", *_renderer);
 
 		RenderPass gBuffer
 		{
