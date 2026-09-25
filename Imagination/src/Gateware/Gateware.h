@@ -19308,7 +19308,7 @@ namespace GW
 					RECT windowRect;
 					::GetWindowRect(wndHandle, &windowRect);
 
-					::SetWindowLongPtr(wndHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+					::SetWindowLongPtr(wndHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN);
 					BOOL winRet = ::SetWindowPos(wndHandle, nullptr, windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOREDRAW);
 					if (winRet == 0)
 						return  GReturn::FAILURE;

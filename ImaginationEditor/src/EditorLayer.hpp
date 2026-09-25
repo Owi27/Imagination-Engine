@@ -1,5 +1,6 @@
 #include <Imgn.hpp>
 #include "Panels/SceneHierarchy.h"
+#include "Panels/ExternalAppPanel.h"
 
 namespace Imgn
 {
@@ -52,6 +53,7 @@ namespace Imgn
 
 		//panels
 		SceneHierarchy _sceneHierarchy;
+		AppPanel blenderPanel;
 
 		//ubo
 		GBufferUBO gBufferUBO;

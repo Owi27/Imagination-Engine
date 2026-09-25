@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/ImaginationEditor/ImaginationEditor.exe"
+			"path" : "bin/Debug-Windows-x64/ImaginationEditor/ImaginationEditor.exe"
 		},
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/ImaginationEditor/ImaginationEditor.pdb"
+			"path" : "bin/Debug-Windows-x64/ImaginationEditor/ImaginationEditor.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -99,10 +99,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -169,10 +169,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -232,10 +232,12 @@
 			],
 			"sourceIndexes" : 
 			[
-				5,
-				6,
 				7,
-				8
+				8,
+				9,
+				10,
+				11,
+				12
 			]
 		}
 	],
@@ -255,11 +257,11 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -MD",
+				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MDd -Zi",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
 				"role" : "flags"
 			},
 			{
@@ -268,7 +270,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "..\\bin\\MinSizeRel-Windows-x64\\Imagination\\IMGN.lib",
+				"fragment" : "..\\bin\\Debug-Windows-x64\\Imagination\\IMGN.lib",
 				"role" : "libraries"
 			},
 			{
@@ -304,10 +306,12 @@
 			"sourceIndexes" : 
 			[
 				0,
-				5,
-				6,
 				7,
-				8
+				8,
+				9,
+				10,
+				11,
+				12
 			]
 		},
 		{
@@ -317,17 +321,19 @@
 				1,
 				2,
 				3,
-				4
+				4,
+				5,
+				6
 			]
 		},
 		{
 			"name" : "Precompile Header File",
 			"sourceIndexes" : 
 			[
-				9,
-				10,
-				11,
-				12
+				13,
+				14,
+				15,
+				16
 			]
 		}
 	],
@@ -351,6 +357,16 @@
 		},
 		{
 			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/EditorWorkspace.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/ExternalAppPanel.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
 			"path" : "ImaginationEditor/src/Panels/SceneHierarchy.h",
 			"sourceGroupIndex" : 1
 		},
@@ -369,6 +385,18 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 1,
 			"path" : "ImaginationEditor/src/EditorLayer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/EditorWorkspace.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/ExternalAppPanel.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

@@ -383,10 +383,13 @@ namespace Imgn
 		{
 			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
 		}
+
+		blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), "../../../../ExternalApps/Blender 4.4/blender.exe");
 	}
 
 	void EditorLayer::WakeUp()
 	{
+		blenderPanel.Shutdown();
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -450,7 +453,7 @@ namespace Imgn
 		ImVec2 sceneViewSize = ImGui::GetContentRegionAvail();
 		_sceneWidth = static_cast<uint32_t>(sceneViewSize.x); _sceneHeight = static_cast<uint32_t>(sceneViewSize.y);
 		_sceneCamera->GetComponent<CameraComponent>()->camera.SetViewportSize(_sceneWidth, _sceneHeight);
-		ImGui::Image(ImTextureRef(textureID), ImVec2(_window->GetWidth(), _window->GetHeight()));
+		ImGui::Image(ImTextureRef(textureID), sceneViewSize);
 
 		//gizmos
 		Entity* selectedEntity = _sceneHierarchy.GetSelectedEntity();
@@ -476,6 +479,8 @@ namespace Imgn
 		}
 
 		ImGui::End();
+
+		blenderPanel.Render();
 	}
 
 	void EditorLayer::Dream(Time pTime)

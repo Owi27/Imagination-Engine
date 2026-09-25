@@ -1,5 +1,6 @@
 #pragma once
 #include <Imgn/ImgnScene.h>
+struct ImGuiWindowClass;
 
 namespace Imgn
 {

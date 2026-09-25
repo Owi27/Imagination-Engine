@@ -3,7 +3,7 @@ project(ImaginationEditor)
 file(GLOB_RECURSE ImaginationEditor_HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 file(GLOB_RECURSE ImaginationEditor_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-add_executable(ImaginationEditor ${ImaginationEditor_HEADERS} ${ImaginationEditor_SOURCES})
+add_executable(ImaginationEditor ${ImaginationEditor_HEADERS} ${ImaginationEditor_SOURCES} "src/Panels/ExternalAppPanel.h" "src/Panels/ExternalAppPanel.cpp" "src/Panels/EditorWorkspace.h" "src/Panels/EditorWorkspace.cpp")
 
 target_precompile_headers(ImaginationEditor PRIVATE ../Imagination/src/pch.hpp)
 target_include_directories(ImaginationEditor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Imagination/src)

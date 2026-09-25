@@ -404,6 +404,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorCamera.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorLayer.hpp" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\EditorWorkspace.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\ExternalAppPanel.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\SceneHierarchy.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Utils\EditorUtils.h" />
     <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorCamera.cpp">
@@ -413,6 +415,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorLayer.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\EditorWorkspace.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\ExternalAppPanel.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

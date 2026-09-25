@@ -246,6 +246,8 @@ file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/main.cpp"
   )
@@ -274,6 +276,8 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.h")
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.h"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h"
   )
