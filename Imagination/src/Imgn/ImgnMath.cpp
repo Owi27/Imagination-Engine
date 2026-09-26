@@ -61,6 +61,24 @@ namespace Imgn
 		};
 	}
 
+	float Math::Determinant(mat4 pMat)
+	{
+		float a0 = pMat[0] * pMat[5] - pMat[1] * pMat[4];
+		float a1 = pMat[0] * pMat[6] - pMat[2] * pMat[4];
+		float a2 = pMat[0] * pMat[7] - pMat[3] * pMat[4];
+		float a3 = pMat[1] * pMat[6] - pMat[2] * pMat[5];
+		float a4 = pMat[1] * pMat[7] - pMat[3] * pMat[5];
+		float a5 = pMat[2] * pMat[7] - pMat[3] * pMat[6];
+		float b0 = pMat[8] * pMat[13] - pMat[9] * pMat[12];
+		float b1 = pMat[8] * pMat[14] - pMat[10] * pMat[12];
+		float b2 = pMat[8] * pMat[15] - pMat[11] * pMat[12];
+		float b3 = pMat[9] * pMat[14] - pMat[10] * pMat[13];
+		float b4 = pMat[9] * pMat[15] - pMat[11] * pMat[13];
+		float b5 = pMat[10] * pMat[15] - pMat[11] * pMat[14];
+
+		return a0 * b5 - a1 * b4 + a2 * b3 + a3 * b2 - a4 * b1 + a5 * b0;
+	}
+
 	mat4 Math::LookAtLH(vec3 pEye, vec3 pAt, vec3 pUp)
 	{
 		vec3 forward = Normalize(pAt - pEye), right = Normalize(pUp * forward), up = forward * right;
@@ -161,7 +179,7 @@ namespace Imgn
 			out = pMat * scale;
 
 			for (size_t i = 0; i < 4; i++) out[i + 12] = translation[i];
-			
+
 			return out;
 		}
 
@@ -181,6 +199,77 @@ namespace Imgn
 			0.f, 0.f, z, 1.f,
 			0.f, 0.f, -pFar * z, 0.f,
 		};
+	}
+
+	void Math::Decompose(mat4 pMat, vec4& pTranslation, vec4& pRotation, vec4& pScale)
+	{
+		//translate
+		pTranslation = { pMat[12], pMat[13], pMat[14], 0 };
+
+		//rotation
+		float det = Determinant(pMat);
+		float sx = sqrt(pMat[0] * pMat[0] + pMat[4] * pMat[4] + pMat[8] * pMat[8]);
+		float sy = sqrt(pMat[1] * pMat[1] + pMat[5] * pMat[5] + pMat[9] * pMat[9]);
+		float sz = sqrt(pMat[2] * pMat[2] + pMat[6] * pMat[6] + pMat[10] * pMat[10]);
+
+		if (WithinStandardDeviation(det, 0.f)) return;
+		if (det < 0) sx = -sx;
+
+		mat4 rotation = pMat;
+		rotation[0] /= sx;
+		rotation[4] /= sx;
+		rotation[8] /= sx;
+		rotation[1] /= sy;
+		rotation[5] /= sy;
+		rotation[9] /= sy;
+		rotation[2] /= sz;
+		rotation[6] /= sz;
+		rotation[10] /= sz;
+
+		float trace = rotation[0] + rotation[5] + rotation[10] + 1;
+
+		if (trace > G_EPSILON_F)
+		{
+			float s = 0.5f / sqrt(trace);
+			pRotation[0] = (rotation[9] - rotation[6]) * s;
+			pRotation[1] = (rotation[2] - rotation[8]) * s;
+			pRotation[2] = (rotation[4] - rotation[1]) * s;
+			pRotation[3] = 0.25f / s;
+		}
+		else
+		{
+			if (rotation[0] > rotation[5] && rotation[0] > rotation[10])
+			{
+				float s = 0.5f / sqrt(1.0f + rotation[0] - rotation[5] - rotation[10]);
+				pRotation[0] = 0.25f / s;
+				pRotation[1] = (rotation[1] + rotation[4]) * s;
+				pRotation[2] = (rotation[3] + rotation[8]) * s;
+				pRotation[3] = (rotation[9] - rotation[6]) * s;
+			}
+			else if (rotation[5] > rotation[10])
+			{
+				float s = 0.5f / sqrt(1.0f + rotation[5] - rotation[0] - rotation[10]);
+				pRotation[0] = (rotation[1] + rotation[4]) * s;
+				pRotation[1] = 0.25f / s;
+				pRotation[2] = (rotation[6] + rotation[9]) * s;
+				pRotation[3] = (rotation[2] - rotation[8]) * s;
+			}
+			else
+			{
+				float s = 0.5f / sqrt(1.0f + rotation[10] - rotation[0] - rotation[5]);
+				pRotation[0] = (rotation[2] + rotation[8]) * s;
+				pRotation[1] = (rotation[6] + rotation[9]) * s;
+				pRotation[2] = 0.25f / s;
+				pRotation[3] = (rotation[4] - rotation[1]) * s;
+			}
+		}
+
+		//scale
+		pScale[0] = sqrt(pMat[0] * pMat[0] + pMat[4] * pMat[4] + pMat[8] * pMat[8]);
+		pScale[1] = sqrt(pMat[1] * pMat[1] + pMat[5] * pMat[5] + pMat[9] * pMat[9]);
+		pScale[2] = sqrt(pMat[2] * pMat[2] + pMat[6] * pMat[6] + pMat[10] * pMat[10]);
+		pScale[3] = 0;
+		pScale[0] = -pScale[0];
 	}
 
 	mat4 Math::Orthographic(float pRight, float pLeft, float pTop, float pBottom, float pNear, float pFar)

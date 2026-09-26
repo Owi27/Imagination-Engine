@@ -581,7 +581,11 @@ namespace Imgn
 				ImGuizmo::Manipulate(view.data(), projection.data(), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, transform.data());
 
 				if (ImGuizmo::IsUsing())
-tc->position = { transform[12], transform[13], transform[14] };
+				{
+					vec4 translation, rotation, scale;
+					Math::Decompose(transform, translation, rotation, scale);
+				}
+					tc->position = { transform[12], transform[13], transform[14] };
 			}
 		}
 		else

@@ -7,6 +7,7 @@ namespace Imgn
 	public:
 		Math() = delete;
 
+		static constexpr float standardDeviation = std::numeric_limits<float>::epsilon() * 10.f;
 		/// <summary>
 		/// identity matrix
 		/// </summary>
@@ -18,8 +19,14 @@ namespace Imgn
 			0.f, 0.f, 0.f, 1.f,
 		};
 
+		static bool AbsoluteComparison(float pX, float pY, float pMargin) { return std::abs(pX - pY) <= pMargin; }
+		static bool RelativeComparison(float pX, float pY, float pMargin) { return std::abs(pX - pY) <= pMargin * ABSLarger(pX, pY); }
+		static bool HybridComparison(float pX, float pY, float pAbsoluteMargin, float pRelativeMargin) { return AbsoluteComparison(pX, pY, pAbsoluteMargin) || RelativeComparison(pX, pY, pRelativeMargin); }
+		static bool WithinStandardDeviation(float pX, float pY) { return HybridComparison(pX, pY, standardDeviation, standardDeviation); }
+
 		static float Radians(float pDegrees) { return pDegrees * .01745329251f; }
 		static float Degrees(float pRadians) { return pRadians * 57.2957795131f; }
+		static float ABSLarger(float pX, float pY) { return std::abs(pX) > std::abs(pY) ? std::abs(pX) : std::abs(pY); }
 		/* VEC2*/
 		/* VEC3*/
 		
@@ -38,11 +45,13 @@ namespace Imgn
 		/* MAT4 */
 		static mat4 Inverse(mat4 pMat);
 		static mat4 Transpose(mat4 pMat);
+		static float Determinant(mat4 pMat);
 		static mat4 LookAtLH(vec3 pEye, vec3 pAt, vec3 pUp);
 		static mat4 Rotate(mat4 pMat, vec3 pAxis, float pRadian, bool pGlobal = false);
 		static mat4 Scale(mat4 pMat, vec3 pScale, bool pGlobal = false);
 		static mat4 Translate(mat4 pMat, vec3 pVec, bool pGlobal = false);
 		static mat4 PerspectiveVKLH(float pFOV, float pAspect, float pNear, float pFar);
+		static void Decompose(mat4 pMat, vec4& pTranslation, vec4& pRotation, vec4& pScale);
 		static mat4 Orthographic(float pRight, float pLeft, float pTop, float pBottom, float pNear = -1.f, float pFar = 1.f);
 	};
 
