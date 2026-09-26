@@ -2,6 +2,7 @@
 #include "ExternalAppPanel.h"
 
 #include <ImGui/imgui.h>
+#include <ImGui/imgui_internal.h>
 
 namespace Imgn
 {
@@ -16,76 +17,78 @@ namespace Imgn
 
 	LRESULT CALLBACK HostWindowProc(HWND pWindow, UINT pMessage, WPARAM pWParam, LPARAM pLParam)
 	{
+		constexpr UINT WM_FOCUS_EXTERNAL_APP = WM_APP + 1;
+
+		if (pMessage == WM_NCCREATE)
+		{
+			const auto* create = reinterpret_cast<const CREATESTRUCTW*>(pLParam);
+
+			SetWindowLongPtrW(pWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
+			return TRUE;
+		}
+
+		auto* panel = reinterpret_cast<ExternalAppPanel*>(GetWindowLongPtrW(pWindow, GWLP_USERDATA));
+
 		switch (pMessage)
 		{
+		case WM_MOUSEACTIVATE:
+			//defer focus until Windows finishes activation.
+			PostMessageW(pWindow, WM_FOCUS_EXTERNAL_APP, 0, 0);
+			return MA_ACTIVATE; //also deliver the original click.
+		case WM_PARENTNOTIFY:
+			switch (LOWORD(pWParam))
+			{
+			case WM_LBUTTONDOWN:
+			case WM_RBUTTONDOWN:
+			case WM_MBUTTONDOWN:
+			case WM_XBUTTONDOWN:
+				PostMessageW(pWindow, WM_FOCUS_EXTERNAL_APP, 0, 0);
+				break;
+			}
+			break;
+		case WM_SETFOCUS:
+			PostMessageW(pWindow, WM_FOCUS_EXTERNAL_APP, 0, 0);
+			return 0;
+		case WM_FOCUS_EXTERNAL_APP:
+			if (panel) panel->FocusApp();
+			return 0;
 		case WM_ERASEBKGND:
-			// Blender is responsible for drawing this area.
-			// Don't let Windows erase the host behind it.
 			return 1;
-
-		default:
-			return DefWindowProcW(
-				pWindow,
-				pMessage,
-				pWParam,
-				pLParam
-			);
+		case WM_NCDESTROY:
+			SetWindowLongPtrW(pWindow, GWLP_USERDATA, 0);
+			break;
 		}
+
+		return DefWindowProcW(pWindow, pMessage, pWParam, pLParam);
 	}
 	BOOL CALLBACK FindProcessWindowCallback(HWND pWindow, LPARAM pParameter)
 	{
-		auto* pData =
-			reinterpret_cast<WindowSearchData*>(
-				pParameter
-				);
-
+		auto* pData = reinterpret_cast<WindowSearchData*>(pParameter);
 		DWORD processID = 0;
 
-		GetWindowThreadProcessId(
-			pWindow,
-			&processID
-		);
+		GetWindowThreadProcessId(pWindow, &processID);
 
-		if (processID != pData->processID)
-			return TRUE;
+		if (processID != pData->processID) return TRUE;
 
-		// We only care about visible application windows.
-		if (!IsWindowVisible(pWindow))
-			return TRUE;
+		//only care about visible application windows.
+		if (!IsWindowVisible(pWindow)) return TRUE;
 
-		// Ignore owned popup/helper windows.
-		if (GetWindow(pWindow, GW_OWNER) != nullptr)
-			return TRUE;
+		//ignore owned popup/helper windows.
+		if (GetWindow(pWindow, GW_OWNER) != nullptr) return TRUE;
 
 		RECT rect{};
 
-		if (!GetWindowRect(
-			pWindow,
-			&rect
-		))
-		{
-			return TRUE;
-		}
+		if (!GetWindowRect(pWindow, &rect)) return TRUE;
 
-		const uint32_t width =
-			static_cast<uint32_t>(
-				rect.right - rect.left
-				);
+		const uint32_t width = static_cast<uint32_t>(rect.right - rect.left);
+		const uint32_t height = static_cast<uint32_t>(rect.bottom - rect.top);
 
-		const uint32_t height =
-			static_cast<uint32_t>(
-				rect.bottom - rect.top
-				);
+		if (width == 0 || height == 0) return TRUE;
 
-		if (width == 0 || height == 0)
-			return TRUE;
+		const uint64_t area = static_cast<uint64_t>(width) * static_cast<uint64_t>(height);
 
-		const uint64_t area =
-			static_cast<uint64_t>(width) *
-			static_cast<uint64_t>(height);
-
-		// Blender can create more than one HWND during startup.
-		// Keep the largest actual application window.
+		//external can create more than one HWND during startup.
+		//keep the largest actual application window.
 		if (area > pData->largestArea)
 		{
 			pData->largestArea = area;
@@ -97,327 +100,145 @@ namespace Imgn
 
 	void ExternalAppPanel::FocusApp()
 	{
-		if (!_appWindow || !IsWindow(_appWindow))
-			return;
+		if (!_appAttached || !IsWindow(_appWindow) || !IsWindowVisible(_hostWindow) || !IsWindowEnabled(_appWindow)) return;
 
-		DWORD appThreadId =
-			GetWindowThreadProcessId(
-				_appWindow,
-				nullptr
-			);
+		//ignore delayed requests after the user switches elsewhere.
+		if (GetForegroundWindow() != _hostWindow) return;
 
-		DWORD editorThreadId =
-			GetWindowThreadProcessId(
-				_editorWindow,
-				nullptr
-			);
+		const DWORD appThread = GetWindowThreadProcessId(_appWindow, nullptr);
+		const DWORD ourThread = GetCurrentThreadId();
 
-		if (appThreadId == 0 ||
-			editorThreadId == 0)
+		if (appThread == 0) return;
+
+		//preserve focus if external already has it.
+		GUITHREADINFO info
 		{
+			.cbSize = sizeof(info)
+		};
+
+		if (GetGUIThreadInfo(appThread, &info) && (info.hwndFocus == _appWindow || IsChild(_appWindow, info.hwndFocus))) return;
+
+		const bool needAttach = appThread != ourThread;
+
+		if (needAttach && !AttachThreadInput(ourThread, appThread, TRUE))
+		{
+			IMGN_ERROR("AttachThreadInput failed: {}", GetLastError());
 			return;
 		}
 
-		// Blender and Imagination have different input queues.
-		//
-		// Temporarily attach them so Windows allows us to transfer
-		// keyboard focus to Blender.
-		const bool attached =
-			AttachThreadInput(
-				editorThreadId,
-				appThreadId,
-				TRUE
-			);
+		SetFocus(_appWindow);
 
-		// Our popup host needs to belong to the active application.
-		SetForegroundWindow(
-			_hostWindow
-		);
+		const HWND focused = GetFocus();
+		const bool success = focused == _appWindow || IsChild(_appWindow, focused);
 
-		// Give actual keyboard focus to Blender, not just the host.
-		SetFocus(
-			_appWindow
-		);
-
-		if (attached)
-		{
-			AttachThreadInput(
-				editorThreadId,
-				appThreadId,
-				FALSE
-			);
-		}
+		if (needAttach) if (!AttachThreadInput(ourThread, appThread, FALSE)) IMGN_ERROR("DetachThreadInput failed: {}", GetLastError());
+		if (!success) IMGN_ERROR("External App did not receive keyboard focus.");
 	}
 
 	bool ExternalAppPanel::FindAppWindow()
 	{
-		if (!_processInfo.dwProcessId)
-			return false;
+		if (!_processInfo.dwProcessId) return false;
 
 		WindowSearchData searchData
 		{
 			.processID = _processInfo.dwProcessId
 		};
 
-		EnumWindows(
-			FindProcessWindowCallback,
-			reinterpret_cast<LPARAM>(&searchData)
-		);
+		EnumWindows(FindProcessWindowCallback, reinterpret_cast<LPARAM>(&searchData));
 
-		if (!searchData.window)
-			return false;
+		if (!searchData.window) return false;
 
 		_appWindow = searchData.window;
 
-		IMGN_INFO(
-			"Found external HWND: {}",
-			reinterpret_cast<uintptr_t>(
-				_appWindow
-				)
-		);
+		IMGN_INFO("Found external HWND: {}", reinterpret_cast<uintptr_t>(_appWindow));
 
 		return true;
 	}
 	void ExternalAppPanel::AttachAppWindow()
 	{
-		if (!_appWindow ||
-			!_hostWindow)
+		if (!_appWindow || !_hostWindow) return;
+
+		IMGN_INFO("Attaching external application HWND: {}", reinterpret_cast<uintptr_t>(_appWindow));
+
+		LONG_PTR style = GetWindowLongPtrW(_appWindow, GWL_STYLE);
+		LONG_PTR exStyle = GetWindowLongPtrW(_appWindow, GWL_EXSTYLE);
+
+		//remove normal top-level window decoration.
+		style &= ~WS_POPUP;
+		style &= ~WS_CAPTION;
+		style &= ~WS_THICKFRAME;
+		style &= ~WS_MINIMIZEBOX;
+		style &= ~WS_MAXIMIZEBOX;
+		style &= ~WS_SYSMENU;
+
+		//external app now lives inside our overlay HWND.
+		style |= WS_CHILD | WS_VISIBLE;
+		exStyle &= ~(WS_EX_APPWINDOW | WS_EX_NOPARENTNOTIFY);
+
+		SetWindowLongPtrW(_appWindow, GWL_STYLE, style);
+		SetWindowLongPtrW(_appWindow, GWL_EXSTYLE, exStyle);
+		SetLastError(ERROR_SUCCESS);
+
+		HWND oldParent = SetParent(_appWindow, _hostWindow);
+		const DWORD parentError = GetLastError();
+
+		if (!oldParent && parentError != ERROR_SUCCESS)
 		{
+			IMGN_ERROR("SetParent failed: {}", parentError);
 			return;
 		}
 
-		IMGN_INFO(
-			"Attaching external application HWND: {}",
-			reinterpret_cast<uintptr_t>(
-				_appWindow
-				)
-		);
-
-		LONG_PTR style =
-			GetWindowLongPtrW(
-				_appWindow,
-				GWL_STYLE
-			);
-
-		LONG_PTR exStyle =
-			GetWindowLongPtrW(
-				_appWindow,
-				GWL_EXSTYLE
-			);
-
-		// Remove normal top-level window decoration.
-		style &=
-			~WS_POPUP;
-
-		style &=
-			~WS_CAPTION;
-
-		style &=
-			~WS_THICKFRAME;
-
-		style &=
-			~WS_MINIMIZEBOX;
-
-		style &=
-			~WS_MAXIMIZEBOX;
-
-		style &=
-			~WS_SYSMENU;
-
-		// Blender now lives inside our overlay HWND.
-		style |=
-			WS_CHILD |
-			WS_VISIBLE;
-
-		exStyle &=
-			~WS_EX_APPWINDOW;
-
-		SetWindowLongPtrW(
-			_appWindow,
-			GWL_STYLE,
-			style
-		);
-
-		SetWindowLongPtrW(
-			_appWindow,
-			GWL_EXSTYLE,
-			exStyle
-		);
-
-		SetLastError(
-			ERROR_SUCCESS
-		);
-
-		HWND oldParent =
-			SetParent(
-				_appWindow,
-				_hostWindow
-			);
-
-		const DWORD parentError =
-			GetLastError();
-
-		if (!oldParent &&
-			parentError != ERROR_SUCCESS)
-		{
-			IMGN_ERROR(
-				"SetParent failed: {}",
-				parentError
-			);
-
-			return;
-		}
-
-		SetWindowPos(
-			_appWindow,
-			nullptr,
-
-			0,
-			0,
-
-			1,
-			1,
-
-			SWP_NOZORDER |
-			SWP_NOACTIVATE |
-			SWP_FRAMECHANGED
-		);
-
-		ShowWindow(
-			_appWindow,
-			SW_SHOW
-		);
+		SetWindowPos(_appWindow, nullptr, 0, 0, 1, 1, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+		ShowWindow(_appWindow, SW_SHOW);
 
 		_appAttached = true;
 
-		// Force Update() to perform a full placement next frame.
+		//force Update() to perform a full placement next frame.
 		_lastX = -1;
 		_lastY = -1;
 		_lastWidth = 0;
 		_lastHeight = 0;
 
-		IMGN_INFO(
-			"External application attached. "
-			"Parent: {} Host: {}",
-
-			reinterpret_cast<uintptr_t>(
-				GetParent(_appWindow)
-				),
-
-			reinterpret_cast<uintptr_t>(
-				_hostWindow
-				)
-		);
+		IMGN_INFO( "External application attached. Parent: {} Host: {}", reinterpret_cast<uintptr_t>(GetParent(_appWindow)), reinterpret_cast<uintptr_t>(_hostWindow));
 	}
 	bool ExternalAppPanel::Initialize(HWND pEditorWindow)
 	{
-		if (!pEditorWindow)
-			return false;
+		if (!pEditorWindow) return false;
 
 		_editorWindow = pEditorWindow;
 
-		HINSTANCE instance =
-			reinterpret_cast<HINSTANCE>(
-				GetWindowLongPtrW(
-					_editorWindow,
-					GWLP_HINSTANCE
-				)
-				);
+		HINSTANCE instance = reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(_editorWindow, GWLP_HINSTANCE));
 
 		WNDCLASSEXW windowClass
 		{
 			.cbSize = sizeof(WNDCLASSEXW),
-
-			.style =
-				CS_HREDRAW |
-				CS_VREDRAW,
-
-			.lpfnWndProc =
-				HostWindowProc,
-
-			.hInstance =
-				instance,
-
-			.hCursor =
-				LoadCursor(
-					nullptr,
-					IDC_ARROW
-				),
-
-			.lpszClassName =
-				HOST_WINDOW_CLASS
+			.style = CS_HREDRAW | CS_VREDRAW,
+			.lpfnWndProc = HostWindowProc,
+			.hInstance = instance,
+			.hCursor = LoadCursor(nullptr, IDC_ARROW),
+			.lpszClassName = HOST_WINDOW_CLASS
 		};
 
-		if (!RegisterClassExW(
-			&windowClass
-		))
+		if (!RegisterClassExW(&windowClass))
 		{
-			const DWORD error =
-				GetLastError();
+			const DWORD error = GetLastError();
 
-			if (error !=
-				ERROR_CLASS_ALREADY_EXISTS)
-			{
-				return false;
-			}
+			if (error != ERROR_CLASS_ALREADY_EXISTS) return false;
 		}
 
-		// IMPORTANT:
-		//
-		// This is NOT a WS_CHILD anymore.
-		//
-		// It is an owned, borderless popup window.
-		//
-		// Because it has its own HWND/redirection surface,
-		// the Vulkan swapchain belonging to _editorWindow
-		// cannot overwrite it.
-		_hostWindow =
-			CreateWindowExW(
-				WS_EX_TOOLWINDOW,
+		_hostWindow = CreateWindowExW(WS_EX_TOOLWINDOW, HOST_WINDOW_CLASS, L"", WS_POPUP | WS_CLIPCHILDREN, 0, 0, 1, 1, _editorWindow, nullptr, instance, nullptr);
 
-				HOST_WINDOW_CLASS,
-
-				L"",
-
-				WS_POPUP |
-				WS_CLIPCHILDREN,
-
-				0,
-				0,
-				1,
-				1,
-
-				// For a WS_POPUP this establishes the owner,
-				// NOT a child-parent relationship.
-				_editorWindow,
-
-				nullptr,
-
-				instance,
-
-				nullptr
-			);
-
-		if (!_hostWindow)
-			return false;
+		if (!_hostWindow) return false;
 
 		return true;
+
 	}
 	bool ExternalAppPanel::Launch(const std::filesystem::path& pExe, const std::wstring pArguments)
 	{
-		if (!_hostWindow)
-			return false;
+		if (!_hostWindow || !std::filesystem::exists(pExe)) return false;
+		if (IsRunning()) return true;
 
-		if (!std::filesystem::exists(pExe))
-			return false;
-
-		if (IsRunning())
-			return true;
-
-		std::wstring commandLine =
-			L"\"" +
-			pExe.wstring() +
-			L"\"";
+		std::wstring commandLine = L"\"" + pExe.wstring() + L"\"";
 
 		if (!pArguments.empty())
 		{
@@ -425,195 +246,74 @@ namespace Imgn
 			commandLine += pArguments;
 		}
 
-		std::vector<wchar_t> commandBuffer(
-			commandLine.begin(),
-			commandLine.end()
-		);
+		std::vector<wchar_t> commandBuffer(commandLine.begin(), commandLine.end());
+		commandBuffer.push_back(L'\0');
 
-		commandBuffer.push_back(
-			L'\0'
-		);
+		STARTUPINFOW startupInfo
+		{
+			.cb = sizeof(STARTUPINFOW)
+		};
 
-		STARTUPINFOW startupInfo{};
-		startupInfo.cb =
-			sizeof(STARTUPINFOW);
+		ZeroMemory(&_processInfo, sizeof(PROCESS_INFORMATION));
 
-		ZeroMemory(
-			&_processInfo,
-			sizeof(PROCESS_INFORMATION)
-		);
-
-		const BOOL success =
-			CreateProcessW(
-				pExe.c_str(),
-
-				commandBuffer.data(),
-
-				nullptr,
-				nullptr,
-
-				FALSE,
-
-				CREATE_NEW_PROCESS_GROUP,
-
-				nullptr,
-
-				pExe.parent_path().c_str(),
-
-				&startupInfo,
-
-				&_processInfo
-			);
+		const BOOL success = CreateProcessW(pExe.c_str(), commandBuffer.data(), nullptr, nullptr, FALSE, CREATE_NEW_PROCESS_GROUP, nullptr, pExe.parent_path().c_str(), &startupInfo, &_processInfo);
 
 		if (!success)
 		{
-			IMGN_ERROR(
-				"CreateProcessW failed: {}",
-				GetLastError()
-			);
-
+			IMGN_ERROR("CreateProcessW failed: {}", GetLastError());
 			return false;
 		}
 
-		WaitForInputIdle(
-			_processInfo.hProcess,
-			5000
-		);
+		WaitForInputIdle(_processInfo.hProcess, 5000);
 
 		return true;
 	}
 	void ExternalAppPanel::Update(int pScreenX, int pScreenY, uint32_t pWidth, uint32_t pHeight, bool pVisible)
 	{
-		if (!_hostWindow)
-			return;
-
-		// Blender may take a moment to create its main HWND.
-		if (!_appAttached && IsRunning())
+		if (!_hostWindow || !IsWindow(_hostWindow)) return;
+		if (_appAttached && !IsWindow(_appWindow))
 		{
-			if (FindAppWindow())
-				AttachAppWindow();
+			_appAttached = false;
+			_appWindow = nullptr;
 		}
 
-		// --------------------------------------------------------
-		// DETERMINE WHETHER THIS PANEL SHOULD BE SHOWN
-		// --------------------------------------------------------
+		if (!_appAttached && IsRunning() && FindAppWindow()) AttachAppWindow();
 
-		const bool editorVisible =
-			IsWindowVisible(_editorWindow);
+		const bool show = pVisible && pWidth > 0 && pHeight > 0 && _appAttached && IsWindow(_appWindow) && IsWindowVisible(_editorWindow) && !IsIconic(_editorWindow);
 
-		const bool editorMinimized =
-			IsIconic(_editorWindow);
-
-		const bool shouldShow =
-			pVisible &&
-			pWidth > 0 &&
-			pHeight > 0 &&
-			editorVisible &&
-			!editorMinimized;
-
-		if (!shouldShow)
+		if (!show)
 		{
-			if (IsWindowVisible(_hostWindow))
-				ShowWindow(_hostWindow, SW_HIDE);
-
+			if (IsWindowVisible(_hostWindow)) ShowWindow(_hostWindow, SW_HIDE);
 			return;
 		}
 
-		// This is a WS_POPUP now.
-		//
-		// ImGui::GetCursorScreenPos() already gave us SCREEN coordinates,
-		// so DO NOT ScreenToClient() these.
-		const int x = pScreenX;
-		const int y = pScreenY;
+		const bool changed = pScreenX != _lastX || pScreenY != _lastY || pWidth != _lastWidth || pHeight != _lastHeight;
+		const bool hidden = !IsWindowVisible(_hostWindow);
 
-		const bool rectChanged =
-			x != _lastX ||
-			y != _lastY ||
-			pWidth != _lastWidth ||
-			pHeight != _lastHeight;
-
-		// --------------------------------------------------------
-		// ONLY MOVE/RESIZE WHEN THE IMGUI RECT ACTUALLY CHANGED
-		// --------------------------------------------------------
-
-		if (rectChanged)
+		if (changed) SetWindowPos(_appWindow, nullptr, 0, 0, static_cast<int>(pWidth), static_cast<int>(pHeight), SWP_NOZORDER | SWP_NOACTIVATE);
+		if (changed || hidden)
 		{
-			_lastX = x;
-			_lastY = y;
-			_lastWidth = pWidth;
-			_lastHeight = pHeight;
+			const UINT flags = SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_SHOWWINDOW;
 
-			SetWindowPos(
-				_hostWindow,
-				HWND_TOP,
-				x,
-				y,
-				static_cast<int>(pWidth),
-				static_cast<int>(pHeight),
-				SWP_NOACTIVATE |
-				SWP_SHOWWINDOW
-			);
-
-			if (_appAttached &&
-				_appWindow &&
-				IsWindow(_appWindow))
+			if (SetWindowPos(_hostWindow, nullptr, pScreenX, pScreenY, static_cast<int>(pWidth), static_cast<int>(pHeight), flags))
 			{
-				SetWindowPos(
-					_appWindow,
-					nullptr,
-					0,
-					0,
-					static_cast<int>(pWidth),
-					static_cast<int>(pHeight),
-					SWP_NOZORDER |
-					SWP_NOACTIVATE |
-					SWP_SHOWWINDOW
-				);
+				_lastX = pScreenX;
+				_lastY = pScreenY;
+				_lastWidth = pWidth;
+				_lastHeight = pHeight;
 			}
-		}
-		else
-		{
-			// IMPORTANT:
-			//
-			// Don't resize anything.
-			//
-			// But reassert that our popup belongs on top of its owner.
-			// Switching back from SceneView can change the native
-			// activation/Z-order even though the rectangle didn't change.
-			SetWindowPos(
-				_hostWindow,
-				HWND_TOP,
-				0,
-				0,
-				0,
-				0,
-				SWP_NOMOVE |
-				SWP_NOSIZE |
-				SWP_NOACTIVATE |
-				SWP_SHOWWINDOW
-			);
 		}
 	}
 	void ExternalAppPanel::Shutdown()
 	{
 		if (_hostWindow)
 		{
-			ShowWindow(
-				_hostWindow,
-				SW_HIDE
-			);
-
+			ShowWindow(_hostWindow, SW_HIDE);
 		}
 
-		if (_appWindow &&
-			IsWindow(_appWindow))
+		if (_appWindow && IsWindow(_appWindow))
 		{
-			PostMessageW(
-				_appWindow,
-				WM_CLOSE,
-				0,
-				0
-			);
+			PostMessageW(_appWindow, WM_CLOSE, 0, 0);
 		}
 
 		_appWindow = nullptr;
@@ -621,31 +321,23 @@ namespace Imgn
 
 		if (_hostWindow)
 		{
-			DestroyWindow(
-				_hostWindow
-			);
+			DestroyWindow(_hostWindow);
 
 			_hostWindow = nullptr;
 		}
 
 		if (_processInfo.hThread)
 		{
-			CloseHandle(
-				_processInfo.hThread
-			);
+			CloseHandle(_processInfo.hThread);
 
-			_processInfo.hThread =
-				nullptr;
+			_processInfo.hThread = nullptr;
 		}
 
 		if (_processInfo.hProcess)
 		{
-			CloseHandle(
-				_processInfo.hProcess
-			);
+			CloseHandle(_processInfo.hProcess);
 
-			_processInfo.hProcess =
-				nullptr;
+			_processInfo.hProcess = nullptr;
 		}
 
 		_processInfo.dwProcessId = 0;
@@ -670,102 +362,73 @@ namespace Imgn
 	}
 	bool AppPanel::Initialize(HWND pEditorWindow, const std::filesystem::path& pExe)
 	{
-		if (!_app.Initialize(
-			pEditorWindow
-		))
-		{
-			return false;
-		}
+		if (!_app.Initialize(pEditorWindow)) return false;
 
-		return _app.Launch(
-			pExe
-		);
+		return _app.Launch(pExe);
 	}
 	void AppPanel::Render()
 	{
 		if (!_open)
 		{
-			_app.Update(
-				0,
-				0,
-				0,
-				0,
-				false
-			);
-
+			_app.Update(0, 0, 0, 0, false);
 			return;
 		}
 
-		ImGui::PushStyleVar(
-			ImGuiStyleVar_WindowPadding,
-			ImVec2(
-				0.0f,
-				0.0f
-			)
-		);
+		// Leave space around Blender for ImGui resize interactions.
+		ImGui::SetNextWindowSize(ImVec2(960.f, 640.f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(320.f, 240.f), ImVec2(FLT_MAX, FLT_MAX));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+		const bool visible = ImGui::Begin("ExternalApp", &_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImGui::PopStyleVar();
 
-		const bool visible =
-			ImGui::Begin(
-				"ExternalApp",
+		ImGuiContext& context = *ImGui::GetCurrentContext();
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		const ImVec2 position = ImGui::GetCursorScreenPos();
+		const ImVec2 size = ImGui::GetContentRegionAvail();
 
-				&_open,
+		ImRect area(position, ImVec2(position.x + size.x, position.y + size.y));
+		area.ClipWith(window->InnerClipRect);
 
-				ImGuiWindowFlags_NoScrollbar |
-				ImGuiWindowFlags_NoScrollWithMouse
-			);
+		const ImVec2 viewportEnd(window->Viewport->Pos.x + window->Viewport->Size.x, window->Viewport->Pos.y + window->Viewport->Size.y);
 
-		if (visible)
-		{
-			const ImVec2 position =
-				ImGui::GetCursorScreenPos();
+		area.ClipWith(ImRect(window->Viewport->Pos, viewportEnd));
 
-			const ImVec2 size =
-				ImGui::GetContentRegionAvail();
+		const bool uiDragging = context.MovingWindow != nullptr || context.DragDropActive;
+		const bool popupOpen = ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
+		const bool selectedTab = !window->DockIsActive || window->DockTabIsVisible;
+		bool show = visible && _open && !window->Hidden && selectedTab && area.GetWidth() >= 1.f && area.GetHeight() >= 1.f && !uiDragging && !popupOpen;
 
-			if (size.x > 0.0f &&
-				size.y > 0.0f)
+		if (show)
+			for (ImGuiWindow* other : context.Windows)
 			{
-				_app.Update(
-					static_cast<int>(
-						position.x
-						),
+				if (!other->Active || other->Hidden || (other->IsFallbackWindow && !other->WriteAccessed) || other->RootWindowDockTree == window->RootWindowDockTree || !ImGui::IsWindowAbove(other, window) || !other->OuterRectClipped.Overlaps(area)) continue;
 
-					static_cast<int>(
-						position.y
-						),
+				// Ignore empty, noninteractive overlays such as ImGuizmo's "gizmo".
+				const bool noInputs = (other->Flags & ImGuiWindowFlags_NoInputs) == ImGuiWindowFlags_NoInputs;
+				const bool hasDrawing = std::any_of(other->DrawList->CmdBuffer.begin(), other->DrawList->CmdBuffer.end(), [](const ImDrawCmd& cmd) { return cmd.ElemCount != 0 || cmd.UserCallback != nullptr; });
 
-					static_cast<uint32_t>(
-						size.x
-						),
+				if (noInputs && !hasDrawing) continue;
 
-					static_cast<uint32_t>(
-						size.y
-						),
-
-					true
-				);
-
-				// Reserve the region inside ImGui.
-				ImGui::Dummy(
-					size
-				);
+				show = false;
+				break;
 			}
-		}
-		else
+
+		POINT topLeft = { static_cast<LONG>(std::ceil(area.Min.x)), static_cast<LONG>(std::ceil(area.Min.y)) };
+		POINT bottomRight = { static_cast<LONG>(std::floor(area.Max.x)), static_cast<LONG>(std::floor(area.Max.y)) };
+
+		// Single-viewport ImGui coordinates are relative to the editor client area.
+		if (show && !(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable))
 		{
-			// An inactive docked tab returns false from Begin().
-			_app.Update(
-				0,
-				0,
-				0,
-				0,
-				false
-			);
+			HWND editor = static_cast<HWND>(ImGui::GetMainViewport()->PlatformHandleRaw);
+			show = editor && ClientToScreen(editor, &topLeft) && ClientToScreen(editor, &bottomRight);
 		}
+
+		if (show && bottomRight.x > topLeft.x && bottomRight.y > topLeft.y) _app.Update(topLeft.x, topLeft.y, static_cast<uint32_t>(bottomRight.x - topLeft.x), static_cast<uint32_t>(bottomRight.y - topLeft.y), true);
+		else _app.Update(0, 0, 0, 0, false);
+
+		if (visible && size.x > 0.f && size.y > 0.f) ImGui::Dummy(size);
 
 		ImGui::End();
-
-		ImGui::PopStyleVar();
 	}
 	void AppPanel::Shutdown()
 	{

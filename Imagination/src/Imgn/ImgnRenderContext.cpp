@@ -62,11 +62,12 @@ namespace Imgn
 	}
 	void RenderContext::SetViewport(uint32_t pWidth, uint32_t pHeight)
 	{
-		_commandBuffer->setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(pWidth), static_cast<float>(pHeight), 0.0f, 1.0f));
+		_commandBuffer->setViewport(0, vk::Viewport{ 0.f, 0.f, static_cast<float>(pWidth), static_cast<float>(pHeight), 0.f, 1.f });
 	}
+
 	void RenderContext::SetScissor(uint32_t pWidth, uint32_t pHeight)
 	{
-		_commandBuffer->setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), { static_cast<float>(pWidth), static_cast<float>(pHeight) }));
+		_commandBuffer->setScissor(0, vk::Rect2D{ { 0, 0 }, { pWidth, pHeight } });
 	}
 	vk::DescriptorBufferInfo RenderContext::CreateDescriptorBufferInfo(uint32_t pHandle, uint64_t pSize)
 	{

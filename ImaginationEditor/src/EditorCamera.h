@@ -5,8 +5,10 @@ namespace Imgn
 {
     class EditorCamera : public ScriptableEntity
     {
-		CameraComponent* cam;// = GetComponent<CameraComponent>();
-		TransformComponent* transform;// = GetComponent<TransformComponent>();
+		CameraComponent* cam = nullptr;
+		TransformComponent* transform = nullptr;
+
+		inline static bool _inputEnabled = false;
 
 		void UpdateCamera(Time pTime);
 
@@ -29,5 +31,7 @@ namespace Imgn
 		}
 
 		mat4 GetCamView();
+
+		static void SetInputEnabled(bool pEnabled) { _inputEnabled = pEnabled; }
 	};
 }

@@ -5,17 +5,15 @@ namespace Imgn
     class ExternalAppPanel
     {
         bool _appAttached = false;
+        int _lastX = -1, _lastY = -1;
         PROCESS_INFORMATION _processInfo = {};
+        uint32_t _lastWidth = 0, _lastHeight = 0;
         HWND _editorWindow = nullptr, _hostWindow = nullptr, _appWindow = nullptr;
-
-        int _lastX = -1;
-        int _lastY = -1;
-        uint32_t _lastWidth = 0;
-        uint32_t _lastHeight = 0;
 
         void FocusApp();
         bool FindAppWindow();
         void AttachAppWindow();
+        friend LRESULT CALLBACK HostWindowProc(HWND, UINT, WPARAM, LPARAM);
 
     public:
         ExternalAppPanel() /*Constructor*/
@@ -24,15 +22,7 @@ namespace Imgn
 
         ~ExternalAppPanel() /*Destructor*/
         {
-            //
-// IMPORTANT:
-//
-// I'm deliberately NOT calling TerminateProcess here.
-//
-// Force-killing Blender could cause the user to lose unsaved work.
-//
-
-            if (_appWindow && IsWindow(_appWindow)) PostMessageW(_appWindow, WM_CLOSE, 0, 0); // Ask app to close normally.
+            if (_appWindow && IsWindow(_appWindow)) PostMessageW(_appWindow, WM_CLOSE, 0, 0); //ask app to close normally.
 
             _appWindow = nullptr;
             _appAttached = false;

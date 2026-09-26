@@ -7,6 +7,38 @@
 
 #include "ImGuizmo/ImGuizmo.h"
 
+#include <CommCtrl.h>
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
+
+namespace
+{
+	constexpr UINT_PTR IMGUI_SUBCLASS_ID = 1;
+
+	LRESULT CALLBACK EditorImGuiSubclass(HWND window, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR subclassId, DWORD_PTR)
+	{
+		if (message == WM_NCDESTROY)
+		{
+			RemoveWindowSubclass(
+				window, EditorImGuiSubclass, subclassId);
+
+			return DefSubclassProc(
+				window, message, wParam, lParam);
+		}
+
+		if (ImGui::GetCurrentContext() &&
+			ImGui_ImplWin32_WndProcHandler(
+				window, message, wParam, lParam))
+		{
+			return 1;
+		}
+
+		// Preserve Gateware's existing window procedure.
+		return DefSubclassProc(
+			window, message, wParam, lParam);
+	}
+}
+
 namespace Imgn
 {
 	void ImGuiLayer::AddImGuiSpecialInputEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed)
@@ -158,9 +190,27 @@ namespace Imgn
 		//io.Fonts->AddFontFromFileTTF("../../Fonts/Raleway-Regular.ttf", 16.f);
 		io.Fonts->AddFontFromFileTTF("../../../../Fonts/consola.ttf", 12.f);
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigWindowsMoveFromTitleBarOnly = true;
 
-		ImGui_ImplWin32_Init(_window->GetWindowHandle());
-		ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
+		const HWND editor =
+			static_cast<HWND>(_window->GetWindowHandle());
+
+		if (!ImGui_ImplWin32_Init(editor))
+		{
+			ImGui::DestroyContext();
+			throw std::runtime_error(
+				"ImGui Win32 initialization failed.");
+		}
+
+		if (!SetWindowSubclass(
+			editor, EditorImGuiSubclass, IMGUI_SUBCLASS_ID, 0))
+		{
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
+
+			throw std::runtime_error(
+				"Could not install ImGui input handler.");
+		}		ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
 
 		ImGui_ImplVulkan_InitInfo initInfo = _renderer->GetImGuiInitInfo();
 
@@ -169,6 +219,11 @@ namespace Imgn
 
 	void ImGuiLayer::WakeUp()
 	{
+		RemoveWindowSubclass(
+			static_cast<HWND>(_window->GetWindowHandle()),
+			EditorImGuiSubclass,
+			IMGUI_SUBCLASS_ID);
+
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplWin32_Shutdown();
 		ImGui::DestroyContext();
@@ -216,7 +271,7 @@ namespace Imgn
 
 	void ImGuiLayer::OnEvent(Event& pEvent)
 	{
-		EventDispatcher dispatcher(pEvent);
+	/*	EventDispatcher dispatcher(pEvent);
 
 		dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& e)
 			{
@@ -272,7 +327,7 @@ namespace Imgn
 				io.MouseWheel += e.GetYOffset();
 
 				return false;
-			});
+			});*/
 
 		/*dispatcher.Dispatch<WindowResizedEvent>([&](WindowResizedEvent& e)
 			{

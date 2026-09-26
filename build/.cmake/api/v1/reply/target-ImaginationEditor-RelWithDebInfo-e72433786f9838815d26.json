@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Debug-Windows-x64/ImaginationEditor/ImaginationEditor.exe"
+			"path" : "bin/RelWithDebInfo-Windows-x64/ImaginationEditor/ImaginationEditor.exe"
 		},
 		{
-			"path" : "bin/Debug-Windows-x64/ImaginationEditor/ImaginationEditor.pdb"
+			"path" : "bin/RelWithDebInfo-Windows-x64/ImaginationEditor/ImaginationEditor.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -99,10 +99,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -169,10 +169,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -257,7 +257,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MDd -Zi",
+				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -MD -Zi",
 				"role" : "flags"
 			},
 			{
@@ -270,12 +270,17 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "..\\bin\\Debug-Windows-x64\\Imagination\\IMGN.lib",
+				"fragment" : "..\\bin\\RelWithDebInfo-Windows-x64\\Imagination\\IMGN.lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 4,
 				"fragment" : "C:\\VulkanSDK\\1.4.335.0\\Lib\\vulkan-1.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "comctl32.lib",
 				"role" : "libraries"
 			},
 			{

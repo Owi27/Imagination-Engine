@@ -1098,7 +1098,7 @@ void Vulkan::BlitToSwapchain(RGImage& pImage)
 	//vk::Offset3D blitOffsetSrc1{ (int32_t)renderWidth, (int32_t)renderHeight, 1 };
 	vk::Offset3D blitOffsetDst1{ (int32_t)_swapchainExtent.width, (int32_t)_swapchainExtent.height, 1 };
 	blit.srcOffsets[0] = blitOffset0;
-	blit.srcOffsets[1] = blitOffsetDst1;
+	blit.srcOffsets[1] = vk::Offset3D{ static_cast<int32_t>(pImage.width), static_cast<int32_t>(pImage.height), 1 };;
 	blit.dstOffsets[0] = blitOffset0;
 	blit.dstOffsets[1] = blitOffsetDst1;
 
@@ -1742,4 +1742,19 @@ void Vulkan::CopyRenderImage(RGImage& pSrc, RGImage& pDst)
 	TransitionImageLayout(cmd, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pDst.image.image, pDst.aspect);
 
 	pDst.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+}
+
+void Vulkan::ClearSwapchain()
+{
+	auto& cmd = *_commandBuffers[_frameInFlightIdx];
+	const vk::Image image = _swapchainImages[_activeImageIdx];
+
+	TransitionImageLayout(cmd, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, image);
+
+	const vk::ClearColorValue color{ std::array<float, 4>{ 0.04f, 0.04f, 0.04f, 1.f } };
+	const vk::ImageSubresourceRange range{ vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 };
+
+	cmd.clearColorImage(image, vk::ImageLayout::eTransferDstOptimal, color, range);
+
+	TransitionImageLayout(cmd, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eColorAttachmentOptimal, image);
 }

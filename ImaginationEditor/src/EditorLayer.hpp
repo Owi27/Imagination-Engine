@@ -62,6 +62,14 @@ namespace Imgn
 
 		std::default_random_engine gen = std::default_random_engine(777);
 
+		uint32_t _renderWidth = 0, _renderHeight = 0;
+		uint32_t _jitterFrameIndex = 0;
+
+		shared<Scene> _editorScene;
+
+		void ResizeSceneTargets();
+		void DrawSceneView();
+
 		mat4 GetCamView(TransformComponent* pTransform);
 
 		//uint32_t _jitterFrameIndex = 0;

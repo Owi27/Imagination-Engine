@@ -504,6 +504,24 @@ namespace Imgn
 
 	void ImgnRenderer::ResizeViewport(uint32_t pWidth, uint32_t pHeight)
 	{
+		if (pWidth == 0 || pHeight == 0) return;
+
+		// Caller handles GPU completion and old ImGui texture descriptors.
+		constexpr const char* images[] = {
+			"G-BufferAlbedo",
+			"G-BufferNormal",
+			"G-BufferMaterial",
+			"G-BufferEmissive",
+			"G-BufferVelocity",
+			"Depth",
+			"LitScene",
+			"TAAResolved",
+			"TAAHistory",
+			"G-BufferVelocityHistory"
+		};
+
+		for (const char* name : images)
+			_graph->ResizeImage(name, pWidth, pHeight);
 	}
 
 	//void ImgnRenderer::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)

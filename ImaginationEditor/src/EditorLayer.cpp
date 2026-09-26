@@ -36,20 +36,36 @@ namespace Imgn
 
 	vec2 EditorLayer::GetJitterSample()
 	{
-		constexpr int sampleCount = 8;
+		auto Halton = [](uint32_t pIndex, uint32_t pBase)
+			{
+				float result = 0.f;
+				float fraction = 1.f;
 
-		std::uniform_real_distribution<float> dist(-1.f, 1.f);
+				while (pIndex > 0)
+				{
+					fraction /= static_cast<float>(pBase);
+					result += fraction * static_cast<float>(pIndex % pBase);
+					pIndex /= pBase;
+				}
 
-		return { dist(gen), dist(gen) };
+				return result;
+			};
+
+		const uint32_t sample = (_jitterFrameIndex++ % 8) + 1;
+		return { Halton(sample, 2) - 0.5f, Halton(sample, 3) - 0.5f };
 	}
 	vec2 EditorLayer::GetProjectionJitter(uint32_t pWidth, uint32_t pHeight)
 	{
-		vec2 pixelJitter = GetJitterSample();
-
-		return { pixelJitter[0] / static_cast<float>(2 * pWidth), pixelJitter[1] / static_cast<float>(2 * pHeight) };
+		const vec2 sample = GetJitterSample();
+		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
 	void EditorLayer::Sleep()
 	{
+		const vk::Extent2D extent = _renderer->GetSwapchainExtent();
+
+		_renderWidth = _sceneWidth = std::max(1u, extent.width);
+		_renderHeight = _sceneHeight = std::max(1u, extent.height);
+
 		GLTFLoader& loader = GLTFLoader::Get();
 		ImgnModel sponza = loader.LoadModel("../../../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
 		ImgnModel testGlb = loader.LoadModel("../../../../Models/Vroid/Test.gltf", *_renderer);
@@ -59,12 +75,12 @@ namespace Imgn
 			.name = "G-BufferPass",
 			.imageOUT =
 			{
-				_renderer->CreateRGImageDesc("G-BufferAlbedo", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Srgb),
-				_renderer->CreateRGImageDesc("G-BufferNormal", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Unorm),
-				_renderer->CreateRGImageDesc("G-BufferMaterial", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Unorm),
-				_renderer->CreateRGImageDesc("G-BufferEmissive", _window->GetWidth(), _window->GetHeight(), vk::Format::eR8G8B8A8Srgb),
-				_renderer->CreateRGImageDesc("G-BufferVelocity", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16Sfloat),
-				_renderer->CreateRGImageDesc("Depth", _window->GetWidth(), _window->GetHeight(), vk::Format::eD32Sfloat)
+				_renderer->CreateRGImageDesc("G-BufferAlbedo", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Srgb),
+				_renderer->CreateRGImageDesc("G-BufferNormal", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Unorm),
+				_renderer->CreateRGImageDesc("G-BufferMaterial", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Unorm),
+				_renderer->CreateRGImageDesc("G-BufferEmissive", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Srgb),
+				_renderer->CreateRGImageDesc("G-BufferVelocity", _renderWidth, _renderHeight, vk::Format::eR16G16Sfloat),
+				_renderer->CreateRGImageDesc("Depth", _renderWidth, _renderHeight, vk::Format::eD32Sfloat)
 			},
 			.Execute = [&, sponza](Imgn::RenderContext& ctx)
 			{
@@ -79,11 +95,11 @@ namespace Imgn
 
 				vk::RenderingAttachmentInfo depthAttachment = ctx.CreateRenderingAttachmentInfo("Depth");
 
-				ctx.BeginRendering(_window->GetWidth(), _window->GetHeight(), colorAttachments, &depthAttachment);
+				ctx.BeginRendering(_renderWidth, _renderHeight, colorAttachments, &depthAttachment);
 				ctx.BindPipeline(vk::PipelineBindPoint::eGraphics, *_renderer->GetPipelines().gBufferPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
-				ctx.SetViewport(_window->GetWidth(), _window->GetHeight());
-				ctx.SetScissor(_window->GetWidth(), _window->GetHeight());
+				ctx.SetViewport(_renderWidth, _renderHeight);
+				ctx.SetScissor(_renderWidth, _renderHeight);
 
 				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], sizeof(GBufferUBO));
 				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
@@ -186,37 +202,10 @@ namespace Imgn
 			},
 			.imageOUT =
 			{
-				_renderer->CreateRGImageDesc("LitScene", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat)
+				_renderer->CreateRGImageDesc("LitScene", _renderWidth, _renderHeight, vk::Format::eR16G16B16A16Sfloat)
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
-				/*vk::RenderingAttachmentInfo colorAttachment
-				{
-					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("LitScene", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-					.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-					.loadOp = vk::AttachmentLoadOp::eClear,
-					.storeOp = vk::AttachmentStoreOp::eStore,
-					.clearValue = vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} },
-				};
-
-				vk::RenderingAttachmentInfo depthAttachment
-				{
-					.imageView = *Renderer().GetRenderGraphImage(Renderer().MakeImageKey("Depth", GetWindow().GetWidth(), GetWindow().GetHeight())).image.view,
-					.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-					.loadOp = vk::AttachmentLoadOp::eClear,
-					.storeOp = vk::AttachmentStoreOp::eStore,
-					.clearValue = vk::ClearDepthStencilValue{ 1.0f, 0 },
-				};
-
-				vk::RenderingInfo renderingInfo
-				{
-					.renderArea = { {0, 0}, { GetWindow().GetWidth(), GetWindow().GetHeight() } },
-					.layerCount = 1,
-					.colorAttachmentCount = 1,
-					.pColorAttachments = &colorAttachment,
-					.pDepthAttachment = &depthAttachment,
-				}; */
-
 				ctx.BindPipeline(vk::PipelineBindPoint::eCompute, *_renderer->GetPipelines().lightingPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
 
@@ -224,8 +213,8 @@ namespace Imgn
 				{
 					.invViewProj = Math::Inverse(gBufferUBO.jitteredViewProj),
 					.camPos = _sceneCamera->GetComponent<TransformComponent>()->position,
-					.width = _window->GetWidth(),
-					.height = _window->GetHeight()
+					.width = _renderWidth,
+					.height = _renderHeight
 				};
 
 				ctx.PushConstants<LightingPC>(vk::ShaderStageFlagBits::eCompute, pc);
@@ -261,12 +250,12 @@ namespace Imgn
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
 				}
 
-				ctx.Dispatch((_window->GetWidth() + 7) / 8, (_window->GetHeight() + 7) / 8, 1);
+				ctx.Dispatch((_renderWidth + 7) / 8, (_renderHeight + 7) / 8, 1);
 			}
 		};
 
-		_renderer->CreateRGImageDesc("TAAHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat);
-		_renderer->CreateRGImageDesc("G-BufferVelocityHistory", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16Sfloat);
+		_renderer->CreateRGImageDesc("TAAHistory", _renderWidth, _renderHeight, vk::Format::eR16G16B16A16Sfloat);
+		_renderer->CreateRGImageDesc("G-BufferVelocityHistory", _renderWidth, _renderHeight, vk::Format::eR16G16Sfloat);
 
 		RenderPass TAA
 		{
@@ -281,7 +270,7 @@ namespace Imgn
 			},
 			.imageOUT =
 			{
-				_renderer->CreateRGImageDesc("TAAResolved", _window->GetWidth(), _window->GetHeight(), vk::Format::eR16G16B16A16Sfloat)
+				_renderer->CreateRGImageDesc("TAAResolved", _renderWidth, _renderHeight, vk::Format::eR16G16B16A16Sfloat)
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
@@ -328,7 +317,7 @@ namespace Imgn
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
 				}
 
-				ctx.Dispatch((_window->GetWidth() + 7) / 8, (_window->GetHeight() + 7) / 8, 1);
+				ctx.Dispatch((_renderWidth + 7) / 8, (_renderHeight + 7) / 8, 1);
 			}
 		};
 
@@ -363,10 +352,11 @@ namespace Imgn
 			_renderer->GetMesh(meshHandle).materialBufferSize = testGlb.materialBufferSize;
 		}
 
-		_sceneCamera = _activeScene->CreateEntity("SceneCamera");
+		_editorScene = Shared<Scene>();
+		_sceneCamera = _editorScene->CreateEntity("SceneCamera");
 		CameraComponent* camera = _sceneCamera->AddComponent<CameraComponent>();
 		TransformComponent* cameraTransform = _sceneCamera->GetComponent<TransformComponent>();
-		camera->camera.SetViewportSize(_window->GetWidth(), _window->GetHeight());
+		camera->camera.SetViewportSize(_renderWidth, _renderHeight);
 
 		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
 		_sceneHierarchy.SetSceneContext(_activeScene);
@@ -394,6 +384,7 @@ namespace Imgn
 
 	void EditorLayer::OnImGuiRender()
 	{
+		EditorCamera::SetInputEnabled(false);
 		ImGui::DockSpaceOverViewport();
 
 		// Show demo options and help
@@ -406,6 +397,7 @@ namespace Imgn
 					_activeScene = Shared<Scene>();
 					_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
 					_sceneHierarchy.SetSceneContext(_activeScene);
+					_taaHistoryValid = false;
 				}
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
@@ -415,6 +407,7 @@ namespace Imgn
 						_activeScene = Shared<Scene>();
 						_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
 						_sceneHierarchy.SetSceneContext(_activeScene);
+						_taaHistoryValid = false;
 
 						SceneSerializer serializer(_activeScene);
 						serializer.Deserialize(filePath);
@@ -442,77 +435,160 @@ namespace Imgn
 
 		_sceneHierarchy.OnImGuiRender();
 
-		if (!_sceneWindow)
-		{
-			_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_renderer->GetRenderGraphImage("TAAResolved").image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-		}
-
-		ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
-
-		ImGui::Begin("SceneView");
-		ImVec2 sceneViewSize = ImGui::GetContentRegionAvail();
-		_sceneWidth = static_cast<uint32_t>(sceneViewSize.x); _sceneHeight = static_cast<uint32_t>(sceneViewSize.y);
-		_sceneCamera->GetComponent<CameraComponent>()->camera.SetViewportSize(_sceneWidth, _sceneHeight);
-		ImGui::Image(ImTextureRef(textureID), sceneViewSize);
-
-		//gizmos
-		Entity* selectedEntity = _sceneHierarchy.GetSelectedEntity();
-		if (selectedEntity)
-		{
-			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, static_cast<float>(ImGui::GetWindowWidth()), static_cast<float>(ImGui::GetWindowHeight()));
-
-			Entity* cameraEntity = _activeScene->GetPrimaryCameraEntity();
-			mat4& camProj = cameraEntity->GetComponent<CameraComponent>()->camera.GetProjection();
-			mat4 camView = Math::Inverse(cameraEntity->GetComponent<TransformComponent>()->GetTransform());
-
-			TransformComponent* tc = selectedEntity->GetComponent<TransformComponent>();
-			mat4 transform = tc->GetTransform();
-
-			ImGuizmo::Manipulate(camView.data(), camProj.data(), ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, transform.data());
-
-			if (ImGuizmo::IsUsing())
-			{
-				tc->position = { transform[12], transform[13], transform[14] };
-			}
-		}
-
-		ImGui::End();
+		DrawSceneView();
 
 		blenderPanel.Render();
 	}
 
 	void EditorLayer::Dream(Time pTime)
 	{
+		ResizeSceneTargets();
+
+		_editorScene->Dream(pTime);
 		_activeScene->Dream(pTime);
-		//UpdateCamera(pTime);
 
-		constexpr float JITTER_DEBUG_SCALE = 1.f;
+		const mat4 view = GetCamView(_sceneCamera->GetComponent<TransformComponent>());
+		const mat4 projection = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
+		const vec2 jitter = GetProjectionJitter(_renderWidth, _renderHeight);
 
-		mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
-		vec2 jitter = GetProjectionJitter(_window->GetWidth(), _window->GetHeight());
-		mat4 jitterMat = Math::Translate(Math::identity, { jitter[0] * JITTER_DEBUG_SCALE, jitter[1] * JITTER_DEBUG_SCALE, 0.f });
-		//proj[8] += jitter[0] * JITTER_DEBUG_SCALE;
-		//proj[9] += jitter[1] * JITTER_DEBUG_SCALE;
-		gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
-		gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
+		mat4 jitteredProjection = projection;
+		jitteredProjection[8] += jitter[0];
+		jitteredProjection[9] += jitter[1];
+
+		gBufferUBO.viewProj = view * projection;
+		gBufferUBO.jitteredViewProj = view * jitteredProjection;
+
+		if (!_taaHistoryValid)
+			gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 
 		_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
-
-		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
-		//IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
-
 
 		_renderer->ExecuteGraph();
 		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
 		_renderer->CopyRenderImage("G-BufferVelocity", "G-BufferVelocityHistory");
 
+		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 		_taaHistoryValid = true;
-		_renderer->BlitToSwapchain("TAAResolved");
+
+		_renderer->ClearSwapchain();
+
+		//_activeScene->Dream(pTime);
+		////UpdateCamera(pTime);
+
+		//constexpr float JITTER_DEBUG_SCALE = 1.f;
+
+		//mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
+		//vec2 jitter = GetProjectionJitter(_renderWidth, _renderHeight);
+		//mat4 jitterMat = Math::Translate(Math::identity, { jitter[0] * JITTER_DEBUG_SCALE, jitter[1] * JITTER_DEBUG_SCALE, 0.f });
+		////proj[8] += jitter[0] * JITTER_DEBUG_SCALE;
+		////proj[9] += jitter[1] * JITTER_DEBUG_SCALE;
+		//gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
+		//gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
+
+		//_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
+
+		//gBufferUBO.prevViewProj = gBufferUBO.viewProj;
+		////IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
+
+
+		//_renderer->ExecuteGraph();
+		//_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
+		//_renderer->CopyRenderImage("G-BufferVelocity", "G-BufferVelocityHistory");
+
+		//_taaHistoryValid = true;
+		//_renderer->BlitToSwapchain("TAAResolved");
 	}
 
 	void EditorLayer::OnEvent(Event& pEvent)
 	{
+	}
+
+	void EditorLayer::ResizeSceneTargets()
+	{
+		if (_sceneWidth == 0 || _sceneHeight == 0) return;
+		if (_sceneWidth == _renderWidth && _sceneHeight == _renderHeight) return;
+
+		// Runs before this frame records commands using the scene images.
+		_renderer->WaitIdle();
+
+		if (_sceneWindow)
+		{
+			ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_sceneWindow));
+			_sceneWindow = nullptr;
+		}
+
+		_renderer->ResizeViewport(_sceneWidth, _sceneHeight);
+
+		_renderWidth = _sceneWidth;
+		_renderHeight = _sceneHeight;
+
+		_sceneCamera->GetComponent<CameraComponent>()->camera.SetViewportSize(_renderWidth, _renderHeight);
+
+		_taaHistoryValid = false;
+		_jitterFrameIndex = 0;
+	}
+
+	void EditorLayer::DrawSceneView()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+		const bool visible = ImGui::Begin("SceneView", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		ImGui::PopStyleVar();
+
+		const ImVec2 size = ImGui::GetContentRegionAvail();
+
+		if (visible && size.x >= 1.f && size.y >= 1.f)
+		{
+			const ImVec2 scale = ImGui::GetIO().DisplayFramebufferScale;
+
+			_sceneWidth = std::max(1u, static_cast<uint32_t>(std::round(size.x * scale.x)));
+			_sceneHeight = std::max(1u, static_cast<uint32_t>(std::round(size.y * scale.y)));
+
+			if (!_sceneWindow)
+			{
+				auto& image = _renderer->GetRenderGraphImage("TAAResolved");
+				_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **image.image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+			}
+
+			const ImTextureID textureID = static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(_sceneWindow)));
+			const ImVec2 position = ImGui::GetCursorScreenPos();
+
+			ImGui::Image(ImTextureRef(textureID), size);
+
+			if (!ImGui::IsMouseDown(ImGuiMouseButton_Right) || !ImGui::IsWindowFocused()) _cameraLookActive = false;
+
+			// Looking must start with a right-click inside the scene image.
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) _cameraLookActive = true;
+
+			EditorCamera::SetInputEnabled(_cameraLookActive);
+
+			Entity* selected = _sceneHierarchy.GetSelectedEntity();
+			TransformComponent* tc = selected ? selected->GetComponent<TransformComponent>() : nullptr;
+
+			if (tc && !_cameraLookActive)
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+				ImGuizmo::SetRect(position.x, position.y, size.x, size.y);
+
+				mat4 view = GetCamView(_sceneCamera->GetComponent<TransformComponent>());
+				mat4 projection = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
+
+				// ImGuizmo performs its own NDC-to-screen Y flip.
+				projection[5] = -projection[5];
+
+				mat4 transform = tc->GetTransform();
+
+				ImGuizmo::Manipulate(view.data(), projection.data(), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, transform.data());
+
+				if (ImGuizmo::IsUsing())
+tc->position = { transform[12], transform[13], transform[14] };
+			}
+		}
+		else
+		{
+			_cameraLookActive = false;
+		}
+
+		ImGui::End();
 	}
 }

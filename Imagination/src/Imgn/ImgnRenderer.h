@@ -116,5 +116,8 @@ namespace Imgn
 		void CopyRenderImage(std::string_view pSrc, std::string_view pDst) { _vkCtx->CopyRenderImage(_graph->GetImage(pSrc), _graph->GetImage(pDst)); }
 
 		ImGui_ImplVulkan_InitInfo GetImGuiInitInfo() { return _vkCtx->GetImGuiInitInfo(); }
+
+		void WaitIdle() { _vkCtx->WaitIdle(); }
+		void ClearSwapchain() { _vkCtx->ClearSwapchain(); }
 	};
 }

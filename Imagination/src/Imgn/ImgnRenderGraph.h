@@ -102,5 +102,7 @@ namespace Imgn
 		void Execute(vk::raii::CommandBuffer& pCommandBuffer);
 
 		void AddPass(RenderPass& pPass);
+
+		void ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight);
 	};
 }

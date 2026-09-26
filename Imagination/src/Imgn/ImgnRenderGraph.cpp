@@ -365,4 +365,25 @@ namespace Imgn
 	{
 		_passes.push_back(pPass);
 	}
+
+	void ImgnRenderGraph::ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight)
+	{
+		if (pWidth == 0 || pHeight == 0) return;
+
+		RGImage& image = _images.at(pName);
+
+		if (image.width == pWidth && image.height == pHeight) return;
+
+		RGImage replacement = _vk.CreateRenderImage(pWidth, pHeight, image.format, image.aspect);
+
+		// Caller has waited for the GPU and removed descriptors using this view.
+		image.image.view.reset();
+		image.image.image.reset();
+		image.image.memory.reset();
+
+		image = std::move(replacement);
+
+		_imageDesc.at(pName).width = pWidth;
+		_imageDesc.at(pName).height = pHeight;
+	}
 }

@@ -243,5 +243,8 @@ public:
 	ImGui_ImplVulkan_InitInfo GetImGuiInitInfo();
 
 	void CopyRenderImage(RGImage& pSrc, RGImage& pDst);
+
+	void WaitIdle() { _device->waitIdle(); }
+	void ClearSwapchain();
 	
 };

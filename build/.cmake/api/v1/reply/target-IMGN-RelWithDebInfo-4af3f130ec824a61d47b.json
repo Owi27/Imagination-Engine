@@ -2,13 +2,13 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.dll"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.dll"
 		},
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.lib"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.lib"
 		},
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.pdb"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -113,14 +113,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -190,14 +190,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -316,6 +316,10 @@
 		{
 			"backtrace" : 3,
 			"id" : "Vulkan::Vulkan::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 3,
+			"fragment" : "comctl32"
 		}
 	],
 	"link" : 
@@ -323,7 +327,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
 				"role" : "flags"
 			},
 			{
@@ -342,6 +346,11 @@
 				"role" : "libraries"
 			},
 			{
+				"backtrace" : 3,
+				"fragment" : "comctl32.lib",
+				"role" : "libraries"
+			},
+			{
 				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
 				"role" : "libraries"
 			}
@@ -353,6 +362,10 @@
 		{
 			"backtrace" : 3,
 			"id" : "Vulkan::Vulkan::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 3,
+			"fragment" : "comctl32"
 		}
 	],
 	"name" : "IMGN",
