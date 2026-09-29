@@ -14,7 +14,7 @@ constexpr uint32_t NumDescriptorsStreaming = 128;
 
 struct Pipelines
 {
-	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline, taaPipeline;
+	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline, taaPipeline, uiPipeline;
 	unique<vk::raii::PipelineLayout> pipelineLayout;
 };
 
@@ -198,6 +198,7 @@ public:
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateUniformBuffer(void* pData, uint64_t pSize);
 	Buffer CreateStorageBuffer(void* pData, uint64_t pSize);
+	Buffer CreateMappedStorageBuffer(uint64_t pSize);
 
 	RGBuffer CreateRenderBuffer(void* pData, uint64_t pSize, vk::BufferUsageFlags pUsage);
 

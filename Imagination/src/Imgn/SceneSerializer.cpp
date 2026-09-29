@@ -2,6 +2,7 @@
 #include "SceneSerializer.h"
 #include "ImgnComponent.h"
 #include "Components/ImgnComponents.h"
+#include "UI/UICanvasComponent.h"
 
 namespace Imgn
 {
@@ -104,6 +105,7 @@ namespace Imgn
 						case CameraComponent::TypeID: entity->AddComponent<CameraComponent>()->Deserialize(_stream); break;
 						case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
 						case ScriptComponent::TypeID: entity->AddComponent<ScriptComponent>()->Deserialize(_stream); break;
+						case UICanvasComponent::TypeID: entity->AddComponent<UICanvasComponent>()->Deserialize(_stream); break;
 						default: break;
 						}
 					}

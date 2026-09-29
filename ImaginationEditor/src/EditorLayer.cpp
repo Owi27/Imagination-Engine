@@ -3,6 +3,7 @@
 #include "Utils/EditorUtils.h"
 
 #include <Imgn/SceneSerializer.h>
+#include <Imgn/UI/UISystem.h>
 
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
@@ -59,6 +60,7 @@ namespace Imgn
 		const vec2 sample = GetJitterSample();
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
+
 	void EditorLayer::Sleep()
 	{
 		const vk::Extent2D extent = _renderer->GetSwapchainExtent();
@@ -102,12 +104,10 @@ namespace Imgn
 				ctx.SetScissor(_renderWidth, _renderHeight);
 
 				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], sizeof(GBufferUBO));
-				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
 
 				std::vector writes
 				{
 					ctx.CreateWriteDescriptorSet(0, vk::DescriptorType::eUniformBuffer, uboInfo),
-					//ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
 				};
 
 				ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
@@ -146,42 +146,6 @@ namespace Imgn
 							}
 						}
 					}
-
-					//for (auto& children : entity->GetChildren())
-					//{
-					//	if (!children->IsActive()) continue;
-
-					//	if (TransformComponent* transform = children->GetComponent<TransformComponent>())
-					//	{
-					//		if (MeshComponent* meshComp = children->GetComponent<MeshComponent>())
-					//		{
-					//			auto& mesh = _renderer->GetMesh(meshComp->mesh);
-					//			if (!meshComp->visible) continue;
-
-					//			ctx.BindMesh(meshComp->mesh);
-					//			vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
-
-					//			std::vector writes
-					//			{
-					//				ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
-					//			};
-
-					//			ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
-
-					//			for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
-					//			{
-					//				GBufferPC pc
-					//				{
-					//					.model = transform->GetTransform(),
-					//					.materialIndex = prim.material
-					//				};
-
-					//				ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
-					//				ctx.DrawPrimitive(prim);
-					//			}
-					//		}
-					//	}
-					//}
 				}
 
 				ctx.EndRendering();
@@ -219,16 +183,7 @@ namespace Imgn
 
 				ctx.PushConstants<LightingPC>(vk::ShaderStageFlagBits::eCompute, pc);
 
-				//push descriptor set
 				{
-					//uniform buffer
-					/*vk::DescriptorBufferInfo uboInfo
-					{
-						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-						.offset = 0,
-						.range = 192
-					};*/
-
 					std::array images =
 					{
 						ctx.CreateDescriptorImageInfo("G-BufferAlbedo"),
@@ -239,7 +194,6 @@ namespace Imgn
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
-
 
 					std::array writes
 					{
@@ -283,16 +237,7 @@ namespace Imgn
 				};
 
 				ctx.PushConstants<TAAPC>(vk::ShaderStageFlagBits::eCompute, pc);
-				//push descriptor set
 				{
-					//uniform buffer
-					/*vk::DescriptorBufferInfo uboInfo
-					{
-						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-						.offset = 0,
-						.range = 192
-					};*/
-
 					std::array images =
 					{
 						ctx.CreateDescriptorImageInfo("LitScene"),
@@ -302,8 +247,6 @@ namespace Imgn
 					};
 
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("TAAResolved", nullptr, vk::ImageLayout::eGeneral);
-
-					//sampler
 
 					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetTAASampler());
 
@@ -321,9 +264,33 @@ namespace Imgn
 			}
 		};
 
+		//in-game ui is the last graphics pass before imgui presents the scene view.
+		//it reads TAAResolved and writes UIComposite, so the hud never enters TAAHistory.
+		//tonemap already happened inside the lighting compute. there is no separate tonemap pass.
+		UISystem::Get().Resize(_renderWidth, _renderHeight);
+		UISystem::Get().Init(_renderer);
+		UISystem::Get().SetPollEngineInput(false);
+		if (UISystem::TestHUDOnStartup) UISystem::Get().CreateTestHUD();
+
+		RenderPass inGameUI
+		{
+			.name = "InGameUI",
+			.bindPoint = vk::PipelineBindPoint::eGraphics,
+			.imageIN = { "TAAResolved" },
+			.imageOUT =
+			{
+				_renderer->CreateRGImageDesc("UIComposite", _renderWidth, _renderHeight, vk::Format::eR16G16B16A16Sfloat)
+			},
+			.Execute = [this](Imgn::RenderContext& ctx)
+			{
+				UISystem::Get().ExecutePass(ctx, _renderWidth, _renderHeight);
+			}
+		};
+
 		_renderer->AddPass(gBuffer);
 		_renderer->AddPass(lighting);
 		_renderer->AddPass(TAA);
+		_renderer->AddPass(inGameUI);
 		_renderer->CompileGraph();
 
 		_activeScene = Shared<Scene>();
@@ -361,11 +328,6 @@ namespace Imgn
 		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
 		_sceneHierarchy.SetSceneContext(_activeScene);
 
-		//GBufferUBO gBufferUBO
-		//{
-		//	.viewProj = Math::Inverse(cameraTransform->GetTransform()) * camera->camera.GetProjection()
-		//};
-
 		gBufferUBO.viewProj = GetCamView(cameraTransform) * camera->camera.GetProjection();
 		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 
@@ -387,7 +349,6 @@ namespace Imgn
 		EditorCamera::SetInputEnabled(false);
 		ImGui::DockSpaceOverViewport();
 
-		// Show demo options and help
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -425,6 +386,16 @@ namespace Imgn
 				if (ImGui::MenuItem("Exit")) ImgnApp::Get().Close();
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("View"))
+			{
+				const bool hud = UISystem::Get().IsTestHUDActive();
+				if (ImGui::MenuItem("Test HUD", nullptr, hud))
+				{
+					if (hud) UISystem::Get().DestroyTestHUD();
+					else UISystem::Get().CreateTestHUD();
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
 		}
 
@@ -444,8 +415,11 @@ namespace Imgn
 	{
 		ResizeSceneTargets();
 
+		UISystem::Get().Resize(_renderWidth, _renderHeight);
+
 		_editorScene->Dream(pTime);
 		_activeScene->Dream(pTime);
+		UISystem::Get().Dream(pTime.Seconds());
 
 		const mat4 view = GetCamView(_sceneCamera->GetComponent<TransformComponent>());
 		const mat4 projection = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
@@ -471,32 +445,6 @@ namespace Imgn
 		_taaHistoryValid = true;
 
 		_renderer->ClearSwapchain();
-
-		//_activeScene->Dream(pTime);
-		////UpdateCamera(pTime);
-
-		//constexpr float JITTER_DEBUG_SCALE = 1.f;
-
-		//mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
-		//vec2 jitter = GetProjectionJitter(_renderWidth, _renderHeight);
-		//mat4 jitterMat = Math::Translate(Math::identity, { jitter[0] * JITTER_DEBUG_SCALE, jitter[1] * JITTER_DEBUG_SCALE, 0.f });
-		////proj[8] += jitter[0] * JITTER_DEBUG_SCALE;
-		////proj[9] += jitter[1] * JITTER_DEBUG_SCALE;
-		//gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
-		//gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
-
-		//_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
-
-		//gBufferUBO.prevViewProj = gBufferUBO.viewProj;
-		////IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
-
-
-		//_renderer->ExecuteGraph();
-		//_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
-		//_renderer->CopyRenderImage("G-BufferVelocity", "G-BufferVelocityHistory");
-
-		//_taaHistoryValid = true;
-		//_renderer->BlitToSwapchain("TAAResolved");
 	}
 
 	void EditorLayer::OnEvent(Event& pEvent)
@@ -545,7 +493,7 @@ namespace Imgn
 
 			if (!_sceneWindow)
 			{
-				auto& image = _renderer->GetRenderGraphImage("TAAResolved");
+				auto& image = _renderer->GetRenderGraphImage("UIComposite");
 				_sceneWindow = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **image.image.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 			}
 
@@ -560,6 +508,19 @@ namespace Imgn
 			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) _cameraLookActive = true;
 
 			EditorCamera::SetInputEnabled(_cameraLookActive);
+
+			//game ui only sees the scene image. right-mouse look and an active gizmo win.
+			//the pointer is applied on the next Dream, which runs before OnImGuiRender.
+			const ImGuiIO& io = ImGui::GetIO();
+			const bool hovered = ImGui::IsItemHovered();
+			if (!hovered || _cameraLookActive || ImGuizmo::IsUsing())
+				UISystem::Get().SetViewportPointer(false, 0.f, 0.f, false, false, false, 0.f);
+			else
+			{
+				const float px = (io.MousePos.x - position.x) / size.x * static_cast<float>(_renderWidth);
+				const float py = (io.MousePos.y - position.y) / size.y * static_cast<float>(_renderHeight);
+				UISystem::Get().SetViewportPointer(true, px, py, io.MouseDown[0], ImGui::IsMouseClicked(ImGuiMouseButton_Left), ImGui::IsMouseReleased(ImGuiMouseButton_Left), io.MouseWheel);
+			}
 
 			Entity* selected = _sceneHierarchy.GetSelectedEntity();
 			TransformComponent* tc = selected ? selected->GetComponent<TransformComponent>() : nullptr;
@@ -591,6 +552,7 @@ namespace Imgn
 		else
 		{
 			_cameraLookActive = false;
+			UISystem::Get().SetViewportPointer(false, 0.f, 0.f, false, false, false, 0.f);
 		}
 
 		ImGui::End();
