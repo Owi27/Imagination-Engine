@@ -134,3 +134,383 @@ void Vulkan::CreateInstance()
 
 	_instance = Unique<vk::raii::Instance>(_ctx->createInstance(instanceCreateInfo));
 }
+
+void Vulkan::CreateSwapchain()
+{
+	vk::SurfaceCapabilitiesKHR surfaceCapabilities = _physicalDevice->getSurfaceCapabilitiesKHR(*_surface);
+	_swapchainExtent = ChooseSwapchainExtent(surfaceCapabilities);
+
+	uint32_t minImageCount = ChooseSwapchainMinImageCount(surfaceCapabilities);
+
+	std::vector<vk::SurfaceFormatKHR> availableFormats = _physicalDevice->getSurfaceFormatsKHR(*_surface);
+	_swapchainSurfaceFormat = ChooseSwapchainSurfaceFormat(availableFormats);
+
+	std::vector<vk::PresentModeKHR> availablePresentModes = _physicalDevice->getSurfacePresentModesKHR(*_surface);
+	vk::PresentModeKHR presentMode = ChooseSwapchainPresentMode(availablePresentModes);
+
+	vk::SwapchainCreateInfoKHR swapchainCreateInfo
+	{
+		.surface = *_surface,
+		.minImageCount = minImageCount,
+		.imageFormat = _swapchainSurfaceFormat.format,
+		.imageColorSpace = _swapchainSurfaceFormat.colorSpace,
+		.imageExtent = _swapchainExtent,
+		.imageArrayLayers = 1,
+		.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
+		.imageSharingMode = vk::SharingMode::eExclusive,
+		.preTransform = surfaceCapabilities.currentTransform,
+		.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+		.presentMode = ChooseSwapchainPresentMode(availablePresentModes),
+		.clipped = true
+	};
+
+	_swapchain = Unique<vk::raii::SwapchainKHR>(_device->createSwapchainKHR(swapchainCreateInfo));
+	_swapchainImages = _swapchain->getImages();
+
+	if (_swapchainImages.empty()) { throw std::runtime_error("Swapchain returned no images"); }
+}
+
+void Vulkan::CreateSwapchainImageViews()
+{
+	_swapchainImageViews.clear();
+	_swapchainImageViews.reserve(_swapchainImages.size());
+
+	for (auto& image : _swapchainImages)
+	{
+		vk::ImageViewCreateInfo imageViewCreateInfo
+		{
+			.image = image,
+			.viewType = vk::ImageViewType::e2D,
+			.format = _swapchainSurfaceFormat.format,
+			.components
+			{
+				.r = vk::ComponentSwizzle::eIdentity,
+				.g = vk::ComponentSwizzle::eIdentity,
+				.b = vk::ComponentSwizzle::eIdentity,
+				.a = vk::ComponentSwizzle::eIdentity
+			},
+			.subresourceRange
+			{
+				.aspectMask = vk::ImageAspectFlagBits::eColor,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = 0,
+				.layerCount = 1
+			}
+		};
+
+		//CreateImageView(image, _swapchainSurfaceFormat.format, vk::ImageAspectFlagBits::eColor)
+
+		_swapchainImageViews.emplace_back(Unique<vk::raii::ImageView>(_device->createImageView(imageViewCreateInfo)));
+	}
+}
+
+void Vulkan::CreateCommandPool()
+{
+	vk::CommandPoolCreateInfo poolInfo
+	{
+		.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+		.queueFamilyIndex = _queueIdx
+	};
+
+	_commandPool = Unique<vk::raii::CommandPool>(_device->createCommandPool(poolInfo));
+}
+
+void Vulkan::CreateSyncObjects()
+{
+	_presentationReadySemaphore.clear();
+	_presentationReadySemaphore.reserve(_swapchainImages.size());
+
+	for (size_t i = 0; i < _swapchainImages.size(); i++)
+	{
+		_presentationReadySemaphore.push_back(Unique<vk::raii::Semaphore>(_device->createSemaphore({})));
+	}
+
+	for (size_t i = 0; i < MaxFramesInFlight; i++)
+	{
+		_imageAcquiredSemaphores[i] = Unique<vk::raii::Semaphore>(_device->createSemaphore({}));
+		_frameFinishedFence[i] = Unique<vk::raii::Fence>(_device->createFence(vk::FenceCreateInfo{ .flags = vk::FenceCreateFlagBits::eSignaled }));
+	}
+}
+
+void Vulkan::CreateCommandBuffers()
+{
+	//_commandBuffers.clear();
+
+	vk::CommandBufferAllocateInfo allocInfo
+	{
+		.commandPool = *_commandPool,
+		.level = vk::CommandBufferLevel::ePrimary,
+		.commandBufferCount = MaxFramesInFlight
+	};
+
+	//_commandBuffers.resize(allocInfo.commandBufferCount);
+
+	for (uint8_t i = 0; auto& commandBuffer : _device->allocateCommandBuffers(allocInfo))
+	{
+		_commandBuffers[i] = Unique<vk::raii::CommandBuffer>(std::move(commandBuffer));
+		i++;
+	}
+}
+
+void Vulkan::CreateDescriptorPool()
+{
+	vk::DescriptorPoolSize poolSize
+	{
+		.type = vk::DescriptorType::eCombinedImageSampler,
+		.descriptorCount = NumDescriptorsStreaming
+	};
+
+	vk::DescriptorPoolCreateInfo poolInfo
+	{
+		.flags = vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind | vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+		.maxSets = 1,
+		.poolSizeCount = 1,
+		.pPoolSizes = &poolSize
+	};
+
+	_textureDescriptorPool = Unique<vk::raii::DescriptorPool>(_device->createDescriptorPool(poolInfo));
+}
+
+void Vulkan::CreateDescriptorSets()
+{
+	vk::DescriptorSetLayout layout = **_textureDescriptorSetLayout;
+
+	vk::DescriptorSetAllocateInfo allocateInfo
+	{
+		.descriptorPool = **_textureDescriptorPool,
+		.descriptorSetCount = 1,
+		.pSetLayouts = &layout
+	};
+
+	std::vector<vk::raii::DescriptorSet> descriptorSets = _device->allocateDescriptorSets(allocateInfo);
+
+	_textureDescriptorSet = Unique<vk::raii::DescriptorSet>(std::move(descriptorSets.front()));
+}
+
+void Vulkan::CreateTAASampler()
+{
+	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
+
+	vk::SamplerCreateInfo samplerInfo
+	{
+		.magFilter = vk::Filter::eLinear,
+		.minFilter = vk::Filter::eLinear,
+		.mipmapMode = vk::SamplerMipmapMode::eLinear,
+		.addressModeU = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeV = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeW = vk::SamplerAddressMode::eClampToEdge,
+		.mipLodBias = 0.f,
+		.anisotropyEnable = vk::False,
+		.maxAnisotropy = properties.limits.maxSamplerAnisotropy,
+		.compareEnable = vk::False,
+		.compareOp = vk::CompareOp::eAlways,
+		.minLod = 0.f,
+		.maxLod = 0.f,
+		.borderColor = vk::BorderColor::eFloatOpaqueBlack,
+		.unnormalizedCoordinates = vk::False
+	};
+
+	_taaSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
+}
+
+void Vulkan::CreateTextureSampler()
+{
+	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
+
+	vk::SamplerCreateInfo samplerInfo
+	{
+		.magFilter = vk::Filter::eLinear,
+		.minFilter = vk::Filter::eLinear,
+		.mipmapMode = vk::SamplerMipmapMode::eLinear,
+		.addressModeU = vk::SamplerAddressMode::eRepeat,
+		.addressModeV = vk::SamplerAddressMode::eRepeat,
+		.addressModeW = vk::SamplerAddressMode::eRepeat,
+		.mipLodBias = 0.f,
+		.anisotropyEnable = vk::True,
+		.maxAnisotropy = properties.limits.maxSamplerAnisotropy,
+		.compareEnable = vk::False,
+		.compareOp = vk::CompareOp::eAlways,
+		.minLod = 0.f,
+		.maxLod = 0.f,
+		.borderColor = vk::BorderColor::eIntOpaqueBlack,
+		.unnormalizedCoordinates = vk::False
+	};
+
+	_textureSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
+}
+
+void Vulkan::RecreateSwapchain()
+{
+	_device->waitIdle();
+
+	_swapchainImages.clear();
+	_swapchain = nullptr;
+
+	CreateSwapchain();
+	CreateSwapchainImageViews();
+}
+
+void Vulkan::PickPhysicalDevice()
+{
+	auto physicalDevices = vk::raii::PhysicalDevices(*_instance);
+	if (physicalDevices.empty()) throw std::runtime_error("failed to find GPUs with Vulkan support!");
+
+	// Use an ordered map to automatically sort candidates by increasing score
+	std::multimap<int, vk::raii::PhysicalDevice> candidates;
+
+	for (const auto& physicalDevice : physicalDevices)
+	{
+		auto deviceProperties = physicalDevice.getProperties();
+		auto deviceFeatures = physicalDevice.getFeatures();
+		uint32_t score = 0;
+
+		// Discrete GPUs have a significant performance advantage
+		if (deviceProperties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) score += 1000;
+
+		// Maximum possible size of textures affects graphics quality
+		score += deviceProperties.limits.maxImageDimension2D;
+
+		// Application can't function without geometry shaders
+		if (!deviceFeatures.geometryShader) continue;
+
+		candidates.insert(std::make_pair(score, physicalDevice));
+	}
+
+	// Check if the best candidate is suitable at all
+	if (!candidates.empty() && candidates.rbegin()->first > 0) _physicalDevice = Unique<vk::raii::PhysicalDevice>(candidates.rbegin()->second);
+	else throw std::runtime_error("failed to find a suitable GPU!");
+}
+
+void Vulkan::SetupDebugMessenger()
+{
+	if (!_enableValidationLayers) return;
+
+	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+		vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+		vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+	vk::DebugUtilsMessageTypeFlagsEXT     messageTypeFlags(
+		vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+	vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT
+	{
+		.messageSeverity = severityFlags,
+		.messageType = messageTypeFlags,
+		.pfnUserCallback = &DebugCallback
+	};
+
+	_debugMessenger = Unique<vk::raii::DebugUtilsMessengerEXT>(_instance->createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT));
+}
+
+void Vulkan::RecreateSurfaceAndSwapchain()
+{
+	_device->waitIdle();
+
+	// Destroy swapchain-dependent objects first.
+	_swapchainImageViews.clear();
+	_presentationReadySemaphore.clear();
+	_swapchainImages.clear();
+	_swapchain.reset();
+
+	// The old surface is no longer valid.
+	_surface.reset();
+
+	CreateSurface(_info.windowHandle);
+
+	if (!_physicalDevice->getSurfaceSupportKHR(_queueIdx, *_surface))
+	{
+		throw std::runtime_error(
+			"Current queue no longer supports the recreated surface"
+		);
+	}
+
+	CreateSwapchain();
+	CreateSwapchainImageViews();
+	CreateSyncObjects();
+
+	_activeImageIdx = 0;
+	_frameInFlightIdx = 0;
+}
+
+uint32_t Vulkan::FindMemoryType(uint32_t pTypeFilter, vk::MemoryPropertyFlags pProps)
+{
+	vk::PhysicalDeviceMemoryProperties memProperties = _physicalDevice->getMemoryProperties();
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+	{
+		if ((pTypeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & pProps) == pProps)
+		{
+			return i;
+		}
+	}
+
+	IMGN_FATAL("failed to find suitable memory type!");
+	throw std::runtime_error("failed to find suitable memory type!");
+}
+
+vk::Extent2D Vulkan::ChooseSwapchainExtent(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+{
+	if (pCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) return pCapabilities.currentExtent;
+
+	return
+	{
+		std::clamp<uint32_t>(_info.width, pCapabilities.minImageExtent.width, pCapabilities.maxImageExtent.width),
+		std::clamp<uint32_t>(_info.height, pCapabilities.minImageExtent.height, pCapabilities.maxImageExtent.height)
+	};
+}
+
+void Vulkan::CopyBuffer(vk::raii::Buffer& pSrc, vk::raii::Buffer& pDst, vk::DeviceSize pSize)
+{
+	unique<vk::raii::CommandBuffer> commandBuffer = StartSingleTimeCommand();
+
+	commandBuffer->copyBuffer(pSrc, pDst, vk::BufferCopy(0, 0, pSize));
+
+	EndSingleTimeCommand(*commandBuffer);
+}
+
+uint32_t Vulkan::ChooseSwapchainMinImageCount(vk::SurfaceCapabilitiesKHR const& pCapabilities)
+{
+	auto minImageCount = std::max(2u, pCapabilities.minImageCount);
+	if ((0 < pCapabilities.maxImageCount) && (pCapabilities.maxImageCount < minImageCount)) minImageCount = pCapabilities.maxImageCount;
+
+	return minImageCount;
+}
+
+vk::PresentModeKHR Vulkan::ChooseSwapchainPresentMode(std::vector<vk::PresentModeKHR> const& pAvailablePresentModes)
+{
+	assert(std::ranges::any_of(pAvailablePresentModes, [](auto presentMode) { return presentMode == vk::PresentModeKHR::eFifo; }));
+	return std::ranges::any_of(pAvailablePresentModes,
+		[](const vk::PresentModeKHR value)
+		{
+			return vk::PresentModeKHR::eMailbox == value;
+		}) ? vk::PresentModeKHR::eMailbox : vk::PresentModeKHR::eFifo;
+}
+
+vk::SurfaceFormatKHR Vulkan::ChooseSwapchainSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& pAvailableFormats)
+{
+	const auto formatIter = std::ranges::find_if(pAvailableFormats, [](const auto& format)
+		{
+			return format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+		});
+
+	return formatIter != pAvailableFormats.end() ? *formatIter : pAvailableFormats[0];
+}
+
+void Vulkan::CopyBufferToImage(uint32_t pWidth, uint32_t pHeight, const vk::raii::Buffer& pBuffer, vk::raii::Image& pImage)
+{
+	unique<vk::raii::CommandBuffer> commandBuffer = StartSingleTimeCommand();
+
+	vk::BufferImageCopy region
+	{
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+		.imageSubresource = { vk::ImageAspectFlagBits::eColor, 0, 0, 1 },
+		.imageOffset = {0, 0, 0},
+		.imageExtent = {pWidth, pHeight, 1}
+	};
+
+	commandBuffer->copyBufferToImage(pBuffer, pImage, vk::ImageLayout::eTransferDstOptimal, { region });
+
+	EndSingleTimeCommand(*commandBuffer);
+}
+
