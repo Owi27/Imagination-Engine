@@ -70,6 +70,7 @@ namespace Imgn
 		uint32_t CreateIndexBuffer(std::vector<uint32_t>& pIndices);
 		uint32_t CreateUniformBuffer(void* pData, uint64_t pSize);
 		uint32_t CreateStorageBuffer(void* pData, uint64_t pSize);
+		uint32_t CreateMappedStorageBuffer(uint64_t pSize);
 		uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
 		vk::raii::Sampler& GetTAASampler() { return _vkCtx->GetTAASampler(); }

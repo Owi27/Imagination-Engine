@@ -43,6 +43,7 @@ namespace Imgn
 		void BindDescriptorSet(vk::PipelineBindPoint pBindPoint, vk::PipelineLayout pPipelineLayout, int pFirstSet, vk::DescriptorSet pDescriptorSet);
 		void SetViewport(uint32_t pWidth, uint32_t pHeight);
 		void SetScissor(uint32_t pWidth, uint32_t pHeight);
+		void SetScissorRect(int pX, int pY, uint32_t pWidth, uint32_t pHeight);
 
 		vk::DescriptorBufferInfo CreateDescriptorBufferInfo(uint32_t pHandle, uint64_t pSize);
 		vk::DescriptorImageInfo CreateDescriptorImageInfo(std::string_view pName, vk::Sampler pSampler = nullptr, vk::ImageLayout pLayout = vk::ImageLayout::eShaderReadOnlyOptimal);
@@ -64,5 +65,6 @@ namespace Imgn
 
 		void BindMesh(uint32_t pMeshHandle);
 		void DrawPrimitive(const ImgnPrimitive& pPrimitive);
+		void DrawInstanced(uint32_t pVertexCount, uint32_t pInstanceCount);
 	};
 }

@@ -69,6 +69,14 @@ namespace Imgn
 	{
 		_commandBuffer->setScissor(0, vk::Rect2D{ { 0, 0 }, { pWidth, pHeight } });
 	}
+
+	void RenderContext::SetScissorRect(int pX, int pY, uint32_t pWidth, uint32_t pHeight)
+	{
+		if (pX < 0) pX = 0;
+		if (pY < 0) pY = 0;
+		_commandBuffer->setScissor(0, vk::Rect2D{ { pX, pY }, { pWidth, pHeight } });
+	}
+
 	vk::DescriptorBufferInfo RenderContext::CreateDescriptorBufferInfo(uint32_t pHandle, uint64_t pSize)
 	{
 		return vk::DescriptorBufferInfo
@@ -148,5 +156,9 @@ namespace Imgn
 	void RenderContext::DrawPrimitive(const ImgnPrimitive& pPrimitive)
 	{
 		_commandBuffer->drawIndexed(pPrimitive.indexCount, 1, pPrimitive.firstIndex, pPrimitive.vertexOffset, 0);
+	}
+	void RenderContext::DrawInstanced(uint32_t pVertexCount, uint32_t pInstanceCount)
+	{
+		_commandBuffer->draw(pVertexCount, pInstanceCount, 0, 0);
 	}
 }
