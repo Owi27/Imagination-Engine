@@ -38,9 +38,9 @@ namespace Imgn
 		//CreateImage()
 		//GBufferUBO gBufferUBO
 		//{
-		//	.world = GW::MATH::GIdentityMatrixF,
-		//	.view = GW::MATH::GIdentityMatrixF,
-		//	.proj = GW::MATH::GIdentityMatrixF,
+		//    .world = GW::MATH::GIdentityMatrixF,
+		//    .view = GW::MATH::GIdentityMatrixF,
+		//    .proj = GW::MATH::GIdentityMatrixF,
 		//};
 
 		//GMatrix::LookAtLHF({ 0.f, 0.25f, 0 }, { 1.f, 0.f, 1.f }, { 0.f, 1.f, 0.f }, gBufferUBO.view);
@@ -50,93 +50,91 @@ namespace Imgn
 
 		//ImgnVulkan::RenderPass gBufferPass
 		//{
-		//	.name = "GeometryPass",
-		//	.inputs = {},
-		//	.outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
-		//	.bufferInputs = {"GBuffer-UBO"},
-		//	.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
-		//	{
-		//		auto ubo = _graph.GetBufferResource("GBuffer-UBO");
-		//		UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
+		//    .name = "GeometryPass",
+		//    .inputs = {},
+		//    .outputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		//    .bufferInputs = {"GBuffer-UBO"},
+		//    .Execute = [&](vk::raii::CommandBuffer& commandBuffer)
+		//    {
+		//        auto ubo = _graph.GetBufferResource("GBuffer-UBO");
+		//        UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer, ubo->buffer, ubo->size, nullptr, 0, {}, *_textureSampler);
 
-		//		std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
-		//		vk::RenderingAttachmentInfoKHR depthAttachment;
-		//		vk::RenderingInfoKHR renderingInfo;
+		//        std::array<vk::RenderingAttachmentInfo, 3> colorAttachments;
+		//        vk::RenderingAttachmentInfoKHR depthAttachment;
+		//        vk::RenderingInfoKHR renderingInfo;
 
-		//		colorAttachments[0].setImageView(_vkCtx.GetImageResource("GBuffer-Position")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
-		//		colorAttachments[1].setImageView(_vkCtx.GetImageResource("GBuffer-Normal")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
-		//		colorAttachments[2].setImageView(_vkCtx.GetImageResource("GBuffer-Albedo")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+		//        colorAttachments[0].setImageView(_vkCtx.GetImageResource("GBuffer-Position")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+		//        colorAttachments[1].setImageView(_vkCtx.GetImageResource("GBuffer-Normal")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
+		//        colorAttachments[2].setImageView(_vkCtx.GetImageResource("GBuffer-Albedo")->view).setImageLayout(vk::ImageLayout::eColorAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearColorValue{ std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} });
 
-		//		depthAttachment.setImageView(_graph.GetImageResource("Depth")->view).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
+		//        depthAttachment.setImageView(_graph.GetImageResource("Depth")->view).setImageLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal).setLoadOp(vk::AttachmentLoadOp::eClear).setStoreOp(vk::AttachmentStoreOp::eStore).setClearValue(vk::ClearDepthStencilValue{ 1.0f, 0 });
 
-		//		renderingInfo.setRenderArea({ {0, 0}, {_w, _h} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
+		//        renderingInfo.setRenderArea({ {0, 0}, {_w, _h} }).setLayerCount(1).setColorAttachmentCount(colorAttachments.size()).setPColorAttachments(colorAttachments.data()).setPDepthAttachment(&depthAttachment);
 
-		//		commandBuffer.beginRendering(renderingInfo);
+		//        commandBuffer.beginRendering(renderingInfo);
 
-		//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
-		//		commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(_w), static_cast<float>(_h), 0.0f, 1.0f));
-		//		commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
+		//        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.gBufferPipeline);
+		//        commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(_w), static_cast<float>(_h), 0.0f, 1.0f));
+		//        commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
 
 
-		//		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer)], nullptr);
-		//		commandBuffer.bindVertexBuffers(0, *_vkCtx.GetBufferResource("VertexBuffer")->buffer, {0});
-		//		commandBuffer.bindIndexBuffer(_vkCtx.GetBufferResource("IndexBuffer")->buffer, 0, vk::IndexType::eUint32);
+		//        commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::GBuffer)], nullptr);
+		//        commandBuffer.bindVertexBuffers(0, *_vkCtx.GetBufferResource("VertexBuffer")->buffer, {0});
+		//        commandBuffer.bindIndexBuffer(_vkCtx.GetBufferResource("IndexBuffer")->buffer, 0, vk::IndexType::eUint32);
 
-		//		commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
+		//        commandBuffer.drawIndexed(_sponza->GetIndexCount(), 1, 0, 0, 0);
 
-		//		commandBuffer.endRendering();
-		//	}
+		//        commandBuffer.endRendering();
+		//    }
 		//};
 
 		//RenderPass lightingPass
 		//{
-		//	.name = "LightingPass",
-		//	.inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
-		//	.outputs = {"FinalColor"},
-		//	.descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
-		//	.Execute = [&](vk::raii::CommandBuffer& commandBuffer)
-		//	{
-		//		vk::RenderingAttachmentInfo colorAttachment
-		//		{
-		//			.imageView = _graph.GetImageResource("FinalColor")->view,
-		//			.imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-		//			.loadOp = vk::AttachmentLoadOp::eClear,
-		//			.storeOp = vk::AttachmentStoreOp::eStore,
-		//			.clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
-		//		};
+		//    .name = "LightingPass",
+		//    .inputs = { "GBuffer-Position", "GBuffer-Normal", "GBuffer-Albedo", "Depth" },
+		//    .outputs = {"FinalColor"},
+		//    .descriptorSetLayout = ImgnVulkan::descriptorSetLayout,
+		//    .Execute = [&](vk::raii::CommandBuffer& commandBuffer)
+		//    {
+		//        vk::RenderingAttachmentInfo colorAttachment
+		//        {
+		//            .imageView = _graph.GetImageResource("FinalColor")->view,
+		//            .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+		//            .loadOp = vk::AttachmentLoadOp::eClear,
+		//            .storeOp = vk::AttachmentStoreOp::eStore,
+		//            .clearValue = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f)
+		//        };
 
-		//		vk::RenderingInfoKHR renderingInfo
-		//		{
-		//			.renderArea = { {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} },
-		//			.layerCount = 1,
-		//			.colorAttachmentCount = 1,
-		//			.pColorAttachments = &colorAttachment,
-		//		};
+		//        vk::RenderingInfoKHR renderingInfo
+		//        {
+		//            .renderArea = { {0, 0}, {ImgnVulkan::swapchainExtent.width, ImgnVulkan::swapchainExtent.height} },
+		//            .layerCount = 1,
+		//            .colorAttachmentCount = 1,
+		//            .pColorAttachments = &colorAttachment,
+		//        };
 
-		//		std::vector<vk::ImageView> imageViews =
-		//		{
-		//			_graph.GetImageResource("GBuffer-Position")->view,
-		//			_graph.GetImageResource("GBuffer-Normal")->view,
-		//			_graph.GetImageResource("GBuffer-Albedo")->view,
-		//			_graph.GetImageResource("Depth")->view,
-		//		};
-		//		UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
+		//        std::vector<vk::ImageView> imageViews =
+		//        {
+		//            _graph.GetImageResource("GBuffer-Position")->view,
+		//            _graph.GetImageResource("GBuffer-Normal")->view,
+		//            _graph.GetImageResource("GBuffer-Albedo")->view,
+		//            _graph.GetImageResource("Depth")->view,
+		//        };
+		//        UpdateDescriptorSet(ImgnVulkan::frameIdx, RenderPassIdx::Lighting, nullptr, 0, nullptr, 0, imageViews, *_textureSampler);
 
-		//		commandBuffer.beginRendering(renderingInfo);
+		//        commandBuffer.beginRendering(renderingInfo);
 
-		//		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
-		//		commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(ImgnVulkan::swapchainExtent.width), static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.0f, 1.0f));
-		//		commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
+		//        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipelines.lightingPipeline);
+		//        commandBuffer.setViewport(0, vk::Viewport(0.0f, 0, static_cast<float>(ImgnVulkan::swapchainExtent.width), static_cast<float>(ImgnVulkan::swapchainExtent.height), 0.0f, 1.0f));
+		//        commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), ImgnVulkan::swapchainExtent));
 
 
-		//		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::Lighting)], nullptr);
-		//		//commandBuffer.bindVertexBuffers(0, _sponza->GetVertexBuffer(), {0});
-		//		//commandBuffer.bindIndexBuffer(_sponza->GetIndexBuffer(), 0, vk::IndexType::eUint32);
+		//        commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _pipelines.pipelineLayout, 0, *ImgnVulkan::descriptorSets[DescriptorSetIndex(ImgnVulkan::frameIdx, RenderPassIdx::Lighting)], nullptr);
 
-		//		commandBuffer.draw(3, 1, 0, 0);
+		//        commandBuffer.draw(3, 1, 0, 0);
 
-		//		commandBuffer.endRendering();
-		//	}
+		//        commandBuffer.endRendering();
+		//    }
 		//};
 
 
@@ -147,8 +145,8 @@ namespace Imgn
 		switch (pFormat)
 		{
 			//case ImgnFormat::Unknown:
-			//	IMGN_CO
-			//	return vk::Format::eUndefined;
+			//    IMGN_CO
+			//    return vk::Format::eUndefined;
 		case ImgnFormat::R8_UNorm:
 			return vk::Format::eR8Unorm;
 		case ImgnFormat::R8_SNorm:
@@ -377,7 +375,7 @@ namespace Imgn
 
 	//uint32_t ImgnRenderer::CreateTexture(const ImgnTextureDesc& pDesc)
 	//{
-	//	return 0;
+	//    return 0;
 	//}
 
 	uint32_t ImgnRenderer::CreateMaterial(const ImgnMaterialDesc& pDesc)
@@ -400,20 +398,20 @@ namespace Imgn
 		_vkCtx->UpdateImageDescriptor(handle, _images[handle]);
 		///*ImgnImage image
 		//{
-		//	.handle = static_cast<uint32_t>(_images.size())
+		//    .handle = static_cast<uint32_t>(_images.size())
 		//};*/
 
 		//switch (_info.backend)
 		//{
 		//case RendererBackend::Vulkan:
-		//	image .vkImage = _vkCtx->CreateTextureImage(pWidth, pHeight, pImageData);
-		//	break;
+		//    image .vkImage = _vkCtx->CreateTextureImage(pWidth, pHeight, pImageData);
+		//    break;
 		//case RendererBackend::D3D12:
-		//	break;
+		//    break;
 		//case RendererBackend::Metal:
-		//	break;
+		//    break;
 		//default:
-		//	break;
+		//    break;
 		//}
 
 		//_images.push_back(std::move(image));
@@ -448,6 +446,13 @@ namespace Imgn
 		return static_cast<uint32_t>(_buffers.size() - 1);
 	}
 
+	uint32_t ImgnRenderer::CreateMappedStorageBuffer(uint64_t pSize)
+	{
+		_buffers.push_back(_vkCtx->CreateMappedStorageBuffer(pSize));
+
+		return static_cast<uint32_t>(_buffers.size() - 1);
+	}
+
 	uint32_t ImgnRenderer::CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles)
 	{
 		std::vector<Material> materials;
@@ -463,20 +468,20 @@ namespace Imgn
 
 	//void ImgnRenderer::DrawMesh(vk::raii::CommandBuffer& pCommandBuffer, uint32_t pVertexBuffer, uint32_t pIndexBuffer, std::vector<ImgnPrimitive> pPrimitives)
 	//{
-	//	pCommandBuffer.bindVertexBuffers(0, **GetBuffer(pVertexBuffer).buffer, { 0 });
-	//	pCommandBuffer.bindIndexBuffer(**GetBuffer(pIndexBuffer).buffer, 0, vk::IndexType::eUint32);
+	//    pCommandBuffer.bindVertexBuffers(0, **GetBuffer(pVertexBuffer).buffer, { 0 });
+	//    pCommandBuffer.bindIndexBuffer(**GetBuffer(pIndexBuffer).buffer, 0, vk::IndexType::eUint32);
 
-	//	for (auto& prim : pPrimitives)
-	//	{
-	//		GBufferPC pc
-	//		{
-	//			.model = Math::identity,
-	//			.materialIndex = prim.material
-	//		};
+	//    for (auto& prim : pPrimitives)
+	//    {
+	//        GBufferPC pc
+	//        {
+	//            .model = Math::identity,
+	//            .materialIndex = prim.material
+	//        };
 
-	//		pCommandBuffer.pushConstants<GBufferPC>(*GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, pc);
-	//		pCommandBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
-	//	}
+	//        pCommandBuffer.pushConstants<GBufferPC>(*GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, pc);
+	//        pCommandBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
+	//    }
 	//}
 
 	bool ImgnRenderer::StartFrame()
@@ -517,7 +522,8 @@ namespace Imgn
 			"LitScene",
 			"TAAResolved",
 			"TAAHistory",
-			"G-BufferVelocityHistory"
+			"G-BufferVelocityHistory",
+			"UIComposite"
 		};
 
 		for (const char* name : images)
@@ -526,12 +532,11 @@ namespace Imgn
 
 	//void ImgnRenderer::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
 	//{
-	//	_vkCtx.CreateBuffer(pName, pSize, pUsage, pData);
+	//    _vkCtx.CreateBuffer(pName, pSize, pUsage, pData);
 	//}
 	//
 	//void ImgnRenderer::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
 	//{
-	//	_vkCtx.CreateImage(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
+	//    _vkCtx.CreateImage(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
 	//}
-
 }
