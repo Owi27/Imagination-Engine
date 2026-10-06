@@ -245,18 +245,6 @@ namespace Imgn
 			//todo write failed to init graphics device
 			break;
 		}
-
-		Material defaultMaterial
-		{
-			.baseColorFactor = { 1.f, 1.f, 1.f, 1.f },
-			.emissiveFactor = { 0.f, 0.f, 0.f, 0.f },
-			.textureIndices0 = { -1, -1, -1, -1 },
-			.textureIndices1 = { -1, static_cast<int32_t>(ImgnAlphaMode::Opaque), 0, 0 },
-			.materialFactors = { 1.f, 1.f, 0.5f, 1.f },
-			.extraFactors = { 1.f, 0.f, 0.f, 0.f }
-		};
-
-		AddMaterial(defaultMaterial); //idx 0
 	}
 
 	void ImgnRenderer::DrawFrame()
@@ -301,13 +289,6 @@ namespace Imgn
 	void ImgnRenderer::UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount)
 	{
 		//_vkCtx.UploadIndices(pIndices, pIndexCount);
-	}
-
-	uint32_t ImgnRenderer::AddMesh(const ImgnMesh& pMesh)
-	{
-		_meshes.push_back(pMesh);
-
-		return static_cast<uint32_t>(_meshes.size() - 1);
 	}
 
 	uint32_t ImgnRenderer::CreateBuffer(const ImgnBufferDesc& pDesc)
@@ -385,13 +366,6 @@ namespace Imgn
 		return 0;
 	}
 
-	uint32_t ImgnRenderer::AddMaterial(const Material& pMaterial)
-	{
-		_materials.push_back(pMaterial);
-
-		return static_cast<uint32_t>(_materials.size() - 1);
-	}
-
 	uint32_t ImgnRenderer::CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData)
 	{
 		uint32_t handle = static_cast<uint32_t>(_images.size());
@@ -420,18 +394,19 @@ namespace Imgn
 		return handle;
 	}
 
-	uint32_t ImgnRenderer::CreateVertexBuffer(std::vector<Vertex>& pVertices)
+	unique<Buffer> ImgnRenderer::CreateVertexBuffer(std::span<const Vertex> pVertices)
 	{
-		_buffers.push_back(_vkCtx->CreateVertexBuffer(pVertices.data(), pVertices.size() * sizeof(Vertex)));
-
-		return static_cast<uint32_t>(_buffers.size() - 1);
+		return pVertices.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateVertexBuffer(pVertices.data(), pVertices.size_bytes()));
 	}
 
-	uint32_t ImgnRenderer::CreateIndexBuffer(std::vector<uint32_t>& pIndices)
+	unique<Buffer> ImgnRenderer::CreateIndexBuffer(std::span<const uint32_t> pIndices)
 	{
-		_buffers.push_back(_vkCtx->CreateIndexBuffer(pIndices.data(), pIndices.size() * sizeof(uint32_t)));
+		return pIndices.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateIndexBuffer(pIndices.data(), pIndices.size_bytes()));
+	}
 
-		return static_cast<uint32_t>(_buffers.size() - 1);
+	unique<Buffer> ImgnRenderer::CreateMaterialBuffer(std::span<const Material> pMaterials)
+	{
+		return pMaterials.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateIndexBuffer(pMaterials.data(), pMaterials.size_bytes()));
 	}
 
 	uint32_t ImgnRenderer::CreateUniformBuffer(void* pData, uint64_t pSize)
@@ -447,37 +422,6 @@ namespace Imgn
 
 		return static_cast<uint32_t>(_buffers.size() - 1);
 	}
-
-	uint32_t ImgnRenderer::CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles)
-	{
-		std::vector<Material> materials;
-		materials.reserve(pMaterialHandles.size());
-
-		for (uint32_t materialHandle : pMaterialHandles)
-		{
-			materials.push_back(GetMaterial(materialHandle));
-		}
-
-		return CreateStorageBuffer(materials.data(), materials.size() * sizeof(Material));
-	}
-
-	//void ImgnRenderer::DrawMesh(vk::raii::CommandBuffer& pCommandBuffer, uint32_t pVertexBuffer, uint32_t pIndexBuffer, std::vector<ImgnPrimitive> pPrimitives)
-	//{
-	//	pCommandBuffer.bindVertexBuffers(0, **GetBuffer(pVertexBuffer).buffer, { 0 });
-	//	pCommandBuffer.bindIndexBuffer(**GetBuffer(pIndexBuffer).buffer, 0, vk::IndexType::eUint32);
-
-	//	for (auto& prim : pPrimitives)
-	//	{
-	//		GBufferPC pc
-	//		{
-	//			.model = Math::identity,
-	//			.materialIndex = prim.material
-	//		};
-
-	//		pCommandBuffer.pushConstants<GBufferPC>(*GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 0, pc);
-	//		pCommandBuffer.drawIndexed(prim.indexCount, 1, prim.firstIndex, prim.vertexOffset, 0);
-	//	}
-	//}
 
 	bool ImgnRenderer::StartFrame()
 	{
@@ -523,15 +467,4 @@ namespace Imgn
 		for (const char* name : images)
 			_graph->ResizeImage(name, pWidth, pHeight);
 	}
-
-	//void ImgnRenderer::CreateBuffer(const std::string& pName, vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, const void* pData)
-	//{
-	//	_vkCtx.CreateBuffer(pName, pSize, pUsage, pData);
-	//}
-	//
-	//void ImgnRenderer::CreateImage(const std::string& pName, vk::Format pFormat, vk::Extent2D pExtent, vk::ImageUsageFlags pUsage, vk::ImageLayout pInitialLayout, vk::ImageLayout pFinalLayout, vk::ImageAspectFlags pAspect)
-	//{
-	//	_vkCtx.CreateImage(pName, pFormat, pExtent, pUsage, pInitialLayout, pFinalLayout, pAspect);
-	//}
-
 }

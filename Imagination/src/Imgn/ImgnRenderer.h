@@ -3,6 +3,7 @@
 #include "ImgnRenderResources.h"
 #include "Renderer/Vulkan.hpp"
 #include "ImgnRenderGraph.h"
+#include "Components/MaterialComponent.h"
 
 namespace Imgn
 {
@@ -27,10 +28,8 @@ namespace Imgn
 		std::vector<Image> _images;
 		std::vector<Buffer> _buffers;
 
-		std::vector<ImgnMesh> _meshes;
-		std::vector<Material> _materials;
-
 		std::map<std::string, uint32_t> _renderPassMap; //use pass to get idx
+
 
 		vk::Format ToVkFormat(ImgnFormat pFormat);
 
@@ -59,26 +58,26 @@ namespace Imgn
 		void UploadMesh(const Vertex* pVertices, uint64_t pVertexCount);
 		void UploadIndices(const uint32_t* pIndices, uint64_t pIndexCount);
 
-		uint32_t AddMesh(const ImgnMesh& pMesh);
 		uint32_t CreateBuffer(const ImgnBufferDesc& pDesc);
 		uint32_t CreateImage(ImgnImageDesc pDesc);
 		uint32_t CreateMaterial(const ImgnMaterialDesc& pDesc);
 		uint32_t AddMaterial(const Material& pMaterial);
 		uint32_t CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData);
 
-		uint32_t CreateVertexBuffer(std::vector<Vertex>& pVertices);
-		uint32_t CreateIndexBuffer(std::vector<uint32_t>& pIndices);
+		unique<Buffer> CreateVertexBuffer(std::span<const Vertex> pVertices);
+		unique<Buffer> CreateIndexBuffer(std::span<const uint32_t> pIndices);
+		unique<Buffer> CreateMaterialBuffer(std::span<const Material> pMaterials);
+		//uint32_t CreateVertexBuffer(std::vector<Vertex>& pVertices);
+		//uint32_t CreateIndexBuffer(std::vector<uint32_t>& pIndices);
 		uint32_t CreateUniformBuffer(void* pData, uint64_t pSize);
 		uint32_t CreateStorageBuffer(void* pData, uint64_t pSize);
-		uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
+		//uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
 		vk::raii::Sampler& GetTAASampler() { return _vkCtx->GetTAASampler(); }
 		vk::raii::Sampler& GetTextureSampler() { return _vkCtx->GetTextureSampler(); }
 
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
-		ImgnMesh& GetMesh(uint32_t pHandle) { return _meshes[pHandle]; }
-		const Material& GetMaterial(uint32_t pHandle) const { return _materials[pHandle]; }
 
 		std::string CreateRGBufferDesc(const std::string& pName, uint64_t pSize) { return _graph->CreateRGBufferDesc(pName, pSize); }
 		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat) { return _graph->CreateRGImageDesc(pName, pWidth, pHeight, pFormat); }
@@ -119,5 +118,8 @@ namespace Imgn
 
 		void WaitIdle() { _vkCtx->WaitIdle(); }
 		void ClearSwapchain() { _vkCtx->ClearSwapchain(); }
+
+		void UploadMaterialBuffer();
+		void UpdateMaterial(uint32_t pHandle, const Material& pMaterial);
 	};
 }

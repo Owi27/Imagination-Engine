@@ -1,7 +1,5 @@
 #pragma once
 
-constexpr uint32_t InvalidHandle = 0xFFFFFFFF;
-
 enum class MemoryUsage
 {
 	GpuOnly,
@@ -231,26 +229,7 @@ struct ImgnMaterialDesc
     float metallic = 1.f, roughness = 1.f;
 };
 
-struct ImgnPrimitive
-{
-    std::string name;
 
-    int vertexOffset = 0;
-    uint32_t firstIndex = 0, indexCount = 0, firstVertex = 0, vertexCount = 0, material = InvalidHandle;
-};
-
-struct ImgnMesh
-{
-    std::string name;
-
-    uint32_t vertexBuffer = InvalidHandle, indexBuffer = InvalidHandle;
-
-    std::vector<ImgnPrimitive> primitives;
-
-    uint32_t materialBuffer = UINT32_MAX;
-    uint64_t materialBufferSize = 0;
-
-};
 
 
 enum class ImgnAlphaMode

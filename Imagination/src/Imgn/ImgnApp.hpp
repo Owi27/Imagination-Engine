@@ -9,6 +9,8 @@
 #include "ImGui/ImgnGui.h"
 #include "ImgnInput.h"
 
+#include <ranges>
+
 namespace Imgn
 {
 	class IMGN_API ImgnApp
@@ -51,6 +53,11 @@ namespace Imgn
 
 		virtual ~ImgnApp()
 		{
+			for (unique<Layer>& layer : std::views::reverse(_layerStack))
+			{
+				layer->WakeUp();
+			}
+
 			_instance = nullptr;
 		}
 

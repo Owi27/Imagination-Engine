@@ -31,7 +31,10 @@ namespace Imgn
 					if (pOpen)
 					{
 						ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
-						ImGui::DragFloat3("Rotation", transform->rotation.data(), 0.5f);
+
+						vec3 rotation = Math::EulerFromQuat(transform->rotation);
+						if (ImGui::DragFloat3("Rotation", rotation.data(), 0.5f)) transform->rotation = Math::QuatFromEuler(rotation);
+
 						ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
 					}
 				});
@@ -125,10 +128,7 @@ namespace Imgn
 			ImGuiTreeNodeFlags flags = ((_selectedEntity == entity.get()) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
 			bool opened = ImGui::TreeNodeEx(entity->GetName().c_str(), flags);
 
-			if (ImGui::IsItemClicked())
-			{
-				_selectedEntity = entity.get();
-			}
+			if (ImGui::IsItemClicked()) _selectedEntity = entity.get();
 
 			bool entityDeleted = false;
 			if (ImGui::BeginPopupContextItem())
@@ -147,6 +147,14 @@ namespace Imgn
 				bool opened = ImGui::TreeNodeEx(std::format("{}{}", entity->GetName(), "777").c_str(), flags);
 				if (opened) ImGui::TreePop();
 				ImGui::TreePop();
+				/*for (auto& children : _selectedEntity->GetChildren())
+				{
+					ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+					bool opened = ImGui::TreeNodeEx(children->GetName().c_str(), flags);
+					if (opened) ImGui::TreePop();
+				}
+
+				ImGui::TreePop();*/
 			}
 
 			if (entityDeleted)

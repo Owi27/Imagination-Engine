@@ -5,7 +5,6 @@
 using namespace Microsoft::WRL;
 #include "ImGui/imgui_impl_vulkan.h"
 
-
 constexpr int MaxFramesInFlight = 2;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
 constexpr const wchar_t* FragmentTarget = L"ps_6_6";
@@ -14,7 +13,7 @@ constexpr uint32_t NumDescriptorsStreaming = 128;
 
 struct Pipelines
 {
-	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline, taaPipeline;
+	unique<vk::raii::Pipeline> gBufferPipeline, shadowPipeline, lightingPipeline, taaPipeline, uiPipeline;
 	unique<vk::raii::PipelineLayout> pipelineLayout;
 };
 
@@ -184,7 +183,7 @@ public:
 
 	~Vulkan()
 	{
-
+		if (_device) _device->waitIdle();
 	}
 
 	/* Class Functions */
@@ -193,6 +192,9 @@ public:
 	bool StartFrame();
 	void BlitToSwapchain(RGImage& pImage);
 	void EndFrame();
+
+	Buffer CreateVertexBuffer(const void* pData, uint64_t pSize);
+	Buffer CreateIndexBuffer(const void* pData, uint64_t pSize);
 
 	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);
@@ -246,5 +248,4 @@ public:
 
 	void WaitIdle() { _device->waitIdle(); }
 	void ClearSwapchain();
-	
-};
+	};

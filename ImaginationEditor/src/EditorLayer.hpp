@@ -67,6 +67,8 @@ namespace Imgn
 
 		shared<Scene> _editorScene;
 
+		int _gizmoType = -1;
+
 		void ResizeSceneTargets();
 		void DrawSceneView();
 

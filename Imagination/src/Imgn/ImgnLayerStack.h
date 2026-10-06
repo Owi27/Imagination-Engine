@@ -32,5 +32,8 @@ namespace Imgn
 
 		std::vector<unique<Layer>>::iterator begin() { return _layers.begin(); };
 		std::vector<unique<Layer>>::iterator end() { return _layers.end(); };
+
+		std::vector<unique<Layer>>::reverse_iterator rbegin() { return _layers.rbegin(); }
+		std::vector<unique<Layer>>::reverse_iterator rend() { return _layers.rend(); }
 	};
 }

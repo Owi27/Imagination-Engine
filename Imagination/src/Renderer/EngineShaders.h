@@ -601,4 +601,137 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     taaOutput[pixel] = float4(lerp(accumulation, currFrameBlurred, velocityDisocclusion), 1.f);
 })";
+
+    std::string UIVertexShader = R"(
+struct UIInstance
+{
+	float4 rect;
+	float4 uvRect;
+	float4 color;
+	float4 clipRect;
+
+	uint textureIndex;
+	uint flags;
+
+	float2 padding;
+};
+
+StructuredBuffer<UIInstance> instances : register(t1, space0);
+
+[[vk::push_constant]]
+struct UIPushConstants
+{
+	float2 viewportSize;
+	float2 padding;
+} pc;
+
+struct VOut
+{
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+	float4 color : COLOR0;
+	float4 clipRect : TEXCOORD1;
+
+	nointerpolation uint textureIndex : TEXCOORD2;
+	nointerpolation uint flags : TEXCOORD3;
+};
+
+VOut main(uint vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
+{
+	static const float2 positions[6] =
+	{
+		float2(0.f, 0.f),
+		float2(1.f, 0.f),
+		float2(1.f, 1.f),
+
+		float2(0.f, 0.f),
+		float2(1.f, 1.f),
+		float2(0.f, 1.f)
+	};
+
+	UIInstance instance = instances[instanceID];
+
+	float2 corner = positions[vertexID];
+
+	float2 pixelPosition =
+		instance.rect.xy +
+		corner * instance.rect.zw;
+
+	float2 ndc =
+	{
+		pixelPosition.x / pc.viewportSize.x * 2.f - 1.f,
+		1.f - pixelPosition.y / pc.viewportSize.y * 2.f
+	};
+
+	VOut output;
+
+	output.pos = float4(ndc, 0.f, 1.f);
+	output.uv = lerp(instance.uvRect.xy, instance.uvRect.zw, corner);
+	output.color = instance.color;
+	output.clipRect = instance.clipRect;
+	output.textureIndex = instance.textureIndex;
+	output.flags = instance.flags;
+
+	return output;
+})";
+
+    std::string UIFragmentShader = R"(
+#define UI_TEXTURED 1
+#define UI_TEXT 2
+#define UI_TEXTURE_SRGB 4
+
+struct VOut
+{
+	float4 pos : SV_Position;
+	float2 uv : TEXCOORD0;
+	float4 color : COLOR0;
+	float4 clipRect : TEXCOORD1;
+
+	nointerpolation uint textureIndex : TEXCOORD2;
+	nointerpolation uint flags : TEXCOORD3;
+};
+
+Texture2D uiTextures[] : register(t0, space1);
+SamplerState uiSampler : register(s0, space1);
+
+float3 LinearToSRGB(float3 pColor)
+{
+	float3 low = pColor * 12.92f;
+	float3 high = 1.055f * pow(max(pColor, 0.f), 1.f / 2.4f) - 0.055f;
+
+	return lerp(high, low, step(pColor, 0.0031308f));
+}
+
+float4 main(VOut input) : SV_Target
+{
+	if (input.pos.x < input.clipRect.x ||
+		input.pos.y < input.clipRect.y ||
+		input.pos.x >= input.clipRect.z ||
+		input.pos.y >= input.clipRect.w)
+	{
+		discard;
+	}
+
+	float4 color = input.color;
+
+	if ((input.flags & UI_TEXTURED) != 0)
+	{
+		uint textureIndex = NonUniformResourceIndex(input.textureIndex);
+
+		float4 sampleColor = uiTextures[textureIndex].Sample(uiSampler, input.uv);
+
+		if ((input.flags & UI_TEXT) != 0)
+		{
+			color.a *= sampleColor.a;
+		}
+		else
+		{
+			if ((input.flags & UI_TEXTURE_SRGB) == 0) sampleColor.rgb = LinearToSRGB(sampleColor.rgb);
+
+			color *= sampleColor;
+		}
+	}
+
+	return color;
+})";
 }

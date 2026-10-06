@@ -1,6 +1,8 @@
 #pragma once
 #include "gltf/tiny_gltf.h"
 #include "ImgnRenderer.h"
+#include "Components/MeshComponent.h"
+#include "Components/MaterialComponent.h"
 #include <filesystem>
 #include <utility>
 #include "Skeleton.h"
@@ -44,28 +46,28 @@
 
 namespace Imgn
 {
+	struct MeshData
+	{
+		std::string name;
+		unique<Buffer> vertexBuffer, indexBuffer;
+		std::vector<Primitive> primitives;
+	};
+
 	struct ImgnModel
 	{
-		std::vector<uint32_t> materials, meshes;
+		std::vector<MeshData> meshes;
+		std::vector<shared<Material>> materials;
 
 		std::vector<Skeleton> skeletons;
-
-		uint32_t materialBuffer = UINT32_MAX;
-		uint64_t materialBufferSize = 0;
 	};
 
 	class IMGN_API GLTFLoader
 	{
 		static inline unique<GLTFLoader> _instance;
 
-		std::unordered_map<int, int> _primToMat;
-
-		ImgnModel _outModel;
-
 		std::vector<uint32_t> LoadGLTFTextures(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-		std::vector<uint32_t> LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, ImgnRenderer& pRenderer);
-		std::vector<uint32_t> LoadGLTFMeshes(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
-		void CreateMaterialBuffer(ImgnRenderer& pRenderer);
+		std::vector<shared<Material>> LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures);
+		std::vector<MeshData> LoadGLTFMeshes(const tinygltf::Model& pModel, ImgnRenderer& pRenderer);
 		std::pair<std::vector<Vertex>, std::vector<uint32_t>> GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive);
 		ImgnModel LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
 		Skeleton LoadSkeleton(const tinygltf::Model& pModel, const tinygltf::Skin& pSkin);
@@ -92,4 +94,6 @@ namespace Imgn
 		/* Class Functions */
 		static ImgnModel LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
 	};
+
+
 }

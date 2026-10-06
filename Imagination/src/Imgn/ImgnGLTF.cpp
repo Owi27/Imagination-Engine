@@ -18,15 +18,22 @@ namespace Imgn
 		return textures;
 	}
 
-	std::vector<uint32_t> GLTFLoader::LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures, Imgn::ImgnRenderer& pRenderer)
+	std::vector<shared<Material>> GLTFLoader::LoadGLTFMaterials(const tinygltf::Model& pModel, const std::vector<uint32_t>& pTextures)
 	{
-		std::vector<uint32_t> materials; materials.reserve(pModel.materials.size());
+		std::vector<shared<Material>> materials;
+		materials.reserve(pModel.materials.size() + 1);
 
-		if (pModel.materials.empty())
+		Material defaultMaterial
 		{
-			materials.push_back(0);
-			return materials;
-		}
+			.baseColorFactor = { 1.0f, 1.0f, 1.0f, 1.0f },
+			.emissiveFactor = { 0.0f, 0.0f, 0.0f, 0.0f },
+			.textureIndices0 = { -1, -1, -1, -1 },
+			.textureIndices1 = { -1, static_cast<int32_t>(ImgnAlphaMode::Opaque), 0, 0 },
+			.materialFactors = { 1.0f, 1.0f, 0.5f, 1.0f },
+			.extraFactors = { 1.0f, 0.0f, 0.0f, 0.0f }
+		};
+
+		materials.push_back(Shared<Material>(defaultMaterial));
 
 		auto GetTextureHandle = [&](int pTextureIndex) -> int32_t
 			{
@@ -43,7 +50,7 @@ namespace Imgn
 		{
 			const tinygltf::PbrMetallicRoughness& pbr = material.pbrMetallicRoughness;
 
-			Material m
+			Material loadedMaterial
 			{
 				.baseColorFactor =
 				{
@@ -72,9 +79,7 @@ namespace Imgn
 				.textureIndices1 =
 				{
 					GetTextureHandle(material.occlusionTexture.index),
-					material.alphaMode == "BLEND" ? static_cast<int32_t>(ImgnAlphaMode::Blend) :
-					material.alphaMode == "MASK" ? static_cast<int32_t>(ImgnAlphaMode::Mask) :
-					static_cast<int32_t>(ImgnAlphaMode::Opaque),
+					material.alphaMode == "BLEND" ? static_cast<int32_t>(ImgnAlphaMode::Blend) : material.alphaMode == "MASK" ? static_cast<int32_t>(ImgnAlphaMode::Mask) : static_cast<int32_t>(ImgnAlphaMode::Opaque),
 					material.doubleSided ? 1 : 0,
 					0
 				},
@@ -96,59 +101,61 @@ namespace Imgn
 				}
 			};
 
-			materials.push_back(pRenderer.AddMaterial(m));
+			materials.push_back(Shared<Material>(loadedMaterial));
 		}
 
 		return materials;
 	}
 
-	std::vector<uint32_t> GLTFLoader::LoadGLTFMeshes(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
+	std::vector<MeshData> GLTFLoader::LoadGLTFMeshes(const tinygltf::Model& pModel, Imgn::ImgnRenderer& pRenderer)
 	{
-		std::vector<uint32_t> meshes;
+		std::vector<MeshData> meshes;
+		meshes.reserve(pModel.meshes.size());
 
 		for (const tinygltf::Mesh& mesh : pModel.meshes)
 		{
-			ImgnMesh m;
-			m.name = mesh.name;
+			std::vector<Vertex> vertices;
+			std::vector<uint32_t> indices;
+			std::vector<Primitive> primitives;
 
-			std::vector<Vertex> vertices;// = vertexData.first;
-			std::vector<uint32_t> indices;// = vertexData.second;
+			primitives.reserve(mesh.primitives.size());
 
 			for (const tinygltf::Primitive& primitive : mesh.primitives)
 			{
 				if (primitive.mode != TINYGLTF_MODE_TRIANGLES) continue;
 
-				auto vertexData = GetVertexData(pModel, primitive);
+				std::pair<std::vector<Vertex>, std::vector<uint32_t>> vertexData = GetVertexData(pModel, primitive);
 
-				ImgnPrimitive prim
+				Primitive loadedPrimitive
 				{
-					.name = mesh.name + "Primitive",
-					.vertexOffset = static_cast<int>(vertices.size()),
 					.firstIndex = static_cast<uint32_t>(indices.size()),
-					.material = primitive.material > -1 ? static_cast<uint32_t>(primitive.material) : 0,
+					.indexCount = static_cast<uint32_t>(vertexData.second.size()),
+					.firstVertex = static_cast<uint32_t>(vertices.size()),
+					.vertexCount = static_cast<uint32_t>(vertexData.first.size()),
+					.vertexOffset = static_cast<uint32_t>(vertices.size()),
+					.materialSlot = primitive.material >= 0 ? static_cast<uint32_t>(primitive.material + 1) : 0
 				};
 
 				vertices.insert(vertices.end(), vertexData.first.begin(), vertexData.first.end());
 				indices.insert(indices.end(), vertexData.second.begin(), vertexData.second.end());
 
-				prim.indexCount = static_cast<uint32_t>(indices.size()) - prim.firstIndex;
-
-				m.primitives.push_back(prim);
+				primitives.push_back(loadedPrimitive);
 			}
 
-			m.vertexBuffer = pRenderer.CreateVertexBuffer(vertices);
-			m.indexBuffer = pRenderer.CreateIndexBuffer(indices);
+			if (vertices.empty() || indices.empty()) continue;
 
-			meshes.push_back(pRenderer.AddMesh(m));
+			MeshData loadedMesh
+			{
+				.name = mesh.name,
+				.vertexBuffer = pRenderer.CreateVertexBuffer(vertices),
+				.indexBuffer = pRenderer.CreateIndexBuffer(indices),
+				.primitives = std::move(primitives)
+			};
+
+			meshes.push_back(std::move(loadedMesh));
 		}
 
 		return meshes;
-	}
-
-	void GLTFLoader::CreateMaterialBuffer(ImgnRenderer& pRenderer)
-	{
-		_outModel.materialBuffer = pRenderer.CreateMaterialBuffer(_outModel.materials);
-		_outModel.materialBufferSize = static_cast<uint64_t>(_outModel.materials.size()) * sizeof(Material);
 	}
 
 	std::pair<std::vector<Vertex>, std::vector<uint32_t>> GLTFLoader::GetVertexData(const tinygltf::Model& pModel, const tinygltf::Primitive& pPrimitive)
@@ -266,11 +273,9 @@ namespace Imgn
 
 	ImgnModel GLTFLoader::LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer)
 	{
-		_outModel = {};
 		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;
-		std::string error;
-		std::string warning;
+		std::string error, warning;
 
 		bool loaded = false;
 
@@ -293,19 +298,21 @@ namespace Imgn
 			throw std::runtime_error("Failed to parse glTF: " + pFile.string() + "\n" + error);
 		}
 
-		_outModel.materials = LoadGLTFMaterials(model, LoadGLTFTextures(model, pRenderer), pRenderer);
-		_outModel.meshes = LoadGLTFMeshes(model, pRenderer);
+		ImgnModel outModel;
 
-		_outModel.skeletons.reserve(model.skins.size());
+		std::vector<uint32_t> textures = LoadGLTFTextures(model, pRenderer);
+
+		outModel.materials = LoadGLTFMaterials(model, textures);
+		outModel.meshes = LoadGLTFMeshes(model, pRenderer);
+
+		outModel.skeletons.reserve(model.skins.size());
 
 		for (const tinygltf::Skin& skin : model.skins)
 		{
-			_outModel.skeletons.push_back(LoadSkeleton(model, skin));
+			outModel.skeletons.push_back(LoadSkeleton(model, skin));
 		}
 
-		CreateMaterialBuffer(pRenderer);
-
-		return _outModel;
+		return outModel;
 	}
 
 	Skeleton GLTFLoader::LoadSkeleton(const tinygltf::Model& pModel, const tinygltf::Skin& pSkin)

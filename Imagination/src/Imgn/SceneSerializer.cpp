@@ -102,7 +102,7 @@ namespace Imgn
 						{
 						case TransformComponent::TypeID: entity->AddComponent<TransformComponent>()->Deserialize(_stream); break;
 						case CameraComponent::TypeID: entity->AddComponent<CameraComponent>()->Deserialize(_stream); break;
-						case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
+						//case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
 						case ScriptComponent::TypeID: entity->AddComponent<ScriptComponent>()->Deserialize(_stream); break;
 						default: break;
 						}

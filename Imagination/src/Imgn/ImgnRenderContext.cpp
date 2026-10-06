@@ -132,6 +132,15 @@ namespace Imgn
 			.pImageInfo = pImageInfo.data()
 		};
 	}
+	vk::DescriptorBufferInfo RenderContext::CreateDescriptorBufferInfo(const Buffer& pBuffer, uint64_t pSize)
+	{
+		return vk::DescriptorBufferInfo
+		{
+			.buffer = **pBuffer.buffer,
+			.offset = 0,
+			.range = pSize
+		};
+	}
 	void RenderContext::PushDescriptorSet(vk::PipelineBindPoint pBindPoint, vk::PipelineLayout pPipelineLayout, std::span<vk::WriteDescriptorSet> pWrites)
 	{
 		_commandBuffer->pushDescriptorSet(pBindPoint, pPipelineLayout, 0, pWrites);
@@ -140,12 +149,20 @@ namespace Imgn
 	{
 		_commandBuffer->dispatch(pX, pY, pZ);
 	}
-	void RenderContext::BindMesh(uint32_t pMeshHandle)
+
+	void RenderContext::BindMesh(const MeshComponent& pMesh)
 	{
-		_commandBuffer->bindVertexBuffers(0, **_renderer->GetBuffer(_renderer->GetMesh(pMeshHandle).vertexBuffer).buffer, { 0 });
-		_commandBuffer->bindIndexBuffer(**_renderer->GetBuffer(_renderer->GetMesh(pMeshHandle).indexBuffer).buffer, 0, vk::IndexType::eUint32);
+		const Buffer* vertexBuffer = pMesh.GetVertexBuffer();
+		const Buffer* indexBuffer = pMesh.GetIndexBuffer();
+
+		if (!vertexBuffer || !indexBuffer) return;
+		if (!vertexBuffer->buffer || !indexBuffer->buffer) return;
+
+		_commandBuffer->bindVertexBuffers(0, **vertexBuffer->buffer, { 0 });
+		_commandBuffer->bindIndexBuffer(**indexBuffer->buffer, 0, vk::IndexType::eUint32);
 	}
-	void RenderContext::DrawPrimitive(const ImgnPrimitive& pPrimitive)
+
+	void RenderContext::DrawPrimitive(const Primitive& pPrimitive)
 	{
 		_commandBuffer->drawIndexed(pPrimitive.indexCount, 1, pPrimitive.firstIndex, pPrimitive.vertexOffset, 0);
 	}

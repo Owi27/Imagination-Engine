@@ -8,6 +8,7 @@ namespace Imgn
 		CameraComponent* cam = nullptr;
 		TransformComponent* transform = nullptr;
 
+		vec3 _eulerRotation = { 0.f, 0.f, 0.f };
 		inline static bool _inputEnabled = false;
 
 		void UpdateCamera(Time pTime);
@@ -18,6 +19,8 @@ namespace Imgn
 			IMGN_TRACE("sleep");
 			cam = GetComponent<CameraComponent>();
 			transform = GetComponent<TransformComponent>();
+
+			if (transform) _eulerRotation = Math::EulerFromQuat(transform->rotation);
 		}
 
 		void WakeUp()

@@ -42,6 +42,8 @@ namespace Imgn
 
         void Dream(Time pTime);
 
+        void Clear() { _entities.clear(); }
+
         /*Class Functions*/
         Entity* CreateEntity(const std::string& pName = "Entity");
         void DestroyEntity(unique<Entity>& pEntity);

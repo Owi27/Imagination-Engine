@@ -672,8 +672,8 @@ void Vulkan::CreateGraphicsPipelines()
 
 		std::array shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
-		auto bindingDesc = Vertex::GetBindingDescription();
-		auto attributeDesc = Vertex::GetAttributeDescriptions();
+		auto bindingDesc = Imgn::Vertex::GetBindingDescription();
+		auto attributeDesc = Imgn::Vertex::GetAttributeDescriptions();
 
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo
 		{
@@ -721,7 +721,7 @@ void Vulkan::CreateGraphicsPipelines()
 			.stencilTestEnable = vk::False
 		};
 
-		std::array blendStates = { colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
+		std::array blendStates = { colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
 
 		vk::PipelineColorBlendStateCreateInfo colorBlending
 		{
@@ -737,7 +737,8 @@ void Vulkan::CreateGraphicsPipelines()
 			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Srgb,
-			vk::Format::eR16G16Sfloat
+			vk::Format::eR16G16Sfloat,
+			vk::Format::eR8Sint
 		};
 
 		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -807,7 +808,118 @@ void Vulkan::CreateGraphicsPipelines()
 		};
 
 		_pipelines.taaPipeline = Unique<vk::raii::Pipeline>(_device->createComputePipeline(nullptr, computePipelineCreateInfo));
+	}
 
+	/* UI */
+	{
+		vk::raii::ShaderModule vertexSM = CreateShaderModule(CreateSPV(Shaders::UIVertexShader, VertexTarget));
+		vk::raii::ShaderModule fragmentSM = CreateShaderModule(CreateSPV(Shaders::UIFragmentShader, FragmentTarget));
+
+		std::array shaderStages =
+		{
+			vk::PipelineShaderStageCreateInfo
+			{
+				.stage = vk::ShaderStageFlagBits::eVertex,
+				.module = vertexSM,
+				.pName = "main"
+			},
+
+			vk::PipelineShaderStageCreateInfo
+			{
+				.stage = vk::ShaderStageFlagBits::eFragment,
+				.module = fragmentSM,
+				.pName = "main"
+			}
+		};
+
+		vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+
+		vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+		{
+			.topology = vk::PrimitiveTopology::eTriangleList
+		};
+
+		vk::PipelineViewportStateCreateInfo viewportState
+		{
+			.viewportCount = 1,
+			.scissorCount = 1
+		};
+
+		vk::PipelineRasterizationStateCreateInfo rasterizer
+		{
+			.depthClampEnable = vk::False,
+			.rasterizerDiscardEnable = vk::False,
+			.polygonMode = vk::PolygonMode::eFill,
+			.cullMode = vk::CullModeFlagBits::eNone,
+			.frontFace = vk::FrontFace::eCounterClockwise,
+			.depthBiasEnable = vk::False,
+			.lineWidth = 1.f
+		};
+
+		vk::PipelineMultisampleStateCreateInfo multisampling
+		{
+			.rasterizationSamples = vk::SampleCountFlagBits::e1
+		};
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil
+		{
+			.depthTestEnable = vk::False,
+			.depthWriteEnable = vk::False
+		};
+
+		vk::PipelineColorBlendAttachmentState blendAttachment
+		{
+			.blendEnable = vk::True,
+
+			.srcColorBlendFactor = vk::BlendFactor::eSrcAlpha,
+			.dstColorBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha,
+			.colorBlendOp = vk::BlendOp::eAdd,
+
+			.srcAlphaBlendFactor = vk::BlendFactor::eOne,
+			.dstAlphaBlendFactor = vk::BlendFactor::eOneMinusSrcAlpha,
+			.alphaBlendOp = vk::BlendOp::eAdd,
+
+			.colorWriteMask =
+				vk::ColorComponentFlagBits::eR |
+				vk::ColorComponentFlagBits::eG |
+				vk::ColorComponentFlagBits::eB |
+				vk::ColorComponentFlagBits::eA
+		};
+
+		vk::PipelineColorBlendStateCreateInfo colorBlending
+		{
+			.attachmentCount = 1,
+			.pAttachments = &blendAttachment
+		};
+
+		vk::Format colorFormat = vk::Format::eR16G16B16A16Sfloat;
+
+		vk::PipelineRenderingCreateInfo renderingInfo
+		{
+			.colorAttachmentCount = 1,
+			.pColorAttachmentFormats = &colorFormat
+		};
+
+		vk::GraphicsPipelineCreateInfo uiPipelineInfo
+		{
+			.pNext = &renderingInfo,
+
+			.stageCount = static_cast<uint32_t>(shaderStages.size()),
+			.pStages = shaderStages.data(),
+
+			.pVertexInputState = &vertexInputInfo,
+			.pInputAssemblyState = &inputAssembly,
+			.pViewportState = &viewportState,
+			.pRasterizationState = &rasterizer,
+			.pMultisampleState = &multisampling,
+			.pDepthStencilState = &depthStencil,
+			.pColorBlendState = &colorBlending,
+			.pDynamicState = &dynamicState,
+
+			.layout = *_pipelines.pipelineLayout
+		};
+
+		_pipelines.uiPipeline = Unique<vk::raii::Pipeline>(_device->createGraphicsPipeline(nullptr, uiPipelineInfo));
 	}
 
 }
@@ -1165,6 +1277,42 @@ void Vulkan::EndFrame()
 	}
 
 	_frameInFlightIdx = (_frameInFlightIdx + 1) % MaxFramesInFlight;
+}
+
+Buffer Vulkan::CreateVertexBuffer(const void* pData, uint64_t pSize)
+{
+	Buffer vertexBuffer;
+
+	Buffer staging;
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+
+	void* stagingData = staging.memory->mapMemory(0, pSize);
+	memcpy(stagingData, pData, pSize);
+	staging.memory->unmapMemory();
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, vertexBuffer);
+
+	CopyBuffer(*staging.buffer, *vertexBuffer.buffer, pSize);
+
+	return vertexBuffer;
+}
+
+Buffer Vulkan::CreateIndexBuffer(const void* pData, uint64_t pSize)
+{
+	Buffer indexBuffer;
+
+	Buffer staging;
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, staging);
+
+	void* stagingData = staging.memory->mapMemory(0, pSize);
+	memcpy(stagingData, pData, pSize);
+	staging.memory->unmapMemory();
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, indexBuffer);
+
+	CopyBuffer(*staging.buffer, *indexBuffer.buffer, pSize);
+
+	return indexBuffer;
 }
 
 Buffer Vulkan::CreateVertexBuffer(void* pData, uint64_t pSize)

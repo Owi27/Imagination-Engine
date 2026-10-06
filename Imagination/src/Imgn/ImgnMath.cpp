@@ -25,6 +25,137 @@ namespace Imgn
 		};
 	}
 
+	float Math::Dot(quat pLQuat, quat pRQuat)
+	{
+		return pLQuat[0] * pRQuat[0] + pLQuat[1] * pRQuat[1] + pLQuat[2] * pRQuat[2] + pLQuat[3] * pRQuat[3];
+	}
+
+	float Math::Length(quat pQuat)
+	{
+		return std::sqrt(Dot(pQuat, pQuat));
+	}
+
+	quat Math::Normalize(quat pQuat)
+	{
+		float length = Length(pQuat);
+
+		if (WithinStandardDeviation(length, 0.f)) return { 0.f, 0.f, 0.f, 1.f };
+
+		float inverseLength = 1.f / length;
+
+		return { pQuat[0] * inverseLength, pQuat[1] * inverseLength, pQuat[2] * inverseLength, pQuat[3] * inverseLength };
+	}
+
+	quat Math::Multiply(quat pLQuat, quat pRQuat)
+	{
+		return { pLQuat[3] * pRQuat[0] + pLQuat[0] * pRQuat[3] + pLQuat[1] * pRQuat[2] - pLQuat[2] * pRQuat[1], pLQuat[3] * pRQuat[1] - pLQuat[0] * pRQuat[2] + pLQuat[1] * pRQuat[3] + pLQuat[2] * pRQuat[0], pLQuat[3] * pRQuat[2] + pLQuat[0] * pRQuat[1] - pLQuat[1] * pRQuat[0] + pLQuat[2] * pRQuat[3], pLQuat[3] * pRQuat[3] - pLQuat[0] * pRQuat[0] - pLQuat[1] * pRQuat[1] - pLQuat[2] * pRQuat[2] };
+	}
+
+	quat Math::QuatFromEuler(vec3 pEuler)
+	{
+		float halfX = Radians(pEuler[0]) * .5f;
+		float halfY = Radians(pEuler[1]) * .5f;
+		float halfZ = Radians(pEuler[2]) * .5f;
+
+		quat rotationX = { std::sin(halfX), 0.f, 0.f, std::cos(halfX) }, rotationY = { 0.f, std::sin(halfY), 0.f, std::cos(halfY) }, rotationZ = { 0.f, 0.f, std::sin(halfZ), std::cos(halfZ) };
+
+		return Normalize(Multiply(Multiply(rotationX, rotationY), rotationZ));
+	}
+
+	vec3 Math::EulerFromQuat(quat pQuat)
+	{
+		mat4 rotation = RotationMatrix(Normalize(pQuat));
+
+		return { Degrees(std::atan2(-rotation[9], rotation[10])), Degrees(std::atan2(rotation[8], std::sqrt(rotation[0] * rotation[0] + rotation[4] * rotation[4]))), Degrees(std::atan2(-rotation[4], rotation[0])) };
+	}
+
+	mat4 Math::RotationMatrix(quat pQuat)
+	{
+		float xx = pQuat[0] * pQuat[0];
+		float yy = pQuat[1] * pQuat[1];
+		float zz = pQuat[2] * pQuat[2];
+
+		float xy = pQuat[0] * pQuat[1];
+		float xz = pQuat[0] * pQuat[2];
+		float yz = pQuat[1] * pQuat[2];
+
+		float wx = pQuat[3] * pQuat[0];
+		float wy = pQuat[3] * pQuat[1];
+		float wz = pQuat[3] * pQuat[2];
+
+		return { 1.f - 2.f * (yy + zz), 2.f * (xy + wz), 2.f * (xz - wy), 0.f, 2.f * (xy - wz), 1.f - 2.f * (xx + zz), 2.f * (yz + wx), 0.f, 2.f * (xz + wy), 2.f * (yz - wx), 1.f - 2.f * (xx + yy), 0.f, 0.f, 0.f, 0.f, 1.f };
+	}
+
+	quat Math::QuatFromRotationMatrix(mat4 pRotation)
+	{
+		quat rotation;
+
+		float trace = pRotation[0] + pRotation[5] + pRotation[10];
+
+		if (trace > 0.f)
+		{
+			float s = std::sqrt(trace + 1.f) * 2.f;
+
+			rotation[3] = .25f * s;
+			rotation[0] = (pRotation[6] - pRotation[9]) / s;
+			rotation[1] = (pRotation[8] - pRotation[2]) / s;
+			rotation[2] = (pRotation[1] - pRotation[4]) / s;
+		}
+		else if (pRotation[0] > pRotation[5] && pRotation[0] > pRotation[10])
+		{
+			float s = std::sqrt(1.f + pRotation[0] - pRotation[5] - pRotation[10]) * 2.f;
+
+			rotation[3] = (pRotation[6] - pRotation[9]) / s;
+			rotation[0] = .25f * s;
+			rotation[1] = (pRotation[1] + pRotation[4]) / s;
+			rotation[2] = (pRotation[2] + pRotation[8]) / s;
+		}
+		else if (pRotation[5] > pRotation[10])
+		{
+			float s = std::sqrt(1.f + pRotation[5] - pRotation[0] - pRotation[10]) * 2.f;
+
+			rotation[3] = (pRotation[8] - pRotation[2]) / s;
+			rotation[0] = (pRotation[1] + pRotation[4]) / s;
+			rotation[1] = .25f * s;
+			rotation[2] = (pRotation[6] + pRotation[9]) / s;
+		}
+		else
+		{
+			float s = std::sqrt(1.f + pRotation[10] - pRotation[0] - pRotation[5]) * 2.f;
+
+			rotation[3] = (pRotation[1] - pRotation[4]) / s;
+			rotation[0] = (pRotation[2] + pRotation[8]) / s;
+			rotation[1] = (pRotation[6] + pRotation[9]) / s;
+			rotation[2] = .25f * s;
+		}
+
+		return Normalize(rotation);
+	}
+
+	vec3 Math::Rotate(vec3 pVec, quat pRotation)
+	{
+		mat4 rotation = RotationMatrix(pRotation);
+
+		return { pVec[0] * rotation[0] + pVec[1] * rotation[4] + pVec[2] * rotation[8], pVec[0] * rotation[1] + pVec[1] * rotation[5] + pVec[2] * rotation[9], pVec[0] * rotation[2] + pVec[1] * rotation[6] + pVec[2] * rotation[10] };
+	}
+
+	mat4 Math::Rotate(mat4 pMat, quat pRotation, bool pGlobal)
+	{
+		mat4 rotation = RotationMatrix(pRotation);
+
+		if (pGlobal)
+		{
+			vec4 translation = { pMat[12], pMat[13], pMat[14], pMat[15] };
+			mat4 out = pMat * rotation;
+
+			for (size_t i = 0; i < 4; i++) out[i + 12] = translation[i];
+
+			return out;
+		}
+
+		return rotation * pMat;
+	}
+
 	mat4 Math::Inverse(mat4 pMat)
 	{
 		float a0 = pMat[0] * pMat[5] - pMat[1] * pMat[4];
@@ -201,75 +332,39 @@ namespace Imgn
 		};
 	}
 
-	void Math::Decompose(mat4 pMat, vec4& pTranslation, vec4& pRotation, vec4& pScale)
+	void Math::Decompose(mat4 pMat, vec4& pTranslation, quat& pRotation, vec4& pScale)
 	{
 		//translate
 		pTranslation = { pMat[12], pMat[13], pMat[14], 0 };
 
 		//rotation
 		float det = Determinant(pMat);
-		float sx = sqrt(pMat[0] * pMat[0] + pMat[4] * pMat[4] + pMat[8] * pMat[8]);
-		float sy = sqrt(pMat[1] * pMat[1] + pMat[5] * pMat[5] + pMat[9] * pMat[9]);
-		float sz = sqrt(pMat[2] * pMat[2] + pMat[6] * pMat[6] + pMat[10] * pMat[10]);
+		float sx = std::sqrt(pMat[0] * pMat[0] + pMat[1] * pMat[1] + pMat[2] * pMat[2]);
+		float sy = std::sqrt(pMat[4] * pMat[4] + pMat[5] * pMat[5] + pMat[6] * pMat[6]);
+		float sz = std::sqrt(pMat[8] * pMat[8] + pMat[9] * pMat[9] + pMat[10] * pMat[10]);
 
 		if (WithinStandardDeviation(det, 0.f)) return;
 		if (det < 0) sx = -sx;
 
 		mat4 rotation = pMat;
 		rotation[0] /= sx;
-		rotation[4] /= sx;
-		rotation[8] /= sx;
-		rotation[1] /= sy;
+		rotation[1] /= sx;
+		rotation[2] /= sx;
+		rotation[4] /= sy;
 		rotation[5] /= sy;
-		rotation[9] /= sy;
-		rotation[2] /= sz;
-		rotation[6] /= sz;
+		rotation[6] /= sy;
+		rotation[8] /= sz;
+		rotation[9] /= sz;
 		rotation[10] /= sz;
 
-		float trace = rotation[0] + rotation[5] + rotation[10] + 1;
-
-		if (trace > G_EPSILON_F)
-		{
-			float s = 0.5f / sqrt(trace);
-			pRotation[0] = (rotation[9] - rotation[6]) * s;
-			pRotation[1] = (rotation[2] - rotation[8]) * s;
-			pRotation[2] = (rotation[4] - rotation[1]) * s;
-			pRotation[3] = 0.25f / s;
-		}
-		else
-		{
-			if (rotation[0] > rotation[5] && rotation[0] > rotation[10])
-			{
-				float s = 0.5f / sqrt(1.0f + rotation[0] - rotation[5] - rotation[10]);
-				pRotation[0] = 0.25f / s;
-				pRotation[1] = (rotation[1] + rotation[4]) * s;
-				pRotation[2] = (rotation[3] + rotation[8]) * s;
-				pRotation[3] = (rotation[9] - rotation[6]) * s;
-			}
-			else if (rotation[5] > rotation[10])
-			{
-				float s = 0.5f / sqrt(1.0f + rotation[5] - rotation[0] - rotation[10]);
-				pRotation[0] = (rotation[1] + rotation[4]) * s;
-				pRotation[1] = 0.25f / s;
-				pRotation[2] = (rotation[6] + rotation[9]) * s;
-				pRotation[3] = (rotation[2] - rotation[8]) * s;
-			}
-			else
-			{
-				float s = 0.5f / sqrt(1.0f + rotation[10] - rotation[0] - rotation[5]);
-				pRotation[0] = (rotation[2] + rotation[8]) * s;
-				pRotation[1] = (rotation[6] + rotation[9]) * s;
-				pRotation[2] = 0.25f / s;
-				pRotation[3] = (rotation[4] - rotation[1]) * s;
-			}
-		}
+		pRotation = QuatFromRotationMatrix(rotation);
 
 		//scale
 		pScale[0] = sqrt(pMat[0] * pMat[0] + pMat[4] * pMat[4] + pMat[8] * pMat[8]);
 		pScale[1] = sqrt(pMat[1] * pMat[1] + pMat[5] * pMat[5] + pMat[9] * pMat[9]);
 		pScale[2] = sqrt(pMat[2] * pMat[2] + pMat[6] * pMat[6] + pMat[10] * pMat[10]);
 		pScale[3] = 0;
-		pScale[0] = -pScale[0];
+		if (det < 0) pScale[0] = -pScale[0];
 	}
 
 	mat4 Math::Orthographic(float pRight, float pLeft, float pTop, float pBottom, float pNear, float pFar)

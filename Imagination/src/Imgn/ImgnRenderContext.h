@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer/Vulkan.hpp"
+#include "Components/MeshComponent.h"
 
-	struct ImgnPrimitive;
 namespace Imgn
 {
 	class ImgnRenderer;
@@ -52,6 +52,8 @@ namespace Imgn
 		vk::WriteDescriptorSet CreateWriteDescriptorSet(uint32_t pBinding, vk::DescriptorType pDescriptorType, vk::DescriptorImageInfo& pImageInfo);
 		vk::WriteDescriptorSet CreateWriteDescriptorSet(uint32_t pBinding, vk::DescriptorType pDescriptorType, std::span<vk::DescriptorImageInfo> pImageInfo);
 
+		vk::DescriptorBufferInfo CreateDescriptorBufferInfo(const Buffer& pBuffer, uint64_t pSize);
+
 		void PushDescriptorSet(vk::PipelineBindPoint pBindPoint, vk::PipelineLayout pPipelineLayout, std::span<vk::WriteDescriptorSet> pWrites);
 		
 		void Dispatch(uint32_t pX, uint32_t pY, uint32_t pZ);
@@ -62,7 +64,7 @@ namespace Imgn
 			_commandBuffer->pushConstants<T>(GetPipelineLayout(), pStages, 0, pData);
 		}
 
-		void BindMesh(uint32_t pMeshHandle);
-		void DrawPrimitive(const ImgnPrimitive& pPrimitive);
+		void BindMesh(const MeshComponent& pMesh);
+		void DrawPrimitive(const Primitive& pPrimitive);
 	};
 }

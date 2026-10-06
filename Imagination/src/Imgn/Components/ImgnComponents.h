@@ -10,15 +10,14 @@ namespace Imgn
 		//static constexpr ID TypeID = HashComponentName("Imgn.TransformComponent");
 		IMGN_COMPONENT_ID("Imgn.TransformComponent");
 
-		vec3 position = { 0.f, 0.f, 0.f }, rotation = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
+		vec3 position = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
+		quat rotation = { 0.f, 0.f, 0.f, 1.f };
 
 		mat4 GetTransform()
 		{
 			mat4 transform = Math::identity;
 			transform = Math::Translate(transform, position);
-			transform = Math::Rotate(transform, { 1.f, 0.f, 0.f }, Math::Radians(rotation[0]));
-			transform = Math::Rotate(transform, { 0.f, 1.f, 0.f }, Math::Radians(rotation[1]));
-			transform = Math::Rotate(transform, { 0.f, 0.f, 1.f }, Math::Radians(rotation[2]));
+			transform = Math::Rotate(transform, rotation);
 			transform = Math::Scale(transform, scale);
 
 			return transform;
@@ -31,47 +30,57 @@ namespace Imgn
 		{
 			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
 			pStream.write(reinterpret_cast<const char*>(position.data()), position.size() * sizeof(float));
-			pStream.write(reinterpret_cast<const char*>(rotation.data()), rotation.size() * sizeof(float));
+
+			vec3 eulerRotation = Math::EulerFromQuat(rotation);
+			pStream.write(reinterpret_cast<const char*>(eulerRotation.data()), eulerRotation.size() * sizeof(float));
+
 			pStream.write(reinterpret_cast<const char*>(scale.data()), scale.size() * sizeof(float));
 		}
 
 		// Inherited via Component
 		void Deserialize(std::fstream& pStream) override
 		{
+			vec3 eulerRotation;
+
 			pStream.read(reinterpret_cast<char*>(position.data()), position.size() * sizeof(float));
-			pStream.read(reinterpret_cast<char*>(rotation.data()), rotation.size() * sizeof(float));
+			pStream.read(reinterpret_cast<char*>(eulerRotation.data()), eulerRotation.size() * sizeof(float));
 			pStream.read(reinterpret_cast<char*>(scale.data()), scale.size() * sizeof(float));
+
+			rotation = Math::QuatFromEuler(eulerRotation);
 		}
 	};
 
-	struct MeshComponent : public Component
-	{
-		//static constexpr ComponentTypeID TypeID = HashComponentName("Imgn.MeshComponent");
-		IMGN_COMPONENT_ID("Imgn.MeshComponent");
+	//struct MeshComponent : public Component
+	//{
+	//	//static constexpr ComponentTypeID TypeID = HashComponentName("Imgn.MeshComponent");
+	//	IMGN_COMPONENT_ID("Imgn.MeshComponent");
 
-		uint32_t mesh;
-		std::vector<uint32_t> materials;
+	//	uint32_t mesh = InvalidHandle;
+	//	std::vector<Material> materials;
 
-		bool visible = true; //cast and receive shadows?
+	//	static bool ReadString(std::fstream& pStream, std::string& pValue);
+	//	static void WriteString(std::fstream& pStream, const std::string& pValue);
 
-		MeshComponent() : Component("Mesh") {}
-		MeshComponent(uint32_t pMesh) : Component("Mesh")
-		{
-			mesh = pMesh;
-		}
+	//	bool visible = true; //cast and receive shadows?
 
-		void Serialize(std::fstream& pStream) override
-		{
-			pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
-			//pStream.write(reinterpret_cast<const char*>(position.data()), position.size() * sizeof(float));
-			//pStream.write(reinterpret_cast<const char*>(rotation.data()), rotation.size() * sizeof(float));
-			//pStream.write(reinterpret_cast<const char*>(scale.data()), scale.size() * sizeof(float));
-		}
+	//	MeshComponent() : Component("Mesh") {}
+	//	MeshComponent(uint32_t pMesh) : Component("Mesh")
+	//	{
+	//		mesh = pMesh;
+	//	}
 
-		void Deserialize(std::fstream& pStream) override
-		{
-		}
-	};
+	//	void Serialize(std::fstream& pStream) override
+	//	{
+	//		pStream.write(reinterpret_cast<const char*>(&TypeID), sizeof(ID));
+	//		//pStream.write(reinterpret_cast<const char*>(position.data()), position.size() * sizeof(float));
+	//		//pStream.write(reinterpret_cast<const char*>(rotation.data()), rotation.size() * sizeof(float));
+	//		//pStream.write(reinterpret_cast<const char*>(scale.data()), scale.size() * sizeof(float));
+	//	}
+
+	//	void Deserialize(std::fstream& pStream) override
+	//	{
+	//	}
+	//};
 
 	struct CameraComponent : public Component
 	{

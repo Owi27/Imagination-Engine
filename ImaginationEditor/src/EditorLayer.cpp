@@ -13,23 +13,8 @@ namespace Imgn
 {
 	mat4 EditorLayer::GetCamView(TransformComponent* pTransform)
 	{
-		const float pitch = Math::Radians(pTransform->rotation[0]);
-
-		const float yaw = Math::Radians(pTransform->rotation[1]);
-
-		vec3 forward =
-		{
-			std::sin(yaw) * std::cos(pitch),
-			-std::sin(pitch),
-			std::cos(yaw) * std::cos(pitch)
-		};
-
-		vec3 target =
-		{
-			pTransform->position[0] + forward[0],
-			pTransform->position[1] + forward[1],
-			pTransform->position[2] + forward[2]
-		};
+		vec3 forward = Math::Rotate(vec3{ 0.f, 0.f, 1.f }, pTransform->rotation);
+		vec3 target = pTransform->position + forward;
 
 		return Math::LookAtLH(pTransform->position, target, { 0.f, 1.f, 0.f });
 	}
@@ -38,8 +23,7 @@ namespace Imgn
 	{
 		auto Halton = [](uint32_t pIndex, uint32_t pBase)
 			{
-				float result = 0.f;
-				float fraction = 1.f;
+				float result = 0.f, fraction = 1.f;
 
 				while (pIndex > 0)
 				{
@@ -54,11 +38,13 @@ namespace Imgn
 		const uint32_t sample = (_jitterFrameIndex++ % 8) + 1;
 		return { Halton(sample, 2) - 0.5f, Halton(sample, 3) - 0.5f };
 	}
+
 	vec2 EditorLayer::GetProjectionJitter(uint32_t pWidth, uint32_t pHeight)
 	{
 		const vec2 sample = GetJitterSample();
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
+
 	void EditorLayer::Sleep()
 	{
 		const vk::Extent2D extent = _renderer->GetSwapchainExtent();
@@ -70,6 +56,7 @@ namespace Imgn
 		ImgnModel sponza = loader.LoadModel("../../../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
 		ImgnModel testGlb = loader.LoadModel("../../../../Models/Vroid/Test.gltf", *_renderer);
 
+		
 		RenderPass gBuffer
 		{
 			.name = "G-BufferPass",
@@ -80,9 +67,10 @@ namespace Imgn
 				_renderer->CreateRGImageDesc("G-BufferMaterial", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Unorm),
 				_renderer->CreateRGImageDesc("G-BufferEmissive", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Srgb),
 				_renderer->CreateRGImageDesc("G-BufferVelocity", _renderWidth, _renderHeight, vk::Format::eR16G16Sfloat),
+				_renderer->CreateRGImageDesc("EntityIDs", _renderWidth, _renderHeight, vk::Format::eR8Sint),
 				_renderer->CreateRGImageDesc("Depth", _renderWidth, _renderHeight, vk::Format::eD32Sfloat)
 			},
-			.Execute = [&, sponza](Imgn::RenderContext& ctx)
+			.Execute = [&](Imgn::RenderContext& ctx)
 			{
 				std::vector colorAttachments =
 				{
@@ -102,12 +90,10 @@ namespace Imgn
 				ctx.SetScissor(_renderWidth, _renderHeight);
 
 				vk::DescriptorBufferInfo uboInfo = ctx.CreateDescriptorBufferInfo(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], sizeof(GBufferUBO));
-				//vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(sponza.materialBuffer, sponza.materialBufferSize);
 
 				std::vector writes
 				{
 					ctx.CreateWriteDescriptorSet(0, vk::DescriptorType::eUniformBuffer, uboInfo),
-					//ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
 				};
 
 				ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
@@ -116,72 +102,42 @@ namespace Imgn
 				{
 					if (!entity->IsActive()) continue;
 
-					if (TransformComponent* transform = entity->GetComponent<TransformComponent>())
+					TransformComponent* transform = entity->GetComponent<TransformComponent>();
+					if (!transform) continue;
+
+					MeshComponent* meshComp = entity->GetComponent<MeshComponent>();
+					if (!meshComp || !meshComp->visible) continue;
+
+					MaterialComponent* materialComp = entity->GetComponent<MaterialComponent>();
+					if (!materialComp) continue;
+
+					materialComp->SyncMaterialBuffer(*_renderer);
+
+					const Buffer* materialBuffer = materialComp->GetMaterialBuffer();
+					if (!materialBuffer) continue;
+
+					ctx.BindMesh(*meshComp);
+
+					vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(*materialBuffer, materialComp->GetMaterialBufferSize());
+
+					std::vector materialWrites
 					{
-						if (MeshComponent* meshComp = entity->GetComponent<MeshComponent>())
+						ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
+					};
+
+					ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), materialWrites);
+
+					for (const Primitive& prim : meshComp->GetPrimitives())
+					{
+						GBufferPC pc
 						{
-							auto& mesh = _renderer->GetMesh(meshComp->mesh);
-							if (!meshComp->visible) continue;
+							.model = transform->GetTransform(),
+							.materialIndex = prim.materialSlot
+						};
 
-							ctx.BindMesh(meshComp->mesh);
-							vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
-
-							std::vector writes
-							{
-								ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
-							};
-
-							ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
-
-							for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
-							{
-								GBufferPC pc
-								{
-									.model = transform->GetTransform(),
-									.materialIndex = prim.material
-								};
-
-								ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
-								ctx.DrawPrimitive(prim);
-							}
-						}
+						ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
+						ctx.DrawPrimitive(prim);
 					}
-
-					//for (auto& children : entity->GetChildren())
-					//{
-					//	if (!children->IsActive()) continue;
-
-					//	if (TransformComponent* transform = children->GetComponent<TransformComponent>())
-					//	{
-					//		if (MeshComponent* meshComp = children->GetComponent<MeshComponent>())
-					//		{
-					//			auto& mesh = _renderer->GetMesh(meshComp->mesh);
-					//			if (!meshComp->visible) continue;
-
-					//			ctx.BindMesh(meshComp->mesh);
-					//			vk::DescriptorBufferInfo materialSBInfo = ctx.CreateDescriptorBufferInfo(mesh.materialBuffer, mesh.materialBufferSize);
-
-					//			std::vector writes
-					//			{
-					//				ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, materialSBInfo),
-					//			};
-
-					//			ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
-
-					//			for (ImgnPrimitive& prim : _renderer->GetMesh(meshComp->mesh).primitives)
-					//			{
-					//				GBufferPC pc
-					//				{
-					//					.model = transform->GetTransform(),
-					//					.materialIndex = prim.material
-					//				};
-
-					//				ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
-					//				ctx.DrawPrimitive(prim);
-					//			}
-					//		}
-					//	}
-					//}
 				}
 
 				ctx.EndRendering();
@@ -328,28 +284,25 @@ namespace Imgn
 
 		_activeScene = Shared<Scene>();
 
+		//sponza
 		for (auto& meshHandle : sponza.meshes)
 		{
 			Entity* entity = _activeScene->CreateEntity("Sponza");
-			MeshComponent* mesh = entity->AddComponent<Imgn::MeshComponent>(meshHandle);
-			mesh->materials = sponza.materials;
-			//todo remove
-			_renderer->GetMesh(meshHandle).materialBuffer = sponza.materialBuffer;
-			_renderer->GetMesh(meshHandle).materialBufferSize = sponza.materialBufferSize;
-
+			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
+			mesh->SetMesh(meshHandle.name, "../../../../Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
+			materialComponent->SetMaterials(sponza.materials);
 		}
 
 		Entity* vroid = _activeScene->CreateEntity("Vroid");
-		for (int i = 0; auto& meshHandle : testGlb.meshes)
+		for (auto& meshHandle : testGlb.meshes)
 		{
+			Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
+			MeshComponent* mesh = child->AddComponent<MeshComponent>();
+			mesh->SetMesh(meshHandle.name, "../../../../Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
 
-			Entity* child = vroid->AddChild(_activeScene->CreateEntity((_renderer->GetMesh(meshHandle).name)));
-			MeshComponent* mesh = child->AddComponent<Imgn::MeshComponent>();
-			mesh->mesh = meshHandle;
-			mesh->materials = testGlb.materials;
-			//todo remove
-			_renderer->GetMesh(meshHandle).materialBuffer = testGlb.materialBuffer;
-			_renderer->GetMesh(meshHandle).materialBufferSize = testGlb.materialBufferSize;
+			MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
+			materialComponent->SetMaterials(testGlb.materials);
 		}
 
 		_editorScene = Shared<Scene>();
@@ -379,6 +332,7 @@ namespace Imgn
 
 	void EditorLayer::WakeUp()
 	{
+		if (_activeScene) _activeScene->Clear();
 		blenderPanel.Shutdown();
 	}
 
@@ -561,9 +515,10 @@ namespace Imgn
 
 			EditorCamera::SetInputEnabled(_cameraLookActive);
 
+			//gizmo
+			_gizmoType = ImGuizmo::OPERATION::TRANSLATE; //ignore hard set
 			Entity* selected = _sceneHierarchy.GetSelectedEntity();
 			TransformComponent* tc = selected ? selected->GetComponent<TransformComponent>() : nullptr;
-
 			if (tc && !_cameraLookActive)
 			{
 				ImGuizmo::SetOrthographic(false);
@@ -578,14 +533,17 @@ namespace Imgn
 
 				mat4 transform = tc->GetTransform();
 
-				ImGuizmo::Manipulate(view.data(), projection.data(), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, transform.data());
+				ImGuizmo::Manipulate(view.data(), projection.data(), (ImGuizmo::OPERATION)_gizmoType, ImGuizmo::LOCAL, transform.data());
 
-				if (ImGuizmo::IsUsing())
+				if (ImGuizmo::IsUsing() && _gizmoType > -1)
 				{
 					vec4 translation, rotation, scale;
 					Math::Decompose(transform, translation, rotation, scale);
+
+					tc->position = { translation[0], translation[1], translation[2] };
+					tc->rotation = rotation;
+					tc->scale = { scale[0], scale[1], scale[2] };
 				}
-					tc->position = { transform[12], transform[13], transform[14] };
 			}
 		}
 		else

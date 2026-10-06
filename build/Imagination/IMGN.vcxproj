@@ -520,6 +520,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\ImGuizmo\ImZoomSlider.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn.hpp" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MaterialComponent.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\AppEvent.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\Event.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\KeyEvent.h" />
@@ -543,6 +545,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnScene.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnTime.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnWindow.h" />
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Model.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Skeleton.h" />
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\main.hpp" />
@@ -635,6 +638,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MaterialComponent.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.cpp">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx;%(ForcedIncludeFiles)</ForcedIncludeFiles>

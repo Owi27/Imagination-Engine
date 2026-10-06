@@ -2,6 +2,8 @@
 
 namespace Imgn
 {
+	using quat = vec4;
+
 	class IMGN_API Math
 	{
 	public:
@@ -42,6 +44,18 @@ namespace Imgn
 
 		/* VEC4*/
 
+		/* QUATERNION */
+		static float Dot(quat pLQuat, quat pRQuat);
+		static float Length(quat pQuat);
+		static quat Normalize(quat pQuat);
+		static quat Multiply(quat pLQuat, quat pRQuat);
+		static quat QuatFromEuler(vec3 pEulerDegrees);
+		static vec3 EulerFromQuat(quat pQuat);
+		static mat4 RotationMatrix(quat pQuat);
+		static quat QuatFromRotationMatrix(mat4 pRotation);
+		static vec3 Rotate(vec3 pVec, quat pRotation);
+		static mat4 Rotate(mat4 pMat, quat pRotation, bool pGlobal = false);
+
 		/* MAT4 */
 		static mat4 Inverse(mat4 pMat);
 		static mat4 Transpose(mat4 pMat);
@@ -51,7 +65,7 @@ namespace Imgn
 		static mat4 Scale(mat4 pMat, vec3 pScale, bool pGlobal = false);
 		static mat4 Translate(mat4 pMat, vec3 pVec, bool pGlobal = false);
 		static mat4 PerspectiveVKLH(float pFOV, float pAspect, float pNear, float pFar);
-		static void Decompose(mat4 pMat, vec4& pTranslation, vec4& pRotation, vec4& pScale);
+		static void Decompose(mat4 pMat, vec4& pTranslation, quat& pRotation, vec4& pScale);
 		static mat4 Orthographic(float pRight, float pLeft, float pTop, float pBottom, float pNear = -1.f, float pFar = 1.f);
 	};
 

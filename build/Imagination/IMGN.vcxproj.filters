@@ -46,6 +46,12 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MaterialComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImGui\ImgnGui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -165,6 +171,12 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\ImgnComponents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MaterialComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\AppEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -232,6 +244,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\ImgnWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\SceneSerializer.h">
