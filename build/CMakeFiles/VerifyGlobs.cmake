@@ -96,6 +96,7 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/ImgnComponents.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp"
@@ -217,6 +218,7 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.hpp")
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn.hpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/FileSystem.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.hpp"

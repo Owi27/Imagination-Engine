@@ -313,6 +313,25 @@ void Vulkan::CreateTAASampler()
 	_taaSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
 }
 
+void Vulkan::CreatePointSampler()
+{
+	vk::SamplerCreateInfo samplerInfo
+	{
+		.magFilter = vk::Filter::eLinear,
+		.minFilter = vk::Filter::eLinear,
+		.mipmapMode = vk::SamplerMipmapMode::eNearest,
+		.addressModeU = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeV = vk::SamplerAddressMode::eClampToEdge,
+		.addressModeW = vk::SamplerAddressMode::eClampToEdge,
+		.compareEnable = vk::True,
+		.compareOp = vk::CompareOp::eGreaterOrEqual,
+		.minLod = 0.f,
+		.maxLod = 0.f
+	};
+
+	_pointSampler = Unique<vk::raii::Sampler>(_device->createSampler(samplerInfo));
+}
+
 void Vulkan::CreateTextureSampler()
 {
 	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
@@ -738,7 +757,7 @@ void Vulkan::CreateGraphicsPipelines()
 			vk::Format::eR8G8B8A8Unorm,
 			vk::Format::eR8G8B8A8Srgb,
 			vk::Format::eR16G16Sfloat,
-			vk::Format::eR8Sint
+			vk::Format::eR32G32Uint
 		};
 
 		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
@@ -808,6 +827,110 @@ void Vulkan::CreateGraphicsPipelines()
 		};
 
 		_pipelines.taaPipeline = Unique<vk::raii::Pipeline>(_device->createComputePipeline(nullptr, computePipelineCreateInfo));
+	}
+
+	/* Shadow */
+	{
+		vk::raii::ShaderModule vertexSM = CreateShaderModule(CreateSPV(Shaders::ShadowVertexShader, VertexTarget));
+		vk::raii::ShaderModule fragmentSM = CreateShaderModule(CreateSPV(Shaders::ShadowFragmentShader, FragmentTarget));
+
+		vk::PipelineShaderStageCreateInfo vertShaderStageInfo
+		{
+			.stage = vk::ShaderStageFlagBits::eVertex,
+			.module = vertexSM,
+			.pName = "main"
+		};
+
+		vk::PipelineShaderStageCreateInfo fragShaderStageInfo
+		{
+			.stage = vk::ShaderStageFlagBits::eFragment,
+			.module = fragmentSM,
+			.pName = "main"
+		};
+
+		std::array shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
+
+		auto bindingDesc = Imgn::Vertex::GetBindingDescription();
+		auto attributeDesc = Imgn::Vertex::GetAttributeDescriptions();
+
+		vk::PipelineVertexInputStateCreateInfo vertexInputInfo
+		{
+			.vertexBindingDescriptionCount = 1,
+			.pVertexBindingDescriptions = &bindingDesc,
+			.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesc.size()),
+			.pVertexAttributeDescriptions = attributeDesc.data()
+		};
+
+		vk::PipelineInputAssemblyStateCreateInfo inputAssembly
+		{
+			.topology = vk::PrimitiveTopology::eTriangleList
+		};
+
+		vk::PipelineViewportStateCreateInfo viewportState
+		{
+			.viewportCount = 1,
+			.scissorCount = 1
+		};
+
+		vk::PipelineRasterizationStateCreateInfo rasterizer
+		{
+			.depthClampEnable = vk::False,
+			.rasterizerDiscardEnable = vk::False,
+			.polygonMode = vk::PolygonMode::eFill,
+			.cullMode = vk::CullModeFlagBits::eNone,
+			.frontFace = vk::FrontFace::eCounterClockwise,
+			.depthBiasEnable = vk::False,
+			.depthBiasSlopeFactor = 1.0f,
+			.lineWidth = 1.0f
+		};
+
+		vk::PipelineMultisampleStateCreateInfo multisampling
+		{
+			.rasterizationSamples = vk::SampleCountFlagBits::e1,
+			.sampleShadingEnable = vk::False
+		};
+
+		vk::PipelineDepthStencilStateCreateInfo depthStencil
+		{
+			.depthTestEnable = vk::True,
+			.depthWriteEnable = vk::True,
+			.depthCompareOp = vk::CompareOp::eGreater,
+			.depthBoundsTestEnable = vk::False,
+			.stencilTestEnable = vk::False
+		};
+
+		vk::PipelineColorBlendStateCreateInfo colorBlending
+		{
+			.logicOpEnable = vk::False,
+			.attachmentCount = 0,
+			.pAttachments = nullptr
+		};
+
+		vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo
+		{
+			.colorAttachmentCount = 0,
+			.pColorAttachmentFormats = nullptr,
+			.depthAttachmentFormat = vk::Format::eD32Sfloat
+		};
+
+		vk::GraphicsPipelineCreateInfo shadowPipelineInfo
+		{
+			.pNext = &pipelineRenderingCreateInfo,
+			.stageCount = 2,
+			.pStages = shaderStages.data(),
+			.pVertexInputState = &vertexInputInfo,
+			.pInputAssemblyState = &inputAssembly,
+			.pViewportState = &viewportState,
+			.pRasterizationState = &rasterizer,
+			.pMultisampleState = &multisampling,
+			.pDepthStencilState = &depthStencil,
+			.pColorBlendState = &colorBlending,
+			.pDynamicState = &dynamicState,
+			.layout = *_pipelines.pipelineLayout,
+			.renderPass = nullptr
+		};
+
+		_pipelines.shadowPipeline = Unique<vk::raii::Pipeline>(_device->createGraphicsPipeline(nullptr, shadowPipelineInfo));
 	}
 
 	/* UI */
@@ -952,7 +1075,8 @@ void Vulkan::CreateDescriptorSetLayout()
 		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
 		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eSampledImage, 10, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
 		vk::DescriptorSetLayoutBinding(3, vk::DescriptorType::eStorageImage, 1, vk::ShaderStageFlagBits::eCompute, nullptr),
-		vk::DescriptorSetLayoutBinding(4, vk::DescriptorType::eSampler, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr)
+		vk::DescriptorSetLayoutBinding(4, vk::DescriptorType::eSampler, 1, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute, nullptr),
+		vk::DescriptorSetLayoutBinding(5, vk::DescriptorType::eSampledImage, 1, vk::ShaderStageFlagBits::eCompute, nullptr)
 	};
 
 	//std::array<vk::DescriptorBindingFlags, 3> flags =
@@ -1024,31 +1148,64 @@ void Vulkan::CreateDescriptorSetLayout()
 	//commandBuffer.pushDescriptorSet(vk::PipelineBindPoint::eGraphics, *_pipelines.pipelineLayout, 0, )
 }
 
-void Vulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage)
+void Vulkan::CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage, vk::ImageViewType pViewType, uint32_t pArrayLayers)
 {
 	vk::ImageViewCreateInfo imageViewCreateInfo
 	{
 		.image = *pImage.image,
-		.viewType = vk::ImageViewType::e2D,
+		.viewType = pViewType,
 		.format = pFormat,
-		.components
+		.components =
 		{
 			.r = vk::ComponentSwizzle::eIdentity,
 			.g = vk::ComponentSwizzle::eIdentity,
 			.b = vk::ComponentSwizzle::eIdentity,
 			.a = vk::ComponentSwizzle::eIdentity
 		},
-		.subresourceRange
+		.subresourceRange =
 		{
 			.aspectMask = pAspectFlags,
 			.baseMipLevel = 0,
 			.levelCount = 1,
 			.baseArrayLayer = 0,
-			.layerCount = 1
+			.layerCount = pArrayLayers
 		}
 	};
 
 	pImage.view = Unique<vk::raii::ImageView>(_device->createImageView(imageViewCreateInfo));
+
+	pImage.layerViews.clear();
+
+	if (pArrayLayers <= 1) return;
+
+	pImage.layerViews.reserve(pArrayLayers);
+
+	for (uint32_t layer = 0; layer < pArrayLayers; layer++)
+	{
+		vk::ImageViewCreateInfo layerViewCreateInfo
+		{
+			.image = *pImage.image,
+			.viewType = vk::ImageViewType::e2D,
+			.format = pFormat,
+			.components =
+			{
+				.r = vk::ComponentSwizzle::eIdentity,
+				.g = vk::ComponentSwizzle::eIdentity,
+				.b = vk::ComponentSwizzle::eIdentity,
+				.a = vk::ComponentSwizzle::eIdentity
+			},
+			.subresourceRange =
+			{
+				.aspectMask = pAspectFlags,
+				.baseMipLevel = 0,
+				.levelCount = 1,
+				.baseArrayLayer = layer,
+				.layerCount = 1
+			}
+		};
+
+		pImage.layerViews.push_back(Unique<vk::raii::ImageView>(_device->createImageView(layerViewCreateInfo)));
+	}
 }
 
 void Vulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer)
@@ -1081,15 +1238,20 @@ void Vulkan::CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk:
 	pBuffer.buffer->bindMemory(*pBuffer.memory, 0);
 }
 
-void Vulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage)
+void Vulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage, vk::ImageViewType pViewType, uint32_t pArrayLayers)
 {
+	vk::ImageCreateFlags flags;
+
+	if (pViewType == vk::ImageViewType::eCube || pViewType == vk::ImageViewType::eCubeArray) flags |= vk::ImageCreateFlagBits::eCubeCompatible;
+
 	vk::ImageCreateInfo imageCreateInfo
 	{
+		.flags = flags,
 		.imageType = vk::ImageType::e2D,
 		.format = pFormat,
-		.extent = {pWidth , pHeight, 1},
+		.extent = { pWidth, pHeight, 1 },
 		.mipLevels = 1,
-		.arrayLayers = 1,
+		.arrayLayers = pArrayLayers,
 		.samples = vk::SampleCountFlagBits::e1,
 		.tiling = pTiling,
 		.usage = pUsage,
@@ -1099,6 +1261,7 @@ void Vulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, 
 	pImage.image = Unique<vk::raii::Image>(_device->createImage(imageCreateInfo));
 
 	vk::MemoryRequirements memReqs = pImage.image->getMemoryRequirements();
+
 	vk::MemoryAllocateInfo memoryAllocateInfo
 	{
 		.allocationSize = memReqs.size,
@@ -1106,6 +1269,7 @@ void Vulkan::CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, 
 	};
 
 	pImage.memory = Unique<vk::raii::DeviceMemory>(_device->allocateMemory(memoryAllocateInfo));
+
 	pImage.image->bindMemory(*pImage.memory, 0);
 }
 
@@ -1129,6 +1293,7 @@ void Vulkan::Init(RendererCreateInfo pCreateInfo)
 	//CreateTextureImageView();
 	CreateTextureSampler();
 	CreateTAASampler();
+	CreatePointSampler();
 	//CreateVertexBuffer();
 	//CreateIndexBuffer();
 	//CreateUniformBuffers();
@@ -1483,23 +1648,27 @@ Image Vulkan::CreateTextureImage(const std::string& pFile)
 	return texture;
 }
 
-RGImage Vulkan::CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect)
+RGImage Vulkan::CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType, uint32_t pArrayLayers)
 {
 	RGImage image;
-	image.width = pWidth; image.height = pHeight;
+
+	image.width = pWidth;
+	image.height = pHeight;
+	image.arrayLayers = pArrayLayers;
 	image.format = pFormat;
 	image.aspect = pAspect;
+	image.viewType = pViewType;
 
 	if (image.aspect & vk::ImageAspectFlagBits::eDepth)
 	{
-		CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image);
-		CreateImageView(image.format, image.aspect, image.image);
+		CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image, image.viewType, image.arrayLayers);
+		CreateImageView(image.format, image.aspect, image.image, image.viewType, image.arrayLayers);
 
 		return image;
 	}
 
-	CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image);
-	CreateImageView(image.format, image.aspect, image.image);
+	CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image, image.viewType, image.arrayLayers);
+	CreateImageView(image.format, image.aspect, image.image, image.viewType, image.arrayLayers);
 
 	return image;
 }
@@ -1539,14 +1708,21 @@ void Vulkan::UpdateImageDescriptor(uint32_t pSlot, const Image& pImage)
 	_device->updateDescriptorSets(writes, {});
 }
 
-void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect)
+void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect, uint32_t pArrayLayers, uint32_t pMipLevels)
 {
 	vk::ImageMemoryBarrier barrier
 	{
 		.oldLayout = pOldLayout,
 		.newLayout = pNewLayout,
 		.image = pImage,
-		.subresourceRange = { pAspect, 0, 1, 0, 1 }
+		.subresourceRange =
+		{
+			.aspectMask = pAspect,
+			.baseMipLevel = 0,
+			.levelCount = pMipLevels,
+			.baseArrayLayer = 0,
+			.layerCount = pArrayLayers
+		}
 	};
 
 	vk::PipelineStageFlags srcStage;
@@ -1905,4 +2081,74 @@ void Vulkan::ClearSwapchain()
 	cmd.clearColorImage(image, vk::ImageLayout::eTransferDstOptimal, color, range);
 
 	TransitionImageLayout(cmd, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eColorAttachmentOptimal, image);
+}
+
+Buffer Vulkan::CreateReadbackBuffer(uint64_t pSize)
+{
+	Buffer buffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, buffer);
+
+	void* data = buffer.memory->mapMemory(0, pSize);
+	std::memset(data, 0, pSize);
+	buffer.memory->unmapMemory();
+
+	return buffer;
+}
+
+void Vulkan::CopyImagePixelToBuffer(vk::raii::CommandBuffer& pCommandBuffer, RGImage& pImage, Buffer& pBuffer, uint32_t pX, uint32_t pY)
+{
+	if (pX >= pImage.width || pY >= pImage.height) return;
+
+	const vk::ImageLayout previousLayout = pImage.currentLayout;
+
+	TransitionImageLayout(*pCommandBuffer, previousLayout, vk::ImageLayout::eTransferSrcOptimal, *pImage.image.image, pImage.aspect);
+	pImage.currentLayout = vk::ImageLayout::eTransferSrcOptimal;
+
+	vk::BufferImageCopy region
+	{
+		.bufferOffset = 0,
+		.bufferRowLength = 0,
+		.bufferImageHeight = 0,
+		.imageSubresource =
+		{
+			.aspectMask = vk::ImageAspectFlagBits::eColor,
+			.mipLevel = 0,
+			.baseArrayLayer = 0,
+			.layerCount = 1
+		},
+		.imageOffset = { static_cast<int32_t>(pX), static_cast<int32_t>(pY), 0 },
+		.imageExtent = { 1, 1, 1 }
+	};
+
+	pCommandBuffer.copyImageToBuffer(*pImage.image.image, vk::ImageLayout::eTransferSrcOptimal, *pBuffer.buffer, region);
+
+	vk::BufferMemoryBarrier2 bufferBarrier
+	{
+		.srcStageMask = vk::PipelineStageFlagBits2::eTransfer,
+		.srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
+		.dstStageMask = vk::PipelineStageFlagBits2::eHost,
+		.dstAccessMask = vk::AccessFlagBits2::eHostRead,
+		.buffer = *pBuffer.buffer,
+		.offset = 0,
+		.size = VK_WHOLE_SIZE
+	};
+
+	pCommandBuffer.pipelineBarrier2(vk::DependencyInfo
+		{
+			.bufferMemoryBarrierCount = 1,
+			.pBufferMemoryBarriers = &bufferBarrier
+		});
+
+	TransitionImageLayout(*pCommandBuffer, vk::ImageLayout::eTransferSrcOptimal, previousLayout, *pImage.image.image, pImage.aspect);
+	pImage.currentLayout = previousLayout;
+}
+
+void Vulkan::ReadBuffer(const Buffer& pBuffer, void* pData, uint64_t pSize)
+{
+	if (!pBuffer.memory || !pData || pSize == 0) return;
+
+	void* mappedData = pBuffer.memory->mapMemory(0, pSize);
+	std::memcpy(pData, mappedData, pSize);
+	pBuffer.memory->unmapMemory();
 }

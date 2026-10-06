@@ -35,6 +35,26 @@ namespace Imgn
 		};
 	}
 
+	vk::RenderingAttachmentInfo RenderContext::CreateRenderingAttachmentInfo(std::string_view pName, uint32_t pLayer)
+	{
+		RGImage& image = _renderer->GetRenderGraphImage(pName);
+
+		if (pLayer >= image.image.layerViews.size())
+		{
+			IMGN_ERROR("Image '{}' does not have layer {}", pName, pLayer);
+			return {};
+		}
+
+		return vk::RenderingAttachmentInfo
+		{
+			.imageView = **image.image.layerViews[pLayer],
+			.imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+			.loadOp = vk::AttachmentLoadOp::eClear,
+			.storeOp = vk::AttachmentStoreOp::eStore,
+			.clearValue = vk::ClearDepthStencilValue{ 0.f, 0 }
+		};
+	}
+
 	void RenderContext::BeginRendering(uint32_t pWidth, uint32_t pHeight, std::span<const vk::RenderingAttachmentInfo> pColors, const vk::RenderingAttachmentInfo* pDepth)
 	{
 		vk::RenderingInfo renderingInfo

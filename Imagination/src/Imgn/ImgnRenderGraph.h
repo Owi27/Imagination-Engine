@@ -23,8 +23,9 @@ namespace Imgn
 	{
 		struct RGImageDesc
 		{
-			uint32_t width, height;
+			uint32_t width, height, arrayLayers = 1, mipLevels = 1;
 			vk::Format format;
+			vk::ImageViewType imageViewType = vk::ImageViewType::e2D;
 		};
 
 		struct RGBufferDesc
@@ -72,15 +73,14 @@ namespace Imgn
 		//std::string MakeImageKey(std::string_view pName, uint32_t pWidth, uint32_t pHeight);
 
 		std::string CreateRGBufferDesc(const std::string& pName, uint64_t pSize);
-		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat);
+		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageViewType pImageViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
 
 		RGImage& GetImage(std::string_view pName)
 		{
 			auto it = _images.find(std::string(pName));
 
 			if (it == _images.end())
-				throw std::runtime_error(
-					std::format("RenderGraph image not found: {}", pName));
+				throw std::runtime_error(std::format("RenderGraph image not found: {}", pName));
 
 			return it->second;
 		}

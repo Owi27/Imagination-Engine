@@ -79,6 +79,9 @@ struct GBufferPC
 {
     matrix model;
     uint materialIndex;
+    uint entityIDLow;
+    uint entityIDHigh;
+    uint padding;
 } pc;
 
 struct UniformBuffer
@@ -128,6 +131,7 @@ struct FOut
     float4 MStuff : SV_TARGET2;
     float4 Emissi : SV_TARGET3; //emissive
     float2 Velocity : SV_TARGET4;
+    uint2 EntityID : SV_TARGET5;
     //float4 Albedo   : SV_TARGET2;
 };
 
@@ -136,6 +140,9 @@ struct GBufferPC
 {
     matrix model;
     uint materialIndex;
+    uint entityIDLow;
+    uint entityIDHigh;
+    uint padding;
 } pc;
 
 #define ALPHA_OPAQUE 0
@@ -312,6 +319,7 @@ FOut main(VOut input, bool isFrontFace : SV_IsFrontFace)
     output.MStuff = float4(metallic, roughness, ao, 1.0f);
     output.Emissi = float4(emissive, 1.f);
     output.Velocity = float2(ClipToUV(input.cPos) - ClipToUV(input.pPos));
+    output.EntityID = uint2(pc.entityIDLow, pc.entityIDHigh);
 
     return output;
 })";
@@ -363,8 +371,19 @@ struct GBufferPC
     uint width, height, pointLightCount;
 } pc;
 
+struct PointLight
+{
+    float3 pos, col;
+    float range, intensity;
+};
+
+StructuredBuffer<PointLight> pointLights : register(t1, space0);
+
 Texture2D<float4> gBuffer[5] : register(t2, space0);
 RWTexture2D<float4> litScene : register(u3, space0);
+
+TextureCubeArray<float> pointShadowMap : register(t5, space0);
+SamplerComparisonState pointShadowSampler : register(s4, space0);
 
 float3 FresnelSchlick(float pCosTheta, float3 F0)
 {
@@ -406,7 +425,7 @@ float GeometrySmith(float3 N, float3 V, float3 L, float pRoughness)
     return ggx1 * ggx2;
 }
 
-float3 PointLight(float3 pWorldPos, float3 N, float3 V, float3 pLightPos, float3 pLightColor, float pRange, float3 pAlbedo, float pMetallic, float pRoughness)
+float3 CreatePointLight(float3 pWorldPos, float3 N, float3 V, float3 pLightPos, float3 pLightColor, float pRange, float pIntensity, float3 pAlbedo, float pMetallic, float pRoughness)
 {
     float3 L = normalize(pLightPos - pWorldPos); //direction from surface to light
     float3 H = normalize(V + L); //halfway vec between view and light dir.
@@ -422,7 +441,7 @@ float3 PointLight(float3 pWorldPos, float3 N, float3 V, float3 pLightPos, float3
         attenuation *= rangeAttenuation; //apply range to attenuation
     }
     
-    float3 radiance = pLightColor * attenuation; //reduces light color based on dist/range
+    float3 radiance = pLightColor * pIntensity * attenuation; //reduces light color based on dist/range
     
     float3 F0 = float3(.04f, .04f, .04f); //mats specular reflectance
     F0 = lerp(F0, pAlbedo, pMetallic); //lerp between non-metals reflectivity and metallic reflectivity
@@ -444,7 +463,7 @@ float3 PointLight(float3 pWorldPos, float3 N, float3 V, float3 pLightPos, float3
     return (kD * pAlbedo / PI + specular) * radiance * NdotL;
 }
 
-float3 DirectionalLight(float3 N, float3 V, float3 pLightDir, float3 pLightColor, float3 pAlbedo, float pMetallic, float pRoughness)
+float3 CreateDirectionalLight(float3 N, float3 V, float3 pLightDir, float3 pLightColor, float3 pAlbedo, float pMetallic, float pRoughness)
 {
     float3 L = normalize(-pLightDir); //direction from light to surface
     float3 H = normalize(V + L); //halfway vec between view and light dir.
@@ -472,17 +491,15 @@ float3 DirectionalLight(float3 N, float3 V, float3 pLightDir, float3 pLightColor
 }
 
 /* Shadows */
-//float PointLightShadow(float pShadowFarPlane, float3 pWorldPos, float3 pLightPos, TextureCube<float4> pShadowMap)
-//{
-//    float3 fragToLight = pWorldPos - pLightPos;
-//    float closestDepth = pShadowMap.SampleLevel( /*$(Sampler:point:point:point:clamp)*/, normalize(fragToLight), 0).r * pShadowFarPlane;
-//    float currentDepth = length(fragToLight);
-//    float bias = .05f;
+float PointLightShadow(uint pShadowIndex, float3 pWorldPos, float3 pLightPos, float pFarPlane)
+{
+    float3 fragToLight = pWorldPos - pLightPos;
+    float distToLight = length(fragToLight);
+    float currentDepth = 1.f - saturate(distToLight / pFarPlane);
+    float bias = .002f;
     
-//    float shadow = currentDepth - bias > closestDepth ? 1.f : 0.f;
-    
-//    return shadow;
-//}
+    return pointShadowMap.SampleCmpLevelZero(pointShadowSampler, float4(fragToLight, pShadowIndex), currentDepth + bias);
+}
 
 float3 ReconstructWorldPosition(float2 pUV, float pDepth)
 {
@@ -498,7 +515,7 @@ float3 ReconstructWorldPosition(float2 pUV, float pDepth)
 }
 
 [numthreads(8, 8, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+void main(uint3 DTid : SV_DispatchThreadID)
 {
     uint2 pixel = DTid.xy;
     float2 uv = (float2(pixel) + .5f) / float2(pc.width, pc.height);
@@ -509,21 +526,21 @@ void main( uint3 DTid : SV_DispatchThreadID )
     float occlusion = gBuffer[GBUFFER_MATERIAL].Load(int3(pixel, 0)).b;
     
     float3 N = normalize(gBuffer[GBUFFER_NORMAL].Load(int3(pixel, 0)).rgb * 2.f - 1.f); //-1-1
-    float3 V = normalize( pc.camPos.rgb - position);
+    float3 V = normalize(pc.camPos.rgb - position);
 
     //direct lighting
     float3 Lo = float3(0.f, 0.f, 0.f);
-    
-    Lo += PointLight(position, N, V, float3(0.f, 0.f, 0.f), float3(100.f, 0.f, 0.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
-    Lo += PointLight(position, N, V, float3(1000.f, 0.f, 0.f), float3(0.f, 100.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
-    Lo += PointLight(position, N, V, float3(-1000.f, 0.f, 0.f), float3(100.f, 0.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
-    //for (int i = 0; i < pc.pointLightCount; i++)
-    //{
-        
-    //}
+    uint lightCount, stride;
+    pointLights.GetDimensions(lightCount, stride);
+    for (int i = 0; i < lightCount; i++)
+    {
+        Lo += CreatePointLight(position, N, V, pointLights[i].pos, pointLights[i].col, pointLights[i].range, pointLights[i].intensity, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].pos, 1000.f);
+        //Lo += PointLight(position, N, V, float3(1000.f, 0.f, 0.f), float3(0.f, 100.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
+        //Lo += PointLight(position, N, V, float3(-1000.f, 0.f, 0.f), float3(100.f, 0.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);        
+    }
 
     //Directional Light
-    Lo += DirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
+    //Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
     
     float3 ambient = float3(.0f, .0f, .0f) * gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb * occlusion;
     float3 color = ambient + Lo + gBuffer[GBUFFER_EMISSIVE].Load(int3(pixel, 0)).rgb;
@@ -600,6 +617,92 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
     
     taaOutput[pixel] = float4(lerp(accumulation, currFrameBlurred, velocityDisocclusion), 1.f);
+})";
+
+    std::string ShadowVertexShader = R"(struct VIn
+{
+    float3 pos : POSITION0;
+};
+
+struct VOut
+{
+    float4 pos : SV_Position;
+    float3 wPos : POSITION0;
+};
+
+[[vk::push_constant]]
+struct ShadowPC
+{
+    matrix model;
+} pc;
+
+struct ShadowUBO
+{
+    matrix viewProj;
+
+    float3 lightPosition;
+    float farPlane;
+};
+
+ConstantBuffer<ShadowUBO> shadow : register(b0, space0);
+
+VOut main(VIn input)
+{
+    VOut output;
+
+    float4 worldPosition = mul(pc.model, float4(input.pos, 1.f));
+
+    output.pos = mul(shadow.viewProj, worldPosition);
+    output.wPos = worldPosition.xyz;
+
+    return output;
+})";
+
+    std::string ShadowFragmentShader = R"(struct VOut
+{
+    float4 pos : SV_Position;
+    float3 wPos : POSITION;
+};
+
+struct FOut
+{
+    float4 PointShadowArray : SV_TARGET0;
+};
+
+struct ShadowUBO
+{
+    matrix viewProj;
+
+    float3 lightPosition;
+    float farPlane;
+};
+
+ConstantBuffer<ShadowUBO> shadow : register(b0, space0);
+
+struct PointLight
+{
+    float3 pos, col;
+    float range, intensity;
+};
+
+StructuredBuffer<PointLight> pointLights : register(t1, space0);
+
+Texture2D materialTextures[] : register(t0, space1);
+SamplerState materialSampler : register(s0, space1);
+
+float2 ClipToUV(float4 pClip)
+{
+    float2 ndc = pClip.xy / pClip.w;
+    
+    return ndc * .5f + .5f;
+}
+
+float main(VOut input) : SV_Depth
+{
+    float distanceToLight = length(input.wPos - shadow.lightPosition);
+    float normalizedDepth = saturate(distanceToLight / shadow.farPlane);
+
+    return 1.f - normalizedDepth;
 })";
 
     std::string UIVertexShader = R"(

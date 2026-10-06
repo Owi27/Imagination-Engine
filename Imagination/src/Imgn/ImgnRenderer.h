@@ -30,6 +30,9 @@ namespace Imgn
 
 		std::map<std::string, uint32_t> _renderPassMap; //use pass to get idx
 
+		std::array<Buffer, MaxFramesInFlight> _entityIDReadbackBuffers;
+		std::array<bool, MaxFramesInFlight> _entityIDReadbackValid = {};
+
 
 		vk::Format ToVkFormat(ImgnFormat pFormat);
 
@@ -74,13 +77,14 @@ namespace Imgn
 		//uint32_t CreateMaterialBuffer(std::span<const uint32_t> pMaterialHandles);
 
 		vk::raii::Sampler& GetTAASampler() { return _vkCtx->GetTAASampler(); }
+		vk::raii::Sampler& GetPointSampler() { return _vkCtx->GetPointSampler(); }
 		vk::raii::Sampler& GetTextureSampler() { return _vkCtx->GetTextureSampler(); }
 
 		Image& GetImage(uint32_t pHandle) { return _images[pHandle]; }
 		Buffer& GetBuffer(uint32_t pHandle) { return _buffers[pHandle]; }
 
 		std::string CreateRGBufferDesc(const std::string& pName, uint64_t pSize) { return _graph->CreateRGBufferDesc(pName, pSize); }
-		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat) { return _graph->CreateRGImageDesc(pName, pWidth, pHeight, pFormat); }
+		std::string CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageViewType pImageViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1) { return _graph->CreateRGImageDesc(pName, pWidth, pHeight, pFormat, pImageViewType, pArrayLayers); }
 
 		RGImage& GetRenderGraphImage(std::string_view pName) { return _graph->GetImage(pName); }
 		RGBuffer& GetRenderGraphBuffer(std::string_view pName) { return _graph->GetBuffer(pName); }
@@ -119,7 +123,7 @@ namespace Imgn
 		void WaitIdle() { _vkCtx->WaitIdle(); }
 		void ClearSwapchain() { _vkCtx->ClearSwapchain(); }
 
-		void UploadMaterialBuffer();
-		void UpdateMaterial(uint32_t pHandle, const Material& pMaterial);
+		void QueueEntityIDReadback(uint32_t pX, uint32_t pY);
+		uint64_t GetEntityIDReadback();
 	};
 }

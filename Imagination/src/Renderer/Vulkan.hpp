@@ -28,14 +28,18 @@ struct Image
 	unique<vk::raii::Image> image;
 	unique<vk::raii::ImageView> view;
 	unique<vk::raii::DeviceMemory> memory;
+
+	std::vector<unique<vk::raii::ImageView>> layerViews;
 };
 
 struct RGImage //literally just image, but with rendergraph info
 {
 	Image image;
 
-	uint32_t width = 1, height = 1;
+	uint32_t width = 1, height = 1, arrayLayers = 1, mipLevels = 1;
 	vk::Format format = vk::Format::eR8G8B8A8Unorm;
+	vk::ImageViewType viewType = vk::ImageViewType::e2D;
+
 	vk::AccessFlags2 currentAccess = vk::AccessFlagBits2::eNone;
 	vk::ImageLayout currentLayout = vk::ImageLayout::eUndefined;
 	vk::ImageAspectFlags aspect = vk::ImageAspectFlagBits::eColor;
@@ -119,7 +123,7 @@ class Vulkan
 	unique<vk::raii::DescriptorSet> _textureDescriptorSet;
 	unique<vk::raii::DescriptorSetLayout> _pushDescriptorSetLayout, _textureDescriptorSetLayout;
 
-	unique<vk::raii::Sampler> _textureSampler, _taaSampler;
+	unique<vk::raii::Sampler> _textureSampler, _taaSampler, _pointSampler;
 
 	uint32_t _queueIdx = 0;// , _frameIdx = 0;
 
@@ -156,14 +160,15 @@ class Vulkan
 	void CreateDescriptorPool();
 	void CreateDescriptorSets();
 	void CreateTAASampler();
+	void CreatePointSampler();
 	void CreateTextureSampler();
 	//void CreateTextureImageView();
 	void CreateGraphicsPipelines();
 	void CreateDescriptorSetLayout();
 
-	void CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage);
 	void CreateBuffer(vk::DeviceSize pSize, vk::BufferUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Buffer& pBuffer);
-	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage);
+	void CreateImageView(vk::Format pFormat, vk::ImageAspectFlags pAspectFlags, Image& pImage, vk::ImageViewType pViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
+	void CreateImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageTiling pTiling, vk::ImageUsageFlags pUsage, vk::MemoryPropertyFlags pProps, Image& pImage, vk::ImageViewType pViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
 
 	uint32_t _activeImageIdx = 0, _frameInFlightIdx = 0;
 	std::array<unique<vk::raii::Fence>, MaxFramesInFlight> _frameFinishedFence;
@@ -188,7 +193,7 @@ public:
 
 	/* Class Functions */
 	void Init(RendererCreateInfo pCreateInfo);
-	
+
 	bool StartFrame();
 	void BlitToSwapchain(RGImage& pImage);
 	void EndFrame();
@@ -215,15 +220,16 @@ public:
 	Image CreateDepthImage(uint32_t pWidth, uint32_t pHeight);
 	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
 	Image CreateTextureImage(const std::string& pFile);
-	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect);
+	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
 
 	vk::raii::Sampler& GetTAASampler() const { return *_taaSampler; }
+	vk::raii::Sampler& GetPointSampler() const { return *_pointSampler; }
 	vk::raii::Sampler& GetTextureSampler() const { return *_textureSampler; }
 	vk::raii::DescriptorSet& GetTextureDescriptorSet() const { return *_textureDescriptorSet; }
 	void UpdateImageDescriptor(uint32_t pSlot, const Image& pImage);
 
 	// For general transitions inside an existing command buffer
-	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
+	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor, uint32_t pArrayLayers = 1, uint32_t pMipLevels = 1);
 
 	// For one-off transitions (like texture loading)
 	void TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
@@ -248,4 +254,8 @@ public:
 
 	void WaitIdle() { _device->waitIdle(); }
 	void ClearSwapchain();
-	};
+
+	Buffer CreateReadbackBuffer(uint64_t pSize);
+	void CopyImagePixelToBuffer(vk::raii::CommandBuffer& pCommandBuffer, RGImage& pImage, Buffer& pBuffer, uint32_t pX, uint32_t pY);
+	void ReadBuffer(const Buffer& pBuffer, void* pData, uint64_t pSize);
+};

@@ -38,6 +38,18 @@ namespace Imgn
 		std::erase(_entities, pEntity);
 	}
 
+	Entity* Scene::GetEntity(ID pID)
+	{
+		if (pID == 0) return nullptr;
+
+		for (const unique<Entity>& entity : _entities)
+		{
+			if (entity->GetID() == pID) return entity.get();
+		}
+
+		return nullptr;
+	}
+
 	Entity* Scene::GetPrimaryCameraEntity()
 	{
 		for (auto& entity : _entities)

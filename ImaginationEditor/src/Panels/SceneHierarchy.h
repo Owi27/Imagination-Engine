@@ -26,5 +26,6 @@ namespace Imgn
 		void OnImGuiRender();
 
 		Entity* GetSelectedEntity() const { return _selectedEntity; }
+		void SetSelectedEntity(Entity* pEntity) { _selectedEntity = pEntity; }
 	};
 }

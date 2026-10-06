@@ -21,7 +21,7 @@ namespace Imgn
 		vec3 clr = { 1.0f, 1.0f, 1.0f };
 		uvec4 joints;
 		vec4 weights;
-		int entityID; //editor only
+		//int entityID; //editor only
 
 		//vk
 		static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }

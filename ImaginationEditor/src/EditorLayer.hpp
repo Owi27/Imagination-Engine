@@ -15,7 +15,7 @@ namespace Imgn
 		//PerspectiveCamera _camera;
 		bool _cameraLookActive = false;
 		std::array<uint32_t, MaxFramesInFlight> gBufferUBOHandles;
-		uint32_t _sceneWidth = 0, _sceneHeight = 0;
+		uint32_t _sceneWidth = 0, _sceneHeight = 0, _pointLightBuffer;
 
 		shared<Scene> _activeScene;
 		Entity* _sceneCamera = nullptr;
@@ -26,7 +26,7 @@ namespace Imgn
 			float range, intensity;
 		};
 
-		std::array<PointLight, 3> pointLights
+		std::array<PointLight, 3> _pointLights
 		{
 			PointLight
 			{
@@ -50,6 +50,32 @@ namespace Imgn
 				.intensity = 100.f
 			},
 		};
+
+		static constexpr std::array<vec3, 6> PointShadowDirections =
+		{
+			vec3{ 1.f, 0.f, 0.f },
+			vec3{ -1.f, 0.f, 0.f },
+			vec3{ 0.f, 1.f, 0.f },
+			vec3{ 0.f, -1.f, 0.f },
+			vec3{ 0.f, 0.f, 1.f },
+			vec3{ 0.f, 0.f, -1.f }
+		};
+
+		static constexpr std::array<vec3, 6> PointShadowUp =
+		{
+			vec3{ 0.f, -1.f, 0.f },
+			vec3{ 0.f, -1.f, 0.f },
+			vec3{ 0.f, 0.f, 1.f },
+			vec3{ 0.f, 0.f, -1.f },
+			vec3{ 0.f, -1.f, 0.f },
+			vec3{ 0.f, -1.f, 0.f }
+		};
+
+		std::array<std::vector<uint32_t>, MaxFramesInFlight> _pointShadowUBOHandles;
+		std::vector<mat4> _pointViewProjs;
+
+		ID _hoveredEntityID = 0;
+		Entity* _hoveredEntity = nullptr;
 
 		//panels
 		SceneHierarchy _sceneHierarchy;

@@ -26,25 +26,27 @@ namespace Imgn
 		return pName;
 	}
 
-	std::string ImgnRenderGraph::CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat)
+	std::string ImgnRenderGraph::CreateRGImageDesc(const std::string& pName, uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageViewType pImageViewType, uint32_t pArrayLayers)
 	{
 		_imageDesc[pName] = RGImageDesc
 		{
 			.width = pWidth,
 			.height = pHeight,
-			.format = pFormat
+			.arrayLayers = pArrayLayers,
+			.format = pFormat,
+			.imageViewType = pImageViewType
 		};
 
-		if (pName.contains("Depth"))
-		{
-			_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eDepth);
-			
-			return pName;
-		}
+		//if (pName.contains("Depth"))
+		//{
+		//	_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eDepth);
+		//	
+		//	return pName;
+		//}
 
-		std::vector<uint8_t> newImageData(pWidth * pHeight * 4, 0); //all black image
+		//std::vector<uint8_t> newImageData(pWidth * pHeight * 4, 0); //all black image
 
-		_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eColor);
+		//_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eColor);
 
 		return pName;
 	}
@@ -222,20 +224,11 @@ namespace Imgn
 
 		// Physical Resource Allocation and Creation
 		// Transform resource descriptions into actual GPU objects
-		for (auto& pass : _passes)
+		for (auto& [name, desc] : _imageDesc)
 		{
-			for (auto& imageOUT : pass.imageOUT)
-			{
-				if (imageOUT.contains("Depth"))
-				{
-					_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eDepth);
-					continue;
-				}
+			vk::ImageAspectFlags aspect = name.contains("Depth") ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
-				std::vector<uint8_t> newImageData(_imageDesc[imageOUT].width* _imageDesc[imageOUT].height * 4, 0); //all black image
-
-				_images[imageOUT] = _vk.CreateRenderImage(_imageDesc[imageOUT].width, _imageDesc[imageOUT].height, _imageDesc[imageOUT].format, vk::ImageAspectFlagBits::eColor);
-			}
+			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect, desc.imageViewType, desc.arrayLayers);
 		}
 
 		for (auto& pass : _passes)
@@ -244,7 +237,6 @@ namespace Imgn
 			{
 				if (bufferOUT.contains("UB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eUniformBuffer);
 				if (bufferOUT.contains("SB")) _buffers[bufferOUT] = _vk.CreateRenderBuffer(nullptr, _bufferDesc[bufferOUT].size, vk::BufferUsageFlagBits::eStorageBuffer);
-
 			}
 		}
 	}
@@ -277,29 +269,26 @@ namespace Imgn
 			}
 
 
-			for (auto& input : pass.imageIN)
+			for (const auto& input : pass.imageIN)
 			{
-				RGImage& resource = _images[input];
+				RGImage& resource = GetImage(input);
 
 				if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
 				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect);
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
 					resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 				}
 			}
 
-			for (auto& output : pass.imageOUT)
+			for (const auto& output : pass.imageOUT)
 			{
-				RGImage& resource = _images[output];
-				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eDepth)
-					? vk::ImageLayout::eDepthStencilAttachmentOptimal
-					: (pass.bindPoint == vk::PipelineBindPoint::eCompute
-						? vk::ImageLayout::eGeneral
-						: vk::ImageLayout::eColorAttachmentOptimal);
+				RGImage& resource = GetImage(output);
+
+				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eDepth) ? vk::ImageLayout::eDepthStencilAttachmentOptimal : (pass.bindPoint == vk::PipelineBindPoint::eCompute ? vk::ImageLayout::eGeneral : vk::ImageLayout::eColorAttachmentOptimal);
 
 				if (resource.currentLayout != target)
 				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, target, *resource.image.image, resource.aspect);
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, target, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
 					resource.currentLayout = target;
 				}
 			}
@@ -346,7 +335,7 @@ namespace Imgn
 			{
 				if (resource.currentLayout != vk::ImageLayout::eDepthStencilAttachmentOptimal)
 				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eDepthStencilAttachmentOptimal, *resource.image.image, resource.aspect);
+					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eDepthStencilAttachmentOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
 					resource.currentLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
 				}
 
@@ -355,7 +344,7 @@ namespace Imgn
 
 			if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
 			{
-				_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect);
+				_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
 				resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 			}
 		}
@@ -374,7 +363,7 @@ namespace Imgn
 
 		if (image.width == pWidth && image.height == pHeight) return;
 
-		RGImage replacement = _vk.CreateRenderImage(pWidth, pHeight, image.format, image.aspect);
+		RGImage replacement = _vk.CreateRenderImage(pWidth, pHeight, image.format, image.aspect, image.viewType, image.arrayLayers);
 
 		// Caller has waited for the GPU and removed descriptors using this view.
 		image.image.view.reset();

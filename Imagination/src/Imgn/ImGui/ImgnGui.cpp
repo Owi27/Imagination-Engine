@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "ImgnGui.h"
 #include "Imgn/ImgnApp.hpp"
+#include "Imgn/FileSystem.hpp"
 
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
@@ -188,12 +189,12 @@ namespace Imgn
 
 		ImGuiIO& io = ImGui::GetIO();
 		//io.Fonts->AddFontFromFileTTF("../../Fonts/Raleway-Regular.ttf", 16.f);
-		io.Fonts->AddFontFromFileTTF("../../../../Fonts/consola.ttf", 12.f);
+		std::string fontPath = std::filesystem::path(FileSystem::Assets() / "Fonts/consola.ttf").string();
+		io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 12.f);
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 
-		const HWND editor =
-			static_cast<HWND>(_window->GetWindowHandle());
+		const HWND editor = static_cast<HWND>(_window->GetWindowHandle());
 
 		if (!ImGui_ImplWin32_Init(editor))
 		{

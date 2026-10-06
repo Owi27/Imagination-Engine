@@ -49,6 +49,8 @@ namespace Imgn
         void DestroyEntity(unique<Entity>& pEntity);
         std::vector<unique<Entity>>& GetEntities() { return _entities; }
 
+        Entity* GetEntity(ID pID);
+
         Entity* GetPrimaryCameraEntity();
 
         void OnViewportResize(uint32_t pWidth, uint32_t pHeight);

@@ -53,10 +53,10 @@ namespace Imgn
 		_renderHeight = _sceneHeight = std::max(1u, extent.height);
 
 		GLTFLoader& loader = GLTFLoader::Get();
-		ImgnModel sponza = loader.LoadModel("../../../../Models/Sponza/glTF/Sponza.gltf", *_renderer);
-		ImgnModel testGlb = loader.LoadModel("../../../../Models/Vroid/Test.gltf", *_renderer);
+		ImgnModel sponza = loader.LoadModel(FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", *_renderer);
+		ImgnModel testGlb = loader.LoadModel(FileSystem::Assets() / "Models/Vroid/Test.gltf", *_renderer);
 
-		
+
 		RenderPass gBuffer
 		{
 			.name = "G-BufferPass",
@@ -67,7 +67,7 @@ namespace Imgn
 				_renderer->CreateRGImageDesc("G-BufferMaterial", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Unorm),
 				_renderer->CreateRGImageDesc("G-BufferEmissive", _renderWidth, _renderHeight, vk::Format::eR8G8B8A8Srgb),
 				_renderer->CreateRGImageDesc("G-BufferVelocity", _renderWidth, _renderHeight, vk::Format::eR16G16Sfloat),
-				_renderer->CreateRGImageDesc("EntityIDs", _renderWidth, _renderHeight, vk::Format::eR8Sint),
+				_renderer->CreateRGImageDesc("EntityIDs", _renderWidth, _renderHeight, vk::Format::eR32G32Uint),
 				_renderer->CreateRGImageDesc("Depth", _renderWidth, _renderHeight, vk::Format::eD32Sfloat)
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
@@ -79,6 +79,7 @@ namespace Imgn
 					ctx.CreateRenderingAttachmentInfo("G-BufferMaterial"),
 					ctx.CreateRenderingAttachmentInfo("G-BufferEmissive"),
 					ctx.CreateRenderingAttachmentInfo("G-BufferVelocity"),
+					ctx.CreateRenderingAttachmentInfo("EntityIDs"),
 				};
 
 				vk::RenderingAttachmentInfo depthAttachment = ctx.CreateRenderingAttachmentInfo("Depth");
@@ -132,7 +133,9 @@ namespace Imgn
 						GBufferPC pc
 						{
 							.model = transform->GetTransform(),
-							.materialIndex = prim.materialSlot
+							.materialIndex = prim.materialSlot,
+							.entityIDLow = static_cast<uint32_t>(entity->GetID() & 0xFFFFFFFFull),
+							.entityIDHigh = static_cast<uint32_t>(entity->GetID() >> 32)
 						};
 
 						ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
@@ -154,6 +157,7 @@ namespace Imgn
 				"G-BufferNormal",
 				"G-BufferMaterial",
 				"G-BufferEmissive",
+				"PointShadowDepthArray",
 				"Depth"
 			},
 			.imageOUT =
@@ -177,13 +181,8 @@ namespace Imgn
 
 				//push descriptor set
 				{
-					//uniform buffer
-					/*vk::DescriptorBufferInfo uboInfo
-					{
-						.buffer = *Renderer().GetRenderGraphBuffer("G-BufferUBO").buffer.buffer,
-						.offset = 0,
-						.range = 192
-					};*/
+					//point lights
+
 
 					std::array images =
 					{
@@ -194,13 +193,20 @@ namespace Imgn
 						ctx.CreateDescriptorImageInfo("Depth"),
 					};
 
+					vk::DescriptorBufferInfo pointLights = ctx.CreateDescriptorBufferInfo(_pointLightBuffer, _pointLights.size() * sizeof(PointLight));
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
 
+					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetPointSampler());
+
+					vk::DescriptorImageInfo pointShadowDepthArray = ctx.CreateDescriptorImageInfo("PointShadowDepthArray");
 
 					std::array writes
 					{
+						ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, pointLights),
 						ctx.CreateWriteDescriptorSet(2, vk::DescriptorType::eSampledImage, images),
-						ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage)
+						ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage),
+						ctx.CreateWriteDescriptorSet(4, vk::DescriptorType::eSampler, sampler),
+						ctx.CreateWriteDescriptorSet(5, vk::DescriptorType::eSampledImage, pointShadowDepthArray),
 					};
 
 					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
@@ -277,9 +283,100 @@ namespace Imgn
 			}
 		};
 
+		RenderPass shadowPass //todo: magic numbers
+		{
+			.name = "ShadowPass",
+			.imageOUT =
+			{
+				_renderer->CreateRGImageDesc("PointShadowDepthArray", 1024, 1024, vk::Format::eD32Sfloat, vk::ImageViewType::eCubeArray, static_cast<uint32_t>(_pointLights.size()) * 6),
+			},
+			.Execute = [&](Imgn::RenderContext& ctx)
+			{
+				ctx.BindPipeline(vk::PipelineBindPoint::eGraphics, *_renderer->GetPipelines().shadowPipeline);
+				ctx.BindDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
+				ctx.SetViewport(1024, 1024);
+				ctx.SetScissor(1024, 1024);
+
+				const uint32_t frameIndex = _renderer->GetFrameInFlightIndex();
+
+				for (uint32_t lightIndex = 0; lightIndex < _pointLights.size(); lightIndex++)
+				{
+					const PointLight& light = _pointLights[lightIndex];
+
+					mat4 projection = Math::PerspectiveVKLH(Math::Radians(90.f), 1.f, .1f, light.range);
+
+					for (uint32_t face = 0; face < 6; face++)
+					{
+						const uint32_t layer = lightIndex * 6 + face;
+
+						mat4 view = Math::LookAtLH(light.pos, light.pos + PointShadowDirections[face], PointShadowUp[face]);
+
+						ShadowUBO shadowUBO
+						{
+							.viewProj = view * projection,
+							.lightPosition = light.pos,
+							.farPlane = light.range
+						};
+
+						_renderer->MapBufferData(_pointShadowUBOHandles[frameIndex][layer], &shadowUBO, sizeof(ShadowUBO));
+
+						vk::DescriptorBufferInfo shadowUBOInfo = ctx.CreateDescriptorBufferInfo(_pointShadowUBOHandles[frameIndex][layer], sizeof(ShadowUBO));
+
+						std::array writes
+						{
+							ctx.CreateWriteDescriptorSet(0, vk::DescriptorType::eUniformBuffer, shadowUBOInfo)
+						};
+
+						ctx.PushDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), writes);
+
+						vk::RenderingAttachmentInfo depthAttachment = ctx.CreateRenderingAttachmentInfo("PointShadowDepthArray", layer);
+						std::span<const vk::RenderingAttachmentInfo> colorAttachments;
+
+						ctx.BeginRendering(1024, 1024, colorAttachments, &depthAttachment);
+
+						for (auto& entity : _activeScene->GetEntities())
+						{
+							if (!entity->IsActive()) continue;
+
+							TransformComponent* transform = entity->GetComponent<TransformComponent>();
+							if (!transform) continue;
+
+							MeshComponent* mesh = entity->GetComponent<MeshComponent>();
+							if (!mesh || !mesh->visible) continue;
+
+							ctx.BindMesh(*mesh);
+
+							ShadowPC pc
+							{
+								.model = transform->GetTransform()
+							};
+
+							ctx.PushConstants<ShadowPC>(vk::ShaderStageFlagBits::eVertex, pc);
+
+							for (const Primitive& primitive : mesh->GetPrimitives()) ctx.DrawPrimitive(primitive);
+						}
+
+						ctx.EndRendering();
+					}
+				}
+			} 
+		};
+
+		const uint32_t faceCount = static_cast<uint32_t>(_pointLights.size()) * 6;
+
+		for (std::vector<uint32_t>& handles : _pointShadowUBOHandles)
+		{
+			handles.resize(faceCount);
+
+			for (uint32_t i = 0; i < faceCount; i++) handles[i] = _renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO));
+		}
+
+		_pointLightBuffer = _renderer->CreateStorageBuffer(_pointLights.data(), _pointLights.size() * sizeof(PointLight));
+
 		_renderer->AddPass(gBuffer);
 		_renderer->AddPass(lighting);
 		_renderer->AddPass(TAA);
+		_renderer->AddPass(shadowPass);
 		_renderer->CompileGraph();
 
 		_activeScene = Shared<Scene>();
@@ -289,7 +386,7 @@ namespace Imgn
 		{
 			Entity* entity = _activeScene->CreateEntity("Sponza");
 			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
-			mesh->SetMesh(meshHandle.name, "../../../../Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
 			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
 			materialComponent->SetMaterials(sponza.materials);
 		}
@@ -299,7 +396,7 @@ namespace Imgn
 		{
 			Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
 			MeshComponent* mesh = child->AddComponent<MeshComponent>();
-			mesh->SetMesh(meshHandle.name, "../../../../Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
 
 			MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
 			materialComponent->SetMaterials(testGlb.materials);
@@ -327,7 +424,7 @@ namespace Imgn
 			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
 		}
 
-		blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), "../../../../ExternalApps/Blender 4.4/blender.exe");
+		//blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), FileSystem::Assets() / "ExternalApps/Blender 4.4/blender.exe");
 	}
 
 	void EditorLayer::WakeUp()
@@ -353,6 +450,7 @@ namespace Imgn
 					_sceneHierarchy.SetSceneContext(_activeScene);
 					_taaHistoryValid = false;
 				}
+
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
 					std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
@@ -367,6 +465,7 @@ namespace Imgn
 						serializer.Deserialize(filePath);
 					}
 				}
+
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 				{
 					std::string filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
@@ -376,9 +475,12 @@ namespace Imgn
 						serializer.Serialize(filePath + ".imgn");
 					}
 				}
+
 				if (ImGui::MenuItem("Exit")) ImgnApp::Get().Close();
+
 				ImGui::EndMenu();
 			}
+
 			ImGui::EndMainMenuBar();
 		}
 
@@ -396,6 +498,9 @@ namespace Imgn
 
 	void EditorLayer::Dream(Time pTime)
 	{
+		_hoveredEntityID = _renderer->GetEntityIDReadback();
+		_hoveredEntity = _activeScene->GetEntity(_hoveredEntityID);
+
 		ResizeSceneTargets();
 
 		_editorScene->Dream(pTime);
@@ -425,32 +530,6 @@ namespace Imgn
 		_taaHistoryValid = true;
 
 		_renderer->ClearSwapchain();
-
-		//_activeScene->Dream(pTime);
-		////UpdateCamera(pTime);
-
-		//constexpr float JITTER_DEBUG_SCALE = 1.f;
-
-		//mat4 proj = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
-		//vec2 jitter = GetProjectionJitter(_renderWidth, _renderHeight);
-		//mat4 jitterMat = Math::Translate(Math::identity, { jitter[0] * JITTER_DEBUG_SCALE, jitter[1] * JITTER_DEBUG_SCALE, 0.f });
-		////proj[8] += jitter[0] * JITTER_DEBUG_SCALE;
-		////proj[9] += jitter[1] * JITTER_DEBUG_SCALE;
-		//gBufferUBO.jitteredViewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * (proj * jitterMat);
-		//gBufferUBO.viewProj = GetCamView(_sceneCamera->GetComponent<TransformComponent>()) * proj;
-
-		//_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
-
-		//gBufferUBO.prevViewProj = gBufferUBO.viewProj;
-		////IMGN_INFO("DeltaTime {}s : {}ms", pTime.Seconds(), pTime.MiliSeconds());
-
-
-		//_renderer->ExecuteGraph();
-		//_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
-		//_renderer->CopyRenderImage("G-BufferVelocity", "G-BufferVelocityHistory");
-
-		//_taaHistoryValid = true;
-		//_renderer->BlitToSwapchain("TAAResolved");
 	}
 
 	void EditorLayer::OnEvent(Event& pEvent)
@@ -508,6 +587,31 @@ namespace Imgn
 
 			ImGui::Image(ImTextureRef(textureID), size);
 
+			if (ImGui::IsItemHovered())
+			{
+				const ImVec2 mouse = ImGui::GetMousePos();
+				const ImVec2 framebufferScale = ImGui::GetIO().DisplayFramebufferScale;
+
+				float localX = mouse.x - position.x;
+				float localY = mouse.y - position.y;
+
+				if (localX >= 0.f && localY >= 0.f && localX < size.x && localY < size.y)
+				{
+					uint32_t pixelX = static_cast<uint32_t>(localX * framebufferScale.x);
+					uint32_t pixelY = static_cast<uint32_t>(localY * framebufferScale.y);
+
+					pixelX = std::min(pixelX, _renderWidth - 1);
+					pixelY = std::min(pixelY, _renderHeight - 1);
+
+					_renderer->QueueEntityIDReadback(pixelX, pixelY);
+				}
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver())
+			{
+				_sceneHierarchy.SetSelectedEntity(_hoveredEntity);
+			}
+
 			if (!ImGui::IsMouseDown(ImGuiMouseButton_Right) || !ImGui::IsWindowFocused()) _cameraLookActive = false;
 
 			// Looking must start with a right-click inside the scene image.
@@ -516,7 +620,7 @@ namespace Imgn
 			EditorCamera::SetInputEnabled(_cameraLookActive);
 
 			//gizmo
-			_gizmoType = ImGuizmo::OPERATION::TRANSLATE; //ignore hard set
+			_gizmoType = ImGuizmo::OPERATION::ROTATE; //ignore hard set
 			Entity* selected = _sceneHierarchy.GetSelectedEntity();
 			TransformComponent* tc = selected ? selected->GetComponent<TransformComponent>() : nullptr;
 			if (tc && !_cameraLookActive)

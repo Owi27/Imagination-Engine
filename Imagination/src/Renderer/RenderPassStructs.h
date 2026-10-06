@@ -5,7 +5,8 @@ namespace Imgn
 	struct GBufferPC
 	{
 		std::array<float, 16> model;
-		uint32_t materialIndex = 0xFFFFFFFF;
+		uint32_t materialIndex = 0xFFFFFFFF, entityIDLow = 0, entityIDHigh = 0;
+		uint32_t padding = 0;
 	};
 
 	struct GBufferUBO
@@ -33,5 +34,19 @@ namespace Imgn
 	struct TAAPC
 	{
 		uint32_t historyValid;
+	};
+
+	//shadow
+	struct ShadowPC
+	{
+		mat4 model;
+	};
+
+	struct ShadowUBO
+	{
+		mat4 viewProj;
+
+		vec3 lightPosition;
+		float farPlane;
 	};
 }

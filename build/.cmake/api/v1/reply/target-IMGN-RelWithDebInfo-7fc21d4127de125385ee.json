@@ -2,13 +2,13 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Debug-Windows-x64/Imagination/IMGN.dll"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.dll"
 		},
 		{
-			"path" : "bin/Debug-Windows-x64/Imagination/IMGN.lib"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.lib"
 		},
 		{
-			"path" : "bin/Debug-Windows-x64/Imagination/IMGN.pdb"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Imagination/IMGN.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -113,14 +113,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -190,14 +190,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -260,7 +260,6 @@
 			],
 			"sourceIndexes" : 
 			[
-				59,
 				60,
 				61,
 				62,
@@ -295,7 +294,9 @@
 				91,
 				92,
 				93,
-				94
+				94,
+				95,
+				96
 			]
 		}
 	],
@@ -391,7 +392,6 @@
 			"sourceIndexes" : 
 			[
 				0,
-				59,
 				60,
 				61,
 				62,
@@ -426,7 +426,9 @@
 				91,
 				92,
 				93,
-				94
+				94,
+				95,
+				96
 			]
 		},
 		{
@@ -490,17 +492,18 @@
 				55,
 				56,
 				57,
-				58
+				58,
+				59
 			]
 		},
 		{
 			"name" : "Precompile Header File",
 			"sourceIndexes" : 
 			[
-				95,
-				96,
 				97,
-				98
+				98,
+				99,
+				100
 			]
 		}
 	],
@@ -635,6 +638,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "Imagination/src/Imgn/Events/MouseEvent.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "Imagination/src/Imgn/FileSystem.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -896,6 +904,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 1,
 			"path" : "Imagination/src/Imgn/Components/MeshComponent.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "Imagination/src/Imgn/FileSystem.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

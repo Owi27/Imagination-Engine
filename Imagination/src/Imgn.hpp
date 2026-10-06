@@ -14,5 +14,6 @@
 #include "Imgn/ImgnWindow.h"
 #include "Imgn/ImgnRenderer.h"
 #include "Imgn/ImgnRenderContext.h"
+#include "Imgn/FileSystem.hpp"
 
 #include "Imgn/ImgnScene.h"

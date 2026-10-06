@@ -35,6 +35,7 @@ namespace Imgn
 
 		/*Class Functions*/
 		vk::RenderingAttachmentInfo CreateRenderingAttachmentInfo(std::string_view pName);
+		vk::RenderingAttachmentInfo CreateRenderingAttachmentInfo(std::string_view pName, uint32_t pLayer);
 
 		void BeginRendering(uint32_t pWidth, uint32_t pHeight, std::span<const vk::RenderingAttachmentInfo> pColors, const vk::RenderingAttachmentInfo* pDepth);
 		void EndRendering();

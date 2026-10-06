@@ -467,4 +467,33 @@ namespace Imgn
 		for (const char* name : images)
 			_graph->ResizeImage(name, pWidth, pHeight);
 	}
+
+	void ImgnRenderer::QueueEntityIDReadback(uint32_t pX, uint32_t pY)
+	{
+		RGImage& image = _graph->GetImage("EntityIDs");
+
+		if (pX >= image.width || pY >= image.height) return;
+
+		const uint32_t frameIndex = _vkCtx->GetFrameInFlightIndex();
+		Buffer& readbackBuffer = _entityIDReadbackBuffers[frameIndex];
+
+		if (!readbackBuffer.buffer) readbackBuffer = _vkCtx->CreateReadbackBuffer(sizeof(uint32_t) * 2);
+
+		_vkCtx->CopyImagePixelToBuffer(_vkCtx->GetCurrentCommandBuffer(), image, readbackBuffer, pX, pY);
+
+		_entityIDReadbackValid[frameIndex] = true;
+	}
+
+	uint64_t ImgnRenderer::GetEntityIDReadback()
+	{
+		const uint32_t frameIndex = _vkCtx->GetFrameInFlightIndex();
+
+		if (!_entityIDReadbackValid[frameIndex]) return 0;
+
+		std::array<uint32_t, 2> entityID = {};
+
+		_vkCtx->ReadBuffer(_entityIDReadbackBuffers[frameIndex], entityID.data(), sizeof(entityID));
+
+		return static_cast<uint64_t>(entityID[0]) | (static_cast<uint64_t>(entityID[1]) << 32);
+	}
 }
