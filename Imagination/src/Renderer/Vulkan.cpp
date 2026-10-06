@@ -1480,6 +1480,27 @@ Buffer Vulkan::CreateIndexBuffer(const void* pData, uint64_t pSize)
 	return indexBuffer;
 }
 
+Buffer Vulkan::CreateStorageBuffer(const void* pData, uint64_t pSize)
+{
+	Buffer storageBuffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, storageBuffer);
+
+	if (!pData) return storageBuffer;
+
+	Buffer stagingBuffer;
+
+	CreateBuffer(pSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, stagingBuffer);
+
+	void* mappedData = stagingBuffer.memory->mapMemory(0, pSize);
+	std::memcpy(mappedData, pData, pSize);
+	stagingBuffer.memory->unmapMemory();
+
+	CopyBuffer(*stagingBuffer.buffer, *storageBuffer.buffer, pSize);
+
+	return storageBuffer;
+}
+
 Buffer Vulkan::CreateVertexBuffer(void* pData, uint64_t pSize)
 {
 	Buffer vertexBuffer;

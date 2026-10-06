@@ -188,7 +188,16 @@ public:
 
 	~Vulkan()
 	{
-		if (_device) _device->waitIdle();
+		if (!_device) return;
+
+		try
+		{
+			_device->waitIdle();
+		}
+		catch (const vk::DeviceLostError&)
+		{
+			IMGN_ERROR("Vulkan device already lost during shutdown");
+		}
 	}
 
 	/* Class Functions */
@@ -200,6 +209,7 @@ public:
 
 	Buffer CreateVertexBuffer(const void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(const void* pData, uint64_t pSize);
+	Buffer CreateStorageBuffer(const void* pData, uint64_t pSize);
 
 	Buffer CreateVertexBuffer(void* pData, uint64_t pSize);
 	Buffer CreateIndexBuffer(void* pData, uint64_t pSize);

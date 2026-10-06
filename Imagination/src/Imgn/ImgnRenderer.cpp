@@ -406,7 +406,7 @@ namespace Imgn
 
 	unique<Buffer> ImgnRenderer::CreateMaterialBuffer(std::span<const Material> pMaterials)
 	{
-		return pMaterials.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateIndexBuffer(pMaterials.data(), pMaterials.size_bytes()));
+		return pMaterials.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateStorageBuffer(pMaterials.data(), pMaterials.size_bytes()));
 	}
 
 	uint32_t ImgnRenderer::CreateUniformBuffer(void* pData, uint64_t pSize)
