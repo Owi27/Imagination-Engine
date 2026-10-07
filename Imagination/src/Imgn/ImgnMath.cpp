@@ -339,22 +339,22 @@ namespace Imgn
 
 		//rotation
 		float det = Determinant(pMat);
-		float sx = std::sqrt(pMat[0] * pMat[0] + pMat[1] * pMat[1] + pMat[2] * pMat[2]);
-		float sy = std::sqrt(pMat[4] * pMat[4] + pMat[5] * pMat[5] + pMat[6] * pMat[6]);
-		float sz = std::sqrt(pMat[8] * pMat[8] + pMat[9] * pMat[9] + pMat[10] * pMat[10]);
+		float sx = sqrt(pMat[0] * pMat[0] + pMat[4] * pMat[4] + pMat[8] * pMat[8]);
+		float sy = sqrt(pMat[1] * pMat[1] + pMat[5] * pMat[5] + pMat[9] * pMat[9]);
+		float sz = sqrt(pMat[2] * pMat[2] + pMat[6] * pMat[6] + pMat[10] * pMat[10]);
 
 		if (WithinStandardDeviation(det, 0.f)) return;
 		if (det < 0) sx = -sx;
 
 		mat4 rotation = pMat;
 		rotation[0] /= sx;
-		rotation[1] /= sx;
-		rotation[2] /= sx;
-		rotation[4] /= sy;
+		rotation[4] /= sx;
+		rotation[8] /= sx;
+		rotation[1] /= sy;
 		rotation[5] /= sy;
-		rotation[6] /= sy;
-		rotation[8] /= sz;
-		rotation[9] /= sz;
+		rotation[9] /= sy;
+		rotation[2] /= sz;
+		rotation[6] /= sz;
 		rotation[10] /= sz;
 
 		pRotation = QuatFromRotationMatrix(rotation);
