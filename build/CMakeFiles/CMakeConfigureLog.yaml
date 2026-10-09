@@ -7,7 +7,7 @@ events:
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineSystem.cmake:212 (message)"
       - "CMakeLists.txt:2 (project)"
     message: |
-      The system is: Windows - 10.0.26200 - AMD64
+      The system is: Windows - 10.0.26300 - AMD64
   -
     kind: "find-v1"
     backtrace:
@@ -79,9 +79,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -126,7 +127,7 @@ events:
       The output was:
       0
       MSBuild version 18.7.8+1ac568fee for .NET Framework
-      Build started 10/5/2026 1:38:56 PM.
+      Build started 10/9/2026 2:50:42 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.3.1-msvc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -155,7 +156,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:00.46
+      Time Elapsed 00:00:00.37
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -226,9 +227,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -239,8 +241,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -296,9 +296,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -378,9 +379,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -391,8 +393,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -517,15 +517,18 @@ events:
       - "C:/Program Files/Git/cmd/lld-link.com"
       - "C:/Program Files/Git/cmd/lld-link.exe"
       - "C:/Program Files/Git/cmd/lld-link"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/lld-link.com"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/lld-link.exe"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/lld-link"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/lld-link.com"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/lld-link.exe"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/lld-link"
+      - "C:/Users/Owi/AppData/Local/nvm/lld-link.com"
+      - "C:/Users/Owi/AppData/Local/nvm/lld-link.exe"
+      - "C:/Users/Owi/AppData/Local/nvm/lld-link"
+      - "C:/nvm4w/nodejs/lld-link.com"
+      - "C:/nvm4w/nodejs/lld-link.exe"
+      - "C:/nvm4w/nodejs/lld-link"
       - "C:/Program Files/Docker/Docker/resources/bin/lld-link.com"
       - "C:/Program Files/Docker/Docker/resources/bin/lld-link.exe"
       - "C:/Program Files/Docker/Docker/resources/bin/lld-link"
+      - "D:/GitHub/ninja/build-cmake/Release/lld-link.com"
+      - "D:/GitHub/ninja/build-cmake/Release/lld-link.exe"
+      - "D:/GitHub/ninja/build-cmake/Release/lld-link"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/lld-link.com"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/lld-link.exe"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/lld-link"
@@ -556,12 +559,6 @@ events:
       - "C:/Users/Owi/AppData/Roaming/npm/lld-link.com"
       - "C:/Users/Owi/AppData/Roaming/npm/lld-link.exe"
       - "C:/Users/Owi/AppData/Roaming/npm/lld-link"
-      - "C:/Users/Owi/AppData/Local/nvm/lld-link.com"
-      - "C:/Users/Owi/AppData/Local/nvm/lld-link.exe"
-      - "C:/Users/Owi/AppData/Local/nvm/lld-link"
-      - "C:/nvm4w/nodejs/lld-link.com"
-      - "C:/nvm4w/nodejs/lld-link.exe"
-      - "C:/nvm4w/nodejs/lld-link"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/lld-link.com"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/lld-link.exe"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/lld-link"
@@ -613,9 +610,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -693,9 +691,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -706,8 +705,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -763,9 +760,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -843,9 +841,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -856,8 +855,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -940,9 +937,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1020,9 +1018,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1033,8 +1032,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -1090,9 +1087,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1173,9 +1171,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1186,8 +1185,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -1282,9 +1279,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1318,8 +1316,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-ytb996"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-ytb996"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -1330,39 +1328,39 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-ytb996'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b502f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_da1f7.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.7.8+1ac568fee for .NET Framework
-        Build started 10/5/2026 1:38:56 PM.
+        Build started 10/9/2026 2:50:43 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ytb996\\cmTC_b502f.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\cmTC_da1f7.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ytb996\\Debug\\".
-          Creating directory "cmTC_b502f.dir\\Debug\\cmTC_b502f.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\".
+          Creating directory "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_b502f.dir\\Debug\\cmTC_b502f.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_b502f.dir\\Debug\\cmTC_b502f.tlog\\unsuccessfulbuild".
+          Creating "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_b502f.dir\\Debug\\\\" /Fd"cmTC_b502f.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_da1f7.dir\\Debug\\\\" /Fd"cmTC_da1f7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36248 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_b502f.dir\\Debug\\\\" /Fd"cmTC_b502f.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_da1f7.dir\\Debug\\\\" /Fd"cmTC_da1f7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ytb996\\Debug\\cmTC_b502f.exe" /INCREMENTAL /ILK:"cmTC_b502f.dir\\Debug\\cmTC_b502f.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-ytb996/Debug/cmTC_b502f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-ytb996/Debug/cmTC_b502f.lib" /MACHINE:X64  /machine:x64 cmTC_b502f.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_b502f.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ytb996\\Debug\\cmTC_b502f.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\cmTC_da1f7.exe" /INCREMENTAL /ILK:"cmTC_da1f7.dir\\Debug\\cmTC_da1f7.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb/Debug/cmTC_da1f7.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb/Debug/cmTC_da1f7.lib" /MACHINE:X64  /machine:x64 cmTC_da1f7.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_da1f7.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\cmTC_da1f7.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_b502f.dir\\Debug\\cmTC_b502f.tlog\\unsuccessfulbuild".
-          Touching "cmTC_b502f.dir\\Debug\\cmTC_b502f.tlog\\cmTC_b502f.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ytb996\\cmTC_b502f.vcxproj" (default targets).
+          Deleting file "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild".
+          Touching "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\cmTC_da1f7.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\cmTC_da1f7.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:00.66
+        Time Elapsed 00:00:00.35
         
       exitCode: 0
   -
@@ -1461,9 +1459,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1474,8 +1473,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -1537,9 +1534,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1638,9 +1636,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1651,8 +1650,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -1716,9 +1713,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1812,9 +1810,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1825,8 +1824,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -1894,9 +1891,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -1980,9 +1978,10 @@ events:
       - "C:/Program Files/CMake/bin/"
       - "C:/ProgramData/chocolatey/bin/"
       - "C:/Program Files/Git/cmd/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_HOME%/"
-      - "D:/GitHub/Imagination-Engine/build/%NVM_SYMLINK%/"
+      - "C:/Users/Owi/AppData/Local/nvm/"
+      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Docker/Docker/resources/bin/"
+      - "D:/GitHub/ninja/build-cmake/Release/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/Scripts/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Python312/"
       - "C:/Users/Owi/AppData/Local/Programs/Python/Launcher/"
@@ -1993,8 +1992,6 @@ events:
       - "C:/Users/Owi/.dotnet/tools/"
       - "C:/Users/Owi/AppData/Local/Microsoft/WinGet/Links/"
       - "C:/Users/Owi/AppData/Roaming/npm/"
-      - "C:/Users/Owi/AppData/Local/nvm/"
-      - "C:/nvm4w/nodejs/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/PrivateAssemblies/runtimes/win-x64/native/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin/"
       - "C:/Program Files/Microsoft Visual Studio/18/Enterprise/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
@@ -2062,9 +2059,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -2160,9 +2158,10 @@ events:
         - "C:\\Program Files\\CMake\\bin"
         - "C:\\ProgramData\\chocolatey\\bin"
         - "C:\\Program Files\\Git\\cmd"
-        - "%NVM_HOME%"
-        - "%NVM_SYMLINK%"
+        - "C:\\Users\\Owi\\AppData\\Local\\nvm"
+        - "C:\\nvm4w\\nodejs"
         - "C:\\Program Files\\Docker\\Docker\\resources\\bin"
+        - "D:\\GitHub\\ninja\\build-cmake\\Release"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Python312\\"
         - "C:\\Users\\Owi\\AppData\\Local\\Programs\\Python\\Launcher\\"
@@ -2213,7 +2212,7 @@ events:
       The output was:
       0
       MSBuild version 18.7.8+1ac568fee for .NET Framework
-      Build started 10/5/2026 1:38:57 PM.
+      Build started 10/9/2026 2:50:43 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.3.1-msvc1\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -2242,7 +2241,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:00.53
+      Time Elapsed 00:00:00.40
       
       
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
@@ -2261,8 +2260,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-cs2afg"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-cs2afg"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh"
     cmakeVariables:
       CMAKE_CXX_STDLIB_MODULES_JSON: ""
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
@@ -2272,39 +2271,39 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-cs2afg'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_d8db6.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b5108.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.7.8+1ac568fee for .NET Framework
-        Build started 10/5/2026 1:38:58 PM.
+        Build started 10/9/2026 2:50:44 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cs2afg\\cmTC_d8db6.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\cmTC_b5108.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cs2afg\\Debug\\".
-          Creating directory "cmTC_d8db6.dir\\Debug\\cmTC_d8db6.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\".
+          Creating directory "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_d8db6.dir\\Debug\\cmTC_d8db6.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_d8db6.dir\\Debug\\cmTC_d8db6.tlog\\unsuccessfulbuild".
+          Creating "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_d8db6.dir\\Debug\\\\" /Fd"cmTC_d8db6.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_b5108.dir\\Debug\\\\" /Fd"cmTC_b5108.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36248 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_d8db6.dir\\Debug\\\\" /Fd"cmTC_d8db6.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_b5108.dir\\Debug\\\\" /Fd"cmTC_b5108.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
           CMakeCCompilerABI.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cs2afg\\Debug\\cmTC_d8db6.exe" /INCREMENTAL /ILK:"cmTC_d8db6.dir\\Debug\\cmTC_d8db6.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-cs2afg/Debug/cmTC_d8db6.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-cs2afg/Debug/cmTC_d8db6.lib" /MACHINE:X64  /machine:x64 cmTC_d8db6.dir\\Debug\\CMakeCCompilerABI.obj
-          cmTC_d8db6.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cs2afg\\Debug\\cmTC_d8db6.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\cmTC_b5108.exe" /INCREMENTAL /ILK:"cmTC_b5108.dir\\Debug\\cmTC_b5108.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh/Debug/cmTC_b5108.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh/Debug/cmTC_b5108.lib" /MACHINE:X64  /machine:x64 cmTC_b5108.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_b5108.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\cmTC_b5108.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_d8db6.dir\\Debug\\cmTC_d8db6.tlog\\unsuccessfulbuild".
-          Touching "cmTC_d8db6.dir\\Debug\\cmTC_d8db6.tlog\\cmTC_d8db6.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-cs2afg\\cmTC_d8db6.vcxproj" (default targets).
+          Deleting file "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild".
+          Touching "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\cmTC_b5108.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\cmTC_b5108.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:00.42
+        Time Elapsed 00:00:00.36
         
       exitCode: 0
   -

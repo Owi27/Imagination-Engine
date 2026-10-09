@@ -186,7 +186,7 @@ SamplerState materialSampler : register(s0, space1);
 
 float2 ClipToUV(float4 pClip)
 {
-    float2 ndc = pClip.xyz / pClip.w;
+    float2 ndc = pClip.xy / pClip.w;
     
     return ndc * .5 + .5f;
 }

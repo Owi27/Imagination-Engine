@@ -2,13 +2,13 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Release-Windows-x64/Imagination/IMGN.dll"
+			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.dll"
 		},
 		{
-			"path" : "bin/Release-Windows-x64/Imagination/IMGN.lib"
+			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.lib"
 		},
 		{
-			"path" : "bin/Release-Windows-x64/Imagination/IMGN.pdb"
+			"path" : "bin/MinSizeRel-Windows-x64/Imagination/IMGN.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -113,14 +113,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Release//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -190,14 +190,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
 				},
 				{
 					"backtrace" : 5,
 					"fragment" : "/Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/Release//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Imagination/IMGN.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -260,7 +260,6 @@
 			],
 			"sourceIndexes" : 
 			[
-				60,
 				61,
 				62,
 				63,
@@ -296,7 +295,9 @@
 				93,
 				94,
 				95,
-				96
+				96,
+				97,
+				98
 			]
 		}
 	],
@@ -392,7 +393,6 @@
 			"sourceIndexes" : 
 			[
 				0,
-				60,
 				61,
 				62,
 				63,
@@ -428,7 +428,9 @@
 				93,
 				94,
 				95,
-				96
+				96,
+				97,
+				98
 			]
 		},
 		{
@@ -493,17 +495,18 @@
 				56,
 				57,
 				58,
-				59
+				59,
+				60
 			]
 		},
 		{
 			"name" : "Precompile Header File",
 			"sourceIndexes" : 
 			[
-				97,
-				98,
 				99,
-				100
+				100,
+				101,
+				102
 			]
 		}
 	],
@@ -618,6 +621,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "Imagination/src/Imgn/Components/MeshComponent.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "Imagination/src/Imgn/Components/PointLightComponent.h",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -904,6 +912,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 1,
 			"path" : "Imagination/src/Imgn/Components/MeshComponent.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "Imagination/src/Imgn/Components/PointLightComponent.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

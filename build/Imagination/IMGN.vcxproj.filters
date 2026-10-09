@@ -52,6 +52,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\PointLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\FileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -178,6 +181,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\MeshComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Components\PointLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\Events\AppEvent.h">

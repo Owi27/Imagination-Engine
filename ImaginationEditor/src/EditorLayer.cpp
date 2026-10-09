@@ -54,7 +54,7 @@ namespace Imgn
 
 		GLTFLoader& loader = GLTFLoader::Get();
 		ImgnModel sponza = loader.LoadModel(FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", *_renderer);
-		ImgnModel testGlb = loader.LoadModel(FileSystem::Assets() / "Models/Vroid/Test.gltf", *_renderer);
+		//ImgnModel testGlb = loader.LoadModel(FileSystem::Assets() / "Models/Vroid/Test.gltf", *_renderer);
 
 
 		RenderPass gBuffer
@@ -396,15 +396,26 @@ namespace Imgn
 			materialComponent->SetMaterials(sponza.materials);
 		}
 
-		Entity* vroid = _activeScene->CreateEntity("Vroid");
-		for (auto& meshHandle : testGlb.meshes)
-		{
-			Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
-			MeshComponent* mesh = child->AddComponent<MeshComponent>();
-			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+		//Entity* vroid = _activeScene->CreateEntity("Vroid");
+		//for (auto& meshHandle : testGlb.meshes)
+		//{
+		//	Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
+		//	MeshComponent* mesh = child->AddComponent<MeshComponent>();
+		//	mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
 
-			MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
-			materialComponent->SetMaterials(testGlb.materials);
+		//	MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
+		//	materialComponent->SetMaterials(testGlb.materials);
+		//}
+
+		//temporarily borrowing... thank u unreal
+		ImgnModel quinn = loader.LoadModel(FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", *_renderer);
+		for (auto& meshHandle : quinn.meshes)
+		{
+			Entity* entity = _activeScene->CreateEntity("Quinn");
+			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
+			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
+			materialComponent->SetMaterials(quinn.materials);
 		}
 
 		_editorScene = Shared<Scene>();
