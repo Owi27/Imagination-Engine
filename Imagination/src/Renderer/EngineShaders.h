@@ -78,6 +78,7 @@ struct VOut
 struct GBufferPC
 {
     matrix model;
+    matrix prevModel;
     uint materialIndex;
     uint entityIDLow;
     uint entityIDHigh;
@@ -96,7 +97,7 @@ VOut main(VIn input)
 {
     VOut output;
     output.pos = mul(ubo.jitteredViewProj, mul(pc.model, float4(input.pos, 1)));
-    output.wPos = input.pos;
+    output.wPos = mul(pc.model, float4(input.pos, 1)).xyz;
     output.uv = input.uv;
     
     float3x3 model3x3 = (float3x3) pc.model;
@@ -107,7 +108,7 @@ VOut main(VIn input)
     output.col = input.col;
 
     output.cPos = mul(ubo.viewProj, mul(pc.model, float4(input.pos, 1)));
-    output.pPos = mul(ubo.prevViewProj, mul(pc.model, float4(input.pos, 1)));
+    output.pPos = mul(ubo.prevViewProj, mul(pc.prevModel, float4(input.pos, 1)));
     
     return output;
 })";
@@ -139,6 +140,7 @@ struct FOut
 struct GBufferPC
 {
     matrix model;
+    matrix prevModel;
     uint materialIndex;
     uint entityIDLow;
     uint entityIDHigh;
@@ -184,7 +186,7 @@ SamplerState materialSampler : register(s0, space1);
 
 float2 ClipToUV(float4 pClip)
 {
-    float2 ndc = pClip.xy / pClip.w;
+    float2 ndc = pClip.xyz / pClip.w;
     
     return ndc * .5 + .5f;
 }
@@ -364,7 +366,7 @@ float4 main(VOut input) : SV_TARGET
 #define GBUFFER_DEPTH    4
 
 [[vk::push_constant]]
-struct GBufferPC
+struct LightingPC
 {
     matrix invViewProj;
     float3 camPos;
@@ -373,8 +375,7 @@ struct GBufferPC
 
 struct PointLight
 {
-    float3 pos, col;
-    float range, intensity;
+    float4 posR, colI;
 };
 
 StructuredBuffer<PointLight> pointLights : register(t1, space0);
@@ -534,7 +535,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     pointLights.GetDimensions(lightCount, stride);
     for (int i = 0; i < lightCount; i++)
     {
-        Lo += CreatePointLight(position, N, V, pointLights[i].pos, pointLights[i].col, pointLights[i].range, pointLights[i].intensity, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].pos, 1000.f);
+        Lo += CreatePointLight(position, N, V, pointLights[i].posR.xyz, pointLights[i].colI.rgb, pointLights[i].posR.w, pointLights[i].colI.w, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].posR.xyz, 1000.f);
         //Lo += PointLight(position, N, V, float3(1000.f, 0.f, 0.f), float3(0.f, 100.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
         //Lo += PointLight(position, N, V, float3(-1000.f, 0.f, 0.f), float3(100.f, 0.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);        
     }

@@ -133,6 +133,7 @@ namespace Imgn
 						GBufferPC pc
 						{
 							.model = transform->GetTransform(),
+							.prevModel = transform->prevTransform,
 							.materialIndex = prim.materialSlot,
 							.entityIDLow = static_cast<uint32_t>(entity->GetID() & 0xFFFFFFFFull),
 							.entityIDHigh = static_cast<uint32_t>(entity->GetID() >> 32)
@@ -141,6 +142,8 @@ namespace Imgn
 						ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
 						ctx.DrawPrimitive(prim);
 					}
+
+					entity->GetComponent<TransformComponent>()->prevTransform = entity->GetComponent<TransformComponent>()->GetTransform();
 				}
 
 				ctx.EndRendering();
@@ -303,19 +306,19 @@ namespace Imgn
 				{
 					const PointLight& light = _pointLights[lightIndex];
 
-					mat4 projection = Math::PerspectiveVKLH(Math::Radians(90.f), 1.f, .1f, light.range);
+					mat4 projection = Math::PerspectiveVKLH(Math::Radians(90.f), 1.f, .1f, light.posRange[3]);
 
 					for (uint32_t face = 0; face < 6; face++)
 					{
 						const uint32_t layer = lightIndex * 6 + face;
 
-						mat4 view = Math::LookAtLH(light.pos, light.pos + PointShadowDirections[face], PointShadowUp[face]);
+						mat4 view = Math::LookAtLH({ light.posRange[0], light.posRange[1], light.posRange[2] }, vec3{ light.posRange[0], light.posRange[1], light.posRange[2] } + PointShadowDirections[face], PointShadowUp[face]);
 
 						ShadowUBO shadowUBO
 						{
 							.viewProj = view * projection,
-							.lightPosition = light.pos,
-							.farPlane = light.range
+							.lightPosition = {light.posRange[0], light.posRange[1], light.posRange[2]},
+							.farPlane = light.posRange[3]
 						};
 
 						_renderer->MapBufferData(_pointShadowUBOHandles[frameIndex][layer], &shadowUBO, sizeof(ShadowUBO));
@@ -354,6 +357,8 @@ namespace Imgn
 							ctx.PushConstants<ShadowPC>(vk::ShaderStageFlagBits::eVertex, pc);
 
 							for (const Primitive& primitive : mesh->GetPrimitives()) ctx.DrawPrimitive(primitive);
+
+
 						}
 
 						ctx.EndRendering();

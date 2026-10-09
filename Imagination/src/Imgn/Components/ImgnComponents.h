@@ -13,6 +13,8 @@ namespace Imgn
 		vec3 position = { 0.f, 0.f, 0.f }, scale = { 1.f, 1.f, 1.f };
 		quat rotation = { 0.f, 0.f, 0.f, 1.f };
 
+		mat4 prevTransform;
+
 		mat4 GetTransform()
 		{
 			mat4 transform = Math::identity;

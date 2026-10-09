@@ -22,32 +22,25 @@ namespace Imgn
 		Entity* _selectedEntity = nullptr;
 		struct PointLight
 		{
-			vec3 pos, col;
-			float range, intensity;
+			vec4 posRange, colIntensity;
 		};
 
 		std::array<PointLight, 3> _pointLights
 		{
 			PointLight
 			{
-				.pos = {0.f, 0.f, 0.f},
-				.col = {1.f, 0.f, 0.f},
-				.range = 1000.f,
-				.intensity = 100.f
+				.posRange = {0.f, 0.f, 0.f, 1000.f},
+				.colIntensity = {1.f, 0.f, 0.f, 100.f},
 			},
 			PointLight
 			{
-				.pos = {1000.f, 0.f, 0.f},
-				.col = {0.f, 1.f, 1.f},
-				.range = 1000.f,
-				.intensity = 100.f
+				.posRange = {1000.f, 0.f, 0.f, 1000.f},
+				.colIntensity = {0.f, 1.f, 1.f, 100.f},
 			},
 			PointLight
 			{
-				.pos = {-1000.f, 0.f, 0.f},
-				.col = {1.f, 0.f, 1.f},
-				.range = 1000.f,
-				.intensity = 100.f
+				.posRange = {-1000.f, 0.f, 0.f, 1000.f},
+				.colIntensity = {1.f, 0.f, 1.f, 100.f},
 			},
 		};
 

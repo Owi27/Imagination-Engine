@@ -335,6 +335,7 @@ void Vulkan::CreatePointSampler()
 void Vulkan::CreateTextureSampler()
 {
 	vk::PhysicalDeviceProperties properties = _physicalDevice->getProperties();
+	IMGN_FATAL("{}", properties.limits.maxPushConstantsSize);
 
 	vk::SamplerCreateInfo samplerInfo
 	{

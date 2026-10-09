@@ -6,7 +6,7 @@
 #define GBUFFER_DEPTH    4
 
 [[vk::push_constant]]
-struct GBufferPC
+struct LightingPC
 {
     matrix invViewProj;
     float3 camPos;
@@ -15,8 +15,7 @@ struct GBufferPC
 
 struct PointLight
 {
-    float3 pos, col;
-    float range, intensity;
+    float4 posR, colI;
 };
 
 StructuredBuffer<PointLight> pointLights : register(t1, space0);
@@ -176,14 +175,10 @@ void main(uint3 DTid : SV_DispatchThreadID)
     pointLights.GetDimensions(lightCount, stride);
     for (int i = 0; i < lightCount; i++)
     {
-        Lo += CreatePointLight(position, N, V, pointLights[i].pos, pointLights[i].col, pointLights[i].range, pointLights[i].intensity, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].pos, 1000.f);
+        Lo += CreatePointLight(position, N, V, pointLights[i].posR.xyz, pointLights[i].colI.rgb, pointLights[i].posR.w, pointLights[i].colI.w, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].posR.xyz, 1000.f);
         //Lo += PointLight(position, N, V, float3(1000.f, 0.f, 0.f), float3(0.f, 100.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
         //Lo += PointLight(position, N, V, float3(-1000.f, 0.f, 0.f), float3(100.f, 0.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);        
     }
-    //for (int i = 0; i < pc.pointLightCount; i++)
-    //{
-        
-    //}
 
     //Directional Light
     Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
