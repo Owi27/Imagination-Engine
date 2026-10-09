@@ -2,6 +2,8 @@
 #include "ImgnComponent.h"
 #include "ImgnTime.h"
 
+#include <ranges>
+
 namespace Imgn
 {
     class IMGN_API Scene
@@ -52,6 +54,9 @@ namespace Imgn
         Entity* GetEntity(ID pID);
 
         Entity* GetPrimaryCameraEntity();
+
+        template<typename T>
+        auto GetEntitiesWithComponent() { return _entities | std::views::filter([](const unique<Entity>& pEntity) { return pEntity->HasComponent<T>(); }); }
 
         void OnViewportResize(uint32_t pWidth, uint32_t pHeight);
     };

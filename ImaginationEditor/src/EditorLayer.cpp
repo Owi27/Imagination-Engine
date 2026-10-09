@@ -2,7 +2,11 @@
 #include "EditorCamera.h"
 #include "Utils/EditorUtils.h"
 
+#include <ranges>
+
+
 #include <Imgn/SceneSerializer.h>
+#include <Imgn/Components/PointLightComponent.h>
 
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_vulkan.h"
@@ -55,6 +59,89 @@ namespace Imgn
 		GLTFLoader& loader = GLTFLoader::Get();
 		ImgnModel sponza = loader.LoadModel(FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", *_renderer);
 		//ImgnModel testGlb = loader.LoadModel(FileSystem::Assets() / "Models/Vroid/Test.gltf", *_renderer);
+
+		_activeScene = Shared<Scene>();
+
+		//sponza
+		for (auto& meshHandle : sponza.meshes)
+		{
+			Entity* entity = _activeScene->CreateEntity("Sponza");
+			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
+			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
+			materialComponent->SetMaterials(sponza.materials);
+		}
+
+		//Entity* vroid = _activeScene->CreateEntity("Vroid");
+		//for (auto& meshHandle : testGlb.meshes)
+		//{
+		//	Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
+		//	MeshComponent* mesh = child->AddComponent<MeshComponent>();
+		//	mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+
+		//	MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
+		//	materialComponent->SetMaterials(testGlb.materials);
+		//}
+
+		//temporarily borrowing... thank u unreal
+		ImgnModel quinn = loader.LoadModel(FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", *_renderer);
+		for (auto& meshHandle : quinn.meshes)
+		{
+			Entity* entity = _activeScene->CreateEntity("Quinn");
+			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
+			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
+			materialComponent->SetMaterials(quinn.materials);
+		}
+
+		_editorScene = Shared<Scene>();
+		_sceneCamera = _editorScene->CreateEntity("SceneCamera");
+		CameraComponent* camera = _sceneCamera->AddComponent<CameraComponent>();
+		TransformComponent* cameraTransform = _sceneCamera->GetComponent<TransformComponent>();
+		camera->camera.SetViewportSize(_renderWidth, _renderHeight);
+
+		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
+		_sceneHierarchy.SetSceneContext(_activeScene);
+
+		//GBufferUBO gBufferUBO
+		//{
+		//	.viewProj = Math::Inverse(cameraTransform->GetTransform()) * camera->camera.GetProjection()
+		//};
+
+		gBufferUBO.viewProj = GetCamView(cameraTransform) * camera->camera.GetProjection();
+		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
+
+		for (auto& handle : gBufferUBOHandles)
+		{
+			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
+		}
+
+		PointLightComponent* pointLight0 = _activeScene->CreateEntity("Point Light")->AddComponent<PointLightComponent>();
+		pointLight0->col = { 1.f, 1.f, 1.f };
+		pointLight0->range = 1000.f;
+		pointLight0->intensity = 100.f;
+
+		const uint32_t pointLightCount = static_cast<uint32_t>(std::ranges::distance(_activeScene->GetEntitiesWithComponent<PointLightComponent>()));
+
+		const uint32_t faceCount = pointLightCount * 6;
+
+		for (std::vector<uint32_t>& handles : _pointShadowUBOHandles)
+		{
+			handles.resize(faceCount);
+
+			for (uint32_t i = 0; i < faceCount; i++) handles[i] = _renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO));
+		}
+
+
+		std::vector<PointLight> pointLights;
+		for (unique<Entity>& pointLightEntity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
+		{
+			pointLights.push_back(pointLightEntity->GetComponent<PointLightComponent>()->GetPointLight(pointLightEntity->GetComponent<TransformComponent>()));
+		}
+
+		_pointLightBufferSize = pointLights.size() * sizeof(PointLight);
+		_pointLightBuffer = _renderer->CreateStorageBuffer(pointLights.data(), _pointLightBufferSize);
+
 
 
 		RenderPass gBuffer
@@ -196,7 +283,7 @@ namespace Imgn
 						ctx.CreateDescriptorImageInfo("Depth"),
 					};
 
-					vk::DescriptorBufferInfo pointLights = ctx.CreateDescriptorBufferInfo(_pointLightBuffer, _pointLights.size() * sizeof(PointLight));
+					vk::DescriptorBufferInfo pointLights = ctx.CreateDescriptorBufferInfo(_pointLightBuffer, static_cast<uint32_t>(std::ranges::distance(_activeScene->GetEntitiesWithComponent<PointLightComponent>())) * sizeof(PointLight));
 					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
 
 					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetPointSampler());
@@ -291,7 +378,7 @@ namespace Imgn
 			.name = "ShadowPass",
 			.imageOUT =
 			{
-				_renderer->CreateRGImageDesc("PointShadowDepthArray", 1024, 1024, vk::Format::eD32Sfloat, vk::ImageViewType::eCubeArray, static_cast<uint32_t>(_pointLights.size()) * 6),
+				_renderer->CreateRGImageDesc("PointShadowDepthArray", 1024, 1024, vk::Format::eD32Sfloat, vk::ImageViewType::eCubeArray, pointLightCount * 6),
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
@@ -302,9 +389,13 @@ namespace Imgn
 
 				const uint32_t frameIndex = _renderer->GetFrameInFlightIndex();
 
-				for (uint32_t lightIndex = 0; lightIndex < _pointLights.size(); lightIndex++)
+				/*for (uint32_t lightIndex = 0; lightIndex < _activeScene->GetEntitiesWithComponent<PointLightComponent>().size(); lightIndex++)
+				{*/
+				//const PointLight& light = _activeScene->GetEntitiesWithComponent<PointLightComponent>()[lightIndex]->GetComponent<PointLightComponent>()->GetPointLight();
+
+				for (int lightIndex = 0; unique<Entity>& pointLightEntity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
 				{
-					const PointLight& light = _pointLights[lightIndex];
+					PointLight light = pointLightEntity->GetComponent<PointLightComponent>()->GetPointLight(pointLightEntity->GetComponent<TransformComponent>());
 
 					mat4 projection = Math::PerspectiveVKLH(Math::Radians(90.f), 1.f, .1f, light.posRange[3]);
 
@@ -363,20 +454,12 @@ namespace Imgn
 
 						ctx.EndRendering();
 					}
+
+					//}
+
 				}
-			} 
+			}
 		};
-
-		const uint32_t faceCount = static_cast<uint32_t>(_pointLights.size()) * 6;
-
-		for (std::vector<uint32_t>& handles : _pointShadowUBOHandles)
-		{
-			handles.resize(faceCount);
-
-			for (uint32_t i = 0; i < faceCount; i++) handles[i] = _renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO));
-		}
-
-		_pointLightBuffer = _renderer->CreateStorageBuffer(_pointLights.data(), _pointLights.size() * sizeof(PointLight));
 
 		_renderer->AddPass(gBuffer);
 		_renderer->AddPass(lighting);
@@ -384,61 +467,6 @@ namespace Imgn
 		_renderer->AddPass(shadowPass);
 		_renderer->CompileGraph();
 
-		_activeScene = Shared<Scene>();
-
-		//sponza
-		for (auto& meshHandle : sponza.meshes)
-		{
-			Entity* entity = _activeScene->CreateEntity("Sponza");
-			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
-			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
-			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
-			materialComponent->SetMaterials(sponza.materials);
-		}
-
-		//Entity* vroid = _activeScene->CreateEntity("Vroid");
-		//for (auto& meshHandle : testGlb.meshes)
-		//{
-		//	Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
-		//	MeshComponent* mesh = child->AddComponent<MeshComponent>();
-		//	mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
-
-		//	MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
-		//	materialComponent->SetMaterials(testGlb.materials);
-		//}
-
-		//temporarily borrowing... thank u unreal
-		ImgnModel quinn = loader.LoadModel(FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", *_renderer);
-		for (auto& meshHandle : quinn.meshes)
-		{
-			Entity* entity = _activeScene->CreateEntity("Quinn");
-			MeshComponent* mesh = entity->AddComponent<MeshComponent>();
-			mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
-			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
-			materialComponent->SetMaterials(quinn.materials);
-		}
-
-		_editorScene = Shared<Scene>();
-		_sceneCamera = _editorScene->CreateEntity("SceneCamera");
-		CameraComponent* camera = _sceneCamera->AddComponent<CameraComponent>();
-		TransformComponent* cameraTransform = _sceneCamera->GetComponent<TransformComponent>();
-		camera->camera.SetViewportSize(_renderWidth, _renderHeight);
-
-		_sceneCamera->AddComponent<ScriptComponent>()->Bind<EditorCamera>();
-		_sceneHierarchy.SetSceneContext(_activeScene);
-
-		//GBufferUBO gBufferUBO
-		//{
-		//	.viewProj = Math::Inverse(cameraTransform->GetTransform()) * camera->camera.GetProjection()
-		//};
-
-		gBufferUBO.viewProj = GetCamView(cameraTransform) * camera->camera.GetProjection();
-		gBufferUBO.prevViewProj = gBufferUBO.viewProj;
-
-		for (auto& handle : gBufferUBOHandles)
-		{
-			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
-		}
 
 		//blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), FileSystem::Assets() / "ExternalApps/Blender 4.4/blender.exe");
 	}
@@ -537,6 +565,19 @@ namespace Imgn
 			gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 
 		_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
+
+
+		std::vector<PointLight> pointLights;
+
+		for (auto& entity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
+		{
+			PointLightComponent* light = entity->GetComponent<PointLightComponent>();
+			TransformComponent* transform = entity->GetComponent<TransformComponent>();
+
+			pointLights.push_back(light->GetPointLight(transform));
+		}
+		_pointLightBufferSize = pointLights.size() * sizeof(PointLight);
+		_renderer->UpdateStorageBuffer(_pointLightBuffer, pointLights.data(), _pointLightBufferSize);
 
 		_renderer->ExecuteGraph();
 		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");

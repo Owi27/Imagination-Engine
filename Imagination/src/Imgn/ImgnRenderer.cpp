@@ -423,6 +423,34 @@ namespace Imgn
 		return static_cast<uint32_t>(_buffers.size() - 1);
 	}
 
+	void ImgnRenderer::UpdateStorageBuffer(uint32_t pHandle, void* pData, uint64_t pSize)
+	{
+		vk::raii::CommandBuffer& commandBuffer = GetActiveCommandBuffer();
+
+		vk::BufferMemoryBarrier barrier
+		{
+			.srcAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
+			.dstAccessMask = vk::AccessFlagBits::eTransferWrite,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.buffer = *GetBuffer(pHandle).buffer,
+			.offset = 0,
+			.size = pSize
+		};
+
+		// Finish previous GPU uses before overwriting this shared buffer.
+		commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, barrier, nullptr);
+
+		const vk::ArrayProxy<const uint8_t> data(static_cast<uint32_t>(pSize), reinterpret_cast<const uint8_t*>(pData));
+		commandBuffer.updateBuffer<uint8_t>(barrier.buffer, 0, data);
+
+		// Make the uploaded values visible to the lighting shader.
+		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+
+		commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, nullptr, barrier, nullptr);
+	}
+
 	bool ImgnRenderer::StartFrame()
 	{
 		return _vkCtx->StartFrame();

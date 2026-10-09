@@ -40,6 +40,154 @@ namespace
 	}
 }
 
+namespace IKATheme
+{
+	inline ImVec4 Color(unsigned int pHex, float pAlpha = 1.0f)
+	{
+		const float red = static_cast<float>((pHex >> 16) & 0xFF) / 255.0f;
+		const float green = static_cast<float>((pHex >> 8) & 0xFF) / 255.0f;
+		const float blue = static_cast<float>(pHex & 0xFF) / 255.0f;
+		return ImVec4(red, green, blue, pAlpha);
+	}
+
+	inline const ImVec4 Background = Color(0x0D0D0D);
+	inline const ImVec4 Accent = Color(0xF20574);
+	inline const ImVec4 Pink = Color(0xF26BC3);
+	inline const ImVec4 Text = Color(0xF2BDE0);
+	inline const ImVec4 Error = Color(0xF20505);
+
+	inline void ApplyDark()
+	{
+		ImGui::StyleColorsDark();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4* colors = style.Colors;
+
+		const ImVec4 panel = Color(0x151115);
+		const ImVec4 frame = Color(0x21171E);
+		const ImVec4 hovered = Color(0x3A2232);
+		const ImVec4 active = Color(0x4D253B);
+		const ImVec4 selected = Color(0x301D29);
+		const ImVec4 border = Color(0x3B2633);
+
+		style.WindowPadding = ImVec2(8.0f, 8.0f);
+		style.FramePadding = ImVec2(6.0f, 4.0f);
+		style.ItemSpacing = ImVec2(8.0f, 4.0f);
+		style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
+		style.CellPadding = ImVec2(6.0f, 4.0f);
+		style.IndentSpacing = 18.0f;
+
+		style.WindowRounding = 0.0f;
+		style.ChildRounding = 2.0f;
+		style.PopupRounding = 3.0f;
+		style.FrameRounding = 2.0f;
+		style.GrabRounding = 2.0f;
+		style.TabRounding = 2.0f;
+		style.ScrollbarRounding = 3.0f;
+
+		style.WindowBorderSize = 1.0f;
+		style.ChildBorderSize = 1.0f;
+		style.PopupBorderSize = 1.0f;
+		style.FrameBorderSize = 1.0f;
+		style.TabBorderSize = 0.0f;
+		style.ScrollbarSize = 12.0f;
+		style.GrabMinSize = 10.0f;
+
+		// Give any additional color slots a palette-based fallback.
+		for (int colorIndex = 0; colorIndex < ImGuiCol_COUNT; ++colorIndex) colors[colorIndex] = Pink;
+
+		colors[ImGuiCol_Text] = Text;
+		colors[ImGuiCol_TextDisabled] = Color(0x99788D);
+		colors[ImGuiCol_WindowBg] = panel;
+		colors[ImGuiCol_ChildBg] = panel;
+		colors[ImGuiCol_PopupBg] = Color(0x1B1419);
+		colors[ImGuiCol_Border] = border;
+		colors[ImGuiCol_BorderShadow] = Color(0x000000, 0.0f);
+
+		colors[ImGuiCol_FrameBg] = frame;
+		colors[ImGuiCol_FrameBgHovered] = hovered;
+		colors[ImGuiCol_FrameBgActive] = active;
+		colors[ImGuiCol_TitleBg] = Background;
+		colors[ImGuiCol_TitleBgActive] = selected;
+		colors[ImGuiCol_TitleBgCollapsed] = Background;
+		colors[ImGuiCol_MenuBarBg] = Background;
+
+		colors[ImGuiCol_ScrollbarBg] = Background;
+		colors[ImGuiCol_ScrollbarGrab] = Color(0x4A3240);
+		colors[ImGuiCol_ScrollbarGrabHovered] = Color(0x6A4058);
+		colors[ImGuiCol_ScrollbarGrabActive] = Pink;
+		colors[ImGuiCol_CheckMark] = Accent;
+		colors[ImGuiCol_SliderGrab] = Accent;
+		colors[ImGuiCol_SliderGrabActive] = Pink;
+
+		colors[ImGuiCol_Button] = frame;
+		colors[ImGuiCol_ButtonHovered] = hovered;
+		colors[ImGuiCol_ButtonActive] = active;
+		colors[ImGuiCol_Header] = selected;
+		colors[ImGuiCol_HeaderHovered] = hovered;
+		colors[ImGuiCol_HeaderActive] = active;
+
+		colors[ImGuiCol_Separator] = border;
+		colors[ImGuiCol_SeparatorHovered] = Pink;
+		colors[ImGuiCol_SeparatorActive] = Accent;
+		colors[ImGuiCol_ResizeGrip] = Color(0xF26BC3, 0.12f);
+		colors[ImGuiCol_ResizeGripHovered] = Color(0xF26BC3, 0.45f);
+		colors[ImGuiCol_ResizeGripActive] = Accent;
+
+		colors[ImGuiCol_Tab] = Background;
+		colors[ImGuiCol_TabHovered] = hovered;
+
+#if IMGUI_VERSION_NUM >= 19090
+		style.TabBarOverlineSize = 2.0f;
+		colors[ImGuiCol_TabSelected] = selected;
+		colors[ImGuiCol_TabSelectedOverline] = Accent;
+		colors[ImGuiCol_TabDimmed] = Background;
+		colors[ImGuiCol_TabDimmedSelected] = frame;
+		colors[ImGuiCol_TabDimmedSelectedOverline] = Color(0xF26BC3, 0.45f);
+#else
+		colors[ImGuiCol_TabActive] = selected;
+		colors[ImGuiCol_TabUnfocused] = Background;
+		colors[ImGuiCol_TabUnfocusedActive] = frame;
+#endif
+
+#ifdef IMGUI_HAS_DOCK
+		colors[ImGuiCol_DockingPreview] = Color(0xF20574, 0.25f);
+		colors[ImGuiCol_DockingEmptyBg] = Background;
+#endif
+
+		colors[ImGuiCol_PlotLines] = Pink;
+		colors[ImGuiCol_PlotLinesHovered] = Text;
+		colors[ImGuiCol_PlotHistogram] = Accent;
+		colors[ImGuiCol_PlotHistogramHovered] = Pink;
+		colors[ImGuiCol_TableHeaderBg] = frame;
+		colors[ImGuiCol_TableBorderStrong] = border;
+		colors[ImGuiCol_TableBorderLight] = Color(0x2C1E27);
+		colors[ImGuiCol_TableRowBg] = Color(0x000000, 0.0f);
+		colors[ImGuiCol_TableRowBgAlt] = Color(0xF2BDE0, 0.025f);
+		colors[ImGuiCol_TextSelectedBg] = Color(0xF20574, 0.25f);
+		colors[ImGuiCol_DragDropTarget] = Pink;
+
+#if IMGUI_VERSION_NUM >= 19140
+		colors[ImGuiCol_NavCursor] = Pink;
+#else
+		colors[ImGuiCol_NavHighlight] = Pink;
+#endif
+
+		colors[ImGuiCol_NavWindowingHighlight] = Color(0xF2BDE0, 0.70f);
+		colors[ImGuiCol_NavWindowingDimBg] = Color(0x0D0D0D, 0.70f);
+		colors[ImGuiCol_ModalWindowDimBg] = Color(0x0D0D0D, 0.80f);
+
+#if IMGUI_VERSION_NUM >= 19298
+		colors[ImGuiCol_CheckboxSelectedBg] = frame;
+		colors[ImGuiCol_InputTextCursor] = Text;
+		colors[ImGuiCol_TextLink] = Pink;
+		colors[ImGuiCol_TreeLines] = border;
+		colors[ImGuiCol_DragDropTargetBg] = Color(0xF20574, 0.12f);
+		colors[ImGuiCol_UnsavedMarker] = Pink;
+#endif
+	}
+}
+
 namespace Imgn
 {
 	void ImGuiLayer::AddImGuiSpecialInputEvent(ImGuiIO& pIO, int pKeyCode, bool pPressed)
@@ -185,7 +333,8 @@ namespace Imgn
 		std::cout << "Working Directory: " << std::filesystem::current_path() << '\n';
 
 		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
+		//ImGui::StyleColorsDark();
+		IKATheme::ApplyDark();
 
 		ImGuiIO& io = ImGui::GetIO();
 		//io.Fonts->AddFontFromFileTTF("../../Fonts/Raleway-Regular.ttf", 16.f);

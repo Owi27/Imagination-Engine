@@ -20,29 +20,31 @@ namespace Imgn
 		shared<Scene> _activeScene;
 		Entity* _sceneCamera = nullptr;
 		Entity* _selectedEntity = nullptr;
-		struct PointLight
-		{
-			vec4 posRange, colIntensity;
-		};
+		//struct PointLight
+		//{
+		//	vec4 posRange, colIntensity;
+		//};
 
-		std::array<PointLight, 3> _pointLights
-		{
-			PointLight
-			{
-				.posRange = {0.f, 0.f, 0.f, 1000.f},
-				.colIntensity = {1.f, 0.f, 0.f, 100.f},
-			},
-			PointLight
-			{
-				.posRange = {1000.f, 0.f, 0.f, 1000.f},
-				.colIntensity = {0.f, 1.f, 1.f, 100.f},
-			},
-			PointLight
-			{
-				.posRange = {-1000.f, 0.f, 0.f, 1000.f},
-				.colIntensity = {1.f, 0.f, 1.f, 100.f},
-			},
-		};
+		//std::array<PointLight, 3> _pointLights
+		//{
+		//	PointLight
+		//	{
+		//		.posRange = {0.f, 0.f, 0.f, 1000.f},
+		//		.colIntensity = {1.f, 0.f, 0.f, 100.f},
+		//	},
+		//	PointLight
+		//	{
+		//		.posRange = {1000.f, 0.f, 0.f, 1000.f},
+		//		.colIntensity = {0.f, 1.f, 1.f, 100.f},
+		//	},
+		//	PointLight
+		//	{
+		//		.posRange = {-1000.f, 0.f, 0.f, 1000.f},
+		//		.colIntensity = {1.f, 0.f, 1.f, 100.f},
+		//	},
+		//};
+
+		uint64_t _pointLightBufferSize = 0;
 
 		static constexpr std::array<vec3, 6> PointShadowDirections =
 		{

@@ -3,6 +3,7 @@
 
 #include <ImGui/imgui.h>
 #include <Imgn/Components/ImgnComponents.h>
+#include <Imgn/Components/PointLightComponent.h>
 
 namespace Imgn
 {
@@ -86,6 +87,56 @@ namespace Imgn
 								camera->camera.CreateOrthographicCamera(orthoSize, orthoNear, orthoFar);
 							}
 						}
+					}
+				});
+		}
+
+		//if (MeshComponent* transform = pEntity->GetComponent<TransformComponent>())
+		//{
+		//	CreateComponentSettings<TransformComponent>(pEntity, "Transform", [&](bool pOpen)
+		//		{
+		//			if (pOpen)
+		//			{
+		//				ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
+
+		//				vec3 rotation = Math::EulerFromQuat(transform->rotation);
+		//				if (ImGui::DragFloat3("Rotation", rotation.data(), 0.5f)) transform->rotation = Math::QuatFromEuler(rotation);
+
+		//				ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
+		//			}
+		//		});
+		//}
+
+		//if (MaterialComponent* transform = pEntity->GetComponent<TransformComponent>())
+		//{
+		//	CreateComponentSettings<TransformComponent>(pEntity, "Transform", [&](bool pOpen)
+		//		{
+		//			if (pOpen)
+		//			{
+		//				ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
+
+		//				vec3 rotation = Math::EulerFromQuat(transform->rotation);
+		//				if (ImGui::DragFloat3("Rotation", rotation.data(), 0.5f)) transform->rotation = Math::QuatFromEuler(rotation);
+
+		//				ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
+		//			}
+		//		});
+		//}
+
+		if (PointLightComponent* pLight = pEntity->GetComponent<PointLightComponent>())
+		{
+			CreateComponentSettings<PointLightComponent>(pEntity, "Point Light", [&](bool pOpen)
+				{
+					if (pOpen)
+					{
+						//ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
+						ImGui::ColorPicker3("Light Color", pLight->col.data(), ImGuiColorEditFlags_PickerHueBar | ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoAlpha);
+						ImGui::DragFloat("Range", &pLight->range, 0.5f);
+						ImGui::DragFloat("Intensity", &pLight->intensity, 0.5f);
+
+						//vec3 rotation = Math::EulerFromQuat(transform->rotation);
+
+						//ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
 					}
 				});
 		}
@@ -198,6 +249,11 @@ namespace Imgn
 				if (ImGui::MenuItem("Camera"))
 				{
 					_selectedEntity->AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("Point Light"))
+				{
+					_selectedEntity->AddComponent<PointLightComponent>();
 					ImGui::CloseCurrentPopup();
 				}
 

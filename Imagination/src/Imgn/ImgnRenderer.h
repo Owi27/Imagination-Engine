@@ -98,6 +98,8 @@ namespace Imgn
 		void MapBufferData(uint32_t pHandle, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_buffers[pHandle]); }
 		void MapRGBufferData(std::string_view pKey, void* pData, uint64_t pSize) { _vkCtx->MapBufferData(pData, pSize, &_graph->GetBuffer(pKey).buffer); }
 
+		void UpdateStorageBuffer(uint32_t pHandle, void* pData, uint64_t pSize);
+
 		void AddPass(RenderPass& pRenderPass) { _graph->AddPass(pRenderPass); }
 
 		vk::raii::CommandBuffer& GetActiveCommandBuffer() { return _vkCtx->GetActiveCommandBuffer(); }

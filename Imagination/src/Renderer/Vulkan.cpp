@@ -38,8 +38,8 @@ void Vulkan::CreateDevice()
 
 	vk::StructureChain<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceVulkan14Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT, vk::PhysicalDeviceDescriptorIndexingFeatures> featureChain =
 	{
-		{.features = {.samplerAnisotropy = true} },                               // vk::PhysicalDeviceFeatures2 (empty for now)
-		{.synchronization2 = true, .dynamicRendering = true },      // Enable dynamic rendering from Vulkan 1.3
+		{.features = {.imageCubeArray = true, .samplerAnisotropy = true } }, // vk::PhysicalDeviceFeatures2 (empty for now)
+		{.synchronization2 = true, .dynamicRendering = true }, // Enable dynamic rendering from Vulkan 1.3
 		{.pushDescriptor = true},
 		{.extendedDynamicState = true },   // Enable extended dynamic state from the extension
 		{.shaderSampledImageArrayNonUniformIndexing = true, .descriptorBindingSampledImageUpdateAfterBind = true, .descriptorBindingUpdateUnusedWhilePending = true, .descriptorBindingPartiallyBound = true, .descriptorBindingVariableDescriptorCount = true, .runtimeDescriptorArray = true}
