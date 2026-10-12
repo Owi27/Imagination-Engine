@@ -15,8 +15,8 @@ namespace Imgn
     public:
         IMGN_COMPONENT_ID("Imgn.PointLightComponent");
 
-        vec3 col;
-        float range, intensity;
+        vec3 col = { 1.f, 1.f, 1.f };
+        float range = 1000.f, intensity = 100.f;
 
         PointLightComponent() /*Constructor*/ : Component("PointLight")
         {

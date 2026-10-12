@@ -3,6 +3,11 @@
 #include "Imgn/ImgnWindow.h"
 #include "Imgn/ImgnRenderer.h"
 
+#include "ImGui/imgui_impl_win32.h"
+#include "ImGui/imgui_impl_vulkan.h"
+
+#include "ImGuizmo/ImGuizmo.h"
+
 namespace Imgn
 {
     class IMGN_API ImGuiLayer : public Layer

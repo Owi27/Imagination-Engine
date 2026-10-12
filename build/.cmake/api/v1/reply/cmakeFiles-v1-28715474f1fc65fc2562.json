@@ -144,6 +144,7 @@
 			[
 				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp",
 				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp",
+				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp",
 				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp",
 				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp",
 				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp",
@@ -167,7 +168,8 @@
 			"expression" : "D:/GitHub/Imagination-Engine/ImaginationEditor/*.hpp",
 			"paths" : 
 			[
-				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp"
+				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp",
+				"D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp"
 			],
 			"recurse" : true
 		}

@@ -127,7 +127,7 @@ events:
       The output was:
       0
       MSBuild version 18.7.8+1ac568fee for .NET Framework
-      Build started 10/9/2026 2:50:42 AM.
+      Build started 10/11/2026 11:24:50 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.3.1-msvc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -156,7 +156,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:00.37
+      Time Elapsed 00:00:00.48
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -1316,8 +1316,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0k7h65"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0k7h65"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -1328,39 +1328,39 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0k7h65'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_da1f7.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_cd0f5.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.7.8+1ac568fee for .NET Framework
-        Build started 10/9/2026 2:50:43 AM.
+        Build started 10/11/2026 11:24:50 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\cmTC_da1f7.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0k7h65\\cmTC_cd0f5.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\".
-          Creating directory "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0k7h65\\Debug\\".
+          Creating directory "cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild".
+          Creating "cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_da1f7.dir\\Debug\\\\" /Fd"cmTC_da1f7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_cd0f5.dir\\Debug\\\\" /Fd"cmTC_cd0f5.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36248 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_da1f7.dir\\Debug\\\\" /Fd"cmTC_da1f7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_cd0f5.dir\\Debug\\\\" /Fd"cmTC_cd0f5.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\cmTC_da1f7.exe" /INCREMENTAL /ILK:"cmTC_da1f7.dir\\Debug\\cmTC_da1f7.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb/Debug/cmTC_da1f7.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-psa7nb/Debug/cmTC_da1f7.lib" /MACHINE:X64  /machine:x64 cmTC_da1f7.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_da1f7.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\Debug\\cmTC_da1f7.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0k7h65\\Debug\\cmTC_cd0f5.exe" /INCREMENTAL /ILK:"cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0k7h65/Debug/cmTC_cd0f5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-0k7h65/Debug/cmTC_cd0f5.lib" /MACHINE:X64  /machine:x64 cmTC_cd0f5.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_cd0f5.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0k7h65\\Debug\\cmTC_cd0f5.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\unsuccessfulbuild".
-          Touching "cmTC_da1f7.dir\\Debug\\cmTC_da1f7.tlog\\cmTC_da1f7.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-psa7nb\\cmTC_da1f7.vcxproj" (default targets).
+          Deleting file "cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.tlog\\unsuccessfulbuild".
+          Touching "cmTC_cd0f5.dir\\Debug\\cmTC_cd0f5.tlog\\cmTC_cd0f5.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-0k7h65\\cmTC_cd0f5.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:00.35
+        Time Elapsed 00:00:00.39
         
       exitCode: 0
   -
@@ -2212,7 +2212,7 @@ events:
       The output was:
       0
       MSBuild version 18.7.8+1ac568fee for .NET Framework
-      Build started 10/9/2026 2:50:43 AM.
+      Build started 10/11/2026 11:24:51 AM.
       
       Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\4.3.1-msvc1\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
       PrepareForBuild:
@@ -2241,7 +2241,7 @@ events:
           0 Warning(s)
           0 Error(s)
       
-      Time Elapsed 00:00:00.40
+      Time Elapsed 00:00:00.43
       
       
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
@@ -2260,8 +2260,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh"
-      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh"
+      source: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-crs7ov"
+      binary: "D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-crs7ov"
     cmakeVariables:
       CMAKE_CXX_STDLIB_MODULES_JSON: ""
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
@@ -2271,39 +2271,39 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh'
+        Change Dir: 'D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-crs7ov'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b5108.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_14488.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild version 18.7.8+1ac568fee for .NET Framework
-        Build started 10/9/2026 2:50:44 AM.
+        Build started 10/11/2026 11:24:52 AM.
         
-        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\cmTC_b5108.vcxproj" on node 1 (default targets).
+        Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-crs7ov\\cmTC_14488.vcxproj" on node 1 (default targets).
         PrepareForBuild:
           Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\".
-          Creating directory "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\".
+          Creating directory "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-crs7ov\\Debug\\".
+          Creating directory "cmTC_14488.dir\\Debug\\cmTC_14488.tlog\\".
         InitializeBuildStatus:
-          Creating "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild".
+          Creating "cmTC_14488.dir\\Debug\\cmTC_14488.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_14488.dir\\Debug\\cmTC_14488.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_b5108.dir\\Debug\\\\" /Fd"cmTC_b5108.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_14488.dir\\Debug\\\\" /Fd"cmTC_14488.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36248 for x64
           Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_b5108.dir\\Debug\\\\" /Fd"cmTC_b5108.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_14488.dir\\Debug\\\\" /Fd"cmTC_14488.dir\\Debug\\vc145.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
           CMakeCCompilerABI.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\cmTC_b5108.exe" /INCREMENTAL /ILK:"cmTC_b5108.dir\\Debug\\cmTC_b5108.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh/Debug/cmTC_b5108.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-nhv5oh/Debug/cmTC_b5108.lib" /MACHINE:X64  /machine:x64 cmTC_b5108.dir\\Debug\\CMakeCCompilerABI.obj
-          cmTC_b5108.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\Debug\\cmTC_b5108.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-crs7ov\\Debug\\cmTC_14488.exe" /INCREMENTAL /ILK:"cmTC_14488.dir\\Debug\\cmTC_14488.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-crs7ov/Debug/cmTC_14488.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"D:/GitHub/Imagination-Engine/build/CMakeFiles/CMakeScratch/TryCompile-crs7ov/Debug/cmTC_14488.lib" /MACHINE:X64  /machine:x64 cmTC_14488.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_14488.vcxproj -> D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-crs7ov\\Debug\\cmTC_14488.exe
         FinalizeBuildStatus:
-          Deleting file "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\unsuccessfulbuild".
-          Touching "cmTC_b5108.dir\\Debug\\cmTC_b5108.tlog\\cmTC_b5108.lastbuildstate".
-        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-nhv5oh\\cmTC_b5108.vcxproj" (default targets).
+          Deleting file "cmTC_14488.dir\\Debug\\cmTC_14488.tlog\\unsuccessfulbuild".
+          Touching "cmTC_14488.dir\\Debug\\cmTC_14488.tlog\\cmTC_14488.lastbuildstate".
+        Done Building Project "D:\\GitHub\\Imagination-Engine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-crs7ov\\cmTC_14488.vcxproj" (default targets).
         
         Build succeeded.
             0 Warning(s)
             0 Error(s)
         
-        Time Elapsed 00:00:00.36
+        Time Elapsed 00:00:00.38
         
       exitCode: 0
   -

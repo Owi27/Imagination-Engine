@@ -8,10 +8,11 @@
 #include <Imgn/SceneSerializer.h>
 #include <Imgn/Components/PointLightComponent.h>
 
-#include "ImGui/imgui_impl_win32.h"
-#include "ImGui/imgui_impl_vulkan.h"
-
-#include "ImGuizmo/ImGuizmo.h"
+#include <Imgn/ImGui/ImgnGui.h>
+//#include "ImGui/imgui_impl_win32.h"
+//#include "ImGui/imgui_impl_vulkan.h"
+//
+//#include "ImGuizmo/ImGuizmo.h"
 
 namespace Imgn
 {
@@ -47,6 +48,13 @@ namespace Imgn
 	{
 		const vec2 sample = GetJitterSample();
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
+	}
+
+	void EditorLayer::UIToolbar()
+	{
+		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+		
+		ImGui::End();
 	}
 
 	void EditorLayer::Sleep()
@@ -480,7 +488,7 @@ namespace Imgn
 	void EditorLayer::OnImGuiRender()
 	{
 		EditorCamera::SetInputEnabled(false);
-		ImGui::DockSpaceOverViewport();
+		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
 		// Show demo options and help
 		if (ImGui::BeginMainMenuBar())
@@ -534,10 +542,12 @@ namespace Imgn
 		ImGui::End();
 
 		_sceneHierarchy.OnImGuiRender();
+		_contentBrowser.OnImGuiRender();
 
 		DrawSceneView();
+		UIToolbar();
 
-		blenderPanel.Render();
+		//blenderPanel.Render();
 	}
 
 	void EditorLayer::Dream(Time pTime)
@@ -675,6 +685,17 @@ namespace Imgn
 			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) _cameraLookActive = true;
 
 			EditorCamera::SetInputEnabled(_cameraLookActive);
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ContentBrowserItem"))
+				{
+					const std::filesystem::path path = std::string(static_cast<const char*>(payload->Data), payload->DataSize);
+					IMGN_INFO("{}", path.string());
+				}
+
+				ImGui::EndDragDropTarget();
+			}
 
 			//gizmo
 			_gizmoType = ImGuizmo::OPERATION::ROTATE; //ignore hard set

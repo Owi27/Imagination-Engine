@@ -3,11 +3,6 @@
 #include "Imgn/ImgnApp.hpp"
 #include "Imgn/FileSystem.hpp"
 
-#include "ImGui/imgui_impl_win32.h"
-#include "ImGui/imgui_impl_vulkan.h"
-
-#include "ImGuizmo/ImGuizmo.h"
-
 #include <CommCtrl.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
@@ -348,19 +343,17 @@ namespace Imgn
 		if (!ImGui_ImplWin32_Init(editor))
 		{
 			ImGui::DestroyContext();
-			throw std::runtime_error(
-				"ImGui Win32 initialization failed.");
+			throw std::runtime_error("ImGui Win32 initialization failed.");
 		}
 
-		if (!SetWindowSubclass(
-			editor, EditorImGuiSubclass, IMGUI_SUBCLASS_ID, 0))
+		if (!SetWindowSubclass(editor, EditorImGuiSubclass, IMGUI_SUBCLASS_ID, 0))
 		{
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
 
-			throw std::runtime_error(
-				"Could not install ImGui input handler.");
-		}		ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
+			throw std::runtime_error("Could not install ImGui input handler.");
+		}
+		ImGui::GetPlatformIO().Platform_CreateVkSurface = ImGui_ImplWin32_CreateVkSurface;
 
 		ImGui_ImplVulkan_InitInfo initInfo = _renderer->GetImGuiInitInfo();
 
@@ -369,10 +362,7 @@ namespace Imgn
 
 	void ImGuiLayer::WakeUp()
 	{
-		RemoveWindowSubclass(
-			static_cast<HWND>(_window->GetWindowHandle()),
-			EditorImGuiSubclass,
-			IMGUI_SUBCLASS_ID);
+		RemoveWindowSubclass(static_cast<HWND>(_window->GetWindowHandle()), EditorImGuiSubclass, IMGUI_SUBCLASS_ID);
 
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplWin32_Shutdown();
@@ -529,6 +519,5 @@ namespace Imgn
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *commandBuffer);
 
 		commandBuffer.endRendering();
-
 	}
 }

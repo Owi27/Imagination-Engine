@@ -1,11 +1,20 @@
 #include <Imgn.hpp>
 #include "Panels/SceneHierarchy.h"
+#include "Panels/ContentBrowser.hpp"
 #include "Panels/ExternalAppPanel.h"
 
 namespace Imgn
 {
     class EditorLayer : public Layer
     {
+		enum class eSceneState
+		{
+			Edit,
+			Play,
+			Pause,
+			Simulate
+		} _sceneState = eSceneState::Edit;
+
         ImgnWindow* _window;
         ImgnRenderer* _renderer;
         vk::DescriptorSet _sceneWindow = nullptr;
@@ -74,6 +83,7 @@ namespace Imgn
 
 		//panels
 		SceneHierarchy _sceneHierarchy;
+		ContentBrowser _contentBrowser;
 		AppPanel blenderPanel;
 
 		//ubo
@@ -98,6 +108,8 @@ namespace Imgn
 		//uint32_t _jitterFrameIndex = 0;
 		vec2 GetJitterSample();
 		vec2 GetProjectionJitter(uint32_t pWidth, uint32_t pHeight);
+
+		void UIToolbar();
 
 	public:
         EditorLayer() /*Constructor*/

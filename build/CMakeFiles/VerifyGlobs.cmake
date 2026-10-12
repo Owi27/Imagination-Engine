@@ -255,6 +255,7 @@ file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp"
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp"
@@ -315,6 +316,7 @@ endif()
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/ImaginationEditor/*.hpp")
 set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp"
+  "D:/GitHub/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

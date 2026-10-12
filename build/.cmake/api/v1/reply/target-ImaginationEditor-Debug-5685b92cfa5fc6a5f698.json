@@ -232,12 +232,13 @@
 			],
 			"sourceIndexes" : 
 			[
-				7,
 				8,
 				9,
 				10,
 				11,
-				12
+				12,
+				13,
+				14
 			]
 		}
 	],
@@ -311,12 +312,13 @@
 			"sourceIndexes" : 
 			[
 				0,
-				7,
 				8,
 				9,
 				10,
 				11,
-				12
+				12,
+				13,
+				14
 			]
 		},
 		{
@@ -328,17 +330,18 @@
 				3,
 				4,
 				5,
-				6
+				6,
+				7
 			]
 		},
 		{
 			"name" : "Precompile Header File",
 			"sourceIndexes" : 
 			[
-				13,
-				14,
 				15,
-				16
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -358,6 +361,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "ImaginationEditor/src/EditorLayer.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/ContentBrowser.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
@@ -390,6 +398,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 1,
 			"path" : "ImaginationEditor/src/EditorLayer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/ContentBrowser.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{

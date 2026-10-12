@@ -10,6 +10,9 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\ContentBrowser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\EditorWorkspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,6 +31,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\EditorLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\ContentBrowser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\ImaginationEditor\src\Panels\EditorWorkspace.h">
