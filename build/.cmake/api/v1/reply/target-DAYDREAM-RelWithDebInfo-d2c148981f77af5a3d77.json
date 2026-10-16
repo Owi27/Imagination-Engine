@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/Daydream/DAYDREAM.exe"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Daydream/DAYDREAM.exe"
 		},
 		{
-			"path" : "bin/MinSizeRel-Windows-x64/Daydream/DAYDREAM.pdb"
+			"path" : "bin/RelWithDebInfo-Windows-x64/Daydream/DAYDREAM.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -49,7 +49,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 15,
+				"line" : 18,
 				"parent" : 3
 			},
 			{
@@ -99,10 +99,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -169,10 +169,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -std:c++latest -MD -Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/RelWithDebInfo//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -239,11 +239,11 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 2,
-			"id" : "IMGN::@4a12ee01f2b1794c9d00"
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
 		},
 		{
-			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+			"backtrace" : 2,
+			"id" : "IMGN::@4a12ee01f2b1794c9d00"
 		}
 	],
 	"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee",
@@ -252,11 +252,11 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -MD",
+				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob1 /DNDEBUG -MD -Zi",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
 				"role" : "flags"
 			},
 			{
@@ -265,7 +265,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "..\\bin\\MinSizeRel-Windows-x64\\Imagination\\IMGN.lib",
+				"fragment" : "..\\bin\\RelWithDebInfo-Windows-x64\\Imagination\\IMGN.lib",
 				"role" : "libraries"
 			},
 			{

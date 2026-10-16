@@ -66,6 +66,8 @@ namespace Imgn
 		uint32_t CreateMaterial(const ImgnMaterialDesc& pDesc);
 		uint32_t AddMaterial(const Material& pMaterial);
 		uint32_t CreateImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pImageData);
+		//uint32_t CreateImage(const std::filesystem::path& pFile);
+		unique<Image> CreateImage(const std::filesystem::path& pFile);
 
 		unique<Buffer> CreateVertexBuffer(std::span<const Vertex> pVertices);
 		unique<Buffer> CreateIndexBuffer(std::span<const uint32_t> pIndices);

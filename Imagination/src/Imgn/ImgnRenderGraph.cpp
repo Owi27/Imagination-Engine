@@ -116,6 +116,8 @@ namespace Imgn
 
 	void ImgnRenderGraph::Compile()
 	{
+		_executionOrder.clear();
+
 		std::vector<std::vector<size_t>> dependencies(_passes.size());  // What each pass depends on
 		std::vector<std::vector<size_t>> dependents(_passes.size());    // What depends on each pass
 

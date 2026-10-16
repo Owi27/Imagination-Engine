@@ -17,7 +17,7 @@ namespace Imgn
 
         ImgnWindow* _window;
         ImgnRenderer* _renderer;
-        vk::DescriptorSet _sceneWindow = nullptr;
+        vk::DescriptorSet _sceneWindow = nullptr, _playIconDS = nullptr, _stopIconDS = nullptr;
 
 		float _cameraSpeed = 500.f, _yaw = 0.f; // , _sceneViewportAspect = 0.f;
 		//vec3 _camPos = { 0, 0, 0 };
@@ -26,9 +26,12 @@ namespace Imgn
 		std::array<uint32_t, MaxFramesInFlight> gBufferUBOHandles;
 		uint32_t _sceneWidth = 0, _sceneHeight = 0, _pointLightBuffer;
 
-		shared<Scene> _activeScene;
+		shared<Scene> _activeScene, _pendingScene;
 		Entity* _sceneCamera = nullptr;
 		Entity* _selectedEntity = nullptr;
+
+		unique<Image> _playIcon, _stopIcon;
+
 		//struct PointLight
 		//{
 		//	vec4 posRange, colIntensity;
@@ -108,6 +111,8 @@ namespace Imgn
 		//uint32_t _jitterFrameIndex = 0;
 		vec2 GetJitterSample();
 		vec2 GetProjectionJitter(uint32_t pWidth, uint32_t pHeight);
+
+		void ApplyPendingScene();
 
 		void UIToolbar();
 

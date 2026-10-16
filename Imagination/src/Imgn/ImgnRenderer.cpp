@@ -394,6 +394,11 @@ namespace Imgn
 		return handle;
 	}
 
+	unique<Image> ImgnRenderer::CreateImage(const std::filesystem::path& pFile)
+	{
+		return Unique<Image>(_vkCtx->CreateTextureImage(pFile));
+	}
+
 	unique<Buffer> ImgnRenderer::CreateVertexBuffer(std::span<const Vertex> pVertices)
 	{
 		return pVertices.empty() ? nullptr : Unique<Buffer>(_vkCtx->CreateVertexBuffer(pVertices.data(), pVertices.size_bytes()));

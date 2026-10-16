@@ -45,6 +45,7 @@ namespace Imgn
 			ofn.lpstrFilter = pFilter;
 			ofn.nFilterIndex = 1;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+			ofn.lpstrDefExt = "imgn";
 
 			if (GetSaveFileNameA(&ofn) == TRUE) return ofn.lpstrFile;
 #endif // IMGN_PLATFORM_WINDOWS

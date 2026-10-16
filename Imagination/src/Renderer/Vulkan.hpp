@@ -229,7 +229,7 @@ public:
 
 	Image CreateDepthImage(uint32_t pWidth, uint32_t pHeight);
 	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
-	Image CreateTextureImage(const std::string& pFile);
+	Image CreateTextureImage(const std::filesystem::path& pFile);
 	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
 
 	vk::raii::Sampler& GetTAASampler() const { return *_taaSampler; }

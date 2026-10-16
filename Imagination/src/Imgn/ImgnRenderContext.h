@@ -60,9 +60,11 @@ namespace Imgn
 		void Dispatch(uint32_t pX, uint32_t pY, uint32_t pZ);
 
 		template<typename T>
-		void PushConstants(vk::ShaderStageFlags pStages, const T& pData)
+		void PushConstants(const T& pData)
 		{
-			_commandBuffer->pushConstants<T>(GetPipelineLayout(), pStages, 0, pData);
+			const vk::ShaderStageFlags stages = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute;
+
+			_commandBuffer->pushConstants<T>(GetPipelineLayout(), stages, 0, pData);
 		}
 
 		void BindMesh(const MeshComponent& pMesh);

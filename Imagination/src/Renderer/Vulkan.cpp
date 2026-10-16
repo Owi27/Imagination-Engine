@@ -636,7 +636,7 @@ void Vulkan::CreateGraphicsPipelines()
 	{
 		.stageFlags = vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eCompute,
 		.offset = 0,
-		.size = 128
+		.size = 256
 	};
 
 	std::array setLayouts = { **_pushDescriptorSetLayout, **_textureDescriptorSetLayout };
@@ -1641,12 +1641,12 @@ Image Vulkan::CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_
 	return texture;
 }
 
-Image Vulkan::CreateTextureImage(const std::string& pFile)
+Image Vulkan::CreateTextureImage(const std::filesystem::path& pFile)
 {
 	int width, height, channels;
 
 	stbi_set_flip_vertically_on_load(true);
-	uint8_t* pixels = stbi_load(pFile.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+	uint8_t* pixels = stbi_load(pFile.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 	vk::DeviceSize imageSize = width * height * 4;
 

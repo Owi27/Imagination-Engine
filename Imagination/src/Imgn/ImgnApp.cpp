@@ -42,9 +42,9 @@ namespace Imgn
 	{
 		EventDispatcher dispatcher(pEvent);
 
-		for (auto iter = _layerStack.end(); iter != _layerStack.begin();)
+		for (unique<Layer>& layer : std::views::reverse(_layerStack))
 		{
-			(*--iter)->OnEvent(pEvent);
+			layer->OnEvent(pEvent);
 			if (pEvent.Handled()) break;
 		}
 		

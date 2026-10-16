@@ -53,7 +53,40 @@ namespace Imgn
 	void EditorLayer::UIToolbar()
 	{
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-		
+		vk::DescriptorSet iconDS;
+		switch (_sceneState)
+		{
+		case Imgn::EditorLayer::eSceneState::Edit:
+			{
+				iconDS = _playIconDS;
+			}
+			break;
+		case Imgn::EditorLayer::eSceneState::Play:
+			{
+				iconDS = _stopIconDS;
+			}
+			break;
+		case Imgn::EditorLayer::eSceneState::Pause:
+			break;
+		case Imgn::EditorLayer::eSceneState::Simulate:
+			break;
+		}
+
+		if (ImGui::ImageButton("sceneStateButton", ImTextureRef(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(iconDS)))), ImVec2(16.f, 16.f)))
+		{
+			switch (_sceneState)
+			{
+			case Imgn::EditorLayer::eSceneState::Edit: _sceneState = eSceneState::Play;
+				break;
+			case Imgn::EditorLayer::eSceneState::Play: _sceneState = eSceneState::Edit;
+				break;
+			case Imgn::EditorLayer::eSceneState::Pause:
+				break;
+			case Imgn::EditorLayer::eSceneState::Simulate:
+				break;
+			}
+		}
+
 		ImGui::End();
 	}
 
@@ -63,6 +96,12 @@ namespace Imgn
 
 		_renderWidth = _sceneWidth = std::max(1u, extent.width);
 		_renderHeight = _sceneHeight = std::max(1u, extent.height);
+
+		_playIcon = _renderer->CreateImage(FileSystem::Assets() / "EngineIcons/playButton.png");
+		_playIconDS = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_playIcon->view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+		_stopIcon = _renderer->CreateImage(FileSystem::Assets() / "EngineIcons/stopButton.png");
+		_stopIconDS = static_cast<vk::DescriptorSet>(ImGui_ImplVulkan_AddTexture(*_renderer->GetTextureSampler(), **_stopIcon->view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+
 
 		GLTFLoader& loader = GLTFLoader::Get();
 		ImgnModel sponza = loader.LoadModel(FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", *_renderer);
@@ -234,7 +273,7 @@ namespace Imgn
 							.entityIDHigh = static_cast<uint32_t>(entity->GetID() >> 32)
 						};
 
-						ctx.PushConstants<GBufferPC>(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, pc);
+						ctx.PushConstants<GBufferPC>(pc);
 						ctx.DrawPrimitive(prim);
 					}
 
@@ -275,7 +314,7 @@ namespace Imgn
 					.height = _renderHeight
 				};
 
-				ctx.PushConstants<LightingPC>(vk::ShaderStageFlagBits::eCompute, pc);
+				ctx.PushConstants<LightingPC>(pc);
 
 				//push descriptor set
 				{
@@ -342,7 +381,7 @@ namespace Imgn
 					.historyValid = static_cast<uint32_t>(_taaHistoryValid)
 				};
 
-				ctx.PushConstants<TAAPC>(vk::ShaderStageFlagBits::eCompute, pc);
+				ctx.PushConstants<TAAPC>(pc);
 				//push descriptor set
 				{
 					//uniform buffer
@@ -453,7 +492,7 @@ namespace Imgn
 								.model = transform->GetTransform()
 							};
 
-							ctx.PushConstants<ShadowPC>(vk::ShaderStageFlagBits::eVertex, pc);
+							ctx.PushConstants<ShadowPC>(pc);
 
 							for (const Primitive& primitive : mesh->GetPrimitives()) ctx.DrawPrimitive(primitive);
 
@@ -463,8 +502,7 @@ namespace Imgn
 						ctx.EndRendering();
 					}
 
-					//}
-
+					lightIndex++;
 				}
 			}
 		};
@@ -481,6 +519,13 @@ namespace Imgn
 
 	void EditorLayer::WakeUp()
 	{
+		_renderer->WaitIdle();
+		if (_playIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_playIconDS));
+		if (_stopIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_stopIconDS));
+
+		_playIconDS = nullptr;
+		_stopIconDS = nullptr;
+
 		if (_activeScene) _activeScene->Clear();
 		blenderPanel.Shutdown();
 	}
@@ -497,14 +542,22 @@ namespace Imgn
 			{
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
+					_renderer->WaitIdle();
+
 					_activeScene = Shared<Scene>();
 					_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
 					_sceneHierarchy.SetSceneContext(_activeScene);
+					_hoveredEntityID = 0;
+					_hoveredEntity = nullptr;
+					_cameraLookActive = false;
 					_taaHistoryValid = false;
+					_jitterFrameIndex = 0;
 				}
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
+					_renderer->WaitIdle();
+
 					std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
 					if (!filePath.empty())
 					{
@@ -525,6 +578,7 @@ namespace Imgn
 					{
 						SceneSerializer serializer(_activeScene);
 						serializer.Serialize(filePath + ".imgn");
+						serializer.Serialize(std::filesystem::path(filePath).replace_extension(".imgn"));
 					}
 				}
 
