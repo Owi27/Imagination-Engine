@@ -4,14 +4,8 @@
 
 #include <ranges>
 
-
-#include <Imgn/SceneSerializer.h>
-
 #include <Imgn/ImGui/ImgnGui.h>
-//#include "ImGui/imgui_impl_win32.h"
-//#include "ImGui/imgui_impl_vulkan.h"
-//
-//#include "ImGuizmo/ImGuizmo.h"
+#include <Imgn/SceneSerializer.h>
 
 namespace Imgn
 {
@@ -133,17 +127,6 @@ namespace Imgn
 			MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
 			materialComponent->SetMaterials(sponza.materials);
 		}
-
-		//Entity* vroid = _activeScene->CreateEntity("Vroid");
-		//for (auto& meshHandle : testGlb.meshes)
-		//{
-		//	Entity* child = vroid->AddChild(_activeScene->CreateEntity(meshHandle.name));
-		//	MeshComponent* mesh = child->AddComponent<MeshComponent>();
-		//	mesh->SetMesh(meshHandle.name, FileSystem::Assets() / "Models/Sponza/glTF/Sponza.gltf", std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
-
-		//	MaterialComponent* materialComponent = child->AddComponent<MaterialComponent>();
-		//	materialComponent->SetMaterials(testGlb.materials);
-		//}
 
 		//temporarily borrowing... thank u unreal
 		ImgnModel quinn = loader.LoadModel(FileSystem::Assets() / "Models/Quinn/SKM_Quinn_Simple.gltf", *_renderer);
