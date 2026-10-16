@@ -25,12 +25,33 @@ namespace Imgn
 		}
 	}
 
-	Entity* Scene::CreateEntity(const std::string& pName)
+	Entity* Scene::CreateEntity(const std::string& pName, ID pID)
 	{
-		_entities.emplace_back(Unique<Entity>(pName));
-		_entities.back()->AddComponent<TransformComponent>();
+		if (pID != 0 && GetEntity(pID))
+		{
+			IMGN_CORE_ERROR("Cannot create entity '{}' with duplicate ID {}.", pName, pID);
+			return nullptr;
+		}
 
-		return &*_entities.back();
+		_entities.emplace_back(Unique<Entity>(pName, pID));
+
+		Entity* entity = _entities.back().get();
+		entity->AddComponent<TransformComponent>();
+
+		return entity;
+	}
+
+	void Scene::DestroyEntity(Entity* pEntity)
+	{
+		if (!pEntity) return;
+
+		pEntity->RemoveFromParent();
+
+		std::vector<Entity*> children = pEntity->GetChildren();
+
+		for (Entity* child : children) pEntity->RemoveChild(child);
+
+		std::erase_if(_entities, [pEntity](const unique<Entity>& pEntityEntry) { return pEntityEntry.get() == pEntity; });
 	}
 
 	void Scene::DestroyEntity(unique<Entity>& pEntity)

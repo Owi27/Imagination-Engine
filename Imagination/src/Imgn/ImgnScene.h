@@ -47,8 +47,9 @@ namespace Imgn
         void Clear() { _entities.clear(); }
 
         /*Class Functions*/
-        Entity* CreateEntity(const std::string& pName = "Entity");
-        void DestroyEntity(unique<Entity>& pEntity);
+        Entity* CreateEntity(const std::string& pName = "Entity", ID pID = 0);
+        void DestroyEntity(Entity* pEntity);
+        void DestroyEntity(unique<Entity>& pEntity) { DestroyEntity(pEntity.get()); }
         std::vector<unique<Entity>>& GetEntities() { return _entities; }
 
         Entity* GetEntity(ID pID);

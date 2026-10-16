@@ -51,4 +51,39 @@ namespace Imgn
 			component->Render();
 		}
 	}
+
+	Entity* Entity::AddChild(Entity* pChild)
+	{
+		if (!pChild || pChild == this) return nullptr;
+
+		for (Entity* parent = this; parent; parent = parent->_parent) if (parent == pChild) return nullptr;
+
+		if (pChild->_parent == this) return pChild;
+
+		if (pChild->_parent) pChild->_parent->RemoveChild(pChild);
+
+		pChild->_parent = this;
+		_children.push_back(pChild);
+
+		return pChild;
+	}
+
+	bool Entity::RemoveChild(Entity* pChild)
+	{
+		if (!pChild) return false;
+
+		const size_t removed = std::erase(_children, pChild);
+		if (removed == 0) return false;
+
+		if (pChild->_parent == this) pChild->_parent = nullptr;
+
+		return true;
+	}
+
+	void Entity::RemoveFromParent()
+	{
+		if (!_parent) return;
+
+		_parent->RemoveChild(this);
+	}
 }
