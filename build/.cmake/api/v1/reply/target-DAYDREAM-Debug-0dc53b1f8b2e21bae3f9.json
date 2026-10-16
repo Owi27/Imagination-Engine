@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Release-Windows-x64/Daydream/DAYDREAM.exe"
+			"path" : "bin/Debug-Windows-x64/Daydream/DAYDREAM.exe"
 		},
 		{
-			"path" : "bin/Release-Windows-x64/Daydream/DAYDREAM.pdb"
+			"path" : "bin/Debug-Windows-x64/Daydream/DAYDREAM.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -99,10 +99,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Release//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -169,10 +169,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Release//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -239,11 +239,11 @@
 	"dependencies" : 
 	[
 		{
-			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
-		},
-		{
 			"backtrace" : 2,
 			"id" : "IMGN::@4a12ee01f2b1794c9d00"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee",
@@ -252,11 +252,11 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MDd -Zi",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /INCREMENTAL:NO",
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
 				"role" : "flags"
 			},
 			{
@@ -265,7 +265,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "..\\bin\\Release-Windows-x64\\Imagination\\IMGN.lib",
+				"fragment" : "..\\bin\\Debug-Windows-x64\\Imagination\\IMGN.lib",
 				"role" : "libraries"
 			},
 			{

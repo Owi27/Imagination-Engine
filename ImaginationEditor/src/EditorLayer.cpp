@@ -50,6 +50,22 @@ namespace Imgn
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
 
+	void EditorLayer::ApplyPendingScene()
+	{
+		if (!_pendingScene) return;
+
+		_renderer->WaitIdle();
+
+		_sceneHierarchy.SetSelectedEntity(nullptr);
+		_hoveredEntity = nullptr;
+
+		_activeScene = _pendingScene;
+		_pendingScene = nullptr;
+		_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
+		_sceneHierarchy.SetSceneContext(_activeScene);
+		_taaHistoryValid = false;
+	}
+
 	void EditorLayer::UIToolbar()
 	{
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -542,32 +558,36 @@ namespace Imgn
 			{
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					_renderer->WaitIdle();
+					_pendingScene = Shared<Scene>();
 
-					_activeScene = Shared<Scene>();
-					_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
-					_sceneHierarchy.SetSceneContext(_activeScene);
-					_hoveredEntityID = 0;
-					_hoveredEntity = nullptr;
-					_cameraLookActive = false;
-					_taaHistoryValid = false;
-					_jitterFrameIndex = 0;
+					//_renderer->WaitIdle();
+
+					//_activeScene = Shared<Scene>();
+					//_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
+					//_sceneHierarchy.SetSceneContext(_activeScene);
+					//_hoveredEntityID = 0;
+					//_hoveredEntity = nullptr;
+					//_cameraLookActive = false;
+					//_taaHistoryValid = false;
+					//_jitterFrameIndex = 0;
 				}
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					_renderer->WaitIdle();
+					//_renderer->WaitIdle();
 
 					std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
 					if (!filePath.empty())
 					{
-						_activeScene = Shared<Scene>();
+						_pendingScene = Shared<Scene>();
+
+						/*_activeScene = Shared<Scene>();
 						_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
 						_sceneHierarchy.SetSceneContext(_activeScene);
-						_taaHistoryValid = false;
+						_taaHistoryValid = false;*/
 
 						SceneSerializer serializer(_activeScene);
-						serializer.Deserialize(filePath);
+						if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
 					}
 				}
 
@@ -606,6 +626,8 @@ namespace Imgn
 
 	void EditorLayer::Dream(Time pTime)
 	{
+		ApplyPendingScene();
+
 		_hoveredEntityID = _renderer->GetEntityIDReadback();
 		_hoveredEntity = _activeScene->GetEntity(_hoveredEntityID);
 

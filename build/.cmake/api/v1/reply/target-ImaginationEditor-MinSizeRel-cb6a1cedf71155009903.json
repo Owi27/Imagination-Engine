@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "bin/Debug-Windows-x64/Daydream/DAYDREAM.exe"
+			"path" : "bin/MinSizeRel-Windows-x64/ImaginationEditor/ImaginationEditor.exe"
 		},
 		{
-			"path" : "bin/Debug-Windows-x64/Daydream/DAYDREAM.pdb"
+			"path" : "bin/MinSizeRel-Windows-x64/ImaginationEditor/ImaginationEditor.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -22,7 +22,7 @@
 		],
 		"files" : 
 		[
-			"Daydream/CMakeLists.txt",
+			"ImaginationEditor/CMakeLists.txt",
 			"Imagination/CMakeLists.txt",
 			"CMakeLists.txt"
 		],
@@ -99,10 +99,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
 				},
 				{
-					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YcD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -132,7 +132,7 @@
 			[
 				{
 					"backtrace" : 8,
-					"path" : "D:/GitHub/Imagination-Engine/Daydream/../Imagination/src"
+					"path" : "D:/GitHub/Imagination-Engine/ImaginationEditor/../Imagination/src"
 				},
 				{
 					"backtrace" : 2,
@@ -157,7 +157,7 @@
 			[
 				{
 					"backtrace" : 9,
-					"header" : "D:/GitHub/Imagination-Engine/Daydream/../Imagination/src/pch.hpp"
+					"header" : "D:/GitHub/Imagination-Engine/ImaginationEditor/../Imagination/src/pch.hpp"
 				}
 			],
 			"sourceIndexes" : 
@@ -169,10 +169,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -std:c++latest -MDd -Zi"
+					"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -std:c++latest -MD"
 				},
 				{
-					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/Daydream/DAYDREAM.dir/Debug//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx"
+					"fragment" : "/YuD:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx /FpD:/GitHub/Imagination-Engine/build/ImaginationEditor/ImaginationEditor.dir/MinSizeRel//cmake_pch.pch /FID:/GitHub/Imagination-Engine/build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx"
 				}
 			],
 			"defines" : 
@@ -202,7 +202,7 @@
 			[
 				{
 					"backtrace" : 8,
-					"path" : "D:/GitHub/Imagination-Engine/Daydream/../Imagination/src"
+					"path" : "D:/GitHub/Imagination-Engine/ImaginationEditor/../Imagination/src"
 				},
 				{
 					"backtrace" : 2,
@@ -227,36 +227,42 @@
 			[
 				{
 					"backtrace" : 9,
-					"header" : "D:/GitHub/Imagination-Engine/Daydream/../Imagination/src/pch.hpp"
+					"header" : "D:/GitHub/Imagination-Engine/ImaginationEditor/../Imagination/src/pch.hpp"
 				}
 			],
 			"sourceIndexes" : 
 			[
-				1
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14
 			]
 		}
 	],
 	"dependencies" : 
 	[
 		{
-			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
-		},
-		{
 			"backtrace" : 2,
 			"id" : "IMGN::@4a12ee01f2b1794c9d00"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "DAYDREAM::@d18117f7cfd3bcefe5ee",
+	"id" : "ImaginationEditor::@b7f6dfed6368fcf6af16",
 	"link" : 
 	{
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /Ob0 /Od /RTC1 -MDd -Zi",
+				"fragment" : "/DWIN32 /D_WINDOWS /EHsc /O1 /Ob1 /DNDEBUG -MD",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "/machine:x64 /debug /INCREMENTAL",
+				"fragment" : "/machine:x64 /INCREMENTAL:NO",
 				"role" : "flags"
 			},
 			{
@@ -265,7 +271,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "..\\bin\\Debug-Windows-x64\\Imagination\\IMGN.lib",
+				"fragment" : "..\\bin\\MinSizeRel-Windows-x64\\Imagination\\IMGN.lib",
 				"role" : "libraries"
 			},
 			{
@@ -292,12 +298,12 @@
 			"id" : "IMGN::@4a12ee01f2b1794c9d00"
 		}
 	],
-	"name" : "DAYDREAM",
-	"nameOnDisk" : "DAYDREAM.exe",
+	"name" : "ImaginationEditor",
+	"nameOnDisk" : "ImaginationEditor.exe",
 	"paths" : 
 	{
-		"build" : "Daydream",
-		"source" : "Daydream"
+		"build" : "ImaginationEditor",
+		"source" : "ImaginationEditor"
 	},
 	"sourceGroups" : 
 	[
@@ -306,17 +312,36 @@
 			"sourceIndexes" : 
 			[
 				0,
-				1
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7
 			]
 		},
 		{
 			"name" : "Precompile Header File",
 			"sourceIndexes" : 
 			[
-				2,
-				3,
-				4,
-				5
+				15,
+				16,
+				17,
+				18
 			]
 		}
 	],
@@ -325,34 +350,105 @@
 		{
 			"backtrace" : 0,
 			"compileGroupIndex" : 0,
-			"path" : "build/Daydream/CMakeFiles/DAYDREAM.dir/cmake_pch.cxx",
+			"path" : "build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/cmake_pch.cxx",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/EditorCamera.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/EditorLayer.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/ContentBrowser.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/EditorWorkspace.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/ExternalAppPanel.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Panels/SceneHierarchy.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "ImaginationEditor/src/Utils/EditorUtils.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/EditorCamera.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 1,
-			"path" : "Daydream/src/main.cpp",
+			"path" : "ImaginationEditor/src/EditorLayer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/ContentBrowser.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/EditorWorkspace.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/ExternalAppPanel.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/Panels/SceneHierarchy.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 1,
+			"path" : "ImaginationEditor/src/main.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 0,
-			"path" : "build/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx",
-			"sourceGroupIndex" : 1
+			"path" : "build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx",
+			"sourceGroupIndex" : 2
 		},
 		{
 			"backtrace" : 0,
-			"path" : "build/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx",
-			"sourceGroupIndex" : 1
+			"path" : "build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx",
+			"sourceGroupIndex" : 2
 		},
 		{
 			"backtrace" : 0,
-			"path" : "build/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx",
-			"sourceGroupIndex" : 1
+			"path" : "build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx",
+			"sourceGroupIndex" : 2
 		},
 		{
 			"backtrace" : 0,
-			"path" : "build/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx",
-			"sourceGroupIndex" : 1
+			"path" : "build/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx",
+			"sourceGroupIndex" : 2
 		}
 	],
 	"type" : "EXECUTABLE"

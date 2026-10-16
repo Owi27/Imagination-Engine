@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "SceneSerializer.h"
 #include "ImgnComponent.h"
-#include "Components/ImgnComponents.h"
+#include "Components/AllComponents.hpp"
 
 namespace Imgn
 {
@@ -102,9 +102,10 @@ namespace Imgn
 						{
 						case TransformComponent::TypeID: entity->AddComponent<TransformComponent>()->Deserialize(_stream); break;
 						case CameraComponent::TypeID: entity->AddComponent<CameraComponent>()->Deserialize(_stream); break;
-						//case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
+						case MeshComponent::TypeID: entity->AddComponent<MeshComponent>()->Deserialize(_stream); break;
+						case MaterialComponent::TypeID: entity->AddComponent<MaterialComponent>()->Deserialize(_stream); break;
+						case PointLightComponent::TypeID: entity->AddComponent<PointLightComponent>()->Deserialize(_stream); break;
 						case ScriptComponent::TypeID: entity->AddComponent<ScriptComponent>()->Deserialize(_stream); break;
-						default: break;
 						}
 					}
 				}
