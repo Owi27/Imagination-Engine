@@ -1,6 +1,6 @@
 #pragma once
 #include "Imgn/ImgnComponent.h"
-#include "ImgnComponents.h"
+#include "TransformComponent.h"
 
 namespace Imgn
 {

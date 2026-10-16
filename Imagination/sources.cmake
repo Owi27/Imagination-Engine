@@ -5,6 +5,9 @@ set(IMGN_PROJECT_FILES
     src/gltf/stb_image_write.h
     src/gltf/tiny_gltf.h
     src/Imgn.hpp
+    src/Imgn/Components/AllComponents.hpp
+    src/Imgn/Components/CameraComponent.cpp
+    src/Imgn/Components/CameraComponent.h
     src/Imgn/Components/ImgnComponents.cpp
     src/Imgn/Components/ImgnComponents.h
     src/Imgn/Components/MaterialComponent.cpp
@@ -13,6 +16,10 @@ set(IMGN_PROJECT_FILES
     src/Imgn/Components/MeshComponent.h
     src/Imgn/Components/PointLightComponent.cpp
     src/Imgn/Components/PointLightComponent.h
+    src/Imgn/Components/ScriptComponent.cpp
+    src/Imgn/Components/ScriptComponent.h
+    src/Imgn/Components/TransformComponent.cpp
+    src/Imgn/Components/TransformComponent.h
     src/Imgn/Events/AppEvent.h
     src/Imgn/Events/Event.h
     src/Imgn/Events/KeyEvent.h

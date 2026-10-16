@@ -53,10 +53,14 @@ namespace Imgn
 
 		virtual ~ImgnApp()
 		{
+			_renderer->WaitIdle();
+
 			for (unique<Layer>& layer : std::views::reverse(_layerStack))
 			{
 				layer->WakeUp();
 			}
+
+			_imGuiLayer->WakeUp();
 
 			_instance = nullptr;
 		}

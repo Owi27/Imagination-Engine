@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "ImgnScene.h"
-#include "Components/ImgnComponents.h"
+#include "Components/AllComponents.hpp"
 
 namespace Imgn
 {

@@ -6,7 +6,6 @@
 
 
 #include <Imgn/SceneSerializer.h>
-#include <Imgn/Components/PointLightComponent.h>
 
 #include <Imgn/ImGui/ImgnGui.h>
 //#include "ImGui/imgui_impl_win32.h"
@@ -535,7 +534,6 @@ namespace Imgn
 
 	void EditorLayer::WakeUp()
 	{
-		_renderer->WaitIdle();
 		if (_playIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_playIconDS));
 		if (_stopIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_stopIconDS));
 
@@ -586,7 +584,7 @@ namespace Imgn
 						_sceneHierarchy.SetSceneContext(_activeScene);
 						_taaHistoryValid = false;*/
 
-						SceneSerializer serializer(_activeScene);
+						SceneSerializer serializer(_pendingScene);
 						if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
 					}
 				}

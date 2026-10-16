@@ -2,8 +2,7 @@
 #include "SceneHierarchy.h"
 
 #include <ImGui/imgui.h>
-#include <Imgn/Components/ImgnComponents.h>
-#include <Imgn/Components/PointLightComponent.h>
+#include <Imgn/Components/AllComponents.hpp>
 
 namespace Imgn
 {

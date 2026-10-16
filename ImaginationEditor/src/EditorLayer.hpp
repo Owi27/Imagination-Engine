@@ -3,6 +3,7 @@
 #include "Panels/ContentBrowser.hpp"
 #include "Panels/ExternalAppPanel.h"
 
+
 namespace Imgn
 {
     class EditorLayer : public Layer
@@ -31,30 +32,6 @@ namespace Imgn
 		Entity* _selectedEntity = nullptr;
 
 		unique<Image> _playIcon, _stopIcon;
-
-		//struct PointLight
-		//{
-		//	vec4 posRange, colIntensity;
-		//};
-
-		//std::array<PointLight, 3> _pointLights
-		//{
-		//	PointLight
-		//	{
-		//		.posRange = {0.f, 0.f, 0.f, 1000.f},
-		//		.colIntensity = {1.f, 0.f, 0.f, 100.f},
-		//	},
-		//	PointLight
-		//	{
-		//		.posRange = {1000.f, 0.f, 0.f, 1000.f},
-		//		.colIntensity = {0.f, 1.f, 1.f, 100.f},
-		//	},
-		//	PointLight
-		//	{
-		//		.posRange = {-1000.f, 0.f, 0.f, 1000.f},
-		//		.colIntensity = {1.f, 0.f, 1.f, 100.f},
-		//	},
-		//};
 
 		uint64_t _pointLightBufferSize = 0;
 

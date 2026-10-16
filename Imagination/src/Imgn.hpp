@@ -2,7 +2,7 @@
 
 #include "Imgn/ImgnApp.hpp"
 #include "Imgn/ImgnComponent.h"
-#include "Imgn/Components/ImgnComponents.h"
+#include "Imgn/Components/AllComponents.hpp"
 #include "Imgn/ImgnLog.h"
 #include "Imgn/ImgnTime.h"
 #include "Imgn/ImgnLayer.h"
