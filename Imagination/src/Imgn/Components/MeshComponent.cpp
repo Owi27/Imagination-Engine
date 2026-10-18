@@ -20,6 +20,16 @@ namespace Imgn
 		_primitives = std::move(pPrimitives);
 	}
 
+	void MeshComponent::CopyFrom(const MeshComponent& pSource)
+	{
+		_name = pSource._name;
+		_assetPath = pSource._assetPath;
+		_primitives = pSource._primitives;
+		_vertex = pSource._vertex;
+		_index = pSource._index;
+		visible = pSource.visible;
+	}
+
 	void MeshComponent::WriteString(std::fstream& pStream, const std::string& pValue)
 	{
 		uint32_t size = static_cast<uint32_t>(pValue.size());

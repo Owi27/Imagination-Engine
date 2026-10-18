@@ -40,7 +40,7 @@ namespace Imgn
 		const Buffer* GetMaterialBuffer() const { return _materialBuffer.get(); }
 
 		shared<Material> GetMaterial(uint32_t pIndex) const { return pIndex < _materials.size() ? _materials[pIndex] : nullptr; }
-		void SetMaterials(const std::vector<shared<Material>> pMaterials) { _materials = std::move(pMaterials); }
+		void SetMaterials(const std::vector<shared<Material>> pMaterials) { _materials = std::move(pMaterials); _materialBufferDirty = true; }
 
 		uint32_t GetMaterialCount() const { return static_cast<uint32_t>(_materials.size()); }
 		uint64_t GetMaterialBufferSize() const { return _materialBufferSize; }

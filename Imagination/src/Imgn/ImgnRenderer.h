@@ -129,5 +129,6 @@ namespace Imgn
 
 		void QueueEntityIDReadback(uint32_t pX, uint32_t pY);
 		uint64_t GetEntityIDReadback();
+		void InvalidateEntityIDReadback() { _entityIDReadbackValid.fill(false); }
 	};
 }

@@ -1,6 +1,6 @@
 #pragma once
 //#include "pch.h"
-#include "ImgnCore.hpp"
+#include "Imgn/ImgnCore.hpp"
 //#include <spdlog/fmt/fmt.h>
 
 #define BIT(x) (1 << x)

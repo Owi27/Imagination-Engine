@@ -6,6 +6,8 @@
 
 namespace Imgn
 {
+    class ScriptComponent;
+
     class IMGN_API Scene
     {
         friend class Entity;
@@ -13,6 +15,8 @@ namespace Imgn
 
         std::vector<unique<Entity>> _entities;
         uint32_t _viewportWidth = 0, _viewportHeight = 0;
+
+        ScriptComponent* GetOrCreateScript(Entity* pEntity);
 
     public:
         Scene() /*Constructor*/
@@ -43,7 +47,7 @@ namespace Imgn
         Scene& operator=(Scene&& pOther) noexcept = default;
 
         void Dream(Time pTime);
-
+        [[nodiscard]] shared<Scene> Clone() const;
         void Clear() { _entities.clear(); }
 
         /*Class Functions*/
@@ -60,5 +64,8 @@ namespace Imgn
         auto GetEntitiesWithComponent() { return _entities | std::views::filter([](const unique<Entity>& pEntity) { return pEntity->HasComponent<T>(); }); }
 
         void OnViewportResize(uint32_t pWidth, uint32_t pHeight);
+
+        void RuntimeStart();
+        void RuntimeStop();
     };
 }

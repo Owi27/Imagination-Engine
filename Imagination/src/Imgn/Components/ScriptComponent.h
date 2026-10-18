@@ -5,6 +5,8 @@ namespace Imgn
 {
 	class IMGN_API ScriptComponent : public Component
 	{
+		std::function<void(ScriptComponent*)> _bind;
+
 	public:
 		IMGN_COMPONENT_ID("Imgn.ScriptComponent");
 
@@ -19,10 +21,19 @@ namespace Imgn
 		template<typename T> requires std::derived_from<T, ScriptableEntity>
 		void Bind()
 		{
+			_bind = [](ScriptComponent* pComponent) { pComponent->Bind<T>(); };
 			Create = [&]() { instance = Unique<T>(); };
 			Sleep = [&]() { static_cast<T*>(instance.get())->Sleep(); };
 			WakeUp = [&]() { static_cast<T*>(instance.get())->WakeUp(); };
 			Dream = [&](Time pTime) { static_cast<T*>(instance.get())->Dream(pTime); };
+		}
+
+		bool CopyBindingFrom(const ScriptComponent& pSource)
+		{
+			if (instance || !pSource._bind) return false;
+
+			pSource._bind(this);
+			return true;
 		}
 
 		void Serialize(std::fstream& pStream) override;

@@ -27,11 +27,18 @@ namespace Imgn
 
 	class IMGN_API Component
 	{
-		enum class State;
+		enum class eState
+		{
+			Uninitialized,
+			Initializing,
+			Active,
+			Destroying,
+			Destroyed
+		} _state = eState::Uninitialized;
+
 		friend class Entity;
 
 		Entity* _owner = nullptr;
-		State _state = State::Uninitialized;
 
 		virtual void OnInit() {}
 		virtual void Dream(float pDeltaTime) {}
@@ -44,14 +51,6 @@ namespace Imgn
 		std::string _debugName;
 
 	public:
-		enum class State
-		{
-			Uninitialized,
-			Initializing,
-			Active,
-			Destroying,
-			Destroyed
-		};
 
 		/* Class Defaults */
 		Component(const std::string& pName = "ImgnComponent")
@@ -61,10 +60,10 @@ namespace Imgn
 
 		virtual ~Component()
 		{
-			if (_state != State::Destroyed)
+			if (_state != eState::Destroyed)
 			{
 				OnDestroy();
-				_state = State::Destroyed;
+				_state = eState::Destroyed;
 			}
 		}
 
@@ -75,11 +74,11 @@ namespace Imgn
 
 		virtual void Init()
 		{
-			if (_state == State::Uninitialized)
+			if (_state == eState::Uninitialized)
 			{
-				_state = State::Initializing;
+				_state = eState::Initializing;
 				OnInit();
-				_state = State::Active;
+				_state = eState::Active;
 			}
 		}
 
@@ -208,16 +207,14 @@ namespace Imgn
 	class IMGN_API ScriptableEntity
 	{
 		friend class Scene;
-		Entity* _entity;
+		Entity* _entity = nullptr;
 
 	public:
 		ScriptableEntity() /*Constructor*/
 		{
 		}
 
-		~ScriptableEntity() /*Destructor*/
-		{
-		}
+		virtual ~ScriptableEntity() = default;/*Destructor*/
 
 		/*Copy Constructor*/
 		ScriptableEntity(const ScriptableEntity& pOther) = default;

@@ -14,7 +14,7 @@ namespace Imgn
 			Play,
 			Pause,
 			Simulate
-		} _sceneState = eSceneState::Edit;
+		} _sceneState = eSceneState::Edit, _requestedSceneState = eSceneState::Edit;
 
         ImgnWindow* _window;
         ImgnRenderer* _renderer;
@@ -27,7 +27,8 @@ namespace Imgn
 		std::array<uint32_t, MaxFramesInFlight> gBufferUBOHandles;
 		uint32_t _sceneWidth = 0, _sceneHeight = 0, _pointLightBuffer;
 
-		shared<Scene> _activeScene, _pendingScene;
+		ID _selectionBeforePlay = 0;
+		shared<Scene> _activeScene, _pendingScene, _runtimeScene, _sceneBeforePlay;
 		Entity* _sceneCamera = nullptr;
 		Entity* _selectedEntity = nullptr;
 
@@ -89,9 +90,16 @@ namespace Imgn
 		vec2 GetJitterSample();
 		vec2 GetProjectionJitter(uint32_t pWidth, uint32_t pHeight);
 
+		void ApplySceneState();
 		void ApplyPendingScene();
 
 		void UIToolbar();
+		void ScenePlay();
+		void SceneStop();
+		void SetActiveScene(shared<Scene> pScene, ID pSelectedEntityID = 0);
+
+		//shortcuts
+
 
 	public:
         EditorLayer() /*Constructor*/

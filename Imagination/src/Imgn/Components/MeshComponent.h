@@ -13,7 +13,7 @@ namespace Imgn
 	class IMGN_API MeshComponent : public Component
 	{
 		std::string _name;
-		unique<Buffer> _vertex, _index;
+		shared<Buffer> _vertex, _index;
 		std::filesystem::path _assetPath;
 		std::vector<Primitive> _primitives;
 		//std::vector<shared<Material>> _materials;
@@ -27,6 +27,9 @@ namespace Imgn
 		MeshComponent();
 		~MeshComponent();
 
+		MeshComponent(const MeshComponent&) = delete;
+		MeshComponent& operator=(const MeshComponent&) = delete;
+
 		Buffer* GetIndexBuffer() { return _index.get(); }
 		const Buffer* GetIndexBuffer() const { return _index.get(); }
 		const std::string& GetMeshName() { return _name; }
@@ -36,6 +39,8 @@ namespace Imgn
 		const std::vector<Primitive>& GetPrimitives() const { return _primitives; }
 
 		void SetMesh(std::string pName, std::filesystem::path pAssetPath, unique<Buffer> pVertexBuffer, unique<Buffer> pIndexBuffer, std::vector<Primitive> pPrimitives);
+
+		void CopyFrom(const MeshComponent& pSource);
 
 		bool visible = true;
 

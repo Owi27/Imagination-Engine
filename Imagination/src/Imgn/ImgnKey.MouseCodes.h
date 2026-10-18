@@ -137,3 +137,149 @@
 
 #define IMGN_MOUSE_SCROLL_UP          203
 #define IMGN_MOUSE_SCROLL_DOWN        204
+
+namespace Imgn //todo, key codes
+{
+	enum class eKey : int32_t
+	{
+		Unsupported = -1,
+		Unknown = 0,
+
+		//general
+		Escape = 1,
+		Minus = 2,
+		Equal = 3,
+		Backspace = 4,
+		Tab = 5,
+		LeftBracket = 6,
+		RightBracket = 7,
+		Enter = 8,
+		LeftControl = 9,
+		RightControl = 10,
+		Semicolon = 11,
+		Apostrophe = 12,
+		GraveAccent = 13,
+		LeftShift = 14,
+		Backslash = 15,
+		Comma = 16,
+		Period = 17,
+		Slash = 18,
+		RightShift = 19,
+		PrintScreen = 20,
+		LeftAlt = 21,
+		RightAlt = 22,
+		Space = 23,
+		CapsLock = 24,
+		NumLock = 25,
+		ScrollLock = 26,
+		Pause = 27,
+		Home = 28,
+		Up = 29,
+		PageUp = 30,
+		Left = 31,
+		Right = 32,
+		End = 33,
+		Down = 34,
+		PageDown = 35,
+		Insert = 36,
+		Delete = 37,
+
+		//letters
+		A = 38,
+		B = 39,
+		C = 40,
+		D = 41,
+		E = 42,
+		F = 43,
+		G = 44,
+		H = 45,
+		I = 46,
+		J = 47,
+		K = 48,
+		L = 49,
+		M = 50,
+		N = 51,
+		O = 52,
+		P = 53,
+		Q = 54,
+		R = 55,
+		S = 56,
+		T = 57,
+		U = 58,
+		V = 59,
+		W = 60,
+		X = 61,
+		Y = 62,
+		Z = 63,
+
+		//number row
+		Key0 = 64,
+		Key1 = 65,
+		Key2 = 66,
+		Key3 = 67,
+		Key4 = 68,
+		Key5 = 69,
+		Key6 = 70,
+		Key7 = 71,
+		Key8 = 72,
+		Key9 = 73,
+
+		//function keys
+		F1 = 74,
+		F2 = 75,
+		F3 = 76,
+		F4 = 77,
+		F5 = 78,
+		F6 = 79,
+		F7 = 80,
+		F8 = 81,
+		F9 = 82,
+		F10 = 83,
+		F11 = 84,
+		F12 = 85,
+
+		//numpad
+		KPAdd = 86,
+		KPSubtract = 87,
+		KPMultiply = 88,
+		KPDivide = 89,
+		KP0 = 90,
+		KP1 = 91,
+		KP2 = 92,
+		KP3 = 93,
+		KP4 = 94,
+		KP5 = 95,
+		KP6 = 96,
+		KP7 = 97,
+		KP8 = 98,
+		KP9 = 99,
+		KPDecimal = 100,
+		KPEnter = 101,
+
+		LeftSuper = 102
+	};
+
+	enum class eMouse : int32_t
+	{
+		Unsupported = -1,
+
+		Button1 = 200,
+		Button2 = 201,
+		Button3 = 202,
+
+		Left = Button1,
+		Right = Button2,
+		Middle = Button3,
+
+		Button4 = Unsupported,
+		Button5 = Unsupported,
+		Button6 = Unsupported,
+		Button7 = Unsupported,
+		Button8 = Unsupported,
+
+		Last = Button3,
+
+		ScrollUp = 203,
+		ScrollDown = 204
+	};
+}

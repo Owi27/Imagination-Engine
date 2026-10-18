@@ -43,20 +43,36 @@ namespace Imgn
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
 
+	void EditorLayer::ApplySceneState()
+	{
+		if (_requestedSceneState == _sceneState) return;
+
+		_renderer->WaitIdle();
+
+		switch (_requestedSceneState)
+		{
+		case eSceneState::Edit: SceneStop();
+			break;
+
+		case eSceneState::Play: ScenePlay();
+			break;
+
+		case eSceneState::Pause:
+		case eSceneState::Simulate:
+			_requestedSceneState = _sceneState;
+			break;
+		}
+	}
+
 	void EditorLayer::ApplyPendingScene()
 	{
 		if (!_pendingScene) return;
 
 		_renderer->WaitIdle();
 
-		_sceneHierarchy.SetSelectedEntity(nullptr);
-		_hoveredEntity = nullptr;
+		SceneStop();
 
-		_activeScene = _pendingScene;
-		_pendingScene = nullptr;
-		_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
-		_sceneHierarchy.SetSceneContext(_activeScene);
-		_taaHistoryValid = false;
+		SetActiveScene(std::move(_pendingScene));
 	}
 
 	void EditorLayer::UIToolbar()
@@ -83,20 +99,94 @@ namespace Imgn
 
 		if (ImGui::ImageButton("sceneStateButton", ImTextureRef(static_cast<ImTextureID>(reinterpret_cast<uintptr_t>(static_cast<VkDescriptorSet>(iconDS)))), ImVec2(16.f, 16.f)))
 		{
-			switch (_sceneState)
-			{
-			case Imgn::EditorLayer::eSceneState::Edit: _sceneState = eSceneState::Play;
-				break;
-			case Imgn::EditorLayer::eSceneState::Play: _sceneState = eSceneState::Edit;
-				break;
-			case Imgn::EditorLayer::eSceneState::Pause:
-				break;
-			case Imgn::EditorLayer::eSceneState::Simulate:
-				break;
-			}
+			_requestedSceneState = _sceneState == eSceneState::Edit ? eSceneState::Play : eSceneState::Edit;
+			//switch (_sceneState)
+			//{
+			//case Imgn::EditorLayer::eSceneState::Edit:
+			//	{
+			//		ScenePlay();
+
+			//		break;
+			//	}
+			//case Imgn::EditorLayer::eSceneState::Play: 
+			//	{
+			//		SceneStop();
+
+			//		break;
+			//	}
+			//case Imgn::EditorLayer::eSceneState::Pause:
+			//	break;
+			//case Imgn::EditorLayer::eSceneState::Simulate:
+			//	break;
+			//}
 		}
 
 		ImGui::End();
+	}
+
+	void EditorLayer::ScenePlay()
+	{
+		if (_sceneState != eSceneState::Edit || !_activeScene)
+		{
+			_requestedSceneState = _sceneState;
+			return;
+		}
+
+		shared<Scene> runtimeScene = _activeScene->Clone();
+
+		if (!runtimeScene)
+		{
+			_requestedSceneState = _sceneState;
+			IMGN_CORE_ERROR("Play failed: the scene could not be cloned.");
+			return;
+		}
+
+		Entity* selected = _sceneHierarchy.GetSelectedEntity();
+		_selectionBeforePlay = selected ? selected->GetID() : 0;
+
+		_sceneBeforePlay = _activeScene;
+		_runtimeScene = std::move(runtimeScene);
+		_sceneState = _requestedSceneState = eSceneState::Play;
+
+		SetActiveScene(_runtimeScene);
+		_runtimeScene->RuntimeStart();
+
+		_sceneHierarchy.SetSelectedEntity(_activeScene->GetEntity(_selectionBeforePlay));
+	}
+
+	void EditorLayer::SceneStop()
+	{
+		_requestedSceneState = eSceneState::Edit;
+		_sceneState = eSceneState::Edit;
+
+		if (!_runtimeScene) return;
+
+		const shared<Scene> runtimeScene = std::move(_runtimeScene);
+		runtimeScene->RuntimeStop();
+
+		SetActiveScene(std::move(_sceneBeforePlay), _selectionBeforePlay);
+		_selectionBeforePlay = 0;
+	}
+
+	void EditorLayer::SetActiveScene(shared<Scene> pScene, ID pSelectedEntityID)
+	{
+		_sceneHierarchy.SetSelectedEntity(nullptr);
+		_selectedEntity = nullptr;
+		_hoveredEntity = nullptr;
+		_hoveredEntityID = 0;
+
+		_activeScene = std::move(pScene);
+		_sceneHierarchy.SetSceneContext(_activeScene);
+
+		if (_activeScene)
+		{
+			_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
+			_sceneHierarchy.SetSelectedEntity(_activeScene->GetEntity(pSelectedEntityID));
+		}
+
+		_renderer->InvalidateEntityIDReadback();
+		_taaHistoryValid = false;
+		_jitterFrameIndex = 0;
 	}
 
 	void EditorLayer::Sleep()
@@ -434,10 +524,6 @@ namespace Imgn
 
 				const uint32_t frameIndex = _renderer->GetFrameInFlightIndex();
 
-				/*for (uint32_t lightIndex = 0; lightIndex < _activeScene->GetEntitiesWithComponent<PointLightComponent>().size(); lightIndex++)
-				{*/
-				//const PointLight& light = _activeScene->GetEntitiesWithComponent<PointLightComponent>()[lightIndex]->GetComponent<PointLightComponent>()->GetPointLight();
-
 				for (int lightIndex = 0; unique<Entity>& pointLightEntity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
 				{
 					PointLight light = pointLightEntity->GetComponent<PointLightComponent>()->GetPointLight(pointLightEntity->GetComponent<TransformComponent>());
@@ -493,8 +579,6 @@ namespace Imgn
 							ctx.PushConstants<ShadowPC>(pc);
 
 							for (const Primitive& primitive : mesh->GetPrimitives()) ctx.DrawPrimitive(primitive);
-
-
 						}
 
 						ctx.EndRendering();
@@ -510,13 +594,24 @@ namespace Imgn
 		_renderer->AddPass(TAA);
 		_renderer->AddPass(shadowPass);
 		_renderer->CompileGraph();
-
-
-		//blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), FileSystem::Assets() / "ExternalApps/Blender 4.4/blender.exe");
 	}
 
 	void EditorLayer::WakeUp()
 	{
+		_renderer->WaitIdle();
+
+		SceneStop();
+
+		for (unique<Entity>& entities : _activeScene->GetEntitiesWithComponent<ScriptComponent>()) entities->GetComponent<ScriptComponent>()->WakeUp();
+
+		if (_editorScene)
+		{
+			_editorScene->RuntimeStop();
+			_editorScene->Clear();
+			_sceneCamera = nullptr;
+		}
+
+		
 		if (_playIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_playIconDS));
 		if (_stopIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_stopIconDS));
 
@@ -524,6 +619,7 @@ namespace Imgn
 		_stopIconDS = nullptr;
 
 		if (_activeScene) _activeScene->Clear();
+
 		blenderPanel.Shutdown();
 	}
 
@@ -540,32 +636,14 @@ namespace Imgn
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
 					_pendingScene = Shared<Scene>();
-
-					//_renderer->WaitIdle();
-
-					//_activeScene = Shared<Scene>();
-					//_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
-					//_sceneHierarchy.SetSceneContext(_activeScene);
-					//_hoveredEntityID = 0;
-					//_hoveredEntity = nullptr;
-					//_cameraLookActive = false;
-					//_taaHistoryValid = false;
-					//_jitterFrameIndex = 0;
 				}
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					//_renderer->WaitIdle();
-
 					std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
 					if (!filePath.empty())
 					{
 						_pendingScene = Shared<Scene>();
-
-						/*_activeScene = Shared<Scene>();
-						_activeScene->OnViewportResize(_sceneWidth, _sceneHeight);
-						_sceneHierarchy.SetSceneContext(_activeScene);
-						_taaHistoryValid = false;*/
 
 						SceneSerializer serializer(_pendingScene);
 						if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
@@ -577,8 +655,7 @@ namespace Imgn
 					std::string filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
 					if (!filePath.empty())
 					{
-						SceneSerializer serializer(_activeScene);
-						serializer.Serialize(filePath + ".imgn");
+						SceneSerializer serializer(_sceneBeforePlay ? _sceneBeforePlay : _activeScene);
 						serializer.Serialize(std::filesystem::path(filePath).replace_extension(".imgn"));
 					}
 				}
@@ -608,6 +685,7 @@ namespace Imgn
 	void EditorLayer::Dream(Time pTime)
 	{
 		ApplyPendingScene();
+		ApplySceneState();
 
 		_hoveredEntityID = _renderer->GetEntityIDReadback();
 		_hoveredEntity = _activeScene->GetEntity(_hoveredEntityID);
@@ -615,7 +693,8 @@ namespace Imgn
 		ResizeSceneTargets();
 
 		_editorScene->Dream(pTime);
-		_activeScene->Dream(pTime);
+
+		if (_sceneState == eSceneState::Play && _runtimeScene) _runtimeScene->Dream(pTime);
 
 		const mat4 view = GetCamView(_sceneCamera->GetComponent<TransformComponent>());
 		const mat4 projection = _sceneCamera->GetComponent<CameraComponent>()->camera.GetProjection();
@@ -628,8 +707,7 @@ namespace Imgn
 		gBufferUBO.viewProj = view * projection;
 		gBufferUBO.jitteredViewProj = view * jitteredProjection;
 
-		if (!_taaHistoryValid)
-			gBufferUBO.prevViewProj = gBufferUBO.viewProj;
+		if (!_taaHistoryValid) gBufferUBO.prevViewProj = gBufferUBO.viewProj;
 
 		_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
 
@@ -658,6 +736,29 @@ namespace Imgn
 
 	void EditorLayer::OnEvent(Event& pEvent)
 	{
+		EventDispatcher dispatcher(pEvent);
+
+		dispatcher.Dispatch<KeyPressedEvent>([&](KeyPressedEvent& e)
+			{
+				bool ctrl = Input::IsKeyPressed(static_cast<int>(eKey::LeftControl)) || Input::IsKeyPressed(static_cast<int>(eKey::RightControl));
+				bool shift = Input::IsKeyPressed(static_cast<int>(eKey::LeftShift)) || Input::IsKeyPressed(static_cast<int>(eKey::RightShift));
+
+				switch (e.GetKeyCode()) //yea yea DRY i know...
+				{
+				case IMGN_KEY_N: if (ctrl) _pendingScene = Shared<Scene>();
+					break;
+				case IMGN_KEY_Q: _gizmoType = -1;
+					break;
+				case IMGN_KEY_W: if (!Input::IsMouseButtonPressed(IMGN_MOUSE_BUTTON_RIGHT)) _gizmoType = ImGuizmo::OPERATION::TRANSLATE;
+					break;
+				case IMGN_KEY_E: _gizmoType = ImGuizmo::OPERATION::ROTATE;
+					break;
+				case IMGN_KEY_R: _gizmoType = ImGuizmo::OPERATION::SCALE;
+					break;
+				}
+
+				return true;
+			});
 	}
 
 	void EditorLayer::ResizeSceneTargets()
@@ -755,10 +856,9 @@ namespace Imgn
 			}
 
 			//gizmo
-			_gizmoType = ImGuizmo::OPERATION::ROTATE; //ignore hard set
 			Entity* selected = _sceneHierarchy.GetSelectedEntity();
 			TransformComponent* tc = selected ? selected->GetComponent<TransformComponent>() : nullptr;
-			if (tc && !_cameraLookActive)
+			if (tc && !_cameraLookActive && _gizmoType > -1)
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();

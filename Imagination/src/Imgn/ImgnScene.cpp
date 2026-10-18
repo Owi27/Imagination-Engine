@@ -2,26 +2,44 @@
 #include "ImgnScene.h"
 #include "Components/AllComponents.hpp"
 
+#include <unordered_map>
+
 namespace Imgn
 {
+	ScriptComponent* Scene::GetOrCreateScript(Entity* pEntity)
+	{
+		if (!pEntity || !pEntity->IsActive()) return nullptr;
+
+		ScriptComponent* script = pEntity->GetComponent<ScriptComponent>();
+
+		if (!script) return nullptr;
+		if (script->instance) return script;
+
+		if (!script->Create || !script->Sleep || !script->WakeUp || !script->Dream)
+		{
+			IMGN_CORE_ERROR("Script on entity '{}' has no complete binding.", pEntity->GetName());
+			return nullptr;
+		}
+
+		script->Create();
+
+		if (!script->instance)
+		{
+			IMGN_CORE_ERROR("Script creation failed for entity '{}'.", pEntity->GetName());
+			return nullptr;
+		}
+
+		script->instance->_entity = pEntity;
+		script->Sleep();
+
+		return script;
+	}
+
 	void Scene::Dream(Time pTime)
 	{
-		//update scripts
+		for (const unique<Entity>& entity : _entities)
 		{
-			for (unique<Entity>& entity : _entities)
-			{
-				if (ScriptComponent* scriptComponent = entity->GetComponent<ScriptComponent>())
-				{
-					if (!scriptComponent->instance)
-					{
-						scriptComponent->Create();
-						scriptComponent->instance->_entity = entity.get();
-						scriptComponent->Sleep();
-					}
-
-					scriptComponent->Dream(pTime);
-				}
-			}
+			if (ScriptComponent* script = GetOrCreateScript(entity.get())) script->Dream(pTime);
 		}
 	}
 
@@ -41,6 +59,111 @@ namespace Imgn
 		return entity;
 	}
 
+	shared<Scene> Scene::Clone() const
+	{
+		shared<Scene> scene = Shared<Scene>();
+		scene->_viewportWidth = _viewportWidth;
+		scene->_viewportHeight = _viewportHeight;
+		scene->_entities.reserve(_entities.size());
+
+		std::unordered_map<const Entity*, Entity*> entityCopies;
+		std::unordered_map<const Material*, shared<Material>> materialCopies;
+		entityCopies.reserve(_entities.size());
+
+		for (const unique<Entity>& source : _entities)
+		{
+			Entity* target = scene->CreateEntity(source->GetName(), source->GetID());
+			if (!target) return nullptr;
+
+			entityCopies.emplace(source.get(), target);
+			target->SetActive(source->IsActive());
+
+			if (const TransformComponent* component = source->GetComponent<TransformComponent>())
+			{
+				TransformComponent* copy = target->GetComponent<TransformComponent>();
+				copy->position = component->position;
+				copy->rotation = component->rotation;
+				copy->scale = component->scale;
+				copy->prevTransform = copy->GetTransform();
+			}
+			else target->RemoveComponent<TransformComponent>();
+
+			if (const CameraComponent* component = source->GetComponent<CameraComponent>())
+			{
+				CameraComponent* copy = target->AddComponent<CameraComponent>();
+				copy->camera = component->camera;
+				copy->mainCamera = component->mainCamera;
+				copy->fixedAspect = component->fixedAspect;
+				copy->cameraSpeed = component->cameraSpeed;
+			}
+
+			if (const MeshComponent* component = source->GetComponent<MeshComponent>()) target->AddComponent<MeshComponent>()->CopyFrom(*component);
+
+			if (const MaterialComponent* component = source->GetComponent<MaterialComponent>())
+			{
+				std::vector<shared<Material>> materials;
+				materials.reserve(component->GetMaterialCount());
+
+				for (const shared<Material>& material : component->GetMaterials())
+				{
+					if (!material)
+					{
+						materials.push_back(nullptr);
+						continue;
+					}
+
+					auto [it, inserted] = materialCopies.try_emplace(material.get(), nullptr);
+					if (inserted) it->second = Shared<Material>(*material);
+
+					materials.push_back(it->second);
+				}
+
+				target->AddComponent<MaterialComponent>()->SetMaterials(std::move(materials));
+			}
+
+			if (const PointLightComponent* component = source->GetComponent<PointLightComponent>())
+			{
+				PointLightComponent* copy = target->AddComponent<PointLightComponent>();
+				copy->col = component->col;
+				copy->range = component->range;
+				copy->intensity = component->intensity;
+			}
+
+			if (const ScriptComponent* component = source->GetComponent<ScriptComponent>())
+			{
+				if (!target->AddComponent<ScriptComponent>()->CopyBindingFrom(*component))
+				{
+					IMGN_CORE_ERROR("Cannot clone script on entity '{}'. Bind its script type first.", source->GetName());
+					return nullptr;
+				}
+			}
+
+			if (target->GetComponents().size() != source->GetComponents().size())
+			{
+				IMGN_CORE_ERROR("Scene cloning does not support every component on entity '{}'.", source->GetName());
+				return nullptr;
+			}
+		}
+
+		for (const unique<Entity>& source : _entities)
+		{
+			Entity* parentCopy = entityCopies.at(source.get());
+
+			for (Entity* child : source->GetChildren())
+			{
+				auto it = entityCopies.find(child);
+
+				if (it == entityCopies.end() || !parentCopy->AddChild(it->second))
+				{
+					IMGN_CORE_ERROR("Cannot clone hierarchy for entity '{}'.", source->GetName());
+					return nullptr;
+				}
+			}
+		}
+
+		return scene;
+	}
+
 	void Scene::DestroyEntity(Entity* pEntity)
 	{
 		if (!pEntity) return;
@@ -52,11 +175,6 @@ namespace Imgn
 		for (Entity* child : children) pEntity->RemoveChild(child);
 
 		std::erase_if(_entities, [pEntity](const unique<Entity>& pEntityEntry) { return pEntityEntry.get() == pEntity; });
-	}
-
-	void Scene::DestroyEntity(unique<Entity>& pEntity)
-	{
-		std::erase(_entities, pEntity);
 	}
 
 	Entity* Scene::GetEntity(ID pID)
@@ -97,4 +215,21 @@ namespace Imgn
 				if (!cameraComp->fixedAspect) cameraComp->camera.SetViewportSize(pWidth, pHeight);
 	}
 
+	void Scene::RuntimeStart()
+	{
+		for (const unique<Entity>& entity : _entities) GetOrCreateScript(entity.get());
+	}
+
+	void Scene::RuntimeStop()
+	{
+		for (const unique<Entity>& entity : _entities)
+		{
+			ScriptComponent* script = entity->GetComponent<ScriptComponent>();
+			if (!script || !script->instance) continue;
+
+			if (script->WakeUp) script->WakeUp();
+
+			script->instance.reset();
+		}
+	}
 }

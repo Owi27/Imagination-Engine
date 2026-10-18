@@ -541,7 +541,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     }
 
     //Directional Light
-    //Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
+    Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
     
     float3 ambient = float3(.0f, .0f, .0f) * gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb * occlusion;
     float3 color = ambient + Lo + gBuffer[GBUFFER_EMISSIVE].Load(int3(pixel, 0)).rgb;
