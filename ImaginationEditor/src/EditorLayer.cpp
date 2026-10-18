@@ -189,6 +189,37 @@ namespace Imgn
 		_jitterFrameIndex = 0;
 	}
 
+	void EditorLayer::NewScene()
+	{
+		_pendingScene = Shared<Scene>();
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
+		if (!filePath.empty())
+		{
+			_pendingScene = Shared<Scene>();
+
+			SceneSerializer serializer(_pendingScene);
+			if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
+		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
+		if (!filePath.empty())
+		{
+			SceneSerializer serializer(_sceneBeforePlay ? _sceneBeforePlay : _activeScene);
+			serializer.Serialize(std::filesystem::path(filePath).replace_extension(".imgn"));
+		}
+	}
+
 	void EditorLayer::Sleep()
 	{
 		const vk::Extent2D extent = _renderer->GetSwapchainExtent();
@@ -635,29 +666,22 @@ namespace Imgn
 			{
 				if (ImGui::MenuItem("New", "Ctrl+N"))
 				{
-					_pendingScene = Shared<Scene>();
+					NewScene();
 				}
 
 				if (ImGui::MenuItem("Open...", "Ctrl+O"))
 				{
-					std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
-					if (!filePath.empty())
-					{
-						_pendingScene = Shared<Scene>();
+					OpenScene();
+				}
 
-						SceneSerializer serializer(_pendingScene);
-						if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
-					}
+				if (ImGui::MenuItem("Save...", "Ctrl+S"))
+				{
+					OpenScene();
 				}
 
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
 				{
-					std::string filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
-					if (!filePath.empty())
-					{
-						SceneSerializer serializer(_sceneBeforePlay ? _sceneBeforePlay : _activeScene);
-						serializer.Serialize(std::filesystem::path(filePath).replace_extension(".imgn"));
-					}
+					SaveSceneAs();
 				}
 
 				if (ImGui::MenuItem("Exit")) ImgnApp::Get().Close();
@@ -743,9 +767,13 @@ namespace Imgn
 				bool ctrl = Input::IsKeyPressed(static_cast<int>(eKey::LeftControl)) || Input::IsKeyPressed(static_cast<int>(eKey::RightControl));
 				bool shift = Input::IsKeyPressed(static_cast<int>(eKey::LeftShift)) || Input::IsKeyPressed(static_cast<int>(eKey::RightShift));
 
-				switch (e.GetKeyCode()) //yea yea DRY i know...
+				switch (e.GetKeyCode())
 				{
-				case IMGN_KEY_N: if (ctrl) _pendingScene = Shared<Scene>();
+				case IMGN_KEY_N: if (ctrl) NewScene;
+					break;
+				case IMGN_KEY_O: if (ctrl) OpenScene();
+					break;
+				case IMGN_KEY_S: if (ctrl) shift ? SaveSceneAs() : SaveScene();
 					break;
 				case IMGN_KEY_Q: _gizmoType = -1;
 					break;

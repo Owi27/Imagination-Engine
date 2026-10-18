@@ -99,7 +99,10 @@ namespace Imgn
 		void SetActiveScene(shared<Scene> pScene, ID pSelectedEntityID = 0);
 
 		//shortcuts
-
+		void NewScene();
+		void OpenScene();
+		void SaveScene();
+		void SaveSceneAs();
 
 	public:
         EditorLayer() /*Constructor*/
