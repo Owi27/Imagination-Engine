@@ -75,7 +75,7 @@ namespace Imgn
 
     class AppPanel
     {
-        bool _open = true;
+        bool _open = false;
         ExternalAppPanel _app;
 
     public:

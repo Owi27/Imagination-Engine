@@ -7,7 +7,7 @@ namespace Imgn
 	class SceneHierarchy
 	{
 		shared<Scene> _scene;
-		Entity* _selectedEntity = nullptr;
+		Entity* _selectedEntity = nullptr, * _pendingEntityDeletion = nullptr;
 
 	public:
 		SceneHierarchy() = default;
@@ -27,5 +27,12 @@ namespace Imgn
 
 		Entity* GetSelectedEntity() const { return _selectedEntity; }
 		void SetSelectedEntity(Entity* pEntity) { _selectedEntity = pEntity; }
+
+		[[nodiscard]] Entity* TakePendingEntityDeletion()
+		{
+			Entity* entity = _pendingEntityDeletion;
+			_pendingEntityDeletion = nullptr;
+			return entity;
+		}
 	};
 }

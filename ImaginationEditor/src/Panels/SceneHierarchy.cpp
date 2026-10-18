@@ -10,6 +10,7 @@ namespace Imgn
 	{
 		_scene = pScene;
 		_selectedEntity = nullptr;
+		_pendingEntityDeletion = nullptr;
 	}
 
 	void SceneHierarchy::DrawComponents(Entity* pEntity)
@@ -90,21 +91,16 @@ namespace Imgn
 				});
 		}
 
-		//if (MeshComponent* transform = pEntity->GetComponent<TransformComponent>())
-		//{
-		//	CreateComponentSettings<TransformComponent>(pEntity, "Transform", [&](bool pOpen)
-		//		{
-		//			if (pOpen)
-		//			{
-		//				ImGui::DragFloat3("Position", transform->position.data(), 0.1f);
-
-		//				vec3 rotation = Math::EulerFromQuat(transform->rotation);
-		//				if (ImGui::DragFloat3("Rotation", rotation.data(), 0.5f)) transform->rotation = Math::QuatFromEuler(rotation);
-
-		//				ImGui::DragFloat3("Scale", transform->scale.data(), 0.01f);
-		//			}
-		//		});
-		//}
+		if (MeshComponent* mesh = pEntity->GetComponent<MeshComponent>())
+		{
+			CreateComponentSettings<MeshComponent>(pEntity, "Mesh", [&](bool pOpen)
+				{
+					if (pOpen)
+					{
+						ImGui::Text(std::format("Mesh Path: {}", mesh->GetMeshAssetPath().string()).c_str());
+					}
+				});
+		}
 
 		//if (MaterialComponent* transform = pEntity->GetComponent<TransformComponent>())
 		//{
@@ -180,12 +176,12 @@ namespace Imgn
 
 			if (ImGui::IsItemClicked()) _selectedEntity = entity.get();
 
-			bool entityDeleted = false;
 			if (ImGui::BeginPopupContextItem())
 			{
 				if (ImGui::MenuItem("Delete Entity"))
 				{
-					entityDeleted = true;
+					_pendingEntityDeletion = entity.get();
+					if (_selectedEntity == entity.get()) _selectedEntity = nullptr;
 				}
 
 				ImGui::EndPopup();
@@ -205,13 +201,6 @@ namespace Imgn
 				}
 
 				ImGui::TreePop();*/
-			}
-
-			if (entityDeleted)
-			{
-				if (_selectedEntity == entity.get()) _selectedEntity = nullptr;
-
-				_scene->DestroyEntity(entity);
 			}
 		}
 

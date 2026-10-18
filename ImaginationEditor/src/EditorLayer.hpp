@@ -94,6 +94,7 @@ namespace Imgn
 
 		void ApplySceneState();
 		void ApplyPendingScene();
+		void ApplyPendingEntityDeletion();
 
 		void SerializeScene(shared<Scene> pScene, const std::filesystem::path& pPath);
 

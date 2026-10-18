@@ -75,6 +75,27 @@ namespace Imgn
 		SetActiveScene(std::move(_pendingScene));
 	}
 
+	void EditorLayer::ApplyPendingEntityDeletion()
+	{
+		Entity* entity = _sceneHierarchy.TakePendingEntityDeletion();
+		if (!entity || !_activeScene) return;
+
+		std::vector<unique<Entity>>& entities = _activeScene->GetEntities();
+		if (std::ranges::none_of(entities, [entity](const unique<Entity>& pEntry) { return pEntry.get() == entity; })) return;
+
+		_renderer->WaitIdle();
+
+		if (_sceneHierarchy.GetSelectedEntity() == entity) _sceneHierarchy.SetSelectedEntity(nullptr);
+		if (_selectedEntity == entity) _selectedEntity = nullptr;
+		_hoveredEntity = nullptr;
+		_hoveredEntityID = 0;
+		_renderer->InvalidateEntityIDReadback();
+
+		_activeScene->DestroyEntity(entity);
+		_taaHistoryValid = false;
+		_jitterFrameIndex = 0;
+	}
+
 	void EditorLayer::SerializeScene(shared<Scene> pScene, const std::filesystem::path& pPath)
 	{
 		SceneSerializer serializer(pScene);
@@ -650,6 +671,10 @@ namespace Imgn
 		_renderer->AddPass(TAA);
 		_renderer->AddPass(shadowPass);
 		_renderer->CompileGraph();
+
+
+		//owi put this somewhere else
+		blenderPanel.Initialize(static_cast<HWND>(_window->GetWindowHandle()), FileSystem::Assets() / "ExternalApps/Blender 4.4/blender.exe");
 	}
 
 	void EditorLayer::WakeUp()
@@ -712,6 +737,16 @@ namespace Imgn
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Externals"))
+			{
+				if (ImGui::MenuItem("Blender"))
+				{
+					blenderPanel.IsOpen() ? blenderPanel.Close() : blenderPanel.Open();
+				}
+
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 
@@ -726,11 +761,12 @@ namespace Imgn
 		DrawSceneView();
 		UIToolbar();
 
-		//blenderPanel.Render();
+		blenderPanel.Render();
 	}
 
 	void EditorLayer::Dream(Time pTime)
 	{
+		ApplyPendingEntityDeletion();
 		ApplyPendingScene();
 		ApplySceneState();
 
@@ -768,6 +804,7 @@ namespace Imgn
 
 			pointLights.push_back(light->GetPointLight(transform));
 		}
+
 		_pointLightBufferSize = pointLights.size() * sizeof(PointLight);
 		_renderer->UpdateStorageBuffer(_pointLightBuffer, pointLights.data(), _pointLightBufferSize);
 
