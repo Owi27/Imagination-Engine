@@ -60,10 +60,10 @@ namespace Imgn
 		_stream.flush();
 		_stream.close();
 	}
-	void SceneSerializer::SerializeRuntime(const std::string& pFilepath)
+	void SceneSerializer::SerializeRuntime(const std::filesystem::path& pFilepath)
 	{
 	}
-	bool SceneSerializer::Deserialize(const std::string& pFilepath)
+	bool SceneSerializer::Deserialize(const std::filesystem::path& pFilepath)
 	{
 		_stream.open(pFilepath, std::ios::binary | std::ios::in);
 
@@ -118,7 +118,7 @@ namespace Imgn
 
 		return false;
 	}
-	bool SceneSerializer::DeserializeRuntime(const std::string& pFilepath)
+	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& pFilepath)
 	{
 		return false;
 	}

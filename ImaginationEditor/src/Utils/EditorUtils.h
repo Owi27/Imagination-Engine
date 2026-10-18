@@ -12,7 +12,7 @@ namespace Imgn
 {
 	namespace FileDialogs
 	{
-		static std::string OpenFile(const char* pFilter)
+		static std::filesystem::path OpenFile(const char* pFilter)
 		{
 #ifdef IMGN_PLATFORM_WINDOWS
 			OPENFILENAMEA ofn;
@@ -26,13 +26,13 @@ namespace Imgn
 			ofn.nFilterIndex = 1;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
-			if (GetOpenFileNameA(&ofn) == TRUE) return ofn.lpstrFile;
+			if (GetOpenFileNameA(&ofn) == TRUE) return std::filesystem::path(ofn.lpstrFile);
 #endif // IMGN_PLATFORM_WINDOWS
 
-			return std::string();
+			return std::filesystem::path();
 		}
 
-		static std::string SaveFile(const char* pFilter)
+		static std::filesystem::path SaveFile(const char* pFilter)
 		{
 #ifdef IMGN_PLATFORM_WINDOWS
 			OPENFILENAMEA ofn;
@@ -47,10 +47,10 @@ namespace Imgn
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 			ofn.lpstrDefExt = "imgn";
 
-			if (GetSaveFileNameA(&ofn) == TRUE) return ofn.lpstrFile;
+			if (GetSaveFileNameA(&ofn) == TRUE) return std::filesystem::path(ofn.lpstrFile);
 #endif // IMGN_PLATFORM_WINDOWS
 
-			return std::string();
+			return std::filesystem::path();
 		}
 	}
 }

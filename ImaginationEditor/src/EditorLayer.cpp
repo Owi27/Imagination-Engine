@@ -75,6 +75,12 @@ namespace Imgn
 		SetActiveScene(std::move(_pendingScene));
 	}
 
+	void EditorLayer::SerializeScene(shared<Scene> pScene, const std::filesystem::path& pPath)
+	{
+		SceneSerializer serializer(pScene);
+		serializer.Serialize(pPath);
+	}
+
 	void EditorLayer::UIToolbar()
 	{
 		ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -192,31 +198,50 @@ namespace Imgn
 	void EditorLayer::NewScene()
 	{
 		_pendingScene = Shared<Scene>();
+		_editorScenePath = std::filesystem::path();
 	}
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
-		if (!filePath.empty())
-		{
-			_pendingScene = Shared<Scene>();
+		std::filesystem::path filePath = FileDialogs::OpenFile("Imgn File (*.imgn)\0*.imgn\0");
 
-			SceneSerializer serializer(_pendingScene);
-			if (!serializer.Deserialize(filePath)) _pendingScene = nullptr;
+		if (filePath.empty()) return;
+
+		if (filePath.extension().string() != ".imgn")
+		{
+			IMGN_WARN("Could not load {}, not an imgn scene", filePath.string());
+			return;
 		}
+
+		_pendingScene = Shared<Scene>();
+
+		SceneSerializer serializer(_pendingScene);
+		if (!serializer.Deserialize(filePath))
+		{
+			_pendingScene = nullptr;
+			return;
+		}
+
+		_editorScenePath = filePath;
 	}
 
 	void EditorLayer::SaveScene()
 	{
+		if (!_editorScenePath.empty())
+		{
+			SerializeScene(_activeScene, _editorScenePath);
+		}
+		else SaveSceneAs();
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
+		std::filesystem::path filePath = FileDialogs::SaveFile("Imgn File (*.imgn)\0*.imgn\0");
 		if (!filePath.empty())
 		{
-			SceneSerializer serializer(_sceneBeforePlay ? _sceneBeforePlay : _activeScene);
-			serializer.Serialize(std::filesystem::path(filePath).replace_extension(".imgn"));
+			SerializeScene(_sceneBeforePlay ? _sceneBeforePlay : _activeScene, std::filesystem::path(filePath).replace_extension(".imgn"));
+
+			_editorScenePath = filePath;
 		}
 	}
 
@@ -633,8 +658,6 @@ namespace Imgn
 
 		SceneStop();
 
-		for (unique<Entity>& entities : _activeScene->GetEntitiesWithComponent<ScriptComponent>()) entities->GetComponent<ScriptComponent>()->WakeUp();
-
 		if (_editorScene)
 		{
 			_editorScene->RuntimeStop();
@@ -642,7 +665,7 @@ namespace Imgn
 			_sceneCamera = nullptr;
 		}
 
-		
+
 		if (_playIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_playIconDS));
 		if (_stopIconDS) ImGui_ImplVulkan_RemoveTexture(static_cast<VkDescriptorSet>(_stopIconDS));
 
@@ -769,7 +792,7 @@ namespace Imgn
 
 				switch (e.GetKeyCode())
 				{
-				case IMGN_KEY_N: if (ctrl) NewScene;
+				case IMGN_KEY_N: if (ctrl) NewScene();
 					break;
 				case IMGN_KEY_O: if (ctrl) OpenScene();
 					break;

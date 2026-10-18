@@ -12,7 +12,7 @@ namespace Imgn
 
 		ScriptComponent* script = pEntity->GetComponent<ScriptComponent>();
 
-		if (!script) return nullptr;
+		if (!script || !script->IsInitialized()) return nullptr;
 		if (script->instance) return script;
 
 		if (!script->Create || !script->Sleep || !script->WakeUp || !script->Dream)
@@ -39,6 +39,7 @@ namespace Imgn
 	{
 		for (const unique<Entity>& entity : _entities)
 		{
+			entity->Dream(pTime.Seconds());
 			if (ScriptComponent* script = GetOrCreateScript(entity.get())) script->Dream(pTime);
 		}
 	}
@@ -217,7 +218,11 @@ namespace Imgn
 
 	void Scene::RuntimeStart()
 	{
-		for (const unique<Entity>& entity : _entities) GetOrCreateScript(entity.get());
+		for (const unique<Entity>& entity : _entities)
+		{
+			entity->Init();
+			GetOrCreateScript(entity.get());
+		}
 	}
 
 	void Scene::RuntimeStop()

@@ -14,6 +14,8 @@ namespace Imgn
 
 	void Entity::Init()
 	{
+		if (!_active) return;
+
 		for (auto& component : _components)
 		{
 			component->Init();
@@ -24,9 +26,11 @@ namespace Imgn
 	{
 		if (!_active) return;
 
+		Init();
+
 		for (auto& component : _components)
 		{
-			component->Dream(pDeltaTime);
+			if (component->IsInitialized()) component->Dream(pDeltaTime);
 		}
 	}
 

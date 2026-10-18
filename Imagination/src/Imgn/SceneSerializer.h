@@ -32,9 +32,9 @@ namespace Imgn
 
         /*Class Functions*/
         void Serialize(const std::filesystem::path& pFilepath);
-        void SerializeRuntime(const std::string& pFilepath);
-        bool Deserialize(const std::string& pFilepath);
-        bool DeserializeRuntime(const std::string& pFilepath);
+        void SerializeRuntime(const std::filesystem::path& pFilepath);
+        bool Deserialize(const std::filesystem::path& pFilepath);
+        bool DeserializeRuntime(const std::filesystem::path& pFilepath);
 
         void Read(void* pData, uint64_t pSize) { _stream.read(reinterpret_cast<char*>(pData), pSize); }
         void Write(const void* pData, uint64_t pSize) { _stream.write(reinterpret_cast<const char*>(pData), pSize); }

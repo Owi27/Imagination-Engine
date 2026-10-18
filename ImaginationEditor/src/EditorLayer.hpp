@@ -79,6 +79,8 @@ namespace Imgn
 
 		shared<Scene> _editorScene;
 
+		std::filesystem::path _editorScenePath;
+
 		int _gizmoType = -1;
 
 		void ResizeSceneTargets();
@@ -92,6 +94,8 @@ namespace Imgn
 
 		void ApplySceneState();
 		void ApplyPendingScene();
+
+		void SerializeScene(shared<Scene> pScene, const std::filesystem::path& pPath);
 
 		void UIToolbar();
 		void ScenePlay();

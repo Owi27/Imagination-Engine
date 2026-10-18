@@ -72,14 +72,15 @@ namespace Imgn
 		Entity* GetOwner() const { return _owner; }
 		inline const std::string& GetName() const { return _debugName; }
 
+		[[nodiscard]] bool IsInitialized() const { return _state == eState::Active; }
+
 		virtual void Init()
 		{
-			if (_state == eState::Uninitialized)
-			{
-				_state = eState::Initializing;
-				OnInit();
-				_state = eState::Active;
-			}
+			if (_state != eState::Uninitialized) return;
+
+			_state = eState::Initializing;
+			OnInit();
+			_state = eState::Active;
 		}
 
 		template<typename T>
@@ -99,7 +100,7 @@ namespace Imgn
 		bool _active = true;
 		std::vector<unique<Component>> _components;
 		std::unordered_map<uint64_t, Component*> _componentMap;
-		
+
 		Entity* _parent = nullptr;
 		std::vector<Entity*> _children;
 
@@ -127,7 +128,7 @@ namespace Imgn
 		bool IsActive() const { return _active; }
 		void SetActive(bool pIsActive) { _active = pIsActive; }
 		const std::vector<unique<Component>>& GetComponents() const { return _components; }
-		
+
 		Entity* GetParent() const { return _parent; }
 		std::vector<Entity*>& GetChildren() { return _children; }
 
