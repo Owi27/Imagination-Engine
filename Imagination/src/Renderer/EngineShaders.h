@@ -560,10 +560,67 @@ struct TAAPC
     uint  validHistory;
 } pc;
 
-
 Texture2D<float4> taaInput[4] : register(t2, space0);
 RWTexture2D<float4> taaOutput : register(u3, space0);
 SamplerState _sampler : register(s4, space0);
+
+float LuminanceWeight(float3 pColor)
+{
+    //rcp = 1/x
+    return rcp(1.f + dot(pColor, float3(.2126f, .7152f, .0722f)));
+}
+
+float4 SampleCatmullRom(Texture2D<float4> pTexture, SamplerState pSampler, float2 pUV, float2 pTextureSize)
+{
+    //convert normalized uv into texel space
+    float2 samplePos = pUV * pTextureSize;
+    float2 texelPos1 = floor(samplePos - .5f) + .5f;
+
+    //fractional position between texels
+    float2 f = samplePos - texelPos1;
+    float2 f2 = f * f;
+    float2 f3 = f2 * f;
+
+    //Catmull-Rom weights
+    float2 w0 = f2 - .5f * (f3 + f);
+    float2 w1 = 1.f + f2 * (-2.5f + 1.5f * f);
+    float2 w2 = f * (.5f + f * (2.f - 1.5f * f));
+    float2 w3 = .5f * (f3 - f2);
+
+    //combine the two center taps so hardware bilinear filtering can give us both with one sample
+    float2 w12 = w1 + w2;
+    float2 offset12 = w2 / w12;
+
+    float2 texelPos0 = texelPos1 - 1.f;
+    float2 texelPos3 = texelPos1 + 2.f;
+    float2 texelPos12 = texelPos1 + offset12;
+
+    //back to normalized uv
+    float2 invTextureSize = rcp(pTextureSize);
+
+    texelPos0  *= invTextureSize;
+    texelPos3  *= invTextureSize;
+    texelPos12 *= invTextureSize;
+
+    float4 result = 0.0f;
+
+    //top row
+    result += pTexture.SampleLevel(pSampler, float2(texelPos0.x, texelPos0.y), 0.f) * (w0.x * w0.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos12.x, texelPos0.y), 0.f) * (w12.x * w0.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos3.x, texelPos0.y), 0.f) * (w3.x * w0.y);
+
+    //middle row
+    result += pTexture.SampleLevel(pSampler, float2(texelPos0.x, texelPos12.y), 0.f) * (w0.x * w12.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos12.x, texelPos12.y), 0.f) * (w12.x * w12.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos3.x, texelPos12.y), 0.f) * (w3.x * w12.y);
+
+    //bottom row
+    result += pTexture.SampleLevel(pSampler, float2(texelPos0.x, texelPos3.y), 0.f) * (w0.x * w3.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos12.x, texelPos3.y), 0.f) * (w12.x * w3.y);
+    result += pTexture.SampleLevel(pSampler, float2(texelPos3.x, texelPos3.y), 0.f) * (w3.x * w3.y);
+
+    return result;
+}
 
 [numthreads(8, 8, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -572,6 +629,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint width, height;
     taaOutput.GetDimensions(width, height);
     
+    if (DTid.x >= width || DTid.y >= height) return;
+
     float2 uv = (float2(pixel) + .5f) / float2(width, height);
     
     float2 currVelocityUV = taaInput[Velocity].Load(int3(pixel, 0)).rg;
@@ -581,7 +640,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float3 prevColor = currColor;
     //valid history
-    if (pc.validHistory == 1) prevColor = taaInput[TAAHistory].SampleLevel(_sampler, reprojectedUV, 0.f).rgb;
+    if (pc.validHistory == 1) prevColor = SampleCatmullRom(taaInput[TAAHistory], _sampler, reprojectedUV, float2(width, height)).rgb;
     
     float3 minColor = 9999.f, maxColor = -9999.f, currFrameBlurred = 0.f;
     
@@ -601,7 +660,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
     currFrameBlurred *= .11111111111111111111111111111111f; ///= 9.f;
     
     float3 previousColorClamped = clamp(prevColor, minColor, maxColor);
-    float3 accumulation = currColor * .1f + previousColorClamped * .9f;
+
+    float currWeight = .1f * LuminanceWeight(currColor);
+    float prevWeight = .9f * LuminanceWeight(previousColorClamped);
+
+    float3 accumulation = (currColor * currWeight + previousColorClamped * prevWeight) / (currWeight + prevWeight);
     
     float velocityDisocclusion = 0.f;
 
@@ -610,7 +673,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float2 previousVelocityUV = taaInput[VHistory].SampleLevel(_sampler, reprojectedUV, 0.f).rg;
         float velocityLength = length(previousVelocityUV - currVelocityUV);
 
-        velocityDisocclusion = saturate((velocityLength - 0.001f) * 10.f);
+        velocityDisocclusion = saturate((velocityLength - .001f) * 10.f);
     }
     
     taaOutput[pixel] = float4(lerp(accumulation, currFrameBlurred, velocityDisocclusion), 1.f);
