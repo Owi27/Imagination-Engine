@@ -564,10 +564,15 @@ struct TAAPC
     uint  validHistory;
 } pc;
 
-
 Texture2D<float4> taaInput[4] : register(t2, space0);
 RWTexture2D<float4> taaOutput : register(u3, space0);
 SamplerState _sampler : register(s4, space0);
+
+float LuminanceWeight(float3 pColor)
+{
+    //rcp = 1/x
+    return rcp(1.f + dot(pColor, float3(.2126f, .7152f, .0722f)));
+}
 
 [numthreads(8, 8, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -605,7 +610,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
     currFrameBlurred *= .11111111111111111111111111111111f; ///= 9.f;
     
     float3 previousColorClamped = clamp(prevColor, minColor, maxColor);
-    float3 accumulation = currColor * .1f + previousColorClamped * .9f;
+
+    float currWeight = .1f * LuminanceWeight(currColor);
+    float prevWeight = .9f * LuminanceWeight(previousColorClamped);
+
+    float3 accumulation = (currColor * currWeight + previousColorClamped * prevWeight) / (currWeight + prevWeight);
     
     float velocityDisocclusion = 0.f;
 
@@ -614,7 +623,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         float2 previousVelocityUV = taaInput[VHistory].Sample(_sampler, reprojectedUV).rg;
         float velocityLength = length(previousVelocityUV - currVelocityUV);
 
-        velocityDisocclusion = saturate((velocityLength - 0.001f) * 10.f);
+        velocityDisocclusion = saturate((velocityLength - .001f) * 10.f);
     }
     
     taaOutput[pixel] = float4(lerp(accumulation, currFrameBlurred, velocityDisocclusion), 1.f);
