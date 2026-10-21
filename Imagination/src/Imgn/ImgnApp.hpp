@@ -18,12 +18,12 @@ namespace Imgn
 		static inline ImgnApp* _instance;
 
 		bool _running = true;
+		unique<ImgnWindow> _window;
+		unique<ImgnRenderer> _renderer;
+		unique<ImGuiLayer> _imGuiLayer;
 		LayerStack _layerStack;
 		std::chrono::steady_clock::time_point _lastFrameTime;
-		unique<ImgnWindow> _window;
-		unique<ImGuiLayer> _imGuiLayer;
 		Entity _entity;
-		unique<ImgnRenderer> _renderer;
 
 	public:
 		ImgnApp()

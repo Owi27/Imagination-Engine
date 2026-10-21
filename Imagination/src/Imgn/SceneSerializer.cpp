@@ -89,10 +89,8 @@ namespace Imgn
 				uint64_t componentCount = 0;
 				Read(&componentCount, sizeof(componentCount));
 
-				if (Entity* entity = _scene->CreateEntity())
+				if (Entity* entity = _scene->CreateEntity(entityName, entityID))
 				{
-					entity->SetName(entityName);
-
 					for (uint64_t i = 0; i < componentCount; i++)
 					{
 						ID componentID = 0;

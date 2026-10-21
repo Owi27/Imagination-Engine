@@ -37,6 +37,7 @@ struct RGImage //literally just image, but with rendergraph info
 	Image image;
 
 	uint32_t width = 1, height = 1, arrayLayers = 1, mipLevels = 1;
+	vk::ImageUsageFlags usage = {};
 	vk::Format format = vk::Format::eR8G8B8A8Unorm;
 	vk::ImageViewType viewType = vk::ImageViewType::e2D;
 
@@ -56,6 +57,8 @@ struct RGBuffer
 
 class Vulkan
 {
+	static constexpr vk::AccessFlags2 WriteAccess = vk::AccessFlagBits2::eShaderWrite | vk::AccessFlagBits2::eShaderStorageWrite | vk::AccessFlagBits2::eColorAttachmentWrite | vk::AccessFlagBits2::eDepthStencilAttachmentWrite | vk::AccessFlagBits2::eTransferWrite | vk::AccessFlagBits2::eHostWrite | vk::AccessFlagBits2::eMemoryWrite;
+
 #ifdef NDEBUG
 	const bool _enableValidationLayers = false;
 #else
@@ -230,7 +233,7 @@ public:
 	Image CreateDepthImage(uint32_t pWidth, uint32_t pHeight);
 	Image CreateTextureImage(uint32_t pWidth, uint32_t pHeight, const uint8_t* pData);
 	Image CreateTextureImage(const std::filesystem::path& pFile);
-	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType = vk::ImageViewType::e2D, uint32_t pArrayLayers = 1);
+	RGImage CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType = vk::ImageViewType::e2D, vk::ImageUsageFlags pUsage = {}, uint32_t pArrayLayers = 1);
 
 	vk::raii::Sampler& GetTAASampler() const { return *_taaSampler; }
 	vk::raii::Sampler& GetPointSampler() const { return *_pointSampler; }
@@ -240,10 +243,11 @@ public:
 
 	// For general transitions inside an existing command buffer
 	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor, uint32_t pArrayLayers = 1, uint32_t pMipLevels = 1);
+	void TransitionImageLayout(vk::CommandBuffer pCommandBuffer, RGImage& pImage, vk::ImageLayout pNewLayout, vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess);
 
 	// For one-off transitions (like texture loading)
 	void TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect = vk::ImageAspectFlagBits::eColor);
-	void TransitionBuffer(vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess, Buffer& pBuffer);
+	void TransitionBuffer(vk::CommandBuffer pCommandBuffer, RGBuffer& pBuffer, vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess);
 
 	vk::raii::CommandBuffer& GetCurrentCommandBuffer() { return *_commandBuffers[_frameInFlightIdx]; }
 
@@ -262,10 +266,12 @@ public:
 
 	void CopyRenderImage(RGImage& pSrc, RGImage& pDst);
 
-	void WaitIdle() { _device->waitIdle(); }
+	void WaitIdle() { if (_device) _device->waitIdle(); }
 	void ClearSwapchain();
 
 	Buffer CreateReadbackBuffer(uint64_t pSize);
 	void CopyImagePixelToBuffer(vk::raii::CommandBuffer& pCommandBuffer, RGImage& pImage, Buffer& pBuffer, uint32_t pX, uint32_t pY);
 	void ReadBuffer(const Buffer& pBuffer, void* pData, uint64_t pSize);
+
+	[[nodiscard]] vk::PhysicalDeviceLimits GetDeviceLimits() const { return _physicalDevice->getProperties().limits; }
 };

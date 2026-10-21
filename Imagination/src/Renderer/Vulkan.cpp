@@ -7,6 +7,9 @@ static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallback(vk::DebugUtilsMessageSever
 {
 	if (severity == vk::DebugUtilsMessageSeverityFlagBitsEXT::eError || severity == vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
 	{
+		OutputDebugStringA("[Vulkan] ");
+		OutputDebugStringA(pCallbackData->pMessage);
+		OutputDebugStringA("\n");
 		std::cout << "validation layer: type " << to_string(type) << " msg: " << pCallbackData->pMessage << std::endl;
 	}
 
@@ -1348,15 +1351,13 @@ bool Vulkan::StartFrame()
 
 void Vulkan::BlitToSwapchain(RGImage& pImage)
 {
-	if (!pImage.image.image)
-		throw std::runtime_error("EndFrame received a null render image");
+	if (!pImage.image.image) throw std::runtime_error("EndFrame received a null render image");
 
 	vk::raii::CommandBuffer& commandBuffer = *_commandBuffers[_frameInFlightIdx];
 
 	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, _swapchainImages[_activeImageIdx]);
-	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], pImage.currentLayout, vk::ImageLayout::eTransferSrcOptimal, *pImage.image.image, pImage.aspect);
+	TransitionImageLayout(*commandBuffer, pImage, vk::ImageLayout::eTransferSrcOptimal, vk::PipelineStageFlagBits2::eTransfer, vk::AccessFlagBits2::eTransferRead);
 
-	pImage.currentLayout = vk::ImageLayout::eTransferSrcOptimal;
 	//blit final color for now
 	vk::ImageSubresourceLayers subresource
 	{
@@ -1383,9 +1384,7 @@ void Vulkan::BlitToSwapchain(RGImage& pImage)
 	//auto finalColor = _graph.GetResource("FinalColor");
 	_commandBuffers[_frameInFlightIdx]->blitImage(*pImage.image.image, vk::ImageLayout::eTransferSrcOptimal, _swapchainImages[_activeImageIdx], vk::ImageLayout::eTransferDstOptimal, blit, vk::Filter::eLinear);
 
-	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pImage.image.image, pImage.aspect);
-
-	pImage.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	TransitionImageLayout(*commandBuffer, pImage, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits2::eAllGraphics | vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderRead);
 	TransitionImageLayout(*_commandBuffers[_frameInFlightIdx], vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eColorAttachmentOptimal, _swapchainImages[_activeImageIdx]);
 }
 
@@ -1670,26 +1669,33 @@ Image Vulkan::CreateTextureImage(const std::filesystem::path& pFile)
 	return texture;
 }
 
-RGImage Vulkan::CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType, uint32_t pArrayLayers)
+RGImage Vulkan::CreateRenderImage(uint32_t pWidth, uint32_t pHeight, vk::Format pFormat, vk::ImageAspectFlags pAspect, vk::ImageViewType pViewType, vk::ImageUsageFlags pUsage, uint32_t pArrayLayers)
 {
 	RGImage image;
-
 	image.width = pWidth;
 	image.height = pHeight;
 	image.arrayLayers = pArrayLayers;
 	image.format = pFormat;
 	image.aspect = pAspect;
 	image.viewType = pViewType;
+	image.usage = pUsage;
 
-	if (image.aspect & vk::ImageAspectFlagBits::eDepth)
+
+	if (!image.usage)
 	{
-		CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image, image.viewType, image.arrayLayers);
-		CreateImageView(image.format, image.aspect, image.image, image.viewType, image.arrayLayers);
+		image.usage = vk::ImageUsageFlagBits::eSampled;
 
-		return image;
+		if (image.aspect & vk::ImageAspectFlagBits::eDepth)
+		{
+			image.usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+		}
+		else
+		{
+			image.usage |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
+		}
 	}
 
-	CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image, image.viewType, image.arrayLayers);
+	CreateImage(image.width, image.height, image.format, vk::ImageTiling::eOptimal, image.usage, vk::MemoryPropertyFlagBits::eDeviceLocal, image.image, image.viewType, image.arrayLayers);
 	CreateImageView(image.format, image.aspect, image.image, image.viewType, image.arrayLayers);
 
 	return image;
@@ -1876,55 +1882,100 @@ void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, vk::ImageLa
 	}
 	else if (pOldLayout == vk::ImageLayout::eUndefined && pNewLayout ==
 		vk::ImageLayout::eShaderReadOnlyOptimal)
-		{
-			barrier.srcAccessMask = {};
+	{
+		barrier.srcAccessMask = {};
 
-			barrier.dstAccessMask =
-				vk::AccessFlagBits::eShaderRead;
+		barrier.dstAccessMask =
+			vk::AccessFlagBits::eShaderRead;
 
-			srcStage =
-				vk::PipelineStageFlagBits::eTopOfPipe;
+		srcStage =
+			vk::PipelineStageFlagBits::eTopOfPipe;
 
-			dstStage =
-				vk::PipelineStageFlagBits::eComputeShader;
-				}
+		dstStage =
+			vk::PipelineStageFlagBits::eComputeShader;
+	}
 	else if (
 		pOldLayout ==
 		vk::ImageLayout::eShaderReadOnlyOptimal &&
 		pNewLayout ==
 		vk::ImageLayout::eTransferDstOptimal)
-		{
-			barrier.srcAccessMask =
-				vk::AccessFlagBits::eShaderRead;
+	{
+		barrier.srcAccessMask =
+			vk::AccessFlagBits::eShaderRead;
 
-			barrier.dstAccessMask =
-				vk::AccessFlagBits::eTransferWrite;
+		barrier.dstAccessMask =
+			vk::AccessFlagBits::eTransferWrite;
 
-			srcStage =
-				vk::PipelineStageFlagBits::eComputeShader |
-				vk::PipelineStageFlagBits::eFragmentShader;
+		srcStage =
+			vk::PipelineStageFlagBits::eComputeShader |
+			vk::PipelineStageFlagBits::eFragmentShader;
 
-			dstStage =
-				vk::PipelineStageFlagBits::eTransfer;
-				}
+		dstStage =
+			vk::PipelineStageFlagBits::eTransfer;
+	}
 	else if (
 		pOldLayout == vk::ImageLayout::eUndefined &&
 		pNewLayout == vk::ImageLayout::eGeneral)
-		{
-			barrier.srcAccessMask = {};
-			barrier.dstAccessMask =
-				vk::AccessFlagBits::eShaderRead |
-				vk::AccessFlagBits::eShaderWrite;
+	{
+		barrier.srcAccessMask = {};
+		barrier.dstAccessMask =
+			vk::AccessFlagBits::eShaderRead |
+			vk::AccessFlagBits::eShaderWrite;
 
-			srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
-			dstStage = vk::PipelineStageFlagBits::eComputeShader;
-			}
+		srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+		dstStage = vk::PipelineStageFlagBits::eComputeShader;
+	}
 	else
 	{
 		throw std::invalid_argument("unsupported layout transition!");
 	}
 
 	pCommandBuffer.pipelineBarrier(srcStage, dstStage, {}, nullptr, nullptr, barrier);
+}
+
+void Vulkan::TransitionImageLayout(vk::CommandBuffer pCommandBuffer, RGImage& pImage, vk::ImageLayout pNewLayout, vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess)
+{
+	const bool writes = static_cast<bool>(pNewAccess & WriteAccess);
+
+	if (pImage.currentLayout != pNewLayout || writes || (pImage.currentAccess & WriteAccess))
+	{
+		vk::ImageMemoryBarrier2 barrier
+		{
+			.srcStageMask = pImage.currentStage,
+			.srcAccessMask = pImage.currentAccess,
+			.dstStageMask = pNewStage,
+			.dstAccessMask = pNewAccess,
+			.oldLayout = pImage.currentLayout,
+			.newLayout = pNewLayout,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.image = *pImage.image.image,
+			.subresourceRange =
+			{
+				.aspectMask = pImage.aspect,
+				.baseMipLevel = 0,
+				.levelCount = pImage.mipLevels,
+				.baseArrayLayer = 0,
+				.layerCount = pImage.arrayLayers
+			}
+		};
+
+		pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &barrier });
+	}
+
+	//retain the producer and all readers until the next write
+	if (writes)
+	{
+		pImage.currentStage = pNewStage;
+		pImage.currentAccess = pNewAccess;
+	}
+	else
+	{
+		pImage.currentStage |= pNewStage;
+		pImage.currentAccess |= pNewAccess;
+	}
+
+	pImage.currentLayout = pNewLayout;
 }
 
 void Vulkan::TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout pNewLayout, vk::Image pImage, vk::ImageAspectFlags pAspect)
@@ -1937,8 +1988,38 @@ void Vulkan::TransitionImageLayout(vk::ImageLayout pOldLayout, vk::ImageLayout p
 	EndSingleTimeCommand(*commandBuffer);
 }
 
-void Vulkan::TransitionBuffer(vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess, Buffer& pBuffer)
+void Vulkan::TransitionBuffer(vk::CommandBuffer pCommandBuffer, RGBuffer& pBuffer, vk::PipelineStageFlags2 pNewStage, vk::AccessFlags2 pNewAccess)
 {
+	const bool writes = static_cast<bool>(pNewAccess & WriteAccess);
+
+	if (writes || (pBuffer.currentAccess & WriteAccess))
+	{
+		vk::BufferMemoryBarrier2 barrier
+		{
+			.srcStageMask = pBuffer.currentStage,
+			.srcAccessMask = pBuffer.currentAccess,
+			.dstStageMask = pNewStage,
+			.dstAccessMask = pNewAccess,
+			.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+			.buffer = *pBuffer.buffer.buffer,
+			.offset = 0,
+			.size = VK_WHOLE_SIZE
+		};
+
+		pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
+	}
+
+	if (writes)
+	{
+		pBuffer.currentStage = pNewStage;
+		pBuffer.currentAccess = pNewAccess;
+	}
+	else
+	{
+		pBuffer.currentStage |= pNewStage;
+		pBuffer.currentAccess |= pNewAccess;
+	}
 }
 
 unique<vk::raii::CommandBuffer> Vulkan::StartSingleTimeCommand()
@@ -2009,85 +2090,23 @@ ImGui_ImplVulkan_InitInfo Vulkan::GetImGuiInitInfo()
 
 void Vulkan::CopyRenderImage(RGImage& pSrc, RGImage& pDst)
 {
-	vk::CommandBuffer cmd = *_commandBuffers[_frameInFlightIdx];
+	vk::raii::CommandBuffer& commandBuffer = *_commandBuffers[_frameInFlightIdx];
 
-	const vk::ImageLayout oldSrcLayout = pSrc.currentLayout;
-
-	const vk::ImageLayout oldDstLayout = pDst.currentLayout;
-
-
-	// Source -> transfer source
-	TransitionImageLayout(cmd, oldSrcLayout, vk::ImageLayout::eTransferSrcOptimal, *pSrc.image.image, pSrc.aspect);
-
-	pSrc.currentLayout = vk::ImageLayout::eTransferSrcOptimal;
-
-
-	// History -> transfer destination
-	TransitionImageLayout(
-		cmd,
-		oldDstLayout,
-		vk::ImageLayout::eTransferDstOptimal,
-		*pDst.image.image,
-		pDst.aspect
-	);
-
-	pDst.currentLayout =
-		vk::ImageLayout::eTransferDstOptimal;
-
+	TransitionImageLayout(*commandBuffer, pSrc, vk::ImageLayout::eTransferSrcOptimal, vk::PipelineStageFlagBits2::eTransfer, vk::AccessFlagBits2::eTransferRead);
+	TransitionImageLayout(*commandBuffer, pDst, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits2::eTransfer, vk::AccessFlagBits2::eTransferWrite);
 
 	vk::ImageCopy region
 	{
-		.srcSubresource =
-		{
-			vk::ImageAspectFlagBits::eColor,
-			0,
-			0,
-			1
-		},
-
-		.srcOffset =
-		{
-			0,
-			0,
-			0
-		},
-
-		.dstSubresource =
-		{
-			vk::ImageAspectFlagBits::eColor,
-			0,
-			0,
-			1
-		},
-
-		.dstOffset =
-		{
-			0,
-			0,
-			0
-		},
-
-		.extent =
-		{
-			pSrc.width,
-			pSrc.height,
-			1
-		}
+		.srcSubresource = { pSrc.aspect, 0, 0, 1 },
+		.dstSubresource = { pDst.aspect, 0, 0, 1 },
+		.extent = { pSrc.width, pSrc.height, 1 }
 	};
 
-	cmd.copyImage(*pSrc.image.image, vk::ImageLayout::eTransferSrcOptimal, *pDst.image.image, vk::ImageLayout::eTransferDstOptimal,	region);
+	commandBuffer.copyImage(*pSrc.image.image, vk::ImageLayout::eTransferSrcOptimal, *pDst.image.image, vk::ImageLayout::eTransferDstOptimal, region);
 
-
-	// TAAResolved will potentially be displayed/read.
-	TransitionImageLayout(cmd, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pSrc.image.image, pSrc.aspect);
-
-	pSrc.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-
-	// History must be readable next frame.
-	TransitionImageLayout(cmd, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, *pDst.image.image, pDst.aspect);
-
-	pDst.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+	const vk::PipelineStageFlags2 shaderStages = vk::PipelineStageFlagBits2::eAllGraphics | vk::PipelineStageFlagBits2::eComputeShader;
+	TransitionImageLayout(*commandBuffer, pSrc, vk::ImageLayout::eShaderReadOnlyOptimal, shaderStages, vk::AccessFlagBits2::eShaderRead);
+	TransitionImageLayout(*commandBuffer, pDst, vk::ImageLayout::eShaderReadOnlyOptimal, shaderStages, vk::AccessFlagBits2::eShaderRead);
 }
 
 void Vulkan::ClearSwapchain()
@@ -2122,10 +2141,7 @@ void Vulkan::CopyImagePixelToBuffer(vk::raii::CommandBuffer& pCommandBuffer, RGI
 {
 	if (pX >= pImage.width || pY >= pImage.height) return;
 
-	const vk::ImageLayout previousLayout = pImage.currentLayout;
-
-	TransitionImageLayout(*pCommandBuffer, previousLayout, vk::ImageLayout::eTransferSrcOptimal, *pImage.image.image, pImage.aspect);
-	pImage.currentLayout = vk::ImageLayout::eTransferSrcOptimal;
+	TransitionImageLayout(*pCommandBuffer, pImage, vk::ImageLayout::eTransferSrcOptimal, vk::PipelineStageFlagBits2::eTransfer, vk::AccessFlagBits2::eTransferRead);
 
 	vk::BufferImageCopy region
 	{
@@ -2162,8 +2178,7 @@ void Vulkan::CopyImagePixelToBuffer(vk::raii::CommandBuffer& pCommandBuffer, RGI
 			.pBufferMemoryBarriers = &bufferBarrier
 		});
 
-	TransitionImageLayout(*pCommandBuffer, vk::ImageLayout::eTransferSrcOptimal, previousLayout, *pImage.image.image, pImage.aspect);
-	pImage.currentLayout = previousLayout;
+	TransitionImageLayout(*pCommandBuffer, pImage, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits2::eAllGraphics | vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderRead);
 }
 
 void Vulkan::ReadBuffer(const Buffer& pBuffer, void* pData, uint64_t pSize)

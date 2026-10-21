@@ -8,6 +8,10 @@ namespace Imgn
 {
     class EditorLayer : public Layer
     {
+		static constexpr uint32_t MaxPointLights = 32;
+		static constexpr uint32_t PointShadowSize = 1024;
+		static constexpr uint32_t PointShadowFaceCount = 6;
+
 		enum class eSceneState
 		{
 			Edit,
@@ -25,7 +29,7 @@ namespace Imgn
 		//PerspectiveCamera _camera;
 		bool _cameraLookActive = false;
 		std::array<uint32_t, MaxFramesInFlight> gBufferUBOHandles;
-		uint32_t _sceneWidth = 0, _sceneHeight = 0, _pointLightBuffer;
+		uint32_t _sceneWidth = 0, _sceneHeight = 0, _pointLightBuffer = 0;
 
 		ID _selectionBeforePlay = 0;
 		shared<Scene> _activeScene, _pendingScene, _runtimeScene, _sceneBeforePlay;
@@ -34,6 +38,7 @@ namespace Imgn
 
 		unique<Image> _playIcon, _stopIcon;
 
+		
 		uint64_t _pointLightBufferSize = 0;
 
 		static constexpr std::array<vec3, 6> PointShadowDirections =
@@ -70,6 +75,10 @@ namespace Imgn
 		//ubo
 		GBufferUBO gBufferUBO;
 
+		//lights
+		std::vector<PointLight> _pointLights;
+
+
 		bool _taaHistoryValid = false;
 
 		std::default_random_engine gen = std::default_random_engine(777);
@@ -91,6 +100,8 @@ namespace Imgn
 		//uint32_t _jitterFrameIndex = 0;
 		vec2 GetJitterSample();
 		vec2 GetProjectionJitter(uint32_t pWidth, uint32_t pHeight);
+
+		void UpdatePointLights();
 
 		void ApplySceneState();
 		void ApplyPendingScene();

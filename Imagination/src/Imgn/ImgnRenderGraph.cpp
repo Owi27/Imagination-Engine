@@ -37,17 +37,6 @@ namespace Imgn
 			.imageViewType = pImageViewType
 		};
 
-		//if (pName.contains("Depth"))
-		//{
-		//	_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eDepth);
-		//	
-		//	return pName;
-		//}
-
-		//std::vector<uint8_t> newImageData(pWidth * pHeight * 4, 0); //all black image
-
-		//_images[pName] = _vk.CreateRenderImage(pWidth, pHeight, pFormat, vk::ImageAspectFlagBits::eColor);
-
 		return pName;
 	}
 
@@ -228,9 +217,34 @@ namespace Imgn
 		// Transform resource descriptions into actual GPU objects
 		for (auto& [name, desc] : _imageDesc)
 		{
-			vk::ImageAspectFlags aspect = name.contains("Depth") ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
+			const bool depth = name.contains("Depth");
+			vk::ImageAspectFlags aspect = depth ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
+			vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eSampled;
 
-			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect, desc.imageViewType, desc.arrayLayers);
+			if (depth)
+			{
+				usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
+			}
+			else
+			{
+				usage |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
+			}
+
+			for (const RenderPass& pass : _passes)
+			{
+				if (std::ranges::find(pass.imageOUT, name) == pass.imageOUT.end()) continue;
+
+				if (pass.bindPoint == vk::PipelineBindPoint::eCompute)
+				{
+					usage |= vk::ImageUsageFlagBits::eStorage;
+				}
+				else if (!depth)
+				{
+					usage |= vk::ImageUsageFlagBits::eColorAttachment;
+				}
+			}
+
+			_images[name] = _vk.CreateRenderImage(desc.width, desc.height, desc.format, aspect, desc.imageViewType, usage, desc.arrayLayers);
 		}
 
 		for (auto& pass : _passes)
@@ -247,134 +261,85 @@ namespace Imgn
 	{
 		for (auto passIdx : _executionOrder)
 		{
-			const auto& pass = _passes[passIdx];
+			const RenderPass& pass = _passes[passIdx];
+			if (!pass.Execute) throw std::runtime_error(std::format("Render pass '{}' has no Execute callback", pass.name));
+
+			const bool compute = pass.bindPoint == vk::PipelineBindPoint::eCompute;
+			const vk::PipelineStageFlags2 shaderStage = compute ? vk::PipelineStageFlagBits2::eComputeShader : vk::PipelineStageFlagBits2::eAllGraphics;
 
 			for (auto& input : pass.bufferIN)
 			{
-				RGBuffer& resource = _buffers[input];
-
-				vk::BufferMemoryBarrier2 barrier
-				{
-					.srcStageMask = resource.currentStage,
-					.srcAccessMask = resource.currentAccess,
-					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
-					.dstAccessMask = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead,
-					.buffer = *resource.buffer.buffer,
-					.offset = 0,
-					.size = VK_WHOLE_SIZE
-				};
-
-				pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
-
-				resource.currentStage = vk::PipelineStageFlagBits2::eAllGraphics;
-				resource.currentAccess = vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead;
+				_vk.TransitionBuffer(*pCommandBuffer, GetBuffer(input), shaderStage, vk::AccessFlagBits2::eShaderRead | vk::AccessFlagBits2::eUniformRead);
 			}
 
-
-			for (const auto& input : pass.imageIN)
+			for (const std::string& output : pass.bufferOUT)
 			{
-				RGImage& resource = GetImage(input);
+				_vk.TransitionBuffer(*pCommandBuffer, GetBuffer(output), shaderStage, vk::AccessFlagBits2::eShaderWrite);
+			}
 
-				if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
+			for (const std::string& input : pass.imageIN)
+			{
+				_vk.TransitionImageLayout(*pCommandBuffer, GetImage(input), vk::ImageLayout::eShaderReadOnlyOptimal, shaderStage, vk::AccessFlagBits2::eShaderRead);
+			}
+
+			for (const std::string& output : pass.imageOUT)
+			{
+				RGImage& image = GetImage(output);
+
+				if (compute)
 				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
-					resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+					_vk.TransitionImageLayout(*pCommandBuffer, image, vk::ImageLayout::eGeneral, shaderStage, vk::AccessFlagBits2::eShaderWrite);
+				}
+				else if (image.aspect & (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil))
+				{
+					_vk.TransitionImageLayout(*pCommandBuffer, image, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests, vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite);
+				}
+				else
+				{
+					_vk.TransitionImageLayout(*pCommandBuffer, image, vk::ImageLayout::eColorAttachmentOptimal, vk::PipelineStageFlagBits2::eColorAttachmentOutput, vk::AccessFlagBits2::eColorAttachmentRead | vk::AccessFlagBits2::eColorAttachmentWrite);
 				}
 			}
 
-			for (const auto& output : pass.imageOUT)
-			{
-				RGImage& resource = GetImage(output);
-
-				vk::ImageLayout target = (resource.aspect & vk::ImageAspectFlagBits::eDepth) ? vk::ImageLayout::eDepthStencilAttachmentOptimal : (pass.bindPoint == vk::PipelineBindPoint::eCompute ? vk::ImageLayout::eGeneral : vk::ImageLayout::eColorAttachmentOptimal);
-
-				if (resource.currentLayout != target)
-				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, target, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
-					resource.currentLayout = target;
-				}
-			}
-
-			if (!pass.Execute)
-			{
-				throw std::runtime_error(
-					std::format("Render pass '{}' has no Execute callback", pass.name));
-			}
-
-			RenderContext context
-			{
-				*_renderer,
-				pCommandBuffer
-			};
-
+			RenderContext context{ *_renderer, pCommandBuffer };
 			pass.Execute(context);
-
-			for (auto& output : pass.bufferOUT)
-			{
-				RGBuffer& resource = _buffers[output];
-
-				vk::BufferMemoryBarrier2 barrier
-				{
-					.srcStageMask = resource.currentStage,
-					.srcAccessMask = resource.currentAccess,
-					.dstStageMask = vk::PipelineStageFlagBits2::eAllGraphics,
-					.dstAccessMask = vk::AccessFlagBits2::eShaderWrite,
-					.buffer = *resource.buffer.buffer,
-					.offset = 0,
-					.size = VK_WHOLE_SIZE
-				};
-
-				pCommandBuffer.pipelineBarrier2(vk::DependencyInfo{ .bufferMemoryBarrierCount = 1, .pBufferMemoryBarriers = &barrier });
-
-				resource.currentStage = vk::PipelineStageFlagBits2::eComputeShader;
-				resource.currentAccess = vk::AccessFlagBits2::eShaderWrite;
-			}
 		}
 
-		for (auto& [name, resource] : _images)
+		//color images can be sampled by the editor after graph execution
+		for (auto& [name, image] : _images)
 		{
-			if (resource.aspect & vk::ImageAspectFlagBits::eDepth)
-			{
-				if (resource.currentLayout != vk::ImageLayout::eDepthStencilAttachmentOptimal)
-				{
-					_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eDepthStencilAttachmentOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
-					resource.currentLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
-				}
+			if (image.aspect & (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil)) continue;
 
-				continue;
-			}
-
-			if (resource.currentLayout != vk::ImageLayout::eShaderReadOnlyOptimal)
-			{
-				_vk.TransitionImageLayout(pCommandBuffer, resource.currentLayout, vk::ImageLayout::eShaderReadOnlyOptimal, *resource.image.image, resource.aspect, resource.arrayLayers, resource.mipLevels);
-				resource.currentLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-			}
+			_vk.TransitionImageLayout(*pCommandBuffer, image, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits2::eAllGraphics | vk::PipelineStageFlagBits2::eComputeShader, vk::AccessFlagBits2::eShaderRead);
 		}
 	}
+
 
 	void ImgnRenderGraph::AddPass(RenderPass& pPass)
 	{
 		_passes.push_back(pPass);
 	}
 
-	void ImgnRenderGraph::ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight)
+	void ImgnRenderGraph::ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight, uint32_t pArrayLayers)
 	{
 		if (pWidth == 0 || pHeight == 0) return;
 
 		RGImage& image = _images.at(pName);
+		const uint32_t arrayLayers = pArrayLayers == 0 ? image.arrayLayers : pArrayLayers;
 
-		if (image.width == pWidth && image.height == pHeight) return;
+		if (image.width == pWidth && image.height == pHeight && image.arrayLayers == arrayLayers) return;
 
-		RGImage replacement = _vk.CreateRenderImage(pWidth, pHeight, image.format, image.aspect, image.viewType, image.arrayLayers);
+		RGImage replacement = _vk.CreateRenderImage(pWidth, pHeight, image.format, image.aspect, image.viewType, image.usage, arrayLayers);
 
-		// Caller has waited for the GPU and removed descriptors using this view.
+		//caller has waited for the gpu and has not recorded uses of this image this frame
+		image.image.layerViews.clear();
 		image.image.view.reset();
 		image.image.image.reset();
 		image.image.memory.reset();
-
 		image = std::move(replacement);
 
-		_imageDesc.at(pName).width = pWidth;
-		_imageDesc.at(pName).height = pHeight;
+		RGImageDesc& desc = _imageDesc.at(pName);
+		desc.width = pWidth;
+		desc.height = pHeight;
+		desc.arrayLayers = arrayLayers;
 	}
 }

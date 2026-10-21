@@ -45,7 +45,16 @@ namespace Imgn
 
 		~ImgnRenderer()
 		{
+			if (!_vkCtx) return;
 
+			try
+			{
+				_vkCtx->WaitIdle();
+			}
+			catch (const vk::DeviceLostError&)
+			{
+				IMGN_CORE_ERROR("Vulkan device already lost during renderer shutdown");
+			}
 		}
 
 		/* Class Functions */
@@ -130,5 +139,12 @@ namespace Imgn
 		void QueueEntityIDReadback(uint32_t pX, uint32_t pY);
 		uint64_t GetEntityIDReadback();
 		void InvalidateEntityIDReadback() { _entityIDReadbackValid.fill(false); }
+
+		[[nodiscard]] vk::PhysicalDeviceLimits GetDeviceLimits() const { return _vkCtx->GetDeviceLimits(); }
+
+		//call after gpu completion and before recording uses of this buffer
+		void ResizeStorageBuffer(uint32_t pHandle, uint64_t pSize);
+
+		void ResizeRenderGraphImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight, uint32_t pArrayLayers = 0) { _graph->ResizeImage(pName, pWidth, pHeight, pArrayLayers); }
 	};
 }

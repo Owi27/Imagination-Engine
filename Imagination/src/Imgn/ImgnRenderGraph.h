@@ -79,8 +79,7 @@ namespace Imgn
 		{
 			auto it = _images.find(std::string(pName));
 
-			if (it == _images.end())
-				throw std::runtime_error(std::format("RenderGraph image not found: {}", pName));
+			if (it == _images.end()) throw std::runtime_error(std::format("RenderGraph image not found: {}", pName));
 
 			return it->second;
 		}
@@ -89,9 +88,7 @@ namespace Imgn
 		{
 			auto it = _buffers.find(std::string(pName));
 
-			if (it == _buffers.end())
-				throw std::runtime_error(
-					std::format("RenderGraph buffer not found: {}", pName));
+			if (it == _buffers.end()) throw std::runtime_error(std::format("RenderGraph buffer not found: {}", pName));
 
 			return it->second;
 		}
@@ -103,6 +100,7 @@ namespace Imgn
 
 		void AddPass(RenderPass& pPass);
 
-		void ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight);
+		void ResizeImage(const std::string& pName, uint32_t pWidth, uint32_t pHeight, uint32_t pArrayLayers = 0);
+
 	};
 }

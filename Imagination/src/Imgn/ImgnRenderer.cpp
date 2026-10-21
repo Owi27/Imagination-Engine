@@ -430,6 +430,8 @@ namespace Imgn
 
 	void ImgnRenderer::UpdateStorageBuffer(uint32_t pHandle, void* pData, uint64_t pSize)
 	{
+		if (pSize == 0) return;
+
 		vk::raii::CommandBuffer& commandBuffer = GetActiveCommandBuffer();
 
 		vk::BufferMemoryBarrier barrier
@@ -494,8 +496,10 @@ namespace Imgn
 			"LitScene",
 			"TAAResolved",
 			"TAAHistory",
-			"G-BufferVelocityHistory"
+			"G-BufferVelocityHistory",
+			"EntityIDs"
 		};
+
 
 		for (const char* name : images)
 			_graph->ResizeImage(name, pWidth, pHeight);
@@ -528,5 +532,17 @@ namespace Imgn
 		_vkCtx->ReadBuffer(_entityIDReadbackBuffers[frameIndex], entityID.data(), sizeof(entityID));
 
 		return static_cast<uint64_t>(entityID[0]) | (static_cast<uint64_t>(entityID[1]) << 32);
+	}
+
+	void ImgnRenderer::ResizeStorageBuffer(uint32_t pHandle, uint64_t pSize)
+	{
+		if (pSize == 0) return;
+
+		Buffer replacement = _vkCtx->CreateStorageBuffer(static_cast<const void*>(nullptr), pSize);
+		Buffer& buffer = _buffers.at(pHandle);
+
+		buffer.buffer.reset();
+		buffer.memory.reset();
+		buffer = std::move(replacement);
 	}
 }

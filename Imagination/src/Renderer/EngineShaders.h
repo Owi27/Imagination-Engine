@@ -531,17 +531,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     //direct lighting
     float3 Lo = float3(0.f, 0.f, 0.f);
-    uint lightCount, stride;
-    pointLights.GetDimensions(lightCount, stride);
-    for (int i = 0; i < lightCount; i++)
+    for (int i = 0; i < pc.pointLightCount; i++)
     {
-        Lo += CreatePointLight(position, N, V, pointLights[i].posR.xyz, pointLights[i].colI.rgb, pointLights[i].posR.w, pointLights[i].colI.w, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].posR.xyz, 1000.f);
-        //Lo += PointLight(position, N, V, float3(1000.f, 0.f, 0.f), float3(0.f, 100.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
-        //Lo += PointLight(position, N, V, float3(-1000.f, 0.f, 0.f), float3(100.f, 0.f, 100.f), 1000.f, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);        
+        Lo += CreatePointLight(position, N, V, pointLights[i].posR.xyz, pointLights[i].colI.rgb, pointLights[i].posR.w, pointLights[i].colI.w, gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness) * PointLightShadow(i, position, pointLights[i].posR.xyz, pointLights[i].posR.w);
     }
 
     //Directional Light
-    Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
+    //Lo += CreateDirectionalLight(N, V, float3(-.2f, -1.f, -.3f), float3(1.f, 1.f, 1.f), gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb, metallic, roughness);
     
     float3 ambient = float3(.0f, .0f, .0f) * gBuffer[GBUFFER_ALBEDO].Load(int3(pixel, 0)).rgb * occlusion;
     float3 color = ambient + Lo + gBuffer[GBUFFER_EMISSIVE].Load(int3(pixel, 0)).rgb;
@@ -585,7 +581,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float3 prevColor = currColor;
     //valid history
-    if (pc.validHistory == 1) prevColor = taaInput[TAAHistory].Sample(_sampler, reprojectedUV).rgb;
+    if (pc.validHistory == 1) prevColor = taaInput[TAAHistory].SampleLevel(_sampler, reprojectedUV, 0.f).rgb;
     
     float3 minColor = 9999.f, maxColor = -9999.f, currFrameBlurred = 0.f;
     
@@ -611,7 +607,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     if (pc.validHistory == 1)
     {
-        float2 previousVelocityUV = taaInput[VHistory].Sample(_sampler, reprojectedUV).rg;
+        float2 previousVelocityUV = taaInput[VHistory].SampleLevel(_sampler, reprojectedUV, 0.f).rg;
         float velocityLength = length(previousVelocityUV - currVelocityUV);
 
         velocityDisocclusion = saturate((velocityLength - 0.001f) * 10.f);

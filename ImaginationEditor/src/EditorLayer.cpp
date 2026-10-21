@@ -43,6 +43,51 @@ namespace Imgn
 		return { 2.f * sample[0] / static_cast<float>(pWidth), 2.f * sample[1] / static_cast<float>(pHeight) };
 	}
 
+	void EditorLayer::UpdatePointLights()
+	{
+		_pointLights.clear();
+
+		for (const unique<Entity>& entity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
+		{
+			if (!entity->IsActive()) continue;
+
+			TransformComponent* transform = entity->GetComponent<TransformComponent>();
+			if (!transform) continue;
+
+			PointLightComponent* light = entity->GetComponent<PointLightComponent>();
+			_pointLights.push_back(light->GetPointLight(transform));
+		}
+
+		const uint32_t lightCount = static_cast<uint32_t>(_pointLights.size());
+		if (lightCount == 0) return;
+
+		const uint64_t bufferSize = static_cast<uint64_t>(lightCount) * sizeof(PointLight);
+		//_pointLightBufferSize = static_cast<uint64_t>(lightCount) * sizeof(PointLight);
+
+		if (_pointLightBufferSize != bufferSize)
+		{
+			_renderer->WaitIdle();
+			_renderer->ResizeStorageBuffer(_pointLightBuffer, _pointLightBufferSize);
+
+			const uint32_t faceCount = lightCount * PointShadowFaceCount;
+
+			_renderer->ResizeRenderGraphImage("PointShadowDepthArray", PointShadowSize, PointShadowSize, faceCount);
+
+			for (std::vector<uint32_t>& handles : _pointShadowUBOHandles)
+			{
+				while (handles.size() < faceCount)
+				{
+					handles.push_back(_renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO)));
+				}
+			}
+
+			_pointLightBufferSize = bufferSize;
+			_taaHistoryValid = false;
+		}
+
+		_renderer->UpdateStorageBuffer(_pointLightBuffer, _pointLights.data(), static_cast<uint64_t>(lightCount) * sizeof(PointLight));
+	}
+
 	void EditorLayer::ApplySceneState()
 	{
 		if (_requestedSceneState == _sceneState) return;
@@ -306,6 +351,29 @@ namespace Imgn
 			materialComponent->SetMaterials(quinn.materials);
 		}
 
+		//shapes
+		{
+			std::array shapes = { "Cube", "Sphere", "Cylinder", "Cone" };
+
+			for (auto& shapeName : shapes)
+			{
+				ImgnModel model = loader.LoadModel(FileSystem::Assets() / std::format("BasicShapes/{}.glb", shapeName), *_renderer);
+				for (auto& meshHandle : model.meshes)
+				{
+					Entity* entity = _activeScene->CreateEntity(shapeName);
+					MeshComponent* mesh = entity->AddComponent<MeshComponent>();
+					mesh->SetMesh(meshHandle.name, FileSystem::Assets() / std::format("BasicShapes/{}.glb", shapeName), std::move(meshHandle.vertexBuffer), std::move(meshHandle.indexBuffer), std::move(meshHandle.primitives));
+					MaterialComponent* materialComponent = entity->AddComponent<MaterialComponent>();
+					materialComponent->SetMaterials(model.materials);
+				}
+			}
+		}
+
+		//PointLightComponent* pointLight0 = _activeScene->CreateEntity("Point Light")->AddComponent<PointLightComponent>();
+		//pointLight0->col = { 1.f, 1.f, 1.f };
+		//pointLight0->range = 1000.f;
+		//pointLight0->intensity = 100.f;
+
 		_editorScene = Shared<Scene>();
 		_sceneCamera = _editorScene->CreateEntity("SceneCamera");
 		CameraComponent* camera = _sceneCamera->AddComponent<CameraComponent>();
@@ -328,33 +396,15 @@ namespace Imgn
 			handle = _renderer->CreateUniformBuffer(nullptr, sizeof(GBufferUBO));
 		}
 
-		PointLightComponent* pointLight0 = _activeScene->CreateEntity("Point Light")->AddComponent<PointLightComponent>();
-		pointLight0->col = { 1.f, 1.f, 1.f };
-		pointLight0->range = 1000.f;
-		pointLight0->intensity = 100.f;
-
-		const uint32_t pointLightCount = static_cast<uint32_t>(std::ranges::distance(_activeScene->GetEntitiesWithComponent<PointLightComponent>()));
-
-		const uint32_t faceCount = pointLightCount * 6;
+		_pointLightBufferSize = sizeof(PointLight);
+		_pointLightBuffer = _renderer->CreateStorageBuffer(nullptr, _pointLightBufferSize);
 
 		for (std::vector<uint32_t>& handles : _pointShadowUBOHandles)
 		{
-			handles.resize(faceCount);
+			handles.resize(PointShadowFaceCount);
 
-			for (uint32_t i = 0; i < faceCount; i++) handles[i] = _renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO));
+			for (uint32_t i = 0; i < PointShadowFaceCount; i++) handles[i] = _renderer->CreateUniformBuffer(nullptr, sizeof(ShadowUBO));
 		}
-
-
-		std::vector<PointLight> pointLights;
-		for (unique<Entity>& pointLightEntity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
-		{
-			pointLights.push_back(pointLightEntity->GetComponent<PointLightComponent>()->GetPointLight(pointLightEntity->GetComponent<TransformComponent>()));
-		}
-
-		_pointLightBufferSize = pointLights.size() * sizeof(PointLight);
-		_pointLightBuffer = _renderer->CreateStorageBuffer(pointLights.data(), _pointLightBufferSize);
-
-
 
 		RenderPass gBuffer
 		{
@@ -476,43 +526,39 @@ namespace Imgn
 					.invViewProj = Math::Inverse(gBufferUBO.jitteredViewProj),
 					.camPos = _sceneCamera->GetComponent<TransformComponent>()->position,
 					.width = _renderWidth,
-					.height = _renderHeight
+					.height = _renderHeight,
+					.pointLightCount = static_cast<uint32_t>(_pointLights.size())
 				};
 
 				ctx.PushConstants<LightingPC>(pc);
 
-				//push descriptor set
+				//descriptor
+				std::array images =
 				{
-					//point lights
+					ctx.CreateDescriptorImageInfo("G-BufferAlbedo"),
+					ctx.CreateDescriptorImageInfo("G-BufferNormal"),
+					ctx.CreateDescriptorImageInfo("G-BufferMaterial"),
+					ctx.CreateDescriptorImageInfo("G-BufferEmissive"),
+					ctx.CreateDescriptorImageInfo("Depth"),
+				};
 
+				vk::DescriptorBufferInfo pointLights = ctx.CreateDescriptorBufferInfo(_pointLightBuffer, _pointLightBufferSize);
+				vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
 
-					std::array images =
-					{
-						ctx.CreateDescriptorImageInfo("G-BufferAlbedo"),
-						ctx.CreateDescriptorImageInfo("G-BufferNormal"),
-						ctx.CreateDescriptorImageInfo("G-BufferMaterial"),
-						ctx.CreateDescriptorImageInfo("G-BufferEmissive"),
-						ctx.CreateDescriptorImageInfo("Depth"),
-					};
+				vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetPointSampler());
 
-					vk::DescriptorBufferInfo pointLights = ctx.CreateDescriptorBufferInfo(_pointLightBuffer, static_cast<uint32_t>(std::ranges::distance(_activeScene->GetEntitiesWithComponent<PointLightComponent>())) * sizeof(PointLight));
-					vk::DescriptorImageInfo litImage = ctx.CreateDescriptorImageInfo("LitScene", nullptr, vk::ImageLayout::eGeneral);
+				vk::DescriptorImageInfo pointShadowDepthArray = ctx.CreateDescriptorImageInfo("PointShadowDepthArray");
 
-					vk::DescriptorImageInfo sampler = ctx.CreateSamplerInfo(_renderer->GetPointSampler());
+				std::array writes
+				{
+					ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, pointLights),
+					ctx.CreateWriteDescriptorSet(2, vk::DescriptorType::eSampledImage, images),
+					ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage),
+					ctx.CreateWriteDescriptorSet(4, vk::DescriptorType::eSampler, sampler),
+					ctx.CreateWriteDescriptorSet(5, vk::DescriptorType::eSampledImage, pointShadowDepthArray),
+				};
 
-					vk::DescriptorImageInfo pointShadowDepthArray = ctx.CreateDescriptorImageInfo("PointShadowDepthArray");
-
-					std::array writes
-					{
-						ctx.CreateWriteDescriptorSet(1, vk::DescriptorType::eStorageBuffer, pointLights),
-						ctx.CreateWriteDescriptorSet(2, vk::DescriptorType::eSampledImage, images),
-						ctx.CreateWriteDescriptorSet(3, vk::DescriptorType::eStorageImage, litImage),
-						ctx.CreateWriteDescriptorSet(4, vk::DescriptorType::eSampler, sampler),
-						ctx.CreateWriteDescriptorSet(5, vk::DescriptorType::eSampledImage, pointShadowDepthArray),
-					};
-
-					ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
-				}
+				ctx.PushDescriptorSet(vk::PipelineBindPoint::eCompute, _renderer->GetPipelineLayout(), writes);
 
 				ctx.Dispatch((_renderWidth + 7) / 8, (_renderHeight + 7) / 8, 1);
 			}
@@ -585,31 +631,31 @@ namespace Imgn
 			}
 		};
 
-		RenderPass shadowPass //todo: magic numbers
+		RenderPass shadowPass
 		{
 			.name = "ShadowPass",
 			.imageOUT =
 			{
-				_renderer->CreateRGImageDesc("PointShadowDepthArray", 1024, 1024, vk::Format::eD32Sfloat, vk::ImageViewType::eCubeArray, pointLightCount * 6),
+				_renderer->CreateRGImageDesc("PointShadowDepthArray", PointShadowSize, PointShadowSize, vk::Format::eD32Sfloat, vk::ImageViewType::eCubeArray, PointShadowFaceCount),
 			},
 			.Execute = [&](Imgn::RenderContext& ctx)
 			{
 				ctx.BindPipeline(vk::PipelineBindPoint::eGraphics, *_renderer->GetPipelines().shadowPipeline);
 				ctx.BindDescriptorSet(vk::PipelineBindPoint::eGraphics, _renderer->GetPipelineLayout(), 1, *_renderer->GetTextureDescriptorSet());
-				ctx.SetViewport(1024, 1024);
-				ctx.SetScissor(1024, 1024);
+				ctx.SetViewport(PointShadowSize, PointShadowSize);
+				ctx.SetScissor(PointShadowSize, PointShadowSize);
 
 				const uint32_t frameIndex = _renderer->GetFrameInFlightIndex();
 
-				for (int lightIndex = 0; unique<Entity>& pointLightEntity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
+				for (uint32_t lightIndex = 0; lightIndex < _pointLights.size(); lightIndex++)
 				{
-					PointLight light = pointLightEntity->GetComponent<PointLightComponent>()->GetPointLight(pointLightEntity->GetComponent<TransformComponent>());
+					PointLight& light = _pointLights[lightIndex];
 
 					mat4 projection = Math::PerspectiveVKLH(Math::Radians(90.f), 1.f, .1f, light.posRange[3]);
 
 					for (uint32_t face = 0; face < 6; face++)
 					{
-						const uint32_t layer = lightIndex * 6 + face;
+						const uint32_t layer = lightIndex * PointShadowFaceCount + face;
 
 						mat4 view = Math::LookAtLH({ light.posRange[0], light.posRange[1], light.posRange[2] }, vec3{ light.posRange[0], light.posRange[1], light.posRange[2] } + PointShadowDirections[face], PointShadowUp[face]);
 
@@ -634,7 +680,7 @@ namespace Imgn
 						vk::RenderingAttachmentInfo depthAttachment = ctx.CreateRenderingAttachmentInfo("PointShadowDepthArray", layer);
 						std::span<const vk::RenderingAttachmentInfo> colorAttachments;
 
-						ctx.BeginRendering(1024, 1024, colorAttachments, &depthAttachment);
+						ctx.BeginRendering(PointShadowSize, PointShadowSize, colorAttachments, &depthAttachment);
 
 						for (auto& entity : _activeScene->GetEntities())
 						{
@@ -794,19 +840,7 @@ namespace Imgn
 
 		_renderer->MapBufferData(gBufferUBOHandles[_renderer->GetFrameInFlightIndex()], &gBufferUBO, sizeof(GBufferUBO));
 
-
-		std::vector<PointLight> pointLights;
-
-		for (auto& entity : _activeScene->GetEntitiesWithComponent<PointLightComponent>())
-		{
-			PointLightComponent* light = entity->GetComponent<PointLightComponent>();
-			TransformComponent* transform = entity->GetComponent<TransformComponent>();
-
-			pointLights.push_back(light->GetPointLight(transform));
-		}
-
-		_pointLightBufferSize = pointLights.size() * sizeof(PointLight);
-		_renderer->UpdateStorageBuffer(_pointLightBuffer, pointLights.data(), _pointLightBufferSize);
+		UpdatePointLights();
 
 		_renderer->ExecuteGraph();
 		_renderer->CopyRenderImage("TAAResolved", "TAAHistory");
