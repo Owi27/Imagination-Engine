@@ -10,6 +10,10 @@ target_include_directories(DAYDREAM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../Imagin
 
 target_link_libraries(DAYDREAM PRIVATE IMGN)
 
-target_compile_definitions(DAYDREAM PRIVATE IMGN_PLATFORM_WINDOWS)
+if(WIN32)
+    target_compile_definitions(DAYDREAM PRIVATE IMGN_PLATFORM_WINDOWS)
+elseif(APPLE)
+    target_compile_definitions(DAYDREAM PRIVATE IMGN_PLATFORM_MACOS)
+endif()
 
 set_target_properties(DAYDREAM PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Daydream LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Daydream ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}/Daydream OBJECT_OUTPUTS_DIRECTORY ${OBJ_DIR}/Daydream)

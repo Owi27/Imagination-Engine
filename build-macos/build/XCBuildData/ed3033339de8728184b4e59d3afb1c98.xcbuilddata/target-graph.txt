@@ -1,0 +1,12 @@
+Target dependency graph (5 targets)
+Target 'ALL_BUILD' in project 'Imagination'
+➜ Explicit dependency on target 'IMGN' in project 'Imagination'
+➜ Explicit dependency on target 'DAYDREAM' in project 'Imagination'
+➜ Explicit dependency on target 'ImaginationEditor' in project 'Imagination'
+➜ Explicit dependency on target 'ZERO_CHECK' in project 'Imagination'
+Target 'ZERO_CHECK' in project 'Imagination' (no dependencies)
+Target 'ImaginationEditor' in project 'Imagination'
+➜ Explicit dependency on target 'IMGN' in project 'Imagination'
+Target 'DAYDREAM' in project 'Imagination'
+➜ Explicit dependency on target 'IMGN' in project 'Imagination'
+Target 'IMGN' in project 'Imagination' (no dependencies)

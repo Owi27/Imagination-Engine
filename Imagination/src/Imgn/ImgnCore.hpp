@@ -2,11 +2,15 @@
 //#include "ImgnKey.MouseCodes.h" todo
 
 #ifdef IMGN_PLATFORM_WINDOWS
-#ifdef IMGN_BUILD_DLL
-#define IMGN_API __declspec(dllexport)
+    #ifdef IMGN_BUILD_DLL
+        #define IMGN_API __declspec(dllexport)
+    #else
+        #define IMGN_API __declspec(dllimport)
+    #endif // IMGN_BUILD_DLL
+#elif defined(__APPLE__) || defined(__linux__)
+    #define IMGN_API __attribute__((visibility("default")))
 #else
-#define IMGN_API __declspec(dllimport)
-#endif // IMGN_BUILD_DLL
+    #define IMGN_API
 #endif // IMGN_PLATFORM_WINDOWS
 
 #ifdef IMGN_ENABLE_ASSERTS

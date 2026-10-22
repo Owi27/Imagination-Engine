@@ -1,0 +1,1651 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		396055AC069C2A9DA9BA999E /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 12D9E843A69848C083491736 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				CF3DC9637AB47EF930FCBD0B /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				18B8A53BEB3C421A9DD9B27C /* PBXTargetDependency */,
+				8A62836D569B4064B1CD37F8 /* PBXTargetDependency */,
+				D84E8E5C42F34146AF26ADFD /* PBXTargetDependency */,
+				87555B4AFA834784B621D2B5 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		556C0DA76B4531529DDED48E /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 6D4EBD3F7940476AB9B68947 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				FCB65FFDA98D6CF680ECB2EF /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		02E27853FFBC47169BAA150A /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */ = {isa = PBXBuildFile; fileRef = B58D94C653814C2FAB3AEDCB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */; };
+		039DC4DBA09E4A5EAA8600E7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp */ = {isa = PBXBuildFile; fileRef = 84F97FC78F4942B086CA2518 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp */; };
+		04D8A5B1F17246809724C9A0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.h */ = {isa = PBXBuildFile; fileRef = 80BAF81ADEBF4749BC8A3C4E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.h */; };
+		063CD22E929346BE8E6A4580 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp */ = {isa = PBXBuildFile; fileRef = 7E7A8BF8AE0E40A98248DB52 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp */; };
+		0BA34F89CE634D4AB6CBB8C7 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */ = {isa = PBXBuildFile; fileRef = ADAFD7AEBF9B4632BF30CA85 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */; };
+		0C0105C91EB8441E8B4F07CC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp */ = {isa = PBXBuildFile; fileRef = 35CE164CB200479AB325D264 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp */; };
+		0CD8F00E02834599B8329926 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp */ = {isa = PBXBuildFile; fileRef = AB81384251FA4E51AAA35EE3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp */; };
+		0D9AE84AAB524D01B8B8D98D /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXBuildFile; fileRef = 57ED54DD887D4D1ABAB3D4E2 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */; };
+		0E6E6026938F42AD975E8377 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.h */ = {isa = PBXBuildFile; fileRef = 216EB11950334DDEB8B70CF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.h */; };
+		0EB22D1E693F489C93AA89B6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h */ = {isa = PBXBuildFile; fileRef = 230D3FA24064494093FA794B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h */; };
+		11BADCCADA12442EB2BEC99D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.h */ = {isa = PBXBuildFile; fileRef = C302B22DA263457788734A7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.h */; };
+		121157E158494DB08FB4D080 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp */ = {isa = PBXBuildFile; fileRef = 510BF56D5B024EADBD7628D4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp */; };
+		164FBD665A39487DB92DA9DA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_textedit.h */ = {isa = PBXBuildFile; fileRef = 6430E77C5E3F4FF8A9B85830 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_textedit.h */; };
+		16E3EBC337D04B099CCA6DEA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/json.hpp */ = {isa = PBXBuildFile; fileRef = E677E1FC04D94DB69EC98853 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/json.hpp */; };
+		1AE19B2A77E6416993F2B318 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.h */ = {isa = PBXBuildFile; fileRef = 4B0ED289BE5548A0996DDB2C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.h */; };
+		1B658202762242B8807BF6DE /* /Users/owi/Documents/Imagination-Engine/Imagination/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 0142C1C893EC47C7BB9FE0CA /* /Users/owi/Documents/Imagination-Engine/Imagination/CMakeLists.txt */; };
+		1C153E9641BA40829DE53312 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp */ = {isa = PBXBuildFile; fileRef = 2D9029711507447BAAF516FB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp */; };
+		224E32D552574A46885A84AE /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp */ = {isa = PBXBuildFile; fileRef = 1855154612644A5FA9A6C7C4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp */; };
+		2385FCB942104992BE064483 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */ = {isa = PBXBuildFile; fileRef = F976163A1B844E20AD09CE0E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */; };
+		24DB531FF51044F7AA08D029 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h */ = {isa = PBXBuildFile; fileRef = 20435BDB76674BA5A0DE1A08 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h */; };
+		2515FFE7296F4D869978969E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp */ = {isa = PBXBuildFile; fileRef = B40AFD79360B477BB494E9B1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp */; };
+		262D1DDBF3224AC18C61D99E /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 365B6E3544524FEC80EA64AF /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */; };
+		2790F17348C548FB88704DF2 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 08EF0EAA7F0F44C1BAE928CC /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */; };
+		288FD6C9C8A44A12808314EC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImLightRig.h */ = {isa = PBXBuildFile; fileRef = 0869AA49AB6946A59928BECC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImLightRig.h */; };
+		29103E07CEF34256A7C30A3E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp */ = {isa = PBXBuildFile; fileRef = 2E552325C1E84581984BA705 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp */; };
+		2B6BA50261844F76BD3F60BB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */ = {isa = PBXBuildFile; fileRef = DC9C4FC3E15744B1BB22D4B4 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */; };
+		2B828A2423B946ABACD567A4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.h */ = {isa = PBXBuildFile; fileRef = 4CA7ECBA63B341B7965A3169 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.h */; };
+		2D66CCC314C349C3B9BF685D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderStructs.h */ = {isa = PBXBuildFile; fileRef = ABD7C2AFA9D64D94A831372F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderStructs.h */; };
+		2D8540529B3645819F04E583 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.h */ = {isa = PBXBuildFile; fileRef = B131A3EABA714231B8C592E4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.h */; };
+		2DF0CDC0660649119E46A6B4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image.h */ = {isa = PBXBuildFile; fileRef = 91B1ECA8877F4A1BB93F7EF8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image.h */; };
+		2FBC6950A2EB4B2586A4141A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.h */ = {isa = PBXBuildFile; fileRef = 8CC0502495FF4BC8B4672F75 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.h */; };
+		32240ADAF8F44A4D8FBCEE1C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp */ = {isa = PBXBuildFile; fileRef = 4504A73784AA46DAA984097D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp */; };
+		327C34166EB34E02894D3519 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h */ = {isa = PBXBuildFile; fileRef = 82D9AA0779F34DBE82EBD492 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h */; };
+		3B338E14DD444FC7A87C4D48 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */ = {isa = PBXBuildFile; fileRef = CB99B8ADBC3843BE838A1FF5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */; };
+		3BF626193A8145668572D779 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.cpp */ = {isa = PBXBuildFile; fileRef = 4849606918364EF5B9629704 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.cpp */; };
+		3DDCECD83ED545ECB57487F7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_rectpack.h */ = {isa = PBXBuildFile; fileRef = F4D36A4A1239463C8424C418 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_rectpack.h */; };
+		4015C44B35EA4FCAA90ACE26 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/Event.h */ = {isa = PBXBuildFile; fileRef = 1B1DA673A5FB41D0BDB3C69D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/Event.h */; };
+		404AA2EC0E874C24A197356E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp */ = {isa = PBXBuildFile; fileRef = 4C7D3D4649B74F9C89AACABA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp */; };
+		425209F6AB2947CA8CBF89A8 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = 745615732F4B4B1C95F6D3DE /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */; };
+		43DFD15743CE4F329FEAFDD8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.h */ = {isa = PBXBuildFile; fileRef = 7479D1E86CEF4917A6B0DE12 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.h */; };
+		498F4094DBA446FFA658C3AC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderPassStructs.h */ = {isa = PBXBuildFile; fileRef = C2B5B70E94D64EFBA9EAEFC6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderPassStructs.h */; };
+		4B61DC2F5F1C49CE98379004 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.h */ = {isa = PBXBuildFile; fileRef = C601349A4A47447691D275C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.h */; };
+		5001562171F7459CAFEC42D6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.h */ = {isa = PBXBuildFile; fileRef = 1736958B661A4D0EB3DE23C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.h */; };
+		50A784FBF3374D6185EE6EBB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */ = {isa = PBXBuildFile; fileRef = C494852E6FC84045A89DB609 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */; };
+		50D7891A8AB94346BB0F43A9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp */ = {isa = PBXBuildFile; fileRef = CE4E0F21F8E541A6BEAE7047 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp */; };
+		511F5A43F089468694CB318C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/EngineShaders.h */ = {isa = PBXBuildFile; fileRef = FF7CC4DBF69447AB9E8BD5B9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/EngineShaders.h */; };
+		51DF220458AF43EDB04B5B7B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.h */ = {isa = PBXBuildFile; fileRef = 7D5D5C4E046548EC89DB52F4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.h */; };
+		51E34A03000D412198729D9A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnTime.h */ = {isa = PBXBuildFile; fileRef = 2F0E02DC159B44538CCD0936 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnTime.h */; };
+		537E8EE8C47144BFB822E03E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImZoomSlider.h */ = {isa = PBXBuildFile; fileRef = 2EE47382D1CF45A9B74984C3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImZoomSlider.h */; };
+		56D7F3F118F04FA2BFFAF381 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.hpp */ = {isa = PBXBuildFile; fileRef = F52EB589EAAF46328E6DAFA8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.hpp */; };
+		5AA0ACFD8DE84BFEA489FCC4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.h */ = {isa = PBXBuildFile; fileRef = B734077F6C064D7580AB91CA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.h */; };
+		6431E8CFB3B748448C6D178E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp */ = {isa = PBXBuildFile; fileRef = 06DD5FAE903E4A8289246239 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp */; };
+		653B88609A0E4C44BEBF435A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h */ = {isa = PBXBuildFile; fileRef = 312E105FF33F40E4BBC662EC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h */; };
+		65417D1290B8480CA604F612 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp */ = {isa = PBXBuildFile; fileRef = 0438F1AF663540FDB7F5AA74 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp */; };
+		65C7333CD2914362BFDFBE9C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.cpp */ = {isa = PBXBuildFile; fileRef = 32DE023ECD6348B387ACAF87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.cpp */; };
+		6666857531BE4C75BADBD7D8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp */ = {isa = PBXBuildFile; fileRef = 9F95F3AA52B54C4C96C7438C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp */; };
+		67347E75F98E4B5081D060E4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp */ = {isa = PBXBuildFile; fileRef = 2CDDB337561D47FB8B366E92 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp */; };
+		68D38571782C4A8FA57DB975 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.h */ = {isa = PBXBuildFile; fileRef = 085A0F331D424DEA9E93A61C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.h */; };
+		68EB66FE15CE4418B03D0C45 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp */ = {isa = PBXBuildFile; fileRef = F5EB8FFE47414AF29F1C1E2B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp */; };
+		6967C01159494E2D859C2C1C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.h */ = {isa = PBXBuildFile; fileRef = 7DAC54D1A0114F779DFE11AA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.h */; };
+		6C2C0BE6BFC8462F8B3B923A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp */ = {isa = PBXBuildFile; fileRef = 7C4396A9D7F44BCD89128EF0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp */; };
+		7995E8F7449B402781460E6E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp */ = {isa = PBXBuildFile; fileRef = 6EAC342201C342F88D275358 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp */; };
+		7A887772F60A424D80D8E153 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.cpp */ = {isa = PBXBuildFile; fileRef = 295DC4C3B75247E687025094 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.cpp */; };
+		7E5A83F5706543438AB96C0D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp */ = {isa = PBXBuildFile; fileRef = 5E16CD3E63B24C90B09E02FD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp */; };
+		815BF3E3527749F1B0471F8E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imconfig.h */ = {isa = PBXBuildFile; fileRef = EFC06622A82F40AA897D9C79 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imconfig.h */; };
+		8554A516F52C4B6A94FD3710 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.h */ = {isa = PBXBuildFile; fileRef = 0EDA2CDF0B1746F0B9FDF713 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.h */; };
+		871E99AE98674A609CF61172 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.h */ = {isa = PBXBuildFile; fileRef = D3FFE2A99A1440A1ABDFAFC9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.h */; };
+		88EDE3AD0C37408CB5926527 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnKey.MouseCodes.h */ = {isa = PBXBuildFile; fileRef = FBD8A0AA641946CE8A3725A8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnKey.MouseCodes.h */; };
+		8ADD0A050D004D828DD537A2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp */ = {isa = PBXBuildFile; fileRef = 3189D89810344210AF78F508 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp */; };
+		8D8AF3367E8E4DDABBC9DD19 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image_write.h */ = {isa = PBXBuildFile; fileRef = E6A8105AA23448F48467CC3F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image_write.h */; };
+		8FC37F3074ED4BE9A90878F4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.h */ = {isa = PBXBuildFile; fileRef = 3D832F42A34247EE8CFDC745 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.h */; };
+		903314E588074A24BD8FA294 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */ = {isa = PBXBuildFile; fileRef = E43C07E305D842FD91FF4417 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */; };
+		91707BEB9BA746E4B79593C2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.h */ = {isa = PBXBuildFile; fileRef = 80AD49D53F344207B95B7AF5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.h */; };
+		A06CA381080B4B299C3E6A82 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.h */ = {isa = PBXBuildFile; fileRef = 654FD9C3F23749A0A70A8C11 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.h */; };
+		A0FC23998FF94C2B99803186 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.h */ = {isa = PBXBuildFile; fileRef = 84AA5C2A32454CCD9E4781DD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.h */; };
+		A1B6B05850A04A40AC5FC7A5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp */ = {isa = PBXBuildFile; fileRef = 0569BCDB775442B19B958AB3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp */; };
+		A71E1249E34947F38AB93FED /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */ = {isa = PBXBuildFile; fileRef = 1F75651382654DF5BB75797B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */; };
+		A7C3F8C2CF7745B9AC691E9C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp */ = {isa = PBXBuildFile; fileRef = 4F67E983A0B24D199FB03ECB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp */; };
+		A7F17FDA42D143458AC4179C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.hpp */ = {isa = PBXBuildFile; fileRef = 8524A40FE3BD4CE49FD87043 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.hpp */; };
+		AB0E19F922274378939AECCE /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */ = {isa = PBXBuildFile; fileRef = B8845B1B0D2346D2862A8ABB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */; };
+		AC13C97AE5324DA1B1453D53 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp */ = {isa = PBXBuildFile; fileRef = AF34B213BC1C40BEB02CF84D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp */; };
+		AC3BB13381EB45BFB530A9A6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.hpp */ = {isa = PBXBuildFile; fileRef = 30EEFD4CE0644D37A5360402 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.hpp */; };
+		ADA41758A96148419E67B302 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.h */ = {isa = PBXBuildFile; fileRef = 3EA36067ABC24B6FB3141B14 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.h */; };
+		AEC197CAABD149D49957B14E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h */ = {isa = PBXBuildFile; fileRef = F081A92842AB4C86AACD1B4D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h */; };
+		AF1429A9C5954C38B878BC5C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp */ = {isa = PBXBuildFile; fileRef = 462AFE3F9983432C95C35EC2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp */; };
+		B0D14175512B4FDA8205439E /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */ = {isa = PBXBuildFile; fileRef = 8683F36E0EA7424CBFCF9129 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */; };
+		B21D8552D59F43F0B29DFC7B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.h */ = {isa = PBXBuildFile; fileRef = 873343777A154322973BEBF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.h */; };
+		B259333419ED4858B1C5A394 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.hpp */ = {isa = PBXBuildFile; fileRef = DE10300BD88B4A168FEEB8DF /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.hpp */; };
+		B45BF1EA1A2845649DEE9D95 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */ = {isa = PBXBuildFile; fileRef = AE2E1DB85D5F40ABA7C191B2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */; };
+		B4DC925668964B7E84A8DE90 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp */ = {isa = PBXBuildFile; fileRef = B2781DCB3A1B4A1B9112BF8F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp */; };
+		B57C904B0B6C483D800B66E1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_truetype.h */ = {isa = PBXBuildFile; fileRef = 5FE6050F23C24B5B9783348E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_truetype.h */; };
+		B5EC03B13CC744BE86300C61 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.h */ = {isa = PBXBuildFile; fileRef = AB79E55E080E4973AE453D58 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.h */; };
+		C28C6823FF974EF39D3E32F0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.h */ = {isa = PBXBuildFile; fileRef = 4D15B586F5CB480CAB1388BE /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.h */; };
+		C40790F2C0B64FA194660D42 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp */ = {isa = PBXBuildFile; fileRef = 94C301C482C740DDA0D6952E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp */; };
+		C4B99A5FB4D24324B9854AED /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp */ = {isa = PBXBuildFile; fileRef = 1D11090D5919404884B3EA87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp */; };
+		C673792C714842748FDEAA73 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderResources.h */ = {isa = PBXBuildFile; fileRef = 3B45DBD1C02D42B79B85C344 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderResources.h */; };
+		C7BDC7E1046D4AB18DFD63F8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn.hpp */ = {isa = PBXBuildFile; fileRef = BBB4CBC43E18436CA29F3DA5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn.hpp */; };
+		CD1DE15E08514B3FB527ED7C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.h */ = {isa = PBXBuildFile; fileRef = F501ABD1A777424783170A70 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.h */; };
+		CE897FF8185C44D89B722F46 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/AllComponents.hpp */ = {isa = PBXBuildFile; fileRef = 9AC5C8C349C4491795300619 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/AllComponents.hpp */; };
+		CF95E16E1CA647CBA69027F0 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXBuildFile; fileRef = 684E99C6A426439589DAB262 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */; };
+		D35C81567D7D44A0B78D48E9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Gateware/Gateware.h */ = {isa = PBXBuildFile; fileRef = 5477658FCB11470E9609ABB1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Gateware/Gateware.h */; };
+		D60F6D79BCC14DDB80246F84 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/tiny_gltf.h */ = {isa = PBXBuildFile; fileRef = 31D4A953713240CD87173FB7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/tiny_gltf.h */; };
+		DA8605D0150F4857BD4C222E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.h */ = {isa = PBXBuildFile; fileRef = 3895D7D5539A415DB779F198 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.h */; };
+		DCAAF9710F0C4CC5A02C7DF5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp */ = {isa = PBXBuildFile; fileRef = CDABFA67FD9C4E51BA552DDD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp */; };
+		DCD0420453154C19ADA4411E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.h */ = {isa = PBXBuildFile; fileRef = B4E8D67757C1414AAE1B41D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.h */; };
+		DF4A877199AA43B9A929D183 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp */ = {isa = PBXBuildFile; fileRef = D624026532AA41EF8028D9F8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp */; };
+		DFBE473D79354A6DBF924873 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */ = {isa = PBXBuildFile; fileRef = 2697223178C4429990B53D29 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */; };
+		E3BFA88D07574D8583B910A4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp */ = {isa = PBXBuildFile; fileRef = 1B658420993240819036CC7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp */; };
+		E49297E1EE0B48CC8FE8E614 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp */ = {isa = PBXBuildFile; fileRef = 5A92F02D1DC84C928D4CC140 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp */; };
+		E6EF64B966544068AF8D47B5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp */ = {isa = PBXBuildFile; fileRef = C59F217966BF4CBD848EACA1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp */; };
+		E8E7DC7E9A6344299C189898 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */ = {isa = PBXBuildFile; fileRef = 6B15C35ABE944B188E6771D9 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */; };
+		E97836147AB040918B5FDD67 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp */ = {isa = PBXBuildFile; fileRef = B43BE7E2F569401AA91ADA61 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp */; };
+		EA58901A57714486BDE5B05B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp */ = {isa = PBXBuildFile; fileRef = 9D187CA9015648F498F784D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp */; };
+		EB179913A947482EA341DD1B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Model.h */ = {isa = PBXBuildFile; fileRef = 48A06F11865D43E2AFBC778B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Model.h */; };
+		EC52D3826C4F49C48F798D17 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.h */ = {isa = PBXBuildFile; fileRef = 219175F4D03C4B25A40CB291 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.h */; };
+		ED1436DE4AD14BF6BAACA471 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */ = {isa = PBXBuildFile; fileRef = 6B7D04324AE845AB8A60BF38 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */; };
+		EDDA3A68A311473FBB750ECF /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h */ = {isa = PBXBuildFile; fileRef = 5842F6C73AE74B53901E0C01 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h */; };
+		EFA71F0DDD9E44A4AEB7F948 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_internal.h */ = {isa = PBXBuildFile; fileRef = 513FE469FF0941B3BC2B700F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_internal.h */; };
+		F351BD6A1CEF4555899A3B1C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp */ = {isa = PBXBuildFile; fileRef = 0A948D08DA964577B619160F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp */; };
+		F43A92BAC8FC4E4883122B3A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp */ = {isa = PBXBuildFile; fileRef = 15C7BD946B6F452B9BFE6CA6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp */; };
+		FA2F2AC74E7F44B190F01120 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp */ = {isa = PBXBuildFile; fileRef = 347A1693D3984DE6988695E0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp */; };
+		FD8E75C26AC04B5C9917F18B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp */ = {isa = PBXBuildFile; fileRef = 88AB531D606D4A1D85363A64 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp */; };
+		FFF8824CDBAB4C1D9D9A7C7B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */ = {isa = PBXBuildFile; fileRef = A335B19863984EECB2E0A14E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		4437694F627644C5AFC04269 /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		CED155BE3F134D208EECB22D /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		E7367E08652E4FC3BFB4A0F0 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		FCAA98537FF349B49F2E0A89 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		1ECFA1778AA94F5EB05FC603 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 556C0DA76B4531529DDED48E;
+			remoteInfo = ZERO_CHECK;
+		};
+		25B37DE0BF8E41E2871F8837 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01A54CBFE9172B0BFA54A3ED;
+			remoteInfo = IMGN;
+		};
+		3CEFE8F483C945DDB79CFA0D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 30EAC98E374C6B5C31E63487;
+			remoteInfo = ImaginationEditor;
+		};
+		62103BD93E4B4BB0AC01AB7D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01A54CBFE9172B0BFA54A3ED;
+			remoteInfo = IMGN;
+		};
+		D048C2F184E040BD9014A537 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17C1962C13EFF6A918787A02;
+			remoteInfo = DAYDREAM;
+		};
+		F24FF34136D14EB4B62B708F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A51948259539447183D2383F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01A54CBFE9172B0BFA54A3ED;
+			remoteInfo = IMGN;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0142C1C893EC47C7BB9FE0CA /* /Users/owi/Documents/Imagination-Engine/Imagination/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = Imagination/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		0438F1AF663540FDB7F5AA74 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TransformComponent.cpp; path = Imagination/src/Imgn/Components/TransformComponent.cpp; sourceTree = SOURCE_ROOT; };
+		0569BCDB775442B19B958AB3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImVectorEditor.cpp; path = Imagination/src/ImGuizmo/ImVectorEditor.cpp; sourceTree = SOURCE_ROOT; };
+		06DD5FAE903E4A8289246239 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnLayer.cpp; path = Imagination/src/Imgn/ImgnLayer.cpp; sourceTree = SOURCE_ROOT; };
+		085A0F331D424DEA9E93A61C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnLayerStack.h; path = Imagination/src/Imgn/ImgnLayerStack.h; sourceTree = SOURCE_ROOT; };
+		0869AA49AB6946A59928BECC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImLightRig.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImLightRig.h; path = Imagination/src/ImGuizmo/ImLightRig.h; sourceTree = SOURCE_ROOT; };
+		08EF0EAA7F0F44C1BAE928CC /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = Daydream/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		0A948D08DA964577B619160F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Skeleton.cpp; path = Imagination/src/Imgn/Skeleton.cpp; sourceTree = SOURCE_ROOT; };
+		0EDA2CDF0B1746F0B9FDF713 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnMath.h; path = Imagination/src/Imgn/ImgnMath.h; sourceTree = SOURCE_ROOT; };
+		106DDA2154DE4C72B53CA831 /* /Users/owi/Documents/Imagination-Engine/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		15C7BD946B6F452B9BFE6CA6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_impl_win32.cpp; path = Imagination/src/ImGui/imgui_impl_win32.cpp; sourceTree = SOURCE_ROOT; };
+		1736958B661A4D0EB3DE23C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MaterialComponent.h; path = Imagination/src/Imgn/Components/MaterialComponent.h; sourceTree = SOURCE_ROOT; };
+		1855154612644A5FA9A6C7C4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImGuizmo.cpp; path = Imagination/src/ImGuizmo/ImGuizmo.cpp; sourceTree = SOURCE_ROOT; };
+		1A4C32B20F4149D4809ECEAF /* IMGN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libIMGN.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B1DA673A5FB41D0BDB3C69D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/Event.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Event.h; path = Imagination/src/Imgn/Events/Event.h; sourceTree = SOURCE_ROOT; };
+		1B658420993240819036CC7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnScene.cpp; path = Imagination/src/Imgn/ImgnScene.cpp; sourceTree = SOURCE_ROOT; };
+		1D11090D5919404884B3EA87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImCurveEdit.cpp; path = Imagination/src/ImGuizmo/ImCurveEdit.cpp; sourceTree = SOURCE_ROOT; };
+		1F75651382654DF5BB75797B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = EditorLayer.hpp; path = ImaginationEditor/src/EditorLayer.hpp; sourceTree = SOURCE_ROOT; };
+		20435BDB76674BA5A0DE1A08 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnWindow.h; path = Imagination/src/Imgn/ImgnWindow.h; sourceTree = SOURCE_ROOT; };
+		216EB11950334DDEB8B70CF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Skeleton.h; path = Imagination/src/Imgn/Skeleton.h; sourceTree = SOURCE_ROOT; };
+		219175F4D03C4B25A40CB291 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnRenderContext.h; path = Imagination/src/Imgn/ImgnRenderContext.h; sourceTree = SOURCE_ROOT; };
+		230D3FA24064494093FA794B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = KeyEvent.h; path = Imagination/src/Imgn/Events/KeyEvent.h; sourceTree = SOURCE_ROOT; };
+		2697223178C4429990B53D29 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ContentBrowser.cpp; path = ImaginationEditor/src/Panels/ContentBrowser.cpp; sourceTree = SOURCE_ROOT; };
+		295DC4C3B75247E687025094 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui.cpp; path = Imagination/src/ImGui/imgui.cpp; sourceTree = SOURCE_ROOT; };
+		2CDDB337561D47FB8B366E92 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnComponent.cpp; path = Imagination/src/Imgn/ImgnComponent.cpp; sourceTree = SOURCE_ROOT; };
+		2D644DDEE3C243C58790C924 /* DAYDREAM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = DAYDREAM; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D9029711507447BAAF516FB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = MeshComponent.cpp; path = Imagination/src/Imgn/Components/MeshComponent.cpp; sourceTree = SOURCE_ROOT; };
+		2E552325C1E84581984BA705 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_tables.cpp; path = Imagination/src/ImGui/imgui_tables.cpp; sourceTree = SOURCE_ROOT; };
+		2EE47382D1CF45A9B74984C3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImZoomSlider.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImZoomSlider.h; path = Imagination/src/ImGuizmo/ImZoomSlider.h; sourceTree = SOURCE_ROOT; };
+		2F0E02DC159B44538CCD0936 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnTime.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnTime.h; path = Imagination/src/Imgn/ImgnTime.h; sourceTree = SOURCE_ROOT; };
+		30EEFD4CE0644D37A5360402 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = FileSystem.hpp; path = Imagination/src/Imgn/FileSystem.hpp; sourceTree = SOURCE_ROOT; };
+		312E105FF33F40E4BBC662EC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnLog.h; path = Imagination/src/Imgn/ImgnLog.h; sourceTree = SOURCE_ROOT; };
+		3189D89810344210AF78F508 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnGLTF.cpp; path = Imagination/src/Imgn/ImgnGLTF.cpp; sourceTree = SOURCE_ROOT; };
+		31D4A953713240CD87173FB7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/tiny_gltf.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = tiny_gltf.h; path = Imagination/src/gltf/tiny_gltf.h; sourceTree = SOURCE_ROOT; };
+		32DE023ECD6348B387ACAF87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = pch.cpp; path = Imagination/src/pch.cpp; sourceTree = SOURCE_ROOT; };
+		347A1693D3984DE6988695E0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SceneSerializer.cpp; path = Imagination/src/Imgn/SceneSerializer.cpp; sourceTree = SOURCE_ROOT; };
+		35CE164CB200479AB325D264 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnApp.cpp; path = Imagination/src/Imgn/ImgnApp.cpp; sourceTree = SOURCE_ROOT; };
+		365B6E3544524FEC80EA64AF /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
+		3895D7D5539A415DB779F198 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PointLightComponent.h; path = Imagination/src/Imgn/Components/PointLightComponent.h; sourceTree = SOURCE_ROOT; };
+		3B45DBD1C02D42B79B85C344 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderResources.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnRenderResources.h; path = Imagination/src/Imgn/ImgnRenderResources.h; sourceTree = SOURCE_ROOT; };
+		3D832F42A34247EE8CFDC745 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ScriptComponent.h; path = Imagination/src/Imgn/Components/ScriptComponent.h; sourceTree = SOURCE_ROOT; };
+		3EA36067ABC24B6FB3141B14 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnRenderGraph.h; path = Imagination/src/Imgn/ImgnRenderGraph.h; sourceTree = SOURCE_ROOT; };
+		4504A73784AA46DAA984097D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = MaterialComponent.cpp; path = Imagination/src/Imgn/Components/MaterialComponent.cpp; sourceTree = SOURCE_ROOT; };
+		462AFE3F9983432C95C35EC2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GraphEditor.cpp; path = Imagination/src/ImGuizmo/GraphEditor.cpp; sourceTree = SOURCE_ROOT; };
+		4849606918364EF5B9629704 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = main.cpp; path = Imagination/src/Imgn/main.cpp; sourceTree = SOURCE_ROOT; };
+		48A06F11865D43E2AFBC778B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Model.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Model.h; path = Imagination/src/Imgn/Model.h; sourceTree = SOURCE_ROOT; };
+		4B0ED289BE5548A0996DDB2C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MeshComponent.h; path = Imagination/src/Imgn/Components/MeshComponent.h; sourceTree = SOURCE_ROOT; };
+		4C7D3D4649B74F9C89AACABA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnRenderer.cpp; path = Imagination/src/Imgn/ImgnRenderer.cpp; sourceTree = SOURCE_ROOT; };
+		4CA7ECBA63B341B7965A3169 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImGradient.h; path = Imagination/src/ImGuizmo/ImGradient.h; sourceTree = SOURCE_ROOT; };
+		4D15B586F5CB480CAB1388BE /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImVectorEditor.h; path = Imagination/src/ImGuizmo/ImVectorEditor.h; sourceTree = SOURCE_ROOT; };
+		4F67E983A0B24D199FB03ECB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = ImgnCore.hpp; path = Imagination/src/Imgn/ImgnCore.hpp; sourceTree = SOURCE_ROOT; };
+		510BF56D5B024EADBD7628D4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = CameraComponent.cpp; path = Imagination/src/Imgn/Components/CameraComponent.cpp; sourceTree = SOURCE_ROOT; };
+		513FE469FF0941B3BC2B700F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_internal.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui_internal.h; path = Imagination/src/ImGui/imgui_internal.h; sourceTree = SOURCE_ROOT; };
+		5477658FCB11470E9609ABB1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Gateware/Gateware.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Gateware.h; path = Imagination/src/Gateware/Gateware.h; sourceTree = SOURCE_ROOT; };
+		57ED54DD887D4D1ABAB3D4E2 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		5842F6C73AE74B53901E0C01 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnComponent.h; path = Imagination/src/Imgn/ImgnComponent.h; sourceTree = SOURCE_ROOT; };
+		5A92F02D1DC84C928D4CC140 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnMath.cpp; path = Imagination/src/Imgn/ImgnMath.cpp; sourceTree = SOURCE_ROOT; };
+		5E16CD3E63B24C90B09E02FD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_demo.cpp; path = Imagination/src/ImGui/imgui_demo.cpp; sourceTree = SOURCE_ROOT; };
+		5FE6050F23C24B5B9783348E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_truetype.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_truetype.h; path = Imagination/src/ImGui/imstb_truetype.h; sourceTree = SOURCE_ROOT; };
+		6430E77C5E3F4FF8A9B85830 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_textedit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_textedit.h; path = Imagination/src/ImGui/imstb_textedit.h; sourceTree = SOURCE_ROOT; };
+		654FD9C3F23749A0A70A8C11 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = CameraComponent.h; path = Imagination/src/Imgn/Components/CameraComponent.h; sourceTree = SOURCE_ROOT; };
+		684E99C6A426439589DAB262 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Metal.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework; sourceTree = "<absolute>"; };
+		6B15C35ABE944B188E6771D9 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = ContentBrowser.hpp; path = ImaginationEditor/src/Panels/ContentBrowser.hpp; sourceTree = SOURCE_ROOT; };
+		6B7D04324AE845AB8A60BF38 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorCamera.h; path = ImaginationEditor/src/EditorCamera.h; sourceTree = SOURCE_ROOT; };
+		6EAC342201C342F88D275358 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_widgets.cpp; path = Imagination/src/ImGui/imgui_widgets.cpp; sourceTree = SOURCE_ROOT; };
+		745615732F4B4B1C95F6D3DE /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = ImaginationEditor/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		7479D1E86CEF4917A6B0DE12 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = GraphEditor.h; path = Imagination/src/ImGuizmo/GraphEditor.h; sourceTree = SOURCE_ROOT; };
+		7923D4DB172F4468B0A21D9D /* ImaginationEditor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = ImaginationEditor; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C4396A9D7F44BCD89128EF0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ScriptComponent.cpp; path = Imagination/src/Imgn/Components/ScriptComponent.cpp; sourceTree = SOURCE_ROOT; };
+		7D5D5C4E046548EC89DB52F4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImCurveEdit.h; path = Imagination/src/ImGuizmo/ImCurveEdit.h; sourceTree = SOURCE_ROOT; };
+		7DAC54D1A0114F779DFE11AA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnScene.h; path = Imagination/src/Imgn/ImgnScene.h; sourceTree = SOURCE_ROOT; };
+		7E7A8BF8AE0E40A98248DB52 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = PointLightComponent.cpp; path = Imagination/src/Imgn/Components/PointLightComponent.cpp; sourceTree = SOURCE_ROOT; };
+		80AD49D53F344207B95B7AF5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImSequencer.h; path = Imagination/src/ImGuizmo/ImSequencer.h; sourceTree = SOURCE_ROOT; };
+		80BAF81ADEBF4749BC8A3C4E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui_impl_win32.h; path = Imagination/src/ImGui/imgui_impl_win32.h; sourceTree = SOURCE_ROOT; };
+		82D9AA0779F34DBE82EBD492 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MouseEvent.h; path = Imagination/src/Imgn/Events/MouseEvent.h; sourceTree = SOURCE_ROOT; };
+		84AA5C2A32454CCD9E4781DD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SceneSerializer.h; path = Imagination/src/Imgn/SceneSerializer.h; sourceTree = SOURCE_ROOT; };
+		84F97FC78F4942B086CA2518 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnInput.cpp; path = Imagination/src/Imgn/ImgnInput.cpp; sourceTree = SOURCE_ROOT; };
+		8524A40FE3BD4CE49FD87043 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = Vulkan.hpp; path = Imagination/src/Renderer/Vulkan/Vulkan.hpp; sourceTree = SOURCE_ROOT; };
+		8683F36E0EA7424CBFCF9129 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = Daydream/src/main.cpp; sourceTree = SOURCE_ROOT; };
+		873343777A154322973BEBF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnInput.h; path = Imagination/src/Imgn/ImgnInput.h; sourceTree = SOURCE_ROOT; };
+		88AB531D606D4A1D85363A64 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnRenderGraph.cpp; path = Imagination/src/Imgn/ImgnRenderGraph.cpp; sourceTree = SOURCE_ROOT; };
+		8CC0502495FF4BC8B4672F75 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnGLTF.h; path = Imagination/src/Imgn/ImgnGLTF.h; sourceTree = SOURCE_ROOT; };
+		91B1ECA8877F4A1BB93F7EF8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stb_image.h; path = Imagination/src/gltf/stb_image.h; sourceTree = SOURCE_ROOT; };
+		94C301C482C740DDA0D6952E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnWindow.cpp; path = Imagination/src/Imgn/ImgnWindow.cpp; sourceTree = SOURCE_ROOT; };
+		9AC5C8C349C4491795300619 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/AllComponents.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = AllComponents.hpp; path = Imagination/src/Imgn/Components/AllComponents.hpp; sourceTree = SOURCE_ROOT; };
+		9D187CA9015648F498F784D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_impl_vulkan.cpp; path = Imagination/src/ImGui/imgui_impl_vulkan.cpp; sourceTree = SOURCE_ROOT; };
+		9F95F3AA52B54C4C96C7438C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnLayerStack.cpp; path = Imagination/src/Imgn/ImgnLayerStack.cpp; sourceTree = SOURCE_ROOT; };
+		A335B19863984EECB2E0A14E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorWorkspace.h; path = ImaginationEditor/src/Panels/EditorWorkspace.h; sourceTree = SOURCE_ROOT; };
+		AB79E55E080E4973AE453D58 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui_impl_vulkan.h; path = Imagination/src/ImGui/imgui_impl_vulkan.h; sourceTree = SOURCE_ROOT; };
+		AB81384251FA4E51AAA35EE3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = FileSystem.cpp; path = Imagination/src/Imgn/FileSystem.cpp; sourceTree = SOURCE_ROOT; };
+		ABD7C2AFA9D64D94A831372F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderStructs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = RenderStructs.h; path = Imagination/src/Renderer/RenderStructs.h; sourceTree = SOURCE_ROOT; };
+		ADAFD7AEBF9B4632BF30CA85 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ExternalAppPanel.h; path = ImaginationEditor/src/Panels/ExternalAppPanel.h; sourceTree = SOURCE_ROOT; };
+		AE2E1DB85D5F40ABA7C191B2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorCamera.cpp; path = ImaginationEditor/src/EditorCamera.cpp; sourceTree = SOURCE_ROOT; };
+		AF34B213BC1C40BEB02CF84D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnGui.cpp; path = Imagination/src/Imgn/ImGui/ImgnGui.cpp; sourceTree = SOURCE_ROOT; };
+		B131A3EABA714231B8C592E4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnCamera.h; path = Imagination/src/Imgn/ImgnCamera.h; sourceTree = SOURCE_ROOT; };
+		B2781DCB3A1B4A1B9112BF8F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = IRenderBackend.hpp; path = Imagination/src/Renderer/IRenderBackend.hpp; sourceTree = SOURCE_ROOT; };
+		B40AFD79360B477BB494E9B1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = imgui_draw.cpp; path = Imagination/src/ImGui/imgui_draw.cpp; sourceTree = SOURCE_ROOT; };
+		B43BE7E2F569401AA91ADA61 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnLog.cpp; path = Imagination/src/Imgn/ImgnLog.cpp; sourceTree = SOURCE_ROOT; };
+		B4E8D67757C1414AAE1B41D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnLayer.h; path = Imagination/src/Imgn/ImgnLayer.h; sourceTree = SOURCE_ROOT; };
+		B58D94C653814C2FAB3AEDCB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ExternalAppPanel.cpp; path = ImaginationEditor/src/Panels/ExternalAppPanel.cpp; sourceTree = SOURCE_ROOT; };
+		B734077F6C064D7580AB91CA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnRenderer.h; path = Imagination/src/Imgn/ImgnRenderer.h; sourceTree = SOURCE_ROOT; };
+		B8845B1B0D2346D2862A8ABB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorUtils.h; path = ImaginationEditor/src/Utils/EditorUtils.h; sourceTree = SOURCE_ROOT; };
+		BBB4CBC43E18436CA29F3DA5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = Imgn.hpp; path = Imagination/src/Imgn.hpp; sourceTree = SOURCE_ROOT; };
+		C2B5B70E94D64EFBA9EAEFC6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderPassStructs.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = RenderPassStructs.h; path = Imagination/src/Renderer/RenderPassStructs.h; sourceTree = SOURCE_ROOT; };
+		C302B22DA263457788734A7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TransformComponent.h; path = Imagination/src/Imgn/Components/TransformComponent.h; sourceTree = SOURCE_ROOT; };
+		C494852E6FC84045A89DB609 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = ImaginationEditor/src/main.cpp; sourceTree = SOURCE_ROOT; };
+		C59F217966BF4CBD848EACA1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImGradient.cpp; path = Imagination/src/ImGuizmo/ImGradient.cpp; sourceTree = SOURCE_ROOT; };
+		C601349A4A47447691D275C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnGui.h; path = Imagination/src/Imgn/ImGui/ImgnGui.h; sourceTree = SOURCE_ROOT; };
+		CB99B8ADBC3843BE838A1FF5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorWorkspace.cpp; path = ImaginationEditor/src/Panels/EditorWorkspace.cpp; sourceTree = SOURCE_ROOT; };
+		CDABFA67FD9C4E51BA552DDD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImSequencer.cpp; path = Imagination/src/ImGuizmo/ImSequencer.cpp; sourceTree = SOURCE_ROOT; };
+		CE4E0F21F8E541A6BEAE7047 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = ImgnApp.hpp; path = Imagination/src/Imgn/ImgnApp.hpp; sourceTree = SOURCE_ROOT; };
+		D3FFE2A99A1440A1ABDFAFC9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImGuizmo.h; path = Imagination/src/ImGuizmo/ImGuizmo.h; sourceTree = SOURCE_ROOT; };
+		D624026532AA41EF8028D9F8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnCamera.cpp; path = Imagination/src/Imgn/ImgnCamera.cpp; sourceTree = SOURCE_ROOT; };
+		DC9C4FC3E15744B1BB22D4B4 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorLayer.cpp; path = ImaginationEditor/src/EditorLayer.cpp; sourceTree = SOURCE_ROOT; };
+		DE10300BD88B4A168FEEB8DF /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = main.hpp; path = Imagination/src/Imgn/main.hpp; sourceTree = SOURCE_ROOT; };
+		E43C07E305D842FD91FF4417 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SceneHierarchy.h; path = ImaginationEditor/src/Panels/SceneHierarchy.h; sourceTree = SOURCE_ROOT; };
+		E677E1FC04D94DB69EC98853 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/json.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = json.hpp; path = Imagination/src/gltf/json.hpp; sourceTree = SOURCE_ROOT; };
+		E6A8105AA23448F48467CC3F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image_write.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stb_image_write.h; path = Imagination/src/gltf/stb_image_write.h; sourceTree = SOURCE_ROOT; };
+		EFC06622A82F40AA897D9C79 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imconfig.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imconfig.h; path = Imagination/src/ImGui/imconfig.h; sourceTree = SOURCE_ROOT; };
+		F081A92842AB4C86AACD1B4D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AppEvent.h; path = Imagination/src/Imgn/Events/AppEvent.h; sourceTree = SOURCE_ROOT; };
+		F4D36A4A1239463C8424C418 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_rectpack.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imstb_rectpack.h; path = Imagination/src/ImGui/imstb_rectpack.h; sourceTree = SOURCE_ROOT; };
+		F501ABD1A777424783170A70 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = imgui.h; path = Imagination/src/ImGui/imgui.h; sourceTree = SOURCE_ROOT; };
+		F52EB589EAAF46328E6DAFA8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = pch.hpp; path = Imagination/src/pch.hpp; sourceTree = SOURCE_ROOT; };
+		F5EB8FFE47414AF29F1C1E2B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ImgnRenderContext.cpp; path = Imagination/src/Imgn/ImgnRenderContext.cpp; sourceTree = SOURCE_ROOT; };
+		F976163A1B844E20AD09CE0E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SceneHierarchy.cpp; path = ImaginationEditor/src/Panels/SceneHierarchy.cpp; sourceTree = SOURCE_ROOT; };
+		FBD8A0AA641946CE8A3725A8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnKey.MouseCodes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ImgnKey.MouseCodes.h; path = Imagination/src/Imgn/ImgnKey.MouseCodes.h; sourceTree = SOURCE_ROOT; };
+		FF7CC4DBF69447AB9E8BD5B9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/EngineShaders.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EngineShaders.h; path = Imagination/src/Renderer/EngineShaders.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5750DF618B0049029C3D5E90 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		667513769B0D43098A2DAC1E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		78E62163472B48D1B4D4CD6B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0982B69FC24D476FA5F4BFDF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				684E99C6A426439589DAB262 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */,
+				57ED54DD887D4D1ABAB3D4E2 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */,
+				365B6E3544524FEC80EA64AF /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		13C47BA3D32F4A79A992F90E /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				6B7D04324AE845AB8A60BF38 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */,
+				1F75651382654DF5BB75797B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */,
+				6B15C35ABE944B188E6771D9 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */,
+				A335B19863984EECB2E0A14E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */,
+				ADAFD7AEBF9B4632BF30CA85 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */,
+				E43C07E305D842FD91FF4417 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */,
+				B8845B1B0D2346D2862A8ABB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		257BF5EFF8F0413AA9A3708C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2D644DDEE3C243C58790C924 /* DAYDREAM */,
+				7923D4DB172F4468B0A21D9D /* ImaginationEditor */,
+				1A4C32B20F4149D4809ECEAF /* IMGN */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		27C825470DAE4939B5B9DCE1 /* ImaginationEditor */ = {
+			isa = PBXGroup;
+			children = (
+				13C47BA3D32F4A79A992F90E /* Header Files */,
+				7CA1F539678444BFBD1D184A /* Source Files */,
+				745615732F4B4B1C95F6D3DE /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */,
+			);
+			name = ImaginationEditor;
+			sourceTree = "<group>";
+		};
+		286CC8CEA7544BCB88262024 = {
+			isa = PBXGroup;
+			children = (
+				7EB50A69D84248A1A4C82C8A /* ALL_BUILD */,
+				F000D4B394014FEDBEEDA3BB /* DAYDREAM */,
+				B81F55C0C4124F38B701DA42 /* IMGN */,
+				27C825470DAE4939B5B9DCE1 /* ImaginationEditor */,
+				257BF5EFF8F0413AA9A3708C /* Products */,
+				0982B69FC24D476FA5F4BFDF /* Frameworks */,
+				CE7DE4DB13134100AA95C9F9 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		452CD40FF63A47D281ECFBA4 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				295DC4C3B75247E687025094 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.cpp */,
+				5E16CD3E63B24C90B09E02FD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp */,
+				B40AFD79360B477BB494E9B1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp */,
+				9D187CA9015648F498F784D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp */,
+				15C7BD946B6F452B9BFE6CA6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp */,
+				2E552325C1E84581984BA705 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp */,
+				6EAC342201C342F88D275358 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp */,
+				462AFE3F9983432C95C35EC2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp */,
+				1D11090D5919404884B3EA87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp */,
+				C59F217966BF4CBD848EACA1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp */,
+				1855154612644A5FA9A6C7C4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp */,
+				CDABFA67FD9C4E51BA552DDD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp */,
+				0569BCDB775442B19B958AB3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp */,
+				510BF56D5B024EADBD7628D4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp */,
+				4504A73784AA46DAA984097D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp */,
+				2D9029711507447BAAF516FB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp */,
+				7E7A8BF8AE0E40A98248DB52 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp */,
+				7C4396A9D7F44BCD89128EF0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp */,
+				0438F1AF663540FDB7F5AA74 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp */,
+				AB81384251FA4E51AAA35EE3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp */,
+				AF34B213BC1C40BEB02CF84D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp */,
+				35CE164CB200479AB325D264 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp */,
+				D624026532AA41EF8028D9F8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp */,
+				2CDDB337561D47FB8B366E92 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp */,
+				3189D89810344210AF78F508 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp */,
+				84F97FC78F4942B086CA2518 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp */,
+				06DD5FAE903E4A8289246239 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp */,
+				9F95F3AA52B54C4C96C7438C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp */,
+				B43BE7E2F569401AA91ADA61 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp */,
+				5A92F02D1DC84C928D4CC140 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp */,
+				F5EB8FFE47414AF29F1C1E2B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp */,
+				88AB531D606D4A1D85363A64 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp */,
+				4C7D3D4649B74F9C89AACABA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp */,
+				1B658420993240819036CC7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp */,
+				94C301C482C740DDA0D6952E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp */,
+				347A1693D3984DE6988695E0 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp */,
+				0A948D08DA964577B619160F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp */,
+				4849606918364EF5B9629704 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.cpp */,
+				32DE023ECD6348B387ACAF87 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		7CA1F539678444BFBD1D184A /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				AE2E1DB85D5F40ABA7C191B2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */,
+				DC9C4FC3E15744B1BB22D4B4 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */,
+				2697223178C4429990B53D29 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */,
+				CB99B8ADBC3843BE838A1FF5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */,
+				B58D94C653814C2FAB3AEDCB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */,
+				F976163A1B844E20AD09CE0E /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */,
+				C494852E6FC84045A89DB609 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		7EB50A69D84248A1A4C82C8A /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				D543EB5D24FB4A879ED0713A /* CMake Rules */,
+				106DDA2154DE4C72B53CA831 /* /Users/owi/Documents/Imagination-Engine/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		9063E21134AA4640B5C5DBD0 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				8683F36E0EA7424CBFCF9129 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		B81F55C0C4124F38B701DA42 /* IMGN */ = {
+			isa = PBXGroup;
+			children = (
+				DBDF8715B6BE4B8990A5CFED /* Header Files */,
+				452CD40FF63A47D281ECFBA4 /* Source Files */,
+				0142C1C893EC47C7BB9FE0CA /* /Users/owi/Documents/Imagination-Engine/Imagination/CMakeLists.txt */,
+			);
+			name = IMGN;
+			sourceTree = "<group>";
+		};
+		CE7DE4DB13134100AA95C9F9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		D543EB5D24FB4A879ED0713A /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		DBDF8715B6BE4B8990A5CFED /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				5477658FCB11470E9609ABB1 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Gateware/Gateware.h */,
+				EFC06622A82F40AA897D9C79 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imconfig.h */,
+				F501ABD1A777424783170A70 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.h */,
+				AB79E55E080E4973AE453D58 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.h */,
+				80BAF81ADEBF4749BC8A3C4E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.h */,
+				513FE469FF0941B3BC2B700F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_internal.h */,
+				F4D36A4A1239463C8424C418 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_rectpack.h */,
+				6430E77C5E3F4FF8A9B85830 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_textedit.h */,
+				5FE6050F23C24B5B9783348E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imstb_truetype.h */,
+				7479D1E86CEF4917A6B0DE12 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.h */,
+				7D5D5C4E046548EC89DB52F4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.h */,
+				4CA7ECBA63B341B7965A3169 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.h */,
+				D3FFE2A99A1440A1ABDFAFC9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.h */,
+				0869AA49AB6946A59928BECC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImLightRig.h */,
+				80AD49D53F344207B95B7AF5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.h */,
+				4D15B586F5CB480CAB1388BE /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.h */,
+				2EE47382D1CF45A9B74984C3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImZoomSlider.h */,
+				BBB4CBC43E18436CA29F3DA5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn.hpp */,
+				9AC5C8C349C4491795300619 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/AllComponents.hpp */,
+				654FD9C3F23749A0A70A8C11 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.h */,
+				1736958B661A4D0EB3DE23C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.h */,
+				4B0ED289BE5548A0996DDB2C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.h */,
+				3895D7D5539A415DB779F198 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.h */,
+				3D832F42A34247EE8CFDC745 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.h */,
+				C302B22DA263457788734A7A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.h */,
+				F081A92842AB4C86AACD1B4D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/AppEvent.h */,
+				1B1DA673A5FB41D0BDB3C69D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/Event.h */,
+				230D3FA24064494093FA794B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/KeyEvent.h */,
+				82D9AA0779F34DBE82EBD492 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Events/MouseEvent.h */,
+				30EEFD4CE0644D37A5360402 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.hpp */,
+				C601349A4A47447691D275C5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.h */,
+				CE4E0F21F8E541A6BEAE7047 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.hpp */,
+				B131A3EABA714231B8C592E4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.h */,
+				5842F6C73AE74B53901E0C01 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.h */,
+				4F67E983A0B24D199FB03ECB /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp */,
+				8CC0502495FF4BC8B4672F75 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.h */,
+				873343777A154322973BEBF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.h */,
+				FBD8A0AA641946CE8A3725A8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnKey.MouseCodes.h */,
+				B4E8D67757C1414AAE1B41D3 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.h */,
+				085A0F331D424DEA9E93A61C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.h */,
+				312E105FF33F40E4BBC662EC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.h */,
+				0EDA2CDF0B1746F0B9FDF713 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.h */,
+				219175F4D03C4B25A40CB291 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.h */,
+				3EA36067ABC24B6FB3141B14 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.h */,
+				3B45DBD1C02D42B79B85C344 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderResources.h */,
+				B734077F6C064D7580AB91CA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.h */,
+				7DAC54D1A0114F779DFE11AA /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.h */,
+				2F0E02DC159B44538CCD0936 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnTime.h */,
+				20435BDB76674BA5A0DE1A08 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.h */,
+				48A06F11865D43E2AFBC778B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Model.h */,
+				84AA5C2A32454CCD9E4781DD /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.h */,
+				216EB11950334DDEB8B70CF6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.h */,
+				DE10300BD88B4A168FEEB8DF /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.hpp */,
+				FF7CC4DBF69447AB9E8BD5B9 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/EngineShaders.h */,
+				B2781DCB3A1B4A1B9112BF8F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp */,
+				C2B5B70E94D64EFBA9EAEFC6 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderPassStructs.h */,
+				ABD7C2AFA9D64D94A831372F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/RenderStructs.h */,
+				8524A40FE3BD4CE49FD87043 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.hpp */,
+				E677E1FC04D94DB69EC98853 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/json.hpp */,
+				91B1ECA8877F4A1BB93F7EF8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image.h */,
+				E6A8105AA23448F48467CC3F /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/stb_image_write.h */,
+				31D4A953713240CD87173FB7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/gltf/tiny_gltf.h */,
+				F52EB589EAAF46328E6DAFA8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.hpp */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		F000D4B394014FEDBEEDA3BB /* DAYDREAM */ = {
+			isa = PBXGroup;
+			children = (
+				9063E21134AA4640B5C5DBD0 /* Source Files */,
+				08EF0EAA7F0F44C1BAE928CC /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */,
+			);
+			name = DAYDREAM;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		01A54CBFE9172B0BFA54A3ED /* IMGN */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A3CBB0BB8CF04C939EB0A029 /* Build configuration list for PBXNativeTarget "IMGN" */;
+			buildPhases = (
+				F0F5776C6D1446AD99C398CB /* Sources */,
+				5750DF618B0049029C3D5E90 /* Frameworks */,
+				4C86B81808DF8E3DCBE6BD1F /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IMGN;
+			productName = IMGN;
+			productReference = 1A4C32B20F4149D4809ECEAF /* IMGN */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		17C1962C13EFF6A918787A02 /* DAYDREAM */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 14551AB753144B2B82AF5407 /* Build configuration list for PBXNativeTarget "DAYDREAM" */;
+			buildPhases = (
+				589EE5C4F3264CD6A296893C /* Sources */,
+				667513769B0D43098A2DAC1E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8DC9C305587647F29B8BEEC7 /* PBXTargetDependency */,
+			);
+			name = DAYDREAM;
+			productName = DAYDREAM;
+			productReference = 2D644DDEE3C243C58790C924 /* DAYDREAM */;
+			productType = "com.apple.product-type.tool";
+		};
+		30EAC98E374C6B5C31E63487 /* ImaginationEditor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 72098AE5DBF04C2CA772A943 /* Build configuration list for PBXNativeTarget "ImaginationEditor" */;
+			buildPhases = (
+				5BA29E98B27A43129164C655 /* Sources */,
+				78E62163472B48D1B4D4CD6B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B22B075141C44C168247F2CD /* PBXTargetDependency */,
+			);
+			name = ImaginationEditor;
+			productName = ImaginationEditor;
+			productReference = 7923D4DB172F4468B0A21D9D /* ImaginationEditor */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A51948259539447183D2383F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2710;
+			};
+			buildConfigurationList = F3794B518606497CAB55EEAF /* Build configuration list for PBXProject "Imagination" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				CED155BE3F134D208EECB22D /* Debug */,
+				FCAA98537FF349B49F2E0A89 /* Release */,
+				4437694F627644C5AFC04269 /* MinSizeRel */,
+				E7367E08652E4FC3BFB4A0F0 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = 286CC8CEA7544BCB88262024;
+			projectDirPath = "/Users/owi/Documents/Imagination-Engine";
+			projectRoot = "";
+			targets = (
+				396055AC069C2A9DA9BA999E /* ALL_BUILD */,
+				17C1962C13EFF6A918787A02 /* DAYDREAM */,
+				30EAC98E374C6B5C31E63487 /* ImaginationEditor */,
+				01A54CBFE9172B0BFA54A3ED /* IMGN */,
+				556C0DA76B4531529DDED48E /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		4C86B81808DF8E3DCBE6BD1F /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Daydream
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Daydream
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/ImaginationEditor
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/ImaginationEditor
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E cmake_symlink_library /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Daydream
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Daydream
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/ImaginationEditor
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/ImaginationEditor
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E cmake_symlink_library /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Daydream
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Daydream
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/ImaginationEditor
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/ImaginationEditor
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E cmake_symlink_library /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Daydream
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Daydream
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E make_directory /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/ImaginationEditor
+  /opt/homebrew/bin/cmake -E copy_if_different /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/ImaginationEditor
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Imagination
+  /opt/homebrew/bin/cmake -E cmake_symlink_library /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib /Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		CF3DC9637AB47EF930FCBD0B /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		FCB65FFDA98D6CF680ECB2EF /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		589EE5C4F3264CD6A296893C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0D14175512B4FDA8205439E /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5BA29E98B27A43129164C655 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B45BF1EA1A2845649DEE9D95 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */,
+				2B6BA50261844F76BD3F60BB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */,
+				DFBE473D79354A6DBF924873 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */,
+				3B338E14DD444FC7A87C4D48 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */,
+				02E27853FFBC47169BAA150A /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */,
+				2385FCB942104992BE064483 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */,
+				50A784FBF3374D6185EE6EBB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F0F5776C6D1446AD99C398CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7A887772F60A424D80D8E153 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui.cpp */,
+				7E5A83F5706543438AB96C0D /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp */,
+				2515FFE7296F4D869978969E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp */,
+				EA58901A57714486BDE5B05B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp */,
+				F43A92BAC8FC4E4883122B3A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp */,
+				29103E07CEF34256A7C30A3E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp */,
+				7995E8F7449B402781460E6E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp */,
+				AF1429A9C5954C38B878BC5C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp */,
+				C4B99A5FB4D24324B9854AED /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp */,
+				E6EF64B966544068AF8D47B5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp */,
+				224E32D552574A46885A84AE /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp */,
+				DCAAF9710F0C4CC5A02C7DF5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp */,
+				A1B6B05850A04A40AC5FC7A5 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp */,
+				121157E158494DB08FB4D080 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp */,
+				32240ADAF8F44A4D8FBCEE1C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp */,
+				1C153E9641BA40829DE53312 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp */,
+				063CD22E929346BE8E6A4580 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp */,
+				6C2C0BE6BFC8462F8B3B923A /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp */,
+				65417D1290B8480CA604F612 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp */,
+				0CD8F00E02834599B8329926 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp */,
+				AC13C97AE5324DA1B1453D53 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp */,
+				0C0105C91EB8441E8B4F07CC /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp */,
+				DF4A877199AA43B9A929D183 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp */,
+				67347E75F98E4B5081D060E4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp */,
+				8ADD0A050D004D828DD537A2 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp */,
+				039DC4DBA09E4A5EAA8600E7 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp */,
+				6431E8CFB3B748448C6D178E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp */,
+				6666857531BE4C75BADBD7D8 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp */,
+				E97836147AB040918B5FDD67 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp */,
+				E49297E1EE0B48CC8FE8E614 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp */,
+				68EB66FE15CE4418B03D0C45 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp */,
+				FD8E75C26AC04B5C9917F18B /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp */,
+				404AA2EC0E874C24A197356E /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp */,
+				E3BFA88D07574D8583B910A4 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp */,
+				C40790F2C0B64FA194660D42 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp */,
+				FA2F2AC74E7F44B190F01120 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp */,
+				F351BD6A1CEF4555899A3B1C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp */,
+				3BF626193A8145668572D779 /* /Users/owi/Documents/Imagination-Engine/Imagination/src/Imgn/main.cpp */,
+				65C7333CD2914362BFDFBE9C /* /Users/owi/Documents/Imagination-Engine/Imagination/src/pch.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		18B8A53BEB3C421A9DD9B27C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 01A54CBFE9172B0BFA54A3ED /* IMGN */;
+			targetProxy = F24FF34136D14EB4B62B708F /* PBXContainerItemProxy */;
+		};
+		87555B4AFA834784B621D2B5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 556C0DA76B4531529DDED48E /* ZERO_CHECK */;
+			targetProxy = 1ECFA1778AA94F5EB05FC603 /* PBXContainerItemProxy */;
+		};
+		8A62836D569B4064B1CD37F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17C1962C13EFF6A918787A02 /* DAYDREAM */;
+			targetProxy = D048C2F184E040BD9014A537 /* PBXContainerItemProxy */;
+		};
+		8DC9C305587647F29B8BEEC7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 01A54CBFE9172B0BFA54A3ED /* IMGN */;
+			targetProxy = 62103BD93E4B4BB0AC01AB7D /* PBXContainerItemProxy */;
+		};
+		B22B075141C44C168247F2CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 01A54CBFE9172B0BFA54A3ED /* IMGN */;
+			targetProxy = 25B37DE0BF8E41E2871F8837 /* PBXContainerItemProxy */;
+		};
+		D84E8E5C42F34146AF26ADFD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 30EAC98E374C6B5C31E63487 /* ImaginationEditor */;
+			targetProxy = 3CEFE8F483C945DDB79CFA0D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		00979DF449534C5C8B7ABBE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		19515A5259A544E09D12B913 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = MinSizeRel;
+		};
+		1A8628E2B93F4725B4C65614 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		21579B836E034581AB6902D0 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination";
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks,"$(inherited)");
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Imagination/CMakeFiles/IMGN.dir/MinSizeRel/cmake_pch.objcxx.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_EXPORTS,IMGN_BUILD_DLL,IMGN_PLATFORM_MACOS,IMGN_METAL_PLATFORM_MACOS,UNICODE,_UNICODE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "@rpath";
+				LIBRARY_STYLE = DYNAMIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' -fPIC -fmodules -fcxx-modules ";
+				OTHER_LDFLAGS = (" -Wl,-headerpad_max_install_names","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = IMGN;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/IMGN.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		2C3209C604134A2CB9BEF758 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination";
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks,"$(inherited)");
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Imagination/CMakeFiles/IMGN.dir/Release/cmake_pch.objcxx.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_EXPORTS,IMGN_BUILD_DLL,IMGN_PLATFORM_MACOS,IMGN_METAL_PLATFORM_MACOS,UNICODE,_UNICODE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "@rpath";
+				LIBRARY_STYLE = DYNAMIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' -fPIC -fmodules -fcxx-modules ";
+				OTHER_LDFLAGS = (" -Wl,-headerpad_max_install_names","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = IMGN;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/IMGN.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		3BEBD205D5364C4BB4B381C5 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		477155A4EC964817A906C62D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Release;
+		};
+		590EF571D9D741CBB6257189 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination";
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks,"$(inherited)");
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Imagination/CMakeFiles/IMGN.dir/RelWithDebInfo/cmake_pch.objcxx.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_EXPORTS,IMGN_BUILD_DLL,IMGN_PLATFORM_MACOS,IMGN_METAL_PLATFORM_MACOS,UNICODE,_UNICODE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "@rpath";
+				LIBRARY_STYLE = DYNAMIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=gnu++23' -fPIC -fmodules -fcxx-modules ";
+				OTHER_LDFLAGS = (" -Wl,-headerpad_max_install_names","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = IMGN;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/IMGN.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		5CDD299A03D440C18191350F /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		6EEFC65395BB497D9740A2CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		70E9FD4CBBC94916990B76E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		7EA8D08019D64745BF21FD17 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = RelWithDebInfo;
+		};
+		8115B6FDFFA44CB1AECFCCE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		86D897EAAEBA454F84021933 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		A2ECF01BCD3F433BB6F8CC1E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		A7A2D38A81CE49D9BDE43AB8 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		A8ADD85BAC6749D29AFB6ADE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		AB6EED27A420424D962CAEBC /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		AF71D1470ACC4E1FBA836E7C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		B8CE727521D3431D8855FA49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination";
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				FRAMEWORK_SEARCH_PATHS = (/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks,"$(inherited)");
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Imagination/CMakeFiles/IMGN.dir/Debug/cmake_pch.objcxx.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_EXPORTS,IMGN_BUILD_DLL,IMGN_PLATFORM_MACOS,IMGN_METAL_PLATFORM_MACOS,UNICODE,_UNICODE,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "@rpath";
+				LIBRARY_STYLE = DYNAMIC;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++23' -fPIC -fmodules -fcxx-modules ";
+				OTHER_LDFLAGS = (" -Wl,-headerpad_max_install_names","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = IMGN;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/IMGN.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		C26F5CA3C82F407C9FB0D9A2 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		D0DB94706C2E4FBBAE447A1F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		DAC3820D50E945AAB36D8162 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		F2A4B13AD8074792A8B77A14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		12D9E843A69848C083491736 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6EEFC65395BB497D9740A2CB /* Debug */,
+				70E9FD4CBBC94916990B76E3 /* Release */,
+				5CDD299A03D440C18191350F /* MinSizeRel */,
+				AB6EED27A420424D962CAEBC /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		14551AB753144B2B82AF5407 /* Build configuration list for PBXNativeTarget "DAYDREAM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8115B6FDFFA44CB1AECFCCE7 /* Debug */,
+				A8ADD85BAC6749D29AFB6ADE /* Release */,
+				86D897EAAEBA454F84021933 /* MinSizeRel */,
+				A7A2D38A81CE49D9BDE43AB8 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6D4EBD3F7940476AB9B68947 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF71D1470ACC4E1FBA836E7C /* Debug */,
+				D0DB94706C2E4FBBAE447A1F /* Release */,
+				C26F5CA3C82F407C9FB0D9A2 /* MinSizeRel */,
+				3BEBD205D5364C4BB4B381C5 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		72098AE5DBF04C2CA772A943 /* Build configuration list for PBXNativeTarget "ImaginationEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00979DF449534C5C8B7ABBE7 /* Debug */,
+				A2ECF01BCD3F433BB6F8CC1E /* Release */,
+				1A8628E2B93F4725B4C65614 /* MinSizeRel */,
+				DAC3820D50E945AAB36D8162 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A3CBB0BB8CF04C939EB0A029 /* Build configuration list for PBXNativeTarget "IMGN" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8CE727521D3431D8855FA49 /* Debug */,
+				2C3209C604134A2CB9BEF758 /* Release */,
+				21579B836E034581AB6902D0 /* MinSizeRel */,
+				590EF571D9D741CBB6257189 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F3794B518606497CAB55EEAF /* Build configuration list for PBXProject "Imagination" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F2A4B13AD8074792A8B77A14 /* Debug */,
+				477155A4EC964817A906C62D /* Release */,
+				19515A5259A544E09D12B913 /* MinSizeRel */,
+				7EA8D08019D64745BF21FD17 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A51948259539447183D2383F /* Project object */;
+}

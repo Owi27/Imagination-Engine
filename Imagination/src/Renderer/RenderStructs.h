@@ -24,6 +24,7 @@ namespace Imgn
 		//int entityID; //editor only
 
 		//vk
+#ifdef IMGN_VULKAN_PLATFORM_WINDOWS
 		static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }
 		static std::array<vk::VertexInputAttributeDescription, 5> GetAttributeDescriptions()
 		{
@@ -36,6 +37,7 @@ namespace Imgn
 				vk::VertexInputAttributeDescription(4, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, clr)),
 			};
 		}
+#endif //IMGN_VULKAN_PLATFORM_WINDOWS
 	};
 
 	struct TextureSource
