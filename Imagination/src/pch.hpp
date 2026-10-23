@@ -7,11 +7,13 @@
 #include <Windows.h>
 #endif // IMGN_PLATFORM_WINDOWS
 
+#ifdef IMGN_VULKAN_PLATFORM_WINDOWS
 #if defined(__INTELLISENSE__) || !defined(USE_CPP20_MODULES)
 #include <vulkan/vulkan_raii.hpp>
 #else
 import vulkan_hpp;
 #endif
+#endif //IMGN_VULKAN_PLATFORM_WINDOWS
 
 #include <iostream>
 #include <memory>
@@ -20,12 +22,16 @@ import vulkan_hpp;
 #include <functional>
 #include <string>
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include <unordered_set>
 #include <format>
 #include <chrono>
 #include <filesystem>
 #include <random>
+
+#include <type_traits>
+#include <typeinfo>
 
 #include "Imgn/ImgnLog.h"
 #include "Imgn/ImgnKey.MouseCodes.h"

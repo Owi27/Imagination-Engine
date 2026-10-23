@@ -398,3 +398,8 @@ FodyWeavers.xsd
 *.sln.iml
 
 [Ee]xternalApps/
+
+# build folders
+[Bb]uild/
+[Bb]uild-macos/
+[Bb]uild-windows/
