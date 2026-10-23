@@ -11,6 +11,7 @@ namespace Imgn
 
 	void ImgnWindow::Dream()
 	{
+#ifdef IMGN_PLATFORM_WINDOWS
 		MSG message{};
 
 		// nullptr includes every window on this thread,
@@ -27,7 +28,7 @@ namespace Imgn
 			TranslateMessage(&message);
 			DispatchMessageW(&message);
 		}
-
+#endif // IMGN_PLATFORM_WINDOWS
 		// Preserve Gateware's EVENTS_PROCESSED notification.
 
 		_window.ProcessWindowEvents();

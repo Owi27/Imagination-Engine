@@ -55,9 +55,15 @@ enum class RendererBackend
 	Vulkan, D3D12, Metal
 };
 
+#if defined(IMGN_METAL_PLATFORM_MACOS)
+inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Metal;
+#else
+inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Vulkan;
+#endif
+
 struct RendererCreateInfo
 {
-	RendererBackend backend = RendererBackend::Vulkan;
+	RendererBackend backend = DefaultRendererBackend;
 
 	void* windowHandle = nullptr, * displayHandle = nullptr;
 
