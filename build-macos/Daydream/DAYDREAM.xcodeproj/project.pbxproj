@@ -1,0 +1,758 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		396055AC069C2A9DA9BA999E /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9DC5F05D513348739A320161 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				8A9C18BE35317778106A754B /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				521A28B796FA4A2697F95277 /* PBXTargetDependency */,
+				A0A647D00AFD49B3BB7B970F /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		556C0DA76B4531529DDED48E /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 21AA9362D58C4B68B04B11A3 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				9CF9CEFFC469FE5E358D7D9F /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		98E6EC31A34246FAB75C6C79 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = A41F42831B654CCFBC859833 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */; };
+		B04530868FC84B4982FD1190 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXBuildFile; fileRef = F3B4FA8158B546EDA82C3A5A /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */; };
+		C8B9B99DA9234D9D841A13CE /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 64093D019413450C801CE29D /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */; };
+		DE6D875EF79A4368B2EE6601 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXBuildFile; fileRef = 55968A35A1AF424BBC4D4275 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */; };
+		E0278B645DFF4D909D970AAB /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */ = {isa = PBXBuildFile; fileRef = 7623F75A0F4045F89A786982 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		4F13C7F8D98243ED92A558ED /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		5949B979164142FF8FB5D881 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		91E874B3F2EE489F8E7F43E8 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+		DA8815EDA3BB49F29FA81889 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		A578984770D94A6C847EF885 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D9073D040514E86A52B31CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17C1962C13EFF6A918787A02;
+			remoteInfo = DAYDREAM;
+		};
+		B032B56737C04FF099E66F4F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D9073D040514E86A52B31CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 556C0DA76B4531529DDED48E;
+			remoteInfo = ZERO_CHECK;
+		};
+		C329F714690E42F88601D7AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9D9073D040514E86A52B31CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 556C0DA76B4531529DDED48E;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		55968A35A1AF424BBC4D4275 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		64093D019413450C801CE29D /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
+		7623F75A0F4045F89A786982 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		A41F42831B654CCFBC859833 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		BABC3CEA4FAD4757A0B083B7 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		E83274B2E88D4B38A186FFFF /* DAYDREAM */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = DAYDREAM; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3B4FA8158B546EDA82C3A5A /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Metal.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework; sourceTree = "<absolute>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C70DBF5B840C4115A87D8049 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		23B45719DCA34F36A9A85B22 = {
+			isa = PBXGroup;
+			children = (
+				742E9232AC8E4191A5EC631B /* ALL_BUILD */,
+				CD08C4E4789B44EFA2105DEC /* DAYDREAM */,
+				2C2D87099C79474A8C519AC9 /* Products */,
+				D560C09DB8CB45F08038400A /* Frameworks */,
+				936974049FB04A29939E4045 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		2C2D87099C79474A8C519AC9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E83274B2E88D4B38A186FFFF /* DAYDREAM */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		742E9232AC8E4191A5EC631B /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				E298CCF99A7C4E4DA582E774 /* CMake Rules */,
+				BABC3CEA4FAD4757A0B083B7 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		922255353CDF4CE59648F0AE /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				7623F75A0F4045F89A786982 /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		936974049FB04A29939E4045 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		CD08C4E4789B44EFA2105DEC /* DAYDREAM */ = {
+			isa = PBXGroup;
+			children = (
+				922255353CDF4CE59648F0AE /* Source Files */,
+				A41F42831B654CCFBC859833 /* /Users/owi/Documents/Imagination-Engine/Daydream/CMakeLists.txt */,
+			);
+			name = DAYDREAM;
+			sourceTree = "<group>";
+		};
+		D560C09DB8CB45F08038400A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F3B4FA8158B546EDA82C3A5A /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */,
+				55968A35A1AF424BBC4D4275 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */,
+				64093D019413450C801CE29D /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E298CCF99A7C4E4DA582E774 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		17C1962C13EFF6A918787A02 /* DAYDREAM */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B8DFE3DC7958433DBBD16AB1 /* Build configuration list for PBXNativeTarget "DAYDREAM" */;
+			buildPhases = (
+				ABC0811DF01543729377A219 /* Sources */,
+				C70DBF5B840C4115A87D8049 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D0257F828E42430CA058BB57 /* PBXTargetDependency */,
+			);
+			name = DAYDREAM;
+			productName = DAYDREAM;
+			productReference = E83274B2E88D4B38A186FFFF /* DAYDREAM */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9D9073D040514E86A52B31CE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2710;
+			};
+			buildConfigurationList = 945705F705B243189B757AE9 /* Build configuration list for PBXProject "DAYDREAM" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				DA8815EDA3BB49F29FA81889 /* Debug */,
+				5949B979164142FF8FB5D881 /* Release */,
+				4F13C7F8D98243ED92A558ED /* MinSizeRel */,
+				91E874B3F2EE489F8E7F43E8 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = 23B45719DCA34F36A9A85B22;
+			projectDirPath = "/Users/owi/Documents/Imagination-Engine/Daydream";
+			projectRoot = "";
+			targets = (
+				396055AC069C2A9DA9BA999E /* ALL_BUILD */,
+				17C1962C13EFF6A918787A02 /* DAYDREAM */,
+				556C0DA76B4531529DDED48E /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		8A9C18BE35317778106A754B /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		9CF9CEFFC469FE5E358D7D9F /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/Daydream
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		ABC0811DF01543729377A219 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0278B645DFF4D909D970AAB /* /Users/owi/Documents/Imagination-Engine/Daydream/src/main.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		521A28B796FA4A2697F95277 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17C1962C13EFF6A918787A02 /* DAYDREAM */;
+			targetProxy = A578984770D94A6C847EF885 /* PBXContainerItemProxy */;
+		};
+		A0A647D00AFD49B3BB7B970F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 556C0DA76B4531529DDED48E /* ZERO_CHECK */;
+			targetProxy = C329F714690E42F88601D7AC /* PBXContainerItemProxy */;
+		};
+		D0257F828E42430CA058BB57 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 556C0DA76B4531529DDED48E /* ZERO_CHECK */;
+			targetProxy = B032B56737C04FF099E66F4F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09E911BE315E4067A504C77D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		269D6A0EC8404C58B3311373 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Release;
+		};
+		2936F5524C944367850BC072 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/Release/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		2B84C744CD6446DBA7446BBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		31FB8A2A6C78479FA0FF2085 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		52289C8F583241B5B9D25F03 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		67EEE9F7C9CB45579205E7E1 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = RelWithDebInfo;
+		};
+		6D83CD54467A4EBA92A1270E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/Debug/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		957F5ADADEF447E99239D6EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		9D4E677520674708A2DE5FDB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		A36CF7E108664DF28212804B /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = MinSizeRel;
+		};
+		AB53FE3A050C4730AA39CEB1 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		ACD25137ACC54101A0629942 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/RelWithDebInfo/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		B2A173A743DA4694A07CA3F1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Debug;
+		};
+		B2BF887521C34A7394F69DF4 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		D23E00A60EC2494A990187D6 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Daydream";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/Daydream/CMakeFiles/DAYDREAM.dir/MinSizeRel/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/Daydream/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = DAYDREAM;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/DAYDREAM.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		21AA9362D58C4B68B04B11A3 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31FB8A2A6C78479FA0FF2085 /* Debug */,
+				9D4E677520674708A2DE5FDB /* Release */,
+				AB53FE3A050C4730AA39CEB1 /* MinSizeRel */,
+				09E911BE315E4067A504C77D /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		945705F705B243189B757AE9 /* Build configuration list for PBXProject "DAYDREAM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2A173A743DA4694A07CA3F1 /* Debug */,
+				269D6A0EC8404C58B3311373 /* Release */,
+				A36CF7E108664DF28212804B /* MinSizeRel */,
+				67EEE9F7C9CB45579205E7E1 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9DC5F05D513348739A320161 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B84C744CD6446DBA7446BBA /* Debug */,
+				957F5ADADEF447E99239D6EB /* Release */,
+				52289C8F583241B5B9D25F03 /* MinSizeRel */,
+				B2BF887521C34A7394F69DF4 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B8DFE3DC7958433DBBD16AB1 /* Build configuration list for PBXNativeTarget "DAYDREAM" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6D83CD54467A4EBA92A1270E /* Debug */,
+				2936F5524C944367850BC072 /* Release */,
+				D23E00A60EC2494A990187D6 /* MinSizeRel */,
+				ACD25137ACC54101A0629942 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9D9073D040514E86A52B31CE /* Project object */;
+}

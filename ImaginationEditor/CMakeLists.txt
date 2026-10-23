@@ -10,6 +10,10 @@ target_include_directories(ImaginationEditor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/
 
 target_link_libraries(ImaginationEditor PRIVATE IMGN)
 
+if(WIN32)
 target_compile_definitions(ImaginationEditor PRIVATE IMGN_PLATFORM_WINDOWS)
+elseif(APPLE)
+    target_compile_definitions(ImaginationEditor PRIVATE IMGN_PLATFORM_MACOS)
+endif()
 
 set_target_properties(ImaginationEditor PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/ImaginationEditor LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/ImaginationEditor ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}/ImaginationEditor OBJECT_OUTPUTS_DIRECTORY ${OBJ_DIR}/ImaginationEditor)

@@ -1,0 +1,811 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		396055AC069C2A9DA9BA999E /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = DB8E5076D7FA43D9846DD90B /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				8483533527D0E02705D9F82A /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				A4829FA8366B4969AD3039B4 /* PBXTargetDependency */,
+				5D2E6731E84348A887581AF1 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		556C0DA76B4531529DDED48E /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 8BB70C6800E2418299113D42 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				B1BDC4318417CC5CA56D300A /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		0CE40625EF524DBEBCD0D83D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */ = {isa = PBXBuildFile; fileRef = 6C84616D3E7041AFA0316935 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */; };
+		13D34988183948799C450B5F /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */ = {isa = PBXBuildFile; fileRef = D90C0216692E432D8121F400 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */; };
+		265F62C9EB8A4BE990F80109 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */ = {isa = PBXBuildFile; fileRef = ED928AAD441640FAA0890629 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */; };
+		3FCFAE72FE43419C8BCB824F /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */ = {isa = PBXBuildFile; fileRef = 919177C11DA84521AFC81F72 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */; };
+		4B43DA7CA26D4C09880F2B45 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */ = {isa = PBXBuildFile; fileRef = 60B4AFCA00024DD097DD9358 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */; };
+		528F9780D89E4B8298D42EF5 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXBuildFile; fileRef = 57D99E263AFA4D2FB7FEE677 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */; };
+		56D36E17A5234F9A853B1D51 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */ = {isa = PBXBuildFile; fileRef = 75E018859B4D4AD18146A61B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */; };
+		65C5E58800C34D0EA8333C4A /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXBuildFile; fileRef = 4278082377604FC6BCCBC0E8 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */; };
+		71CC220FE65B4A05857DC09C /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */ = {isa = PBXBuildFile; fileRef = 2FF15C8EB41F4512B6705460 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */; };
+		774620A418E44009A76CE4DB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */ = {isa = PBXBuildFile; fileRef = 0B655DF59A0C4137A749F922 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */; };
+		8F237A8B02F24E8087EF3004 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */ = {isa = PBXBuildFile; fileRef = 93D645CC6BCC41CAB4C188F2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */; };
+		903A41083DF84A71BEE5B7A5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */ = {isa = PBXBuildFile; fileRef = A6C7983B04C1422D9002A679 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */; };
+		A6AAD25DD98D47F38AF292B2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */ = {isa = PBXBuildFile; fileRef = 55F97399B11A4624833DA814 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */; };
+		BCC62994A0EF401DBB28FC4C /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */ = {isa = PBXBuildFile; fileRef = A1F07DCB08DF4A42BEE98B3D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */; };
+		C578F4FCACE740F89ABE3658 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 60FE4F2FCCA7423B99F436B3 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */; };
+		D53D0A5061924FDD99874B9D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */ = {isa = PBXBuildFile; fileRef = BACA2EA4B2504879A2F334CC /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */; };
+		DBD68537970F4BEBAF6BB365 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */ = {isa = PBXBuildFile; fileRef = A230AB2D45DF4C6B8187A6AB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */; };
+		E539504B1AEE4B4C94824817 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */ = {isa = PBXBuildFile; fileRef = 64A75BA609CF4E5F8D504BB5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		95F62F7CECAF4A85866D3ECC /* MinSizeRel */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = MinSizeRel;
+		};
+		99902F4283EA4A51809D5823 /* Release */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Release;
+		};
+		C982B5B09A4949149D1CC523 /* Debug */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		CC606491677743D49A3E8F22 /* RelWithDebInfo */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = RelWithDebInfo;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		3D5395FA0BEA42F9ACA6B2C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17DB71C9837844C2AF239409 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 556C0DA76B4531529DDED48E;
+			remoteInfo = ZERO_CHECK;
+		};
+		FB74B24DB5384056AB96D9A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17DB71C9837844C2AF239409 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 30EAC98E374C6B5C31E63487;
+			remoteInfo = ImaginationEditor;
+		};
+		FDC3478742A141839A967443 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17DB71C9837844C2AF239409 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 556C0DA76B4531529DDED48E;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0B655DF59A0C4137A749F922 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorLayer.cpp; path = src/EditorLayer.cpp; sourceTree = SOURCE_ROOT; };
+		2D3064009E204FFBB48DBB5A /* ImaginationEditor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = ImaginationEditor; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FF15C8EB41F4512B6705460 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		4278082377604FC6BCCBC0E8 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		55F97399B11A4624833DA814 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = SceneHierarchy.cpp; path = src/Panels/SceneHierarchy.cpp; sourceTree = SOURCE_ROOT; };
+		57D99E263AFA4D2FB7FEE677 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Metal.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework; sourceTree = "<absolute>"; };
+		60B4AFCA00024DD097DD9358 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ExternalAppPanel.h; path = src/Panels/ExternalAppPanel.h; sourceTree = SOURCE_ROOT; };
+		60FE4F2FCCA7423B99F436B3 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = "<absolute>"; };
+		64A75BA609CF4E5F8D504BB5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = SceneHierarchy.h; path = src/Panels/SceneHierarchy.h; sourceTree = SOURCE_ROOT; };
+		65C6F9A3D1244FAFB53466A3 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		6C84616D3E7041AFA0316935 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorCamera.h; path = src/EditorCamera.h; sourceTree = SOURCE_ROOT; };
+		75E018859B4D4AD18146A61B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = ContentBrowser.hpp; path = src/Panels/ContentBrowser.hpp; sourceTree = SOURCE_ROOT; };
+		919177C11DA84521AFC81F72 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorCamera.cpp; path = src/EditorCamera.cpp; sourceTree = SOURCE_ROOT; };
+		93D645CC6BCC41CAB4C188F2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; name = EditorLayer.hpp; path = src/EditorLayer.hpp; sourceTree = SOURCE_ROOT; };
+		A1F07DCB08DF4A42BEE98B3D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorUtils.h; path = src/Utils/EditorUtils.h; sourceTree = SOURCE_ROOT; };
+		A230AB2D45DF4C6B8187A6AB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ExternalAppPanel.cpp; path = src/Panels/ExternalAppPanel.cpp; sourceTree = SOURCE_ROOT; };
+		A6C7983B04C1422D9002A679 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; name = CMakeLists.txt; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		BACA2EA4B2504879A2F334CC /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = EditorWorkspace.cpp; path = src/Panels/EditorWorkspace.cpp; sourceTree = SOURCE_ROOT; };
+		D90C0216692E432D8121F400 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ContentBrowser.cpp; path = src/Panels/ContentBrowser.cpp; sourceTree = SOURCE_ROOT; };
+		ED928AAD441640FAA0890629 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = EditorWorkspace.h; path = src/Panels/EditorWorkspace.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A9D2CAAE249E444CA9FAC9A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1DEFE96361C2499182132BE7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		3BE71016673C4D6385C42C27 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2D3064009E204FFBB48DBB5A /* ImaginationEditor */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4E95A0567BFF4B85901B41E0 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				E051FDCADB5D43AAADD10577 /* CMake Rules */,
+				65C6F9A3D1244FAFB53466A3 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		8FE94BDF812A47E8B44D96E5 /* ImaginationEditor */ = {
+			isa = PBXGroup;
+			children = (
+				E98F9BC0DC044DA99DEEB17D /* Header Files */,
+				F245221E7C1D4BD2BBD9F468 /* Source Files */,
+				A6C7983B04C1422D9002A679 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/CMakeLists.txt */,
+			);
+			name = ImaginationEditor;
+			sourceTree = "<group>";
+		};
+		93F24A4715B14CB8B87178B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				57D99E263AFA4D2FB7FEE677 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework */,
+				4278082377604FC6BCCBC0E8 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Foundation.framework */,
+				60FE4F2FCCA7423B99F436B3 /* /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E051FDCADB5D43AAADD10577 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		E0ED71DC7C4C4A5B97718BF3 = {
+			isa = PBXGroup;
+			children = (
+				4E95A0567BFF4B85901B41E0 /* ALL_BUILD */,
+				8FE94BDF812A47E8B44D96E5 /* ImaginationEditor */,
+				3BE71016673C4D6385C42C27 /* Products */,
+				93F24A4715B14CB8B87178B6 /* Frameworks */,
+				1DEFE96361C2499182132BE7 /* Resources */,
+			);
+			sourceTree = "<group>";
+		};
+		E98F9BC0DC044DA99DEEB17D /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				6C84616D3E7041AFA0316935 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.h */,
+				93D645CC6BCC41CAB4C188F2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.hpp */,
+				75E018859B4D4AD18146A61B /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.hpp */,
+				ED928AAD441640FAA0890629 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.h */,
+				60B4AFCA00024DD097DD9358 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.h */,
+				64A75BA609CF4E5F8D504BB5 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.h */,
+				A1F07DCB08DF4A42BEE98B3D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Utils/EditorUtils.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		F245221E7C1D4BD2BBD9F468 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				919177C11DA84521AFC81F72 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */,
+				0B655DF59A0C4137A749F922 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */,
+				D90C0216692E432D8121F400 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */,
+				BACA2EA4B2504879A2F334CC /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */,
+				A230AB2D45DF4C6B8187A6AB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */,
+				55F97399B11A4624833DA814 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */,
+				2FF15C8EB41F4512B6705460 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		30EAC98E374C6B5C31E63487 /* ImaginationEditor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C383BA3DB67949F8A981291F /* Build configuration list for PBXNativeTarget "ImaginationEditor" */;
+			buildPhases = (
+				9486447D2C7348D29D27C0EC /* Sources */,
+				A9D2CAAE249E444CA9FAC9A4 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				05A6E187275B4A75B5A40F76 /* PBXTargetDependency */,
+			);
+			name = ImaginationEditor;
+			productName = ImaginationEditor;
+			productReference = 2D3064009E204FFBB48DBB5A /* ImaginationEditor */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		17DB71C9837844C2AF239409 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2710;
+			};
+			buildConfigurationList = 701B41AB5BFD4D2EA053923A /* Build configuration list for PBXProject "ImaginationEditor" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				C982B5B09A4949149D1CC523 /* Debug */,
+				99902F4283EA4A51809D5823 /* Release */,
+				95F62F7CECAF4A85866D3ECC /* MinSizeRel */,
+				CC606491677743D49A3E8F22 /* RelWithDebInfo */,
+			);
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 0;
+			mainGroup = E0ED71DC7C4C4A5B97718BF3;
+			projectDirPath = "/Users/owi/Documents/Imagination-Engine/ImaginationEditor";
+			projectRoot = "";
+			targets = (
+				396055AC069C2A9DA9BA999E /* ALL_BUILD */,
+				30EAC98E374C6B5C31E63487 /* ImaginationEditor */,
+				556C0DA76B4531529DDED48E /* ZERO_CHECK */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C0110FC8322DE7E50886E21 = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		8483533527D0E02705D9F82A /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ALL_BUILD"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  echo Build\\ all\\ projects
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  echo Build\\ all\\ projects
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+		9B50530E35CC49C82C2FACCF = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here
+exit 0";
+			showEnvVarsInLog = 0;
+		};
+		B1BDC4318417CC5CA56D300A /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+"/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ZERO_CHECK"			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e
+if test \"$CONFIGURATION\" = \"Debug\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"Release\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"MinSizeRel\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeScripts/ReRunCMake.make
+fi
+if test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :
+  cd /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor
+  make -f /Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeScripts/ReRunCMake.make
+fi
+";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9486447D2C7348D29D27C0EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3FCFAE72FE43419C8BCB824F /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorCamera.cpp */,
+				774620A418E44009A76CE4DB /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/EditorLayer.cpp */,
+				13D34988183948799C450B5F /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ContentBrowser.cpp */,
+				D53D0A5061924FDD99874B9D /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/EditorWorkspace.cpp */,
+				DBD68537970F4BEBAF6BB365 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/ExternalAppPanel.cpp */,
+				A6AAD25DD98D47F38AF292B2 /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/Panels/SceneHierarchy.cpp */,
+				71CC220FE65B4A05857DC09C /* /Users/owi/Documents/Imagination-Engine/ImaginationEditor/src/main.cpp */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		05A6E187275B4A75B5A40F76 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 556C0DA76B4531529DDED48E /* ZERO_CHECK */;
+			targetProxy = 3D5395FA0BEA42F9ACA6B2C4 /* PBXContainerItemProxy */;
+		};
+		5D2E6731E84348A887581AF1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 556C0DA76B4531529DDED48E /* ZERO_CHECK */;
+			targetProxy = FDC3478742A141839A967443 /* PBXContainerItemProxy */;
+		};
+		A4829FA8366B4969AD3039B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 30EAC98E374C6B5C31E63487 /* ImaginationEditor */;
+			targetProxy = FB74B24DB5384056AB96D9A3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0471DBD164EF44BBBD0D8329 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		186C3E6CC3324F43870CD3F7 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/RelWithDebInfo/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "       -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/RelWithDebInfo-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		346B0D2C047E46C8A31E48CC /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/MinSizeRel/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/MinSizeRel-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		3C6B62778D7B42B4B358EEFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Release;
+		};
+		456C7229D2DB4611B12F5EC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Release/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "    -DNDEBUG '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Release-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		670EE75A4FCF4D8E98D41F41 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		6C76464094E54EDF9EFA0828 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		7D7828F213984545A3D7F0A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/ImaginationEditor";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "/Users/owi/Documents/Imagination-Engine/build-macos/ImaginationEditor/CMakeFiles/ImaginationEditor.dir/Debug/cmake_pch.hxx";
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",IMGN_PLATFORM_MACOS,UNICODE,_UNICODE,IMGN_METAL_PLATFORM_MACOS,"$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/ImaginationEditor/../Imagination/src","/Users/owi/Documents/Imagination-Engine/Imagination/src","$(inherited)");
+				INSTALL_PATH = "";
+				LD_RUNPATH_SEARCH_PATHS = ("/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination","$(inherited)");
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CPLUSPLUSFLAGS = "   '-std=gnu++23' ";
+				OTHER_LDFLAGS = (" -Wl,-search_paths_first -Wl,-headerpad_max_install_names","/Users/owi/Documents/Imagination-Engine/build-macos/bin/Debug-Windows-x64/Imagination/libIMGN.dylib","-framework Metal","-framework Foundation","-framework QuartzCore","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ImaginationEditor;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Users/owi/Documents/Imagination-Engine/build-macos/build/ImaginationEditor.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		7DF7E9993C2A4649A4CCA210 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = MinSizeRel;
+		};
+		8870F5D9C696426CA71932B3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Release;
+		};
+		88CBA7EDC3054FB7B173DCF2 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = MinSizeRel;
+		};
+		8DE2DBC4E9D54B31BB1C4410 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		97678E8B0DD5460AAFBC8B6A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = Debug;
+		};
+		AFF4A7EE4BF144DC91FD0707 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = RelWithDebInfo;
+		};
+		B53707744AAB48F9912EA3EA /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'","$(inherited)");
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = ("","$(inherited)");
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = ("$(inherited)");
+			};
+			name = RelWithDebInfo;
+		};
+		C3CD128011084ED381C95CC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				SDKROOT = "";
+				SYMROOT = "/Users/owi/Documents/Imagination-Engine/build-macos/build";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		701B41AB5BFD4D2EA053923A /* Build configuration list for PBXProject "ImaginationEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3CD128011084ED381C95CC2 /* Debug */,
+				3C6B62778D7B42B4B358EEFF /* Release */,
+				88CBA7EDC3054FB7B173DCF2 /* MinSizeRel */,
+				AFF4A7EE4BF144DC91FD0707 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8BB70C6800E2418299113D42 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97678E8B0DD5460AAFBC8B6A /* Debug */,
+				6C76464094E54EDF9EFA0828 /* Release */,
+				670EE75A4FCF4D8E98D41F41 /* MinSizeRel */,
+				0471DBD164EF44BBBD0D8329 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C383BA3DB67949F8A981291F /* Build configuration list for PBXNativeTarget "ImaginationEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D7828F213984545A3D7F0A9 /* Debug */,
+				456C7229D2DB4611B12F5EC0 /* Release */,
+				346B0D2C047E46C8A31E48CC /* MinSizeRel */,
+				186C3E6CC3324F43870CD3F7 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DB8E5076D7FA43D9846DD90B /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8DE2DBC4E9D54B31BB1C4410 /* Debug */,
+				8870F5D9C696426CA71932B3 /* Release */,
+				7DF7E9993C2A4649A4CCA210 /* MinSizeRel */,
+				B53707744AAB48F9912EA3EA /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 17DB71C9837844C2AF239409 /* Project object */;
+}

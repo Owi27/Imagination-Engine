@@ -24,6 +24,7 @@ namespace Imgn
 		//int entityID; //editor only
 
 		//vk
+#ifdef IMGN_VULKAN_PLATFORM_WINDOWS
 		static vk::VertexInputBindingDescription GetBindingDescription() { return { 0, sizeof(Vertex), vk::VertexInputRate::eVertex }; }
 		static std::array<vk::VertexInputAttributeDescription, 5> GetAttributeDescriptions()
 		{
@@ -36,6 +37,7 @@ namespace Imgn
 				vk::VertexInputAttributeDescription(4, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, clr)),
 			};
 		}
+#endif //IMGN_VULKAN_PLATFORM_WINDOWS
 	};
 
 	struct TextureSource
@@ -53,9 +55,15 @@ enum class RendererBackend
 	Vulkan, D3D12, Metal
 };
 
+#if defined(IMGN_METAL_PLATFORM_MACOS)
+inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Metal;
+#else
+inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Vulkan;
+#endif
+
 struct RendererCreateInfo
 {
-	RendererBackend backend = RendererBackend::Vulkan;
+	RendererBackend backend = DefaultRendererBackend;
 
 	void* windowHandle = nullptr, * displayHandle = nullptr;
 
