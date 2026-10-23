@@ -1,5 +1,5 @@
 #pragma once
-#include "Renderer/Vulkan.hpp"
+#include "Renderer/Vulkan/Vulkan.hpp"
 
 namespace Imgn
 {

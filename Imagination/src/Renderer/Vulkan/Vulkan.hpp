@@ -4,6 +4,7 @@
 #pragma comment(lib, "dxcompiler.lib")
 using namespace Microsoft::WRL;
 #include "ImGui/imgui_impl_vulkan.h"
+#include "Renderer/IRenderBackend.hpp"
 
 constexpr int MaxFramesInFlight = 2;
 constexpr const wchar_t* VertexTarget = L"vs_6_6";
@@ -55,7 +56,7 @@ struct RGBuffer
 	vk::PipelineStageFlags2 currentStage = vk::PipelineStageFlagBits2::eNone;
 };
 
-class Vulkan
+class Vulkan final : IRenderBackend
 {
 	static constexpr vk::AccessFlags2 WriteAccess = vk::AccessFlagBits2::eShaderWrite | vk::AccessFlagBits2::eShaderStorageWrite | vk::AccessFlagBits2::eColorAttachmentWrite | vk::AccessFlagBits2::eDepthStencilAttachmentWrite | vk::AccessFlagBits2::eTransferWrite | vk::AccessFlagBits2::eHostWrite | vk::AccessFlagBits2::eMemoryWrite;
 
@@ -274,4 +275,19 @@ public:
 	void ReadBuffer(const Buffer& pBuffer, void* pData, uint64_t pSize);
 
 	[[nodiscard]] vk::PhysicalDeviceLimits GetDeviceLimits() const { return _physicalDevice->getProperties().limits; }
+
+	bool Sleep(RendererCreateInfo pCreateInfo) override
+	{
+		Init(pCreateInfo);
+		return true;
+	}
+
+	void Dream() override
+	{
+	}
+
+	void WakeUp() override
+	{
+		WaitIdle();
+	}
 };

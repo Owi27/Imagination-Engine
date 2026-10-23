@@ -117,6 +117,7 @@ namespace Imgn
 
 		SceneStop();
 
+		_pendingScene->LoadMeshAssets(*_renderer);
 		SetActiveScene(std::move(_pendingScene));
 	}
 

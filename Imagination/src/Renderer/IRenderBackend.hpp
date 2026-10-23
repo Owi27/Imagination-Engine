@@ -1,14 +1,19 @@
 #pragma once
-#include <stdint.h>
 
-enum class RendererBackend
+enum class eRendererBackend
 {
 	Vulkan, D3D12, Metal
 };
 
+#if defined(IMGN_METAL_PLATFORM_MACOS)
+inline constexpr eRendererBackend DefaultRendererBackend = eRendererBackend::Metal;
+#else
+inline constexpr eRendererBackend DefaultRendererBackend = eRendererBackend::Vulkan;
+#endif
+
 struct RendererCreateInfo
 {
-	RendererBackend backend = RendererBackend::Vulkan;
+	eRendererBackend backend = DefaultRendererBackend;
 
 	void* windowHandle = nullptr, * displayHandle = nullptr;
 
@@ -19,20 +24,11 @@ struct RendererCreateInfo
 
 class IRenderBackend
 {
-
-
 public:
-	/* Class Defaults */
-	IRenderBackend()
-	{
-
-	}
-
-	~IRenderBackend()
-	{
-
-	}
+	virtual ~IRenderBackend() = default;
 
 	/* Class Functions */
-	virtual void Init(RendererCreateInfo pCreateInfo) = 0;
+	virtual bool Sleep(RendererCreateInfo pCreateInfo) = 0;
+	virtual void Dream() = 0;
+	virtual void WakeUp() = 0;
 };

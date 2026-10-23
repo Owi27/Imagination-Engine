@@ -7,49 +7,12 @@
 #include <utility>
 #include "Skeleton.h"
 
-//enum class AlphaMode : uint32_t
-//{
-//	Opaque,
-//	Mask,
-//	Blend
-//};
-
-/*struct PbrMetallicRoughness {
-  std::vector<double> baseColorFactor{1.0, 1.0, 1.0, 1.0};  // len = 4. default [1,1,1,1]
-  TextureInfo baseColorTexture;
-  double metallicFactor{1.0};   // default 1
-  double roughnessFactor{1.0};  // default 1
-  TextureInfo metallicRoughnessTexture;
-
-  Value extras;
-  ExtensionMap extensions;
-
-  // Filled when SetStoreOriginalJSONForExtrasAndExtensions is enabled.
-  std::string extras_json_string;
-  std::string extensions_json_string;
-
-  PbrMetallicRoughness() = default;
-  DEFAULT_METHODS(PbrMetallicRoughness)
-
-  bool operator==(const PbrMetallicRoughness &) const;
-};
-*/
-
-//struct ImgnMaterial
-//{
-//	vec4 baseColor = { 1.f, 1.f, 1.f, 1.f }, emissive = { 0.f, 0.f, 0.f, 0.f };
-//	int baseColorTexture = -1, normalTexture = -1, metallicRoughnessTexture = -1, occlusionTexture = -1, emissiveTexture = -1;
-//	float metallic = 1.f, roughness = 1.f, alphaCutoff = .5f;
-//	AlphaMode alphaMode = AlphaMode::Opaque;
-//};
-
-
 namespace Imgn
 {
 	struct MeshData
 	{
 		std::string name;
-		unique<Buffer> vertexBuffer, indexBuffer;
+		shared<Buffer> vertexBuffer, indexBuffer;
 		std::vector<Primitive> primitives;
 	};
 
@@ -73,6 +36,8 @@ namespace Imgn
 		Skeleton LoadSkeleton(const tinygltf::Model& pModel, const tinygltf::Skin& pSkin);
 		std::vector<int32_t> BuildNodeParents(const tinygltf::Model& pModel);
 
+		static bool LoadFile(const std::filesystem::path& pFile, tinygltf::Model& pModel);
+
 	public:
 		/* Class Defaults */
 		GLTFLoader()
@@ -93,6 +58,7 @@ namespace Imgn
 
 		/* Class Functions */
 		static ImgnModel LoadModel(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
+		static std::vector<MeshData> LoadMeshes(const std::filesystem::path& pFile, ImgnRenderer& pRenderer);
 	};
 
 

@@ -1,7 +1,7 @@
 #pragma once
 //#include <ImgnVulkan.hpp>
 #include "ImgnRenderResources.h"
-#include "Renderer/Vulkan.hpp"
+#include "Renderer/Vulkan/Vulkan.hpp"
 #include "ImgnRenderGraph.h"
 #include "Components/MaterialComponent.h"
 

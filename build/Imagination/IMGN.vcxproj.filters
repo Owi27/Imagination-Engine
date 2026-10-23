@@ -118,10 +118,10 @@
     <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Imgn\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\pch.cpp">
+    <ClCompile Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan\Vulkan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -291,13 +291,16 @@
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\IRenderBackend.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Metal\Metal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderPassStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\RenderStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan.hpp">
+    <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\Renderer\Vulkan\Vulkan.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D:\GitHub\Imagination-Engine\Imagination\src\gltf\json.hpp">

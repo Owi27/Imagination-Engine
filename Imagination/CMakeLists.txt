@@ -30,7 +30,7 @@ target_include_directories(IMGN PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_compile_definitions(IMGN PRIVATE IMGN_BUILD_DLL)
     
 if (WIN32)
-    target_compile_definitions(IMGN PUBLIC IMGN_PLATFORM_WINDOWS IMGN_VULKAN_PLATFORM_WINDOWS)
+    target_compile_definitions(IMGN PUBLIC IMGN_PLATFORM_WINDOWS IMGN_VULKAN_PLATFORM_WINDOWS VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1)
     
     target_link_libraries(IMGN PUBLIC Vulkan::Vulkan comctl32)
 elseif(APPLE)

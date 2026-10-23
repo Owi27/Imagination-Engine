@@ -38,7 +38,7 @@ namespace Imgn
 		const std::filesystem::path& GetMeshAssetPath() { return _assetPath; }
 		const std::vector<Primitive>& GetPrimitives() const { return _primitives; }
 
-		void SetMesh(std::string pName, std::filesystem::path pAssetPath, unique<Buffer> pVertexBuffer, unique<Buffer> pIndexBuffer, std::vector<Primitive> pPrimitives);
+		void SetMesh(std::string pName, std::filesystem::path pAssetPath, shared<Buffer> pVertexBuffer, shared<Buffer> pIndexBuffer, std::vector<Primitive> pPrimitives);
 
 		void CopyFrom(const MeshComponent& pSource);
 

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "ImgnScene.h"
 #include "Components/AllComponents.hpp"
+#include "ImgnGLTF.h"
 
 #include <unordered_map>
 
@@ -235,6 +236,45 @@ namespace Imgn
 			if (script->WakeUp) script->WakeUp();
 
 			script->instance.reset();
+		}
+	}
+
+	void Scene::LoadMeshAssets(ImgnRenderer& pRenderer)
+	{
+		std::unordered_map<std::filesystem::path, std::vector<MeshData>> loadedAssets;
+
+		for (const unique<Entity>& entity : GetEntitiesWithComponent<MeshComponent>())
+		{
+			MeshComponent* mesh = entity->GetComponent<MeshComponent>();
+			if (mesh->GetMeshAssetPath().empty()) continue;
+			if (mesh->GetVertexBuffer() && mesh->GetIndexBuffer() && !mesh->GetPrimitives().empty()) continue;
+
+			const std::filesystem::path assetPath = mesh->GetMeshAssetPath().lexically_normal();
+			loadedAssets[assetPath] = GLTFLoader::LoadMeshes(assetPath, pRenderer);
+			
+			if (loadedAssets[assetPath].empty()) continue;
+			
+			const MeshData* source = nullptr;
+
+			for (const MeshData& candidate : loadedAssets[assetPath])
+			{
+				if (candidate.name != mesh->GetMeshName()) continue;
+				if (source)
+				{
+					source = nullptr;
+					break;
+				}
+
+				source = &candidate;
+			}
+
+			if (!source)
+			{
+				IMGN_CORE_ERROR("Cannot restore mesh '{}' from '{}': the name is missing or ambiguous.", mesh->GetMeshName(), assetPath.string());
+				continue;
+			}
+
+			mesh->SetMesh(mesh->GetMeshName(), mesh->GetMeshAssetPath(), source->vertexBuffer, source->indexBuffer, source->primitives);
 		}
 	}
 }

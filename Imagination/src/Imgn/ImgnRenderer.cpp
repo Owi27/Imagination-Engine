@@ -229,7 +229,7 @@ namespace Imgn
 		_info = pCreateInfo;
 		switch (_info.backend)
 		{
-		case RendererBackend::Vulkan:
+		case eRendererBackend::Vulkan:
 			{
 				_vkCtx = Unique<Vulkan>();
 				_vkCtx->Init(_info);
@@ -237,9 +237,9 @@ namespace Imgn
 				_graph->SetRenderer(this);
 			}
 			break;
-		case RendererBackend::D3D12:
+		case eRendererBackend::D3D12:
 			break;
-		case RendererBackend::Metal:
+		case eRendererBackend::Metal:
 			break;
 		default:
 			//todo write failed to init graphics device
@@ -251,12 +251,12 @@ namespace Imgn
 	{
 		switch (_info.backend)
 		{
-		case RendererBackend::Vulkan:
+		case eRendererBackend::Vulkan:
 			//_vkCtx.DrawFrame();
 			break;
-		case RendererBackend::D3D12:
+		case eRendererBackend::D3D12:
 			break;
-		case RendererBackend::Metal:
+		case eRendererBackend::Metal:
 			break;
 		default:
 			//todo write failed to init graphics device
@@ -295,7 +295,7 @@ namespace Imgn
 	{
 		switch (_info.backend)
 		{
-		case RendererBackend::Vulkan:
+		case eRendererBackend::Vulkan:
 			{
 				/*vk::BufferUsageFlags usage;
 
@@ -309,9 +309,9 @@ namespace Imgn
 				_vkCtx.CreateBuffer(pDesc.name, pDesc.size, usage, pDesc.data);*/
 			}
 			break;
-		case RendererBackend::D3D12:
+		case eRendererBackend::D3D12:
 			break;
-		case RendererBackend::Metal:
+		case eRendererBackend::Metal:
 			break;
 		default:
 			break;
@@ -323,7 +323,7 @@ namespace Imgn
 	{
 		switch (_info.backend)
 		{
-		case RendererBackend::Vulkan:
+		case eRendererBackend::Vulkan:
 			{
 				/*vk::ImageUsageFlags usage;
 
@@ -345,9 +345,9 @@ namespace Imgn
 				return static_cast<uint32_t>(_images.size() - 1);*/
 			}
 			break;
-		case RendererBackend::D3D12:
+		case eRendererBackend::D3D12:
 			break;
-		case RendererBackend::Metal:
+		case eRendererBackend::Metal:
 			break;
 		default:
 			break;

@@ -77,71 +77,6 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
 endif()
 
-# IMGN_SOURCES at Imagination/CMakeLists.txt:6 (file)
-file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.cpp")
-set(OLD_GLOB
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan.cpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/pch.cpp"
-  )
-if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
-  message("-- GLOB mismatch!")
-  set(NEW_ONLY ${NEW_GLOB})
-  set(OLD_ONLY ${OLD_GLOB})
-  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
-  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
-  if(NEW_ONLY)
-    message("The following files were added:")
-    foreach(VAR_FILE IN LISTS NEW_ONLY)
-      message("  +${VAR_FILE}")
-    endforeach()
-  endif()
-  if(OLD_ONLY)
-    message("The following files were removed:")
-    foreach(VAR_FILE IN LISTS OLD_ONLY)
-      message("  -${VAR_FILE}")
-    endforeach()
-  endif()
-  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
-endif()
-
 # IMGN_HEADERS at Imagination/CMakeLists.txt:5 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/*.h")
 set(OLD_GLOB
@@ -230,9 +165,153 @@ set(OLD_GLOB
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCore.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/IRenderBackend.hpp"
-  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan.hpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Metal/Metal.hpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/gltf/json.hpp"
   "D:/GitHub/Imagination-Engine/Imagination/src/pch.hpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# IMGN_SOURCES at Imagination/CMakeLists.txt:7 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/src/*.cpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_demo.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_draw.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_vulkan.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_impl_win32.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_tables.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGui/imgui_widgets.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/GraphEditor.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImCurveEdit.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImGradient.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImGuizmo.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImSequencer.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/ImGuizmo/ImVectorEditor.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/CameraComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MaterialComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/MeshComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/PointLightComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/ScriptComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Components/TransformComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/FileSystem.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImGui/ImgnGui.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnApp.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnCamera.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnComponent.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnGLTF.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnInput.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLayer.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLayerStack.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnLog.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnMath.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderContext.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderGraph.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnRenderer.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnScene.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/ImgnWindow.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/SceneSerializer.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/Skeleton.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Imgn/main.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Metal/Metal.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.cpp"
+  "D:/GitHub/Imagination-Engine/Imagination/src/pch.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# IMGN_METAL_SOURCES at Imagination/CMakeLists.txt:11 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Metal/*.cpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Metal/Metal.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# IMGN_METAL_SOURCES at Imagination/CMakeLists.txt:11 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Metal/*.mm")
+set(OLD_GLOB
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  set(NEW_ONLY ${NEW_GLOB})
+  set(OLD_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})
+  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})
+  if(NEW_ONLY)
+    message("The following files were added:")
+    foreach(VAR_FILE IN LISTS NEW_ONLY)
+      message("  +${VAR_FILE}")
+    endforeach()
+  endif()
+  if(OLD_ONLY)
+    message("The following files were removed:")
+    foreach(VAR_FILE IN LISTS OLD_ONLY)
+      message("  -${VAR_FILE}")
+    endforeach()
+  endif()
+  file(TOUCH_NOCREATE "D:/GitHub/Imagination-Engine/build/CMakeFiles/cmake.verify_globs")
+endif()
+
+# IMGN_VULKAN_SOURCES at Imagination/CMakeLists.txt:9 (file)
+file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan/*.cpp")
+set(OLD_GLOB
+  "D:/GitHub/Imagination-Engine/Imagination/src/Renderer/Vulkan/Vulkan.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

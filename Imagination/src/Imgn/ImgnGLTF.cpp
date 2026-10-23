@@ -273,30 +273,9 @@ namespace Imgn
 
 	ImgnModel GLTFLoader::LoadModelImpl(const std::filesystem::path& pFile, ImgnRenderer& pRenderer)
 	{
-		tinygltf::TinyGLTF loader;
 		tinygltf::Model model;
-		std::string error, warning;
 
-		bool loaded = false;
-
-		if (pFile.extension() == ".glb") loaded = loader.LoadBinaryFromFile(&model, &error, &warning, pFile.string());
-		else loaded = loader.LoadASCIIFromFile(&model, &error, &warning, pFile.string());
-
-		if (!warning.empty())
-		{
-			std::cout << "Warn:  " << warning << '\n';
-		}
-
-		if (!error.empty())
-		{
-			std::cout << "Err:  " << error << '\n';
-		}
-
-		if (!loaded)
-		{
-			std::cout << "Failed to parse glTF: " << pFile << '\n';
-			throw std::runtime_error("Failed to parse glTF: " + pFile.string() + "\n" + error);
-		}
+		if (!LoadFile(pFile, model)) IMGN_ERROR("Failed to load gltf {}", pFile.string());
 
 		ImgnModel outModel;
 
@@ -389,8 +368,52 @@ namespace Imgn
 		return parents;
 	}
 
+	bool GLTFLoader::LoadFile(const std::filesystem::path& pFile, tinygltf::Model& pModel)
+	{
+		tinygltf::TinyGLTF loader;
+		std::string error, warning;
+
+		bool loaded = false;
+
+		if (pFile.extension() == ".glb") loaded = loader.LoadBinaryFromFile(&pModel, &error, &warning, pFile.string());
+		else loaded = loader.LoadASCIIFromFile(&pModel, &error, &warning, pFile.string());
+
+		if (!warning.empty())
+		{
+			IMGN_CORE_WARN("gltf {}: {}", pFile.string(), warning);
+		}
+
+		if (!error.empty())
+		{
+			IMGN_CORE_ERROR("gltf {}: {}", pFile.string(), error);
+		}
+
+		if (!loaded)
+		{
+			IMGN_CORE_ERROR("Could not load gltf {}", pFile.string());
+			return false;
+		}
+
+		return true;
+	}
+
 	ImgnModel GLTFLoader::LoadModel(const std::filesystem::path& pFile, Imgn::ImgnRenderer& pRenderer)
 	{
 		return Get().LoadModelImpl(pFile, pRenderer);
+	}
+
+	std::vector<MeshData> GLTFLoader::LoadMeshes(const std::filesystem::path& pFile, ImgnRenderer& pRenderer)
+	{
+		tinygltf::Model model;
+		if (!LoadFile(pFile, model)) return {};
+
+		std::vector<MeshData> meshes = Get().LoadGLTFMeshes(model, pRenderer);
+
+		if (meshes.empty())
+		{
+			IMGN_CORE_WARN("No renderable meshes found in '{}'.", pFile.string());
+		}
+
+		return meshes;
 	}
 }

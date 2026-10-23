@@ -11,7 +11,7 @@ namespace Imgn
 
 	MeshComponent::~MeshComponent() = default;
 
-	void MeshComponent::SetMesh(std::string pName, std::filesystem::path pAssetPath, unique<Buffer> pVertexBuffer, unique<Buffer> pIndexBuffer, std::vector<Primitive> pPrimitives)
+	void MeshComponent::SetMesh(std::string pName, std::filesystem::path pAssetPath, shared<Buffer> pVertexBuffer, shared<Buffer> pIndexBuffer, std::vector<Primitive> pPrimitives)
 	{
 		_name = std::move(pName);
 		_assetPath = std::move(pAssetPath);

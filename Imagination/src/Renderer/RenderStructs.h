@@ -48,26 +48,27 @@ namespace Imgn
 
 		bool operator==(const TextureSource&) const = default;
 	};
+
+//	enum class RendererBackend
+//	{
+//		Vulkan, D3D12, Metal
+//	};
+//
+//#if defined(IMGN_METAL_PLATFORM_MACOS)
+//	inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Metal;
+//#else
+//	inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Vulkan;
+//#endif
+//
+//	struct RendererCreateInfo
+//	{
+//		RendererBackend backend = DefaultRendererBackend;
+//
+//		void* windowHandle = nullptr, * displayHandle = nullptr;
+//
+//		uint32_t width = 1280, height = 720;
+//
+//		bool enableValidation = true;
+//	};
 }
 
-enum class RendererBackend
-{
-	Vulkan, D3D12, Metal
-};
-
-#if defined(IMGN_METAL_PLATFORM_MACOS)
-inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Metal;
-#else
-inline constexpr RendererBackend DefaultRendererBackend = RendererBackend::Vulkan;
-#endif
-
-struct RendererCreateInfo
-{
-	RendererBackend backend = DefaultRendererBackend;
-
-	void* windowHandle = nullptr, * displayHandle = nullptr;
-
-	uint32_t width = 1280, height = 720;
-
-	bool enableValidation = true;
-};

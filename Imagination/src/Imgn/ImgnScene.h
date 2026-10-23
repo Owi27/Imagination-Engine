@@ -6,6 +6,7 @@
 
 namespace Imgn
 {
+    class ImgnRenderer;
     class ScriptComponent;
 
     class IMGN_API Scene
@@ -67,5 +68,7 @@ namespace Imgn
 
         void RuntimeStart();
         void RuntimeStop();
+
+        void LoadMeshAssets(ImgnRenderer& pRenderer);
     };
 }
